@@ -17,7 +17,7 @@
     "snapshot": "fedx-scripts jest --updateSnapshot",
     "start": "fedx-scripts webpack-dev-server --progress",
     "start:with-theme": "paragon install-theme && npm start && npm install",
-    "dev": "PUBLIC_PATH=/console/ MFE_CONFIG_API_URL='http://localhost:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.local.openedx.io",
+    "dev": "PUBLIC_PATH=/admin-console/ MFE_CONFIG_API_URL='http://localhost:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.local.openedx.io",
     "test": "fedx-scripts jest --coverage --passWithNoTests",
     "types": "tsc --noEmit"
   },
@@ -39,7 +39,6 @@
     "@edx/brand": "npm:@openedx/brand-openedx@^1.2.2",
     "@openedx/frontend-plugin-framework": "^1.7.0",
     "@edx/frontend-component-header": "^6.4.0",
-    "@edx/frontend-component-footer": "^14.6.0",
     "@edx/frontend-platform": "^8.3.0",
     "@edx/openedx-atlas": "^0.7.0",
     "@openedx/paragon": "^23.4.5",
