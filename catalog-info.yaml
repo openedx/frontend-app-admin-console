@@ -4,10 +4,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: "frontend-frontend-app-admin-console"
+  name: "frontend-app-admin-console"
   description: ""
   links:
-    - url: "https://github.com/openedx/frontend-frontend-app-admin-console/blob/master/README.rst"
+    - url: "https://github.com/openedx/frontend-app-admin-console/blob/master/README.rst"
       title: "README"
       icon: "Article"
   annotations:
