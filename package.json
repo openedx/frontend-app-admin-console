@@ -1,10 +1,10 @@
 {
-  "name": "@edx/frontend-template-application",
+  "name": "@openedx/frontend-app-admin-console",
   "version": "0.1.0",
-  "description": "Frontend application template",
+  "description": "Frontend Admin Console",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openedx/frontend-template-application.git"
+    "url": "git+https://github.com/openedx/frontend-app-admin-console.git"
   },
   "browserslist": [
     "extends @edx/browserslist-config"
@@ -17,50 +17,45 @@
     "snapshot": "fedx-scripts jest --updateSnapshot",
     "start": "fedx-scripts webpack-dev-server --progress",
     "start:with-theme": "paragon install-theme && npm start && npm install",
-    "test": "fedx-scripts jest --coverage --passWithNoTests"
+    "dev": "PUBLIC_PATH=/console/ MFE_CONFIG_API_URL='http://localhost:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.local.openedx.io",
+    "test": "fedx-scripts jest --coverage --passWithNoTests",
+    "types": "tsc --noEmit"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
     }
   },
-  "author": "edX",
+  "author": "Open edX Community",
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/openedx/frontend-template-application#readme",
+  "homepage": "https://github.com/openedx/frontend-app-admin-console#readme",
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/openedx/frontend-template-application/issues"
+    "url": "https://github.com/openedx/frontend-app-admin-console/issues"
   },
   "dependencies": {
     "@edx/brand": "npm:@openedx/brand-openedx@^1.2.2",
+    "@openedx/frontend-plugin-framework": "^1.7.0",
     "@edx/frontend-component-header": "^6.4.0",
     "@edx/frontend-component-footer": "^14.6.0",
     "@edx/frontend-platform": "^8.3.0",
     "@edx/openedx-atlas": "^0.7.0",
-    "@fortawesome/fontawesome-svg-core": "1.2.36",
-    "@fortawesome/free-brands-svg-icons": "5.15.4",
-    "@fortawesome/free-regular-svg-icons": "5.15.4",
-    "@fortawesome/free-solid-svg-icons": "5.15.4",
-    "@fortawesome/react-fontawesome": "0.2.6",
     "@openedx/paragon": "^23.4.5",
-    "core-js": "3.45.1",
-    "prop-types": "15.8.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-redux": "7.2.9",
-    "react-router": "6.30.1",
-    "react-router-dom": "6.30.1",
-    "redux": "4.2.1",
-    "regenerator-runtime": "0.14.1"
+    "@tanstack/react-query": "5.89.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.0.0"
   },
   "devDependencies": {
     "@edx/browserslist-config": "^1.1.1",
-    "@edx/reactifex": "^2.1.1",
     "@openedx/frontend-build": "14.6.2",
-    "glob": "7.2.3",
-    "husky": "7.0.4",
-    "jest": "30.1.3"
+    "@edx/typescript-config": "1.1.0",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0"
   }
 }
