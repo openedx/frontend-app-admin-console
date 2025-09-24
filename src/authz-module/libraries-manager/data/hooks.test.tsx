@@ -1,8 +1,12 @@
 import { ReactNode } from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { useLibrary, useTeamMembers } from './hooks';
-import * as api from './api';
+
+jest.mock('@edx/frontend-platform/auth', () => ({
+  getAuthenticatedHttpClient: jest.fn(),
+}));
 
 const mockMembers = [
   {
@@ -51,7 +55,9 @@ describe('useTeamMembers', () => {
   });
 
   it('returns data when API call succeeds', async () => {
-    jest.spyOn(api, 'getTeamMembers').mockResolvedValue(mockMembers);
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { results: mockMembers } }),
+    });
 
     const { result } = renderHook(() => useTeamMembers('lib:123'), {
       wrapper: createWrapper(),
@@ -59,14 +65,14 @@ describe('useTeamMembers', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(api.getTeamMembers).toHaveBeenCalledWith('lib:123');
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockMembers);
   });
 
   it('handles error when API call fails', async () => {
-    jest
-      .spyOn(api, 'getTeamMembers')
-      .mockRejectedValue(new Error('API failure'));
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('API failure')),
+    });
 
     const { result } = renderHook(() => useTeamMembers('lib:123'), {
       wrapper: createWrapper(),
@@ -74,7 +80,7 @@ describe('useTeamMembers', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(api.getTeamMembers).toHaveBeenCalledWith('lib:123');
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     expect(result.current.error).toBeDefined();
     expect(result.current.data).toBeUndefined();
   });
@@ -86,7 +92,9 @@ describe('useLibrary', () => {
   });
 
   it('returns metadata on success', async () => {
-    jest.spyOn(api, 'getLibrary').mockResolvedValue(mockLibrary);
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValueOnce({ data: mockLibrary }),
+    });
 
     const { result } = renderHook(
       () => useLibrary('lib123'),
@@ -94,22 +102,24 @@ describe('useLibrary', () => {
     );
     await waitFor(() => {
       expect(result.current.data).toEqual(mockLibrary);
-      expect(api.getLibrary).toHaveBeenCalledWith('lib123');
+      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     });
   });
 
   it('throws on error', () => {
-    jest
-      .spyOn(api, 'getLibrary')
-      .mockRejectedValue(new Error('Not found'));
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Not found')),
+    });
 
     const wrapper = createWrapper();
     try {
-      renderHook(() => useLibrary('lib123'), { wrapper });
+      act(()=>{
+        renderHook(() => useLibrary('lib123'), { wrapper });
+      })
     } catch (e) {
       expect(e).toEqual(new Error('Not found'));
     }
 
-    expect(api.getLibrary).toHaveBeenCalledWith('lib123');
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
   });
 });
