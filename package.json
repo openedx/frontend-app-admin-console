@@ -37,10 +37,10 @@
   },
   "dependencies": {
     "@edx/brand": "npm:@openedx/brand-openedx@^1.2.2",
-    "@openedx/frontend-plugin-framework": "^1.7.0",
     "@edx/frontend-component-header": "^6.4.0",
     "@edx/frontend-platform": "^8.3.0",
     "@edx/openedx-atlas": "^0.7.0",
+    "@openedx/frontend-plugin-framework": "^1.7.0",
     "@openedx/paragon": "^23.4.5",
     "@tanstack/react-query": "5.89.0",
     "react": "^18.3.1",
@@ -49,12 +49,13 @@
   },
   "devDependencies": {
     "@edx/browserslist-config": "^1.1.1",
-    "@openedx/frontend-build": "14.6.2",
     "@edx/typescript-config": "1.1.0",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@openedx/frontend-build": "14.6.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
-    "@testing-library/react": "^16.3.0"
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^18",
+    "@types/react-dom": "^18"
   }
 }
