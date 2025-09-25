@@ -1,5 +1,6 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { LibraryMetadata, TeamMember } from '@src/authz-module/constants';
+import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/helpers/utils';
 
 export interface GetTeamMembersResponse {
@@ -10,7 +11,7 @@ export interface GetTeamMembersResponse {
 // TODO: replece api path once is created
 export const getTeamMembers = async (libraryId: string): Promise<TeamMember[]> => {
   const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users?scope=${libraryId}`));
-  return data.results;
+  return camelCaseObject(data.results);
 };
 
 
