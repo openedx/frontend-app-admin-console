@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import LibrariesAuthZManager from './LibrariesAuthZManager';
+import LibrariesTeamManager from './LibrariesTeamManager';
 import { useLibraryAuthZ } from './context';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
@@ -19,7 +19,7 @@ jest.mock('./components/TeamTable', () => ({
   default: () => <div data-testid="team-table">MockTeamTable</div>,
 }));
 
-describe('LibrariesAuthZManager', () => {
+describe('LibrariesTeamManager', () => {
   beforeEach(() => {
     initializeMockApp({
       authenticatedUser: {
@@ -38,7 +38,7 @@ describe('LibrariesAuthZManager', () => {
   });
 
   it('renders tabs and layout content correctly', () => {
-    renderWrapper(<div>hola<LibrariesAuthZManager /></div>);
+    renderWrapper(<LibrariesTeamManager />);
 
     // Tabs
     expect(screen.getByRole('tab', { name: /Team Members/i })).toBeInTheDocument();
