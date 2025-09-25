@@ -6,7 +6,7 @@ import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 import messages from './messages';
 
-const LibrariesAuthZView = () => {
+const LibrariesAuthZTeamView = () => {
   const intl = useIntl();
   const { libraryId, libraryName, libraryOrg } = useLibraryAuthZ();
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
@@ -40,10 +40,10 @@ const LibrariesAuthZView = () => {
     </div>
   );
 };
-const LibrariesAuthZManager = () => (
+const LibrariesTeamManager = () => (
   <LibraryAuthZProvider>
-    <LibrariesAuthZView />
+    <LibrariesAuthZTeamView />
   </LibraryAuthZProvider>
 );
 
-export default LibrariesAuthZManager;
+export default LibrariesTeamManager;

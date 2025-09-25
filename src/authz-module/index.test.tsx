@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AuthZModule from './index';
 
-jest.mock('./libraries-manager/LibrariesAuthZManager', () => {
+jest.mock('./libraries-manager/LibrariesTeamManager', () => {
   return lazy(() =>
     new Promise<{ default: ComponentType<any> }>(resolve =>
       setTimeout(() => resolve({ default: () => <div data-testid="libraries-manager">Loaded</div> }), 100)
@@ -22,7 +22,7 @@ const createTestQueryClient = () =>
   });
 
 describe('AuthZModule', () => {
-  it('renders LoadingPage then LibrariesAuthZManager when route matches', async () => {
+  it('renders LoadingPage then LibrariesTeamManager when route matches', async () => {
     const queryClient = createTestQueryClient();
     const path = '/libraries/lib:123';
 

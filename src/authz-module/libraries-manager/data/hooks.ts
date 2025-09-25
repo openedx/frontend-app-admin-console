@@ -25,10 +25,10 @@ export const useTeamMembers = (libraryId: string) => useQuery<TeamMember[], Erro
  * @param libraryId - The unique ID of the library.
  *
  * @example
- * const { data, isLoading, isError } = useLibrary('lib:123',);
+ * const { data } = useLibrary('lib:123',);
  *
  */
-export function useLibrary(libraryId: string) {
+export const useLibrary = (libraryId: string) => {
   return useSuspenseQuery<LibraryMetadata, Error>({
     queryKey: ['library-metadata', libraryId],
     queryFn: () => getLibrary(libraryId),
