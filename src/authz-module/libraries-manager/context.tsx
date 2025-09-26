@@ -21,8 +21,6 @@ type LibraryAuthZContextType = {
   libraryId: string;
   roles: string[];
   permissions: string[];
-  libraryName: string;
-  libraryOrg: string;
 };
 
 const LibraryAuthZContext = createContext<LibraryAuthZContextType | undefined>(undefined);
@@ -48,13 +46,9 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children })
     throw new Error('NoAccess');
   }
 
-  const { data: libraryMetadata } = useLibrary(libraryId);
-
   const value = useMemo((): LibraryAuthZContextType => ({
     username: authenticatedUser.username,
     libraryId,
-    libraryName: libraryMetadata.title,
-    libraryOrg: libraryMetadata.org,
     roles: [],
     permissions: [],
     canManageTeam,

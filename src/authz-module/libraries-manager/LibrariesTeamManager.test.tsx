@@ -3,6 +3,7 @@ import LibrariesTeamManager from './LibrariesTeamManager';
 import { useLibraryAuthZ } from './context';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { useLibrary } from '@src/authz-module/data/hooks';
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -13,6 +14,10 @@ jest.mock('./context', () => {
   };
 });
 const mockedUseLibraryAuthZ = useLibraryAuthZ as jest.Mock;
+
+jest.mock('@src/authz-module/data/hooks', () => ({
+  useLibrary: jest.fn(),
+}));
 
 jest.mock('./components/TeamTable', () => ({
   __esModule: true,
@@ -34,6 +39,13 @@ describe('LibrariesTeamManager', () => {
       roles: ['admin'],
       permissions: [],
       canManageTeam: true,
+    });
+
+    (useLibrary as jest.Mock).mockReturnValue({
+      data: {
+        title: 'Test Library',
+        org: 'Test Org',
+      },
     });
   });
 
