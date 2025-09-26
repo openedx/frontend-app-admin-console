@@ -1,5 +1,5 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { appId } from "@src/constants";
+import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
 import { getLibrary, getTeamMembers } from './api';
 
