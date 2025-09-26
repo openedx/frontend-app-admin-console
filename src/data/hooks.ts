@@ -1,6 +1,12 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { PermissionValidationRequest, PermissionValidationResponse } from '@src/types';
 import { validateUserPermissions } from './api';
+import { appId } from '@src/constants';
+
+const adminConsoleQueryKeys = {
+  all: [appId] as const,
+  permissions: (permissions: PermissionValidationRequest[]) => [...adminConsoleQueryKeys.all, 'validatePermissions', permissions] as const,
+};
 
 /**
  * React Query hook to validate if the current user has permissions over a certain object in the instance.
@@ -11,7 +17,7 @@ import { validateUserPermissions } from './api';
  * @param permissions - The array of objects and actions to validate.
  *
  * @example
- * const { data } = userValidateUserPermissions([{
+ * const { data } = useValidateUserPermissions([{
            "action": "act:read",
            "object": "lib:test-lib",
            "scope": "org:OpenedX"
@@ -19,9 +25,9 @@ import { validateUserPermissions } from './api';
  * if (data[0].allowed) { ... }
  *
  */
-export const useValidateUserPermissions = (permissions: PermissionValidationRequest[])  => {
+export const useValidateUserPermissions = (permissions: PermissionValidationRequest[]) => {
   return useSuspenseQuery<PermissionValidationResponse[], Error>({
-    queryKey: ['validate-user-permissions', permissions],
+    queryKey: adminConsoleQueryKeys.permissions(permissions),
     queryFn: () => validateUserPermissions(permissions),
     retry: false,
   });

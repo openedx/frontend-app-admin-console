@@ -1,6 +1,14 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { appId } from "@src/constants";
 import { LibraryMetadata, TeamMember } from '@src/types';
 import { getLibrary, getTeamMembers } from './api';
+
+
+const authzQueryKeys = {
+  all: [appId, 'authz'] as const,
+  teamMembers: (object: string) => [...authzQueryKeys.all, 'teamMembers', object] as const,
+  library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
+};
 
 /**
  * React Query hook to fetch all team members for a specific object/scope.
@@ -14,7 +22,7 @@ import { getLibrary, getTeamMembers } from './api';
  * ```
  */
 export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>({
-  queryKey: ['team-members', object],
+  queryKey: authzQueryKeys.teamMembers(object),
   queryFn: () => getTeamMembers(object),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
 });
@@ -30,7 +38,7 @@ export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>(
  */
 export const useLibrary = (libraryId: string) => {
   return useSuspenseQuery<LibraryMetadata, Error>({
-    queryKey: ['library-metadata', libraryId],
+    queryKey: authzQueryKeys.library(libraryId),
     queryFn: () => getLibrary(libraryId),
     retry: false,
   });
