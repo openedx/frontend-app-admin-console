@@ -1,12 +1,12 @@
 export interface PermissionValidationRequest {
-    action: string;
-    object?: string;
-    scope?: string;
-};
+  action: string;
+  object?: string;
+  scope?: string;
+}
 
-export interface PermissionValidationResponse extends PermissionValidationRequest{
-    allowed: boolean;
-};
+export interface PermissionValidationResponse extends PermissionValidationRequest {
+  allowed: boolean;
+}
 
 // Libraries AuthZ types
 export interface TeamMember {
@@ -21,6 +21,13 @@ export interface LibraryMetadata {
   org: string;
   title: string;
   slug: string;
+}
+
+export interface TeamRole {
+  role: string;
+  description: string;
+  userCount: number;
+  objects: { object: string; description: string; actions: string[] }[];
 }
 
 // Paragon table type

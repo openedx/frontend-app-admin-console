@@ -1,12 +1,16 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useMutation, useQuery, useQueryClient, useSuspenseQuery,
+} from '@tanstack/react-query';
 import { appId } from '@src/constants';
-import { LibraryMetadata, TeamMember } from '@src/types';
-import { getLibrary, getTeamMembers } from './api';
-
+import { LibraryMetadata, TeamMember, TeamRole } from '@src/types';
+import {
+  addTeamMembers, AddTeamMembersRequest, getLibrary, getTeamMembers, getTeamRoles,
+} from './api';
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
   teamMembers: (object: string) => [...authzQueryKeys.all, 'teamMembers', object] as const,
+  teamRoles: (libraryId: string) => [...authzQueryKeys.all, 'teamRoles', libraryId] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
 };
 
@@ -36,10 +40,47 @@ export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>(
  * const { data } = useLibrary('lib:123',);
  *
  */
-export const useLibrary = (libraryId: string) => {
-  return useSuspenseQuery<LibraryMetadata, Error>({
-    queryKey: authzQueryKeys.library(libraryId),
-    queryFn: () => getLibrary(libraryId),
-    retry: false,
+export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadata, Error>({
+  queryKey: authzQueryKeys.library(libraryId),
+  queryFn: () => getLibrary(libraryId),
+  retry: false,
+});
+
+/**
+ * React Query hook to add new team members to a specific library.
+ * It provides a mutation function to add users with specified roles to the library's team.
+ *
+ * @example
+ * ```tsx
+ * const { mutate: addTeamMember, isPending } = useAddTeamMember();
+ * addTeamMember({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
+ * ```
+ */
+export const useAddTeamMember = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ data }: {
+      data: AddTeamMembersRequest
+    }) => addTeamMembers(data),
+    onSettled: (_data, _error, { data: { scope } }) => {
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scope) });
+    },
   });
-}
+};
+
+/**
+ * React Query hook to fetch all roles available for a specific library.
+ * It retrieves the list of roles that can be assigned to team members within the given library.
+ *
+ * @param libraryId - The unique identifier of the library
+ *
+ * @example
+ * ```tsx
+ * const { data: teamRoles, isLoading, isError } = useTeamRoles('lib:123');
+ * ```
+ */
+export const useTeamRoles = (libraryId: string) => useSuspenseQuery<TeamRole[], Error>({
+  queryKey: authzQueryKeys.teamRoles(libraryId),
+  queryFn: () => getTeamRoles(libraryId),
+  staleTime: 1000 * 60 * 60 * 24, // refetch after 24 hours
+});

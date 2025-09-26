@@ -4,7 +4,8 @@ import {
 import { useParams } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { useLibrary } from '../data/hooks';
+import { TeamRole } from 'types';
+import { useTeamRoles } from '../data/hooks';
 
 const LIBRARY_TEAM_PERMISSIONS = ['act:view_library_team', 'act:manage_library_team'];
 
@@ -19,7 +20,7 @@ type LibraryAuthZContextType = {
   canManageTeam: boolean;
   username: string;
   libraryId: string;
-  roles: string[];
+  roles: TeamRole[];
   permissions: string[];
 };
 
@@ -46,13 +47,15 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children })
     throw new Error('NoAccess');
   }
 
+  const { data: teamRoles } = useTeamRoles(libraryId);
+
   const value = useMemo((): LibraryAuthZContextType => ({
     username: authenticatedUser.username,
     libraryId,
-    roles: [],
+    roles: teamRoles,
     permissions: [],
     canManageTeam,
-  }), [libraryId, authenticatedUser.username, canManageTeam]);
+  }), [libraryId, authenticatedUser.username, canManageTeam, teamRoles]);
 
   return (
     <LibraryAuthZContext.Provider value={value}>
