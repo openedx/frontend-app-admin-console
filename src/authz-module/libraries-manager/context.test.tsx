@@ -2,7 +2,6 @@ import { screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
-import { useLibrary } from '../data/hooks';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -14,10 +13,6 @@ jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissions: jest.fn(),
 }));
 
-jest.mock('../data/hooks', () => ({
-  useLibrary: jest.fn(),
-}));
-
 const TestComponent = () => {
   const context = useLibraryAuthZ();
   return (
@@ -25,8 +20,6 @@ const TestComponent = () => {
       <div data-testid="username">{context.username}</div>
       <div data-testid="libraryId">{context.libraryId}</div>
       <div data-testid="canManageTeam">{context.canManageTeam ? 'true' : 'false'}</div>
-      <div data-testid="libraryName">{context.libraryName}</div>
-      <div data-testid="libraryOrg">{context.libraryOrg}</div>
     </div>
   );
 };
@@ -36,13 +29,6 @@ describe('LibraryAuthZProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
-
-    (useLibrary as jest.Mock).mockReturnValue({
-      data: {
-        title: 'Test Library',
-        org: 'Test Org',
-      },
-    });
   });
 
   it('provides the correct context values to consumers', () => {
@@ -62,8 +48,6 @@ describe('LibraryAuthZProvider', () => {
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
     expect(screen.getByTestId('libraryId')).toHaveTextContent('lib123');
     expect(screen.getByTestId('canManageTeam')).toHaveTextContent('true');
-    expect(screen.getByTestId('libraryName')).toHaveTextContent('Test Library');
-    expect(screen.getByTestId('libraryOrg')).toHaveTextContent('Test Org');
   });
 
   it('throws error when user lacks both view and manage permissions', () => {
