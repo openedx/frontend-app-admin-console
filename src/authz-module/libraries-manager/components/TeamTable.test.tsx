@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { ROUTES } from '@src/authz-module/constants';
 import { renderWrapper } from '@src/setupTest';
 import TeamTable from './TeamTable';
-import { useTeamMembers } from '../data/hooks';
+import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '../context';
 
 const mockNavigate = jest.fn();
@@ -12,7 +12,7 @@ jest.mock('react-router', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-jest.mock('../data/hooks', () => ({
+jest.mock('@src/authz-module/data/hooks', () => ({
   useTeamMembers: jest.fn(),
 }));
 

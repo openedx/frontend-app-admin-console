@@ -1,8 +1,8 @@
 import { act, ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useValidateUserPermissions } from './useValidateUserPermissions';
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { useValidateUserPermissions } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
@@ -25,6 +25,7 @@ const createWrapper = () => {
 
   return wrapper;
 };
+
 const permissions = [
   {
     action: 'act:read',
@@ -50,7 +51,6 @@ describe('useValidateUserPermissions', () => {
     getAuthenticatedHttpClient.mockReturnValue({
       post: jest.fn().mockResolvedValueOnce({ data: mockValidPermissions }),
     });
-
 
     const { result } = renderHook(() => useValidateUserPermissions(permissions), {
       wrapper: createWrapper(),
