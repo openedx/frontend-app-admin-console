@@ -1,4 +1,4 @@
-import LibrariesTeamManager from "./LibrariesTeamManager";
+import LibrariesTeamManager from './LibrariesTeamManager';
 
 export {
   LibrariesTeamManager,
