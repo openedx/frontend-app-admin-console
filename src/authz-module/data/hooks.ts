@@ -1,26 +1,26 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { LibraryMetadata, TeamMember } from '@src/authz-module/constants';
+import { LibraryMetadata, TeamMember } from '@src/types';
 import { getLibrary, getTeamMembers } from './api';
 
 /**
- * React Query hook to fetch all team members for a specific library.
- * It retrieves the full list of members who have access to the given library.
+ * React Query hook to fetch all team members for a specific object/scope.
+ * It retrieves the full list of members who have access to the given scope.
  *
- * @param libraryId - The unique identifier of the library
+ * @param object - The unique identifier of the object/scope
  *
  * @example
  * ```tsx
  * const { data: teamMembers, isLoading, isError } = useTeamMembers('lib:123');
  * ```
  */
-export const useTeamMembers = (libraryId: string) => useQuery<TeamMember[], Error>({
-  queryKey: ['team-members', libraryId],
-  queryFn: () => getTeamMembers(libraryId),
+export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>({
+  queryKey: ['team-members', object],
+  queryFn: () => getTeamMembers(object),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
 });
 
 /**
- * React Query hook to retrive the inforation of the current library.
+ * React Query hook to retrieve the information of the current library.
  *
  * @param libraryId - The unique ID of the library.
  *

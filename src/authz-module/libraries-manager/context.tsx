@@ -3,8 +3,8 @@ import {
 } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
-import { useValidateUserPermissions } from '@src/helpers/useValidateUserPermissions';
-import { useLibrary } from './data/hooks';
+import { useValidateUserPermissions } from '@src/data/hooks';
+import { useLibrary } from '../data/hooks';
 
 const LIBRARY_TEAM_PERMISSIONS = ['act:view_library_team', 'act:manage_library_team'];
 

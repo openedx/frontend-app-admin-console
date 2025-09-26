@@ -5,8 +5,9 @@ import {
   DataTable, Button, Chip, Skeleton,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
-import { ROUTES, TableCellValue, TeamMember } from '@src/authz-module/constants';
-import { useTeamMembers } from '../data/hooks';
+import { TableCellValue, TeamMember } from '@src/types';
+import { ROUTES } from '@src/authz-module/constants';
+import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '../context';
 import messages from './messages';
 

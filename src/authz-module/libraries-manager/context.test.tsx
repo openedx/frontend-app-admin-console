@@ -1,8 +1,8 @@
 import { screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
-import { useValidateUserPermissions } from '@src/helpers/useValidateUserPermissions';
+import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
-import { useLibrary } from './data/hooks';
+import { useLibrary } from '../data/hooks';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -10,11 +10,11 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('@src/helpers/useValidateUserPermissions', () => ({
+jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissions: jest.fn(),
 }));
 
-jest.mock('./data/hooks', () => ({
+jest.mock('../data/hooks', () => ({
   useLibrary: jest.fn(),
 }));
 
