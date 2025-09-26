@@ -8,3 +8,11 @@
     background-color: var(--pgn-color-light-200);
   }
 }
+
+.toast-container {
+  // Ensure toast appears above modal
+  z-index: 1000;
+  // Move toast to the right 
+  left: auto;
+  right: var(--pgn-spacing-toast-container-gutter-lg);
+}
