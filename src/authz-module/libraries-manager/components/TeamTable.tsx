@@ -25,11 +25,24 @@ const EmailCell = ({ row }: CellProps) => (row.original?.username === SKELETON_R
   row.original.email
 ));
 
-const NameCell = ({ row }: CellProps) => (row.original.username === SKELETON_ROWS[0].username ? (
-  <Skeleton width="180px" />
-) : (
-  row.original.displayName
-));
+const NameCell = ({ row }: CellProps) => {
+  const intl = useIntl();
+  const { username } = useLibraryAuthZ();
+
+  if (row.original.username === SKELETON_ROWS[0].username) {
+    return <Skeleton width="180px" />;
+  }
+
+  if (row.original.username === username) {
+    return (
+      <span>
+        {username}
+        <span className="text-gray-500">{intl.formatMessage(messages['library.authz.team.table.username.current'])}</span>
+      </span>
+    );
+  }
+  return row.original.username;
+};
 
 const RolesCell = ({ row }: CellProps) => (row.original.username === SKELETON_ROWS[0].username ? (
   <Skeleton width="80px" />
@@ -82,8 +95,8 @@ const TeamTable = () => {
       columns={
         [
           {
-            Header: intl.formatMessage(messages['library.authz.team.table.display.name']),
-            accessor: 'displayName',
+            Header: intl.formatMessage(messages['library.authz.team.table.username']),
+            accessor: 'username',
             Cell: NameCell,
           },
           {
