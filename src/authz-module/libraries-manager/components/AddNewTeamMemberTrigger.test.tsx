@@ -235,4 +235,56 @@ describe('AddNewTeamMemberTrigger', () => {
     expect(newUsersInput).toHaveValue('');
     expect(newRoleSelect).toHaveValue('');
   });
+
+  it('allows closing the success/error toast message', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    // Simulate successful response
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [{ user: 'alice@example.com', status: 'role_added' }],
+      errors: [],
+    });
+
+    // Toast should be visible
+    await waitFor(() => {
+      expect(screen.getByText('1 team member added successfully.')).toBeInTheDocument();
+    });
+
+    // Find and close the toast
+    const toastCloseButton = screen.getByLabelText(/close/i);
+    await user.click(toastCloseButton);
+
+    // Toast should be removed
+    await waitFor(() => {
+      expect(screen.queryByText('1 team member added successfully.')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays loading state when adding team member', async () => {
+    const user = userEvent.setup();
+
+    // Mock loading state
+    (useAddTeamMember as jest.Mock).mockReturnValue({
+      mutate: mockMutate,
+      isPending: true,
+      isError: false,
+      isSuccess: false,
+    } as any);
+
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    // Loading indicator should be visible in the modal
+    expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
+  });
 });
