@@ -6,6 +6,7 @@ import AuthZLayout from '../components/AuthZLayout';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 import messages from './messages';
+import AddNewTeamMemberTrigger from './components/AddNewTeamMemberTrigger';
 
 const LibrariesAuthZTeamView = () => {
   const intl = useIntl();
@@ -21,7 +22,9 @@ const LibrariesAuthZTeamView = () => {
         activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
-        actions={[]}
+        actions={[
+          <AddNewTeamMemberTrigger libraryId={libraryId} />,
+        ]}
       >
         <Tabs
           variant="tabs"
