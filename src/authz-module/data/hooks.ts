@@ -1,8 +1,10 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useMutation, useQuery, useQueryClient, useSuspenseQuery,
+} from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
 import {
-  getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
+  addTeamMembers, AddTeamMembersRequest, getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
 } from './api';
 
 const authzQueryKeys = {
@@ -60,3 +62,25 @@ export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadat
   queryFn: () => getLibrary(libraryId),
   retry: false,
 });
+
+/**
+ * React Query hook to add new team members to a specific library.
+ * It provides a mutation function to add users with specified roles to the library's team.
+ *
+ * @example
+ * ```tsx
+ * const { mutate: addTeamMember, isPending } = useAddTeamMember();
+ * addTeamMember({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
+ * ```
+ */
+export const useAddTeamMember = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ data }: {
+      data: AddTeamMembersRequest
+    }) => addTeamMembers(data),
+    onSettled: (_data, _error, { data: { scope } }) => {
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scope) });
+    },
+  });
+};
