@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { PermissionValidationRequest, PermissionValidationResponse } from '@src/types';
-import { validateUserPermissions } from './api';
 import { appId } from '@src/constants';
+import { validateUserPermissions } from './api';
 
 const adminConsoleQueryKeys = {
   all: [appId] as const,
@@ -25,10 +25,10 @@ const adminConsoleQueryKeys = {
  * if (data[0].allowed) { ... }
  *
  */
-export const useValidateUserPermissions = (permissions: PermissionValidationRequest[]) => {
-  return useSuspenseQuery<PermissionValidationResponse[], Error>({
-    queryKey: adminConsoleQueryKeys.permissions(permissions),
-    queryFn: () => validateUserPermissions(permissions),
-    retry: false,
-  });
-};
+export const useValidateUserPermissions = (
+  permissions: PermissionValidationRequest[],
+) => useSuspenseQuery<PermissionValidationResponse[], Error>({
+  queryKey: adminConsoleQueryKeys.permissions(permissions),
+  queryFn: () => validateUserPermissions(permissions),
+  retry: false,
+});

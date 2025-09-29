@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTable, Button, Chip, Skeleton,
@@ -46,30 +45,12 @@ const TeamTable = () => {
 
   // TODO: Display error in the notification system
   const {
-    data: teamMembers, isLoading, isError
+    data: teamMembers, isLoading, isError,
   } = useTeamMembers(libraryId);
 
   const rows = isError ? [] : (teamMembers || SKELETON_ROWS);
 
   const navigate = useNavigate();
-
-  const columns = useMemo(() => [
-    {
-      Header: intl.formatMessage(messages['library.authz.team.table.display.name']),
-      accessor: 'displayName',
-      Cell: NameCell,
-    },
-    {
-      Header: intl.formatMessage(messages['library.authz.team.table.email']),
-      accessor: 'email',
-      Cell: EmailCell,
-    },
-    {
-      Header: intl.formatMessage(messages['library.authz.team.table.roles']),
-      accessor: 'roles',
-      Cell: RolesCell,
-    },
-  ], [isLoading]);
 
   return (
     <DataTable
@@ -88,7 +69,7 @@ const TeamTable = () => {
                 variant="link"
                 size="sm"
                 // TODO: update the view with the team member view
-                onClick={() => navigate(`/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', username)}`)}
+                onClick={() => navigate(`/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', row.original.username)}`)}
               >
                 {intl.formatMessage(messages['authz.libraries.team.table.edit.action'])}
               </Button>
@@ -98,7 +79,25 @@ const TeamTable = () => {
       initialState={{
         pageSize: 10,
       }}
-      columns={columns}
+      columns={
+        [
+          {
+            Header: intl.formatMessage(messages['library.authz.team.table.display.name']),
+            accessor: 'displayName',
+            Cell: NameCell,
+          },
+          {
+            Header: intl.formatMessage(messages['library.authz.team.table.email']),
+            accessor: 'email',
+            Cell: EmailCell,
+          },
+          {
+            Header: intl.formatMessage(messages['library.authz.team.table.roles']),
+            accessor: 'roles',
+            Cell: RolesCell,
+          },
+        ]
+      }
     />
   );
 };

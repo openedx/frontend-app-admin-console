@@ -1,8 +1,8 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Tab, Tabs } from '@openedx/paragon';
+import { useLibrary } from '@src/authz-module/data/hooks';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
-import { useLibrary } from '@src/authz-module/data/hooks';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 import messages from './messages';
@@ -10,7 +10,7 @@ import messages from './messages';
 const LibrariesAuthZTeamView = () => {
   const intl = useIntl();
   const { libraryId } = useLibraryAuthZ();
-  const { data: library } = useLibrary(libraryId)
+  const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
   return (

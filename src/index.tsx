@@ -6,11 +6,11 @@ import { AppProvider, ErrorPage } from '@edx/frontend-platform/react';
 import {
   APP_INIT_ERROR, APP_READY, subscribe, initialize,
 } from '@edx/frontend-platform';
+import AuthZModule from 'authz-module';
 
 import messages from './i18n';
 
 import './index.scss';
-import AuthZModule from 'authz-module';
 
 const queryClient = new QueryClient();
 
@@ -24,7 +24,7 @@ subscribe(APP_READY, () => {
           <Routes>
             <Route path="/authz/*" element={<AuthZModule />} />
           </Routes>
-        </ AppProvider>
+        </AppProvider>
       </QueryClientProvider>
     </StrictMode>,
   );

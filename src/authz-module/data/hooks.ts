@@ -3,7 +3,6 @@ import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
 import { getLibrary, getTeamMembers } from './api';
 
-
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
   teamMembers: (object: string) => [...authzQueryKeys.all, 'teamMembers', object] as const,
@@ -36,10 +35,8 @@ export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>(
  * const { data } = useLibrary('lib:123',);
  *
  */
-export const useLibrary = (libraryId: string) => {
-  return useSuspenseQuery<LibraryMetadata, Error>({
-    queryKey: authzQueryKeys.library(libraryId),
-    queryFn: () => getLibrary(libraryId),
-    retry: false,
-  });
-}
+export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadata, Error>({
+  queryKey: authzQueryKeys.library(libraryId),
+  queryFn: () => getLibrary(libraryId),
+  retry: false,
+});
