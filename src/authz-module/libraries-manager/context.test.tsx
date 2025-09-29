@@ -27,6 +27,13 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   }),
 }));
 
+jest.mock('../data/hooks', () => ({
+  useTeamRoles: jest.fn(),
+}));
+
+// Get the mocked function
+const { useTeamRoles } = jest.requireMock('../data/hooks');
+
 const TestComponent = () => {
   const context = useLibraryAuthZ();
   return (
@@ -45,6 +52,34 @@ describe('LibraryAuthZProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
+    (useTeamRoles as jest.Mock).mockReturnValue({
+      data: [
+        {
+          role: 'instructor',
+          description: 'Can create and edit content',
+          userCount: 3,
+          objects: [
+            {
+              object: 'library',
+              description: 'Library permissions',
+              actions: ['view', 'edit', 'delete'],
+            },
+          ],
+        },
+        {
+          role: 'admin',
+          description: 'Full access to the library',
+          userCount: 1,
+          objects: [
+            {
+              object: 'library',
+              description: 'Library permissions',
+              actions: ['view', 'edit', 'delete', 'manage'],
+            },
+          ],
+        },
+      ],
+    });
   });
 
   it('provides the correct context values to consumers', () => {

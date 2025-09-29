@@ -4,7 +4,7 @@ import {
   ActionRow, Button, Form, ModalDialog,
   Stack,
 } from '@openedx/paragon';
-import { useLibraryAuthZ } from 'authz-module/libraries-manager/context';
+import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import messages from './messages';
 
 interface AddNewTeamMemberModalProps {
