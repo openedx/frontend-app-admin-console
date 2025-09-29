@@ -14,7 +14,6 @@ export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   return camelCaseObject(data.results);
 };
 
-
 // TODO: this should be replaced in the future with Console API
 export const getLibrary = async (libraryId: string): Promise<LibraryMetadata> => {
   const { data } = await getAuthenticatedHttpClient().get(getStudioApiUrl(`/api/libraries/v2/${libraryId}/`));

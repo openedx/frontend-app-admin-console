@@ -4,7 +4,6 @@ import {
 import { useParams } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { useLibrary } from '../data/hooks';
 
 const LIBRARY_TEAM_PERMISSIONS = ['act:view_library_team', 'act:manage_library_team'];
 
@@ -29,7 +28,7 @@ type AuthZProviderProps = {
   children: ReactNode;
 };
 
-export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }) => {
+export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:AuthZProviderProps) => {
   const { libraryId } = useParams<{ libraryId: string }>();
   const { authenticatedUser } = useContext(AppContext) as AppContextType;
 

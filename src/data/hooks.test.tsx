@@ -90,10 +90,8 @@ describe('useValidateUserPermissions', () => {
           wrapper: createWrapper(),
         });
       });
-
     } catch (error) {
-      expect(error).toEqual(mockError);  // Check for the expected error
-      return;
+      expect(error).toEqual(mockError); // Check for the expected error
     }
   });
 });

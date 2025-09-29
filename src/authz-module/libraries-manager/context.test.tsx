@@ -25,7 +25,6 @@ const TestComponent = () => {
 };
 
 describe('LibraryAuthZProvider', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
@@ -42,7 +41,7 @@ describe('LibraryAuthZProvider', () => {
     renderWrapper(
       <LibraryAuthZProvider>
         <TestComponent />
-      </LibraryAuthZProvider>
+      </LibraryAuthZProvider>,
     );
 
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
@@ -62,7 +61,7 @@ describe('LibraryAuthZProvider', () => {
       renderWrapper(
         <LibraryAuthZProvider>
           <TestComponent />
-        </LibraryAuthZProvider>
+        </LibraryAuthZProvider>,
       );
     }).toThrow('NoAccess');
   });
@@ -70,7 +69,7 @@ describe('LibraryAuthZProvider', () => {
   it('provides context when user can view but not manage team', () => {
     (useValidateUserPermissions as jest.Mock).mockReturnValue({
       data: [
-        { allowed: true },  // canViewTeam
+        { allowed: true }, // canViewTeam
         { allowed: false }, // canManageTeam
       ],
     });
@@ -78,7 +77,7 @@ describe('LibraryAuthZProvider', () => {
     renderWrapper(
       <LibraryAuthZProvider>
         <TestComponent />
-      </LibraryAuthZProvider>
+      </LibraryAuthZProvider>,
     );
 
     expect(screen.getByTestId('canManageTeam')).toHaveTextContent('false');
@@ -91,8 +90,8 @@ describe('LibraryAuthZProvider', () => {
       renderWrapper(
         <LibraryAuthZProvider>
           <TestComponent />
-        </LibraryAuthZProvider>
-      );;
+        </LibraryAuthZProvider>,
+      );
     }).toThrow('MissingLibrary');
   });
 

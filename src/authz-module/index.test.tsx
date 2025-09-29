@@ -4,22 +4,16 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AuthZModule from './index';
 
-jest.mock('./libraries-manager/LibrariesTeamManager', () => {
-  return lazy(() =>
-    new Promise<{ default: ComponentType<any> }>(resolve =>
-      setTimeout(() => resolve({ default: () => <div data-testid="libraries-manager">Loaded</div> }), 100)
-    )
-  );
-});
+// eslint-disable-next-line no-promise-executor-return
+jest.mock('./libraries-manager/LibrariesTeamManager', () => lazy(() => new Promise<{ default: ComponentType<any> }>(resolve => setTimeout(() => resolve({ default: () => <div data-testid="libraries-manager">Loaded</div> }), 100))));
 
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
     },
-  });
+  },
+});
 
 describe('AuthZModule', () => {
   it('renders LoadingPage then LibrariesTeamManager when route matches', async () => {
@@ -31,7 +25,7 @@ describe('AuthZModule', () => {
         <MemoryRouter initialEntries={[path]}>
           <AuthZModule />
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(screen.getByTestId('loading-page')).toBeInTheDocument();

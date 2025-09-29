@@ -2,13 +2,13 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ROUTES } from '@src/authz-module/constants';
 import { renderWrapper } from '@src/setupTest';
-import TeamTable from './TeamTable';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
+import TeamTable from './TeamTable';
 import { useLibraryAuthZ } from '../context';
 
 const mockNavigate = jest.fn();
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
 
@@ -93,7 +93,7 @@ describe('TeamTable', () => {
 
     await userEvent.click(editButtons[0]);
     expect(mockNavigate).toHaveBeenCalledWith(
-      `/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', 'alice')}`,
+      `/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', 'bob')}`,
     );
   });
 

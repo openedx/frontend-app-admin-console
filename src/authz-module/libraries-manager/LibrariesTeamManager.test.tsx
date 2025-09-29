@@ -1,9 +1,9 @@
 import { screen } from '@testing-library/react';
-import LibrariesTeamManager from './LibrariesTeamManager';
-import { useLibraryAuthZ } from './context';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary } from '@src/authz-module/data/hooks';
+import { useLibraryAuthZ } from './context';
+import LibrariesTeamManager from './LibrariesTeamManager';
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -28,9 +28,9 @@ describe('LibrariesTeamManager', () => {
   beforeEach(() => {
     initializeMockApp({
       authenticatedUser: {
-        username: 'admin'
-      }
-    })
+        username: 'admin',
+      },
+    });
     mockedUseLibraryAuthZ.mockReturnValue({
       libraryId: 'lib-001',
       libraryName: 'Mock Library',

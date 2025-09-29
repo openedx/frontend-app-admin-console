@@ -113,9 +113,9 @@ describe('useLibrary', () => {
 
     const wrapper = createWrapper();
     try {
-      act(()=>{
+      act(() => {
         renderHook(() => useLibrary('lib123'), { wrapper });
-      })
+      });
     } catch (e) {
       expect(e).toEqual(new Error('Not found'));
     }
