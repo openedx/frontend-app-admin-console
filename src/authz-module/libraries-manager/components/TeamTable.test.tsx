@@ -23,13 +23,11 @@ jest.mock('../context', () => ({
 describe('TeamTable', () => {
   const mockTeamMembers = [
     {
-      displayName: 'Alice',
       email: 'alice@example.com',
       roles: ['Admin', 'Editor'],
       username: 'alice',
     },
     {
-      displayName: 'Bob',
       email: 'bob@example.com',
       roles: ['Viewer'],
       username: 'bob',
@@ -68,12 +66,12 @@ describe('TeamTable', () => {
 
     renderWrapper(<TeamTable />);
 
-    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
     expect(screen.getByText('alice@example.com')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('Editor')).toBeInTheDocument();
 
-    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('bob')).toBeInTheDocument();
     expect(screen.getByText('bob@example.com')).toBeInTheDocument();
     expect(screen.getByText('Viewer')).toBeInTheDocument();
   });

@@ -10,7 +10,6 @@ export interface PermissionValidationResponse extends PermissionValidationReques
 
 // Libraries AuthZ types
 export interface TeamMember {
-  displayName: string;
   username: string;
   email: string;
   roles: string[];

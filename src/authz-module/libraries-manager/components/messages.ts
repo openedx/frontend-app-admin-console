@@ -1,10 +1,15 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 
 const messages = defineMessages({
-  'library.authz.team.table.display.name': {
-    id: 'library.authz.team.table.display.name',
-    defaultMessage: 'Name',
-    description: 'Libraries team management table name column header',
+  'library.authz.team.table.username': {
+    id: 'library.authz.team.table.username',
+    defaultMessage: 'Username',
+    description: 'Libraries team management table username column header',
+  },
+  'library.authz.team.table.username.current': {
+    id: 'library.authz.team.table.username.current',
+    defaultMessage: ' (Me)',
+    description: 'Libraries team management table indicative of current user',
   },
   'library.authz.team.table.email': {
     id: 'library.team.table.email',
