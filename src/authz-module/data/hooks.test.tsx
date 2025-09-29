@@ -2,7 +2,9 @@ import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { useLibrary, usePermissionsByRole, useTeamMembers } from './hooks';
+import {
+  useLibrary, usePermissionsByRole, useTeamMembers, useAddTeamMember,
+} from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
@@ -154,5 +156,75 @@ describe('usePermissionsByRole', () => {
     } catch (e) {
       expect(e).toEqual(new Error('Not found'));
     }
+  });
+
+  describe('useAddTeamMember', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('successfully adds team members', async () => {
+      const mockResponse = {
+        completed: [
+          {
+            user: 'jdoe',
+            status: 'role_added',
+          },
+          {
+            user: 'alice@example.com',
+            status: 'already_has_role',
+          },
+        ],
+        errors: [],
+      };
+
+      getAuthenticatedHttpClient.mockReturnValue({
+        put: jest.fn().mockResolvedValue({ data: mockResponse }),
+      });
+
+      const { result } = renderHook(() => useAddTeamMember(), {
+        wrapper: createWrapper(),
+      });
+
+      const addTeamMemberData = {
+        scope: 'lib:123',
+        users: ['jdoe'],
+        role: 'author',
+      };
+
+      await act(async () => {
+        result.current.mutate({ data: addTeamMemberData });
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+      expect(result.current.data).toEqual(mockResponse);
+    });
+
+    it('handles error when adding team members fails', async () => {
+      getAuthenticatedHttpClient.mockReturnValue({
+        put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
+      });
+
+      const { result } = renderHook(() => useAddTeamMember(), {
+        wrapper: createWrapper(),
+      });
+
+      const addTeamMemberData = {
+        scope: 'lib:123',
+        users: ['jdoe'],
+        role: 'author',
+      };
+
+      await act(async () => {
+        result.current.mutate({ data: addTeamMemberData });
+      });
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+      expect(result.current.error).toEqual(new Error('Failed to add members'));
+    });
   });
 });

@@ -1,0 +1,238 @@
+import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWrapper } from '@src/setupTest';
+import { useAddTeamMember } from '@src/authz-module/data/hooks';
+import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
+
+const mockMutate = jest.fn();
+
+// Mock the hooks module
+jest.mock('@src/authz-module/data/hooks', () => ({
+  useAddTeamMember: jest.fn(),
+}));
+
+jest.mock('./AddNewTeamMemberModal', () => {
+  /* eslint-disable react/prop-types */
+  const MockModal = ({
+    isOpen, close, onSave, isLoading, formValues, handleChangeForm,
+  }) => (
+    isOpen ? (
+      <div data-testid="add-team-member-modal">
+        <button type="button" onClick={close} data-testid="close-modal">Close</button>
+        <button type="button" onClick={onSave} data-testid="save-modal">Save</button>
+        <textarea
+          name="users"
+          value={formValues?.users || ''}
+          onChange={handleChangeForm}
+          data-testid="users-input"
+        />
+        <select
+          name="role"
+          value={formValues?.role || ''}
+          onChange={handleChangeForm}
+          data-testid="role-select"
+        >
+          <option value="">Select role</option>
+          <option value="admin">Admin</option>
+          <option value="editor">Editor</option>
+        </select>
+        {isLoading && <div data-testid="loading-indicator">Loading...</div>}
+      </div>
+    ) : null
+  );
+  /* eslint-enable react/prop-types */
+  return MockModal;
+});
+
+describe('AddNewTeamMemberTrigger', () => {
+  const mockLibraryId = 'lib:123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAddTeamMember as jest.Mock).mockReturnValue({
+      mutate: mockMutate,
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+    } as any);
+  });
+
+  it('renders the trigger button', () => {
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const button = screen.getByRole('button', { name: /add new team member/i });
+    expect(button).toBeInTheDocument();
+  });
+
+  it('opens modal when trigger button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+  });
+
+  it('closes modal when close button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+
+    const closeButton = screen.getByTestId('close-modal');
+    await user.click(closeButton);
+
+    expect(screen.queryByTestId('add-team-member-modal')).not.toBeInTheDocument();
+  });
+
+  it('calls addTeamMember with correct data when save is clicked', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const usersInput = screen.getByTestId('users-input');
+    const roleSelect = screen.getByTestId('role-select');
+    const saveButton = screen.getByTestId('save-modal');
+
+    await user.type(usersInput, 'alice@example.com, bob@example.com');
+    await user.selectOptions(roleSelect, 'editor');
+    await user.click(saveButton);
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        data: {
+          users: ['alice@example.com', 'bob@example.com'],
+          role: 'editor',
+          scope: mockLibraryId,
+        },
+      },
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+      }),
+    );
+  });
+
+  it('displays success toast and closes modal on successful addition with no errors', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    // Simulate successful response with no errors
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [
+        { user: 'alice@example.com', status: 'role_added' },
+        { user: 'bob@example.com', status: 'added_to_team' },
+      ],
+      errors: [],
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('add-team-member-modal')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByText('2 team members added successfully.')).toBeInTheDocument();
+  });
+
+  it('displays mixed success and error toast on partial success', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    // Simulate partial success response
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [
+        { user: 'alice@example.com', status: 'role_added' },
+      ],
+      errors: [
+        { user: 'unknown@example.com', error: 'user_not_found' },
+      ],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/1 team member added successfully/)).toBeInTheDocument();
+      expect(screen.getByText(/We couldn't find a user for 1 email address or username/)).toBeInTheDocument();
+    });
+
+    // Modal should remain open when there are errors
+    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+  });
+
+  it('displays only error toast when all additions fail', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    // Simulate all failed response
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [],
+      errors: [
+        { user: 'unknown1@example.com', error: 'user_not_found' },
+        { user: 'unknown2@example.com', error: 'user_not_found' },
+      ],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/We couldn't find a user for 2 email addresses or usernames/)).toBeInTheDocument();
+    });
+
+    // Modal should remain open when there are errors
+    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+  });
+
+  it('resets form values after successful addition with no errors', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const usersInput = screen.getByTestId('users-input');
+    const roleSelect = screen.getByTestId('role-select');
+    const saveButton = screen.getByTestId('save-modal');
+
+    await user.type(usersInput, 'alice@example.com');
+    await user.selectOptions(roleSelect, 'editor');
+    await user.click(saveButton);
+
+    // Simulate successful response with no errors
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [{ user: 'alice@example.com', status: 'role_added' }],
+      errors: [],
+    });
+
+    // Open modal again to check if form is reset
+    await user.click(triggerButton);
+
+    const newUsersInput = screen.getByTestId('users-input');
+    const newRoleSelect = screen.getByTestId('role-select');
+
+    expect(newUsersInput).toHaveValue('');
+    expect(newRoleSelect).toHaveValue('');
+  });
+});

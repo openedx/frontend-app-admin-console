@@ -3,7 +3,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, Toast, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
-import { useAddTeamMember } from 'authz-module/data/hooks';
+import { useAddTeamMember } from '@src/authz-module/data/hooks';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';
 
