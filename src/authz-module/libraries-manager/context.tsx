@@ -4,8 +4,12 @@ import {
 import { useParams } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
+import { usePermissionsByRole } from '@src/authz-module/data/hooks';
+import { PermissionMetadata, ResourceMetadata, Role } from 'types';
+import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
 
 const LIBRARY_TEAM_PERMISSIONS = ['act:view_library_team', 'act:manage_library_team'];
+const LIBRARY_AUTHZ_SCOPE = 'lib:*';
 
 export type AppContextType = {
   authenticatedUser: {
@@ -18,8 +22,9 @@ type LibraryAuthZContextType = {
   canManageTeam: boolean;
   username: string;
   libraryId: string;
-  roles: string[];
-  permissions: string[];
+  resources: ResourceMetadata[];
+  roles: Role[];
+  permissions: PermissionMetadata[];
 };
 
 const LibraryAuthZContext = createContext<LibraryAuthZContextType | undefined>(undefined);
@@ -45,13 +50,17 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
     throw new Error('NoAccess');
   }
 
+  const { data: libraryRoles } = usePermissionsByRole(LIBRARY_AUTHZ_SCOPE);
+  const roles = libraryRoles.map(role => ({ ...role, ...libraryRolesMetadata.find(r => r.key === role.key) } as Role));
+
   const value = useMemo((): LibraryAuthZContextType => ({
     username: authenticatedUser.username,
     libraryId,
-    roles: [],
-    permissions: [],
+    roles,
+    permissions: libraryPermissions,
+    resources: libraryResourceTypes,
     canManageTeam,
-  }), [libraryId, authenticatedUser.username, canManageTeam]);
+  }), [libraryId, authenticatedUser.username, canManageTeam, roles]);
 
   return (
     <LibraryAuthZContext.Provider value={value}>

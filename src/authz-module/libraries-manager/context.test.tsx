@@ -12,6 +12,20 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissions: jest.fn(),
 }));
+jest.mock('@src/authz-module/data/hooks', () => ({
+  usePermissionsByRole: jest.fn().mockReturnValue({
+    data: [
+      {
+        key: 'library_author',
+        permissions: [
+          'view_library_team',
+          'edit_library',
+        ],
+        user_count: 12,
+      },
+    ],
+  }),
+}));
 
 const TestComponent = () => {
   const context = useLibraryAuthZ();
@@ -20,6 +34,9 @@ const TestComponent = () => {
       <div data-testid="username">{context.username}</div>
       <div data-testid="libraryId">{context.libraryId}</div>
       <div data-testid="canManageTeam">{context.canManageTeam ? 'true' : 'false'}</div>
+      <div data-testid="roles">{Array.isArray(context.roles) ? context.roles.length : 'undefined'}</div>
+      <div data-testid="permissions">{Array.isArray(context.permissions) ? context.permissions.length : 'undefined'}</div>
+      <div data-testid="resources">{Array.isArray(context.resources) ? context.resources.length : 'undefined'}</div>
     </div>
   );
 };
@@ -47,6 +64,9 @@ describe('LibraryAuthZProvider', () => {
     expect(screen.getByTestId('username')).toHaveTextContent('testuser');
     expect(screen.getByTestId('libraryId')).toHaveTextContent('lib123');
     expect(screen.getByTestId('canManageTeam')).toHaveTextContent('true');
+    expect(Number(screen.getByTestId('roles').textContent)).not.toBeNaN();
+    expect(Number(screen.getByTestId('permissions').textContent)).not.toBeNaN();
+    expect(Number(screen.getByTestId('resources').textContent)).not.toBeNaN();
   });
 
   it('throws error when user lacks both view and manage permissions', () => {

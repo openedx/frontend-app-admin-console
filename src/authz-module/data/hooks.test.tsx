@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { useLibrary, useTeamMembers } from './hooks';
+import { useLibrary, usePermissionsByRole, useTeamMembers } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
@@ -121,5 +121,38 @@ describe('useLibrary', () => {
     }
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+  });
+});
+
+describe('usePermissionsByRole', () => {
+  it('fetches roles for a given scope', async () => {
+    const mockRoles = [
+      { key: 'admin', permissions: ['perm1'], userCount: 1 },
+      { key: 'user', permissions: ['perm2'], userCount: 2 },
+    ];
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockRoles }),
+    });
+
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => usePermissionsByRole('lib'), { wrapper });
+    await waitFor(() => result.current.data !== undefined);
+    expect(result.current.data).toEqual(mockRoles);
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+  });
+
+  it('returns error if getRoles fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Not found')),
+    });
+    const wrapper = createWrapper();
+    try {
+      act(() => {
+        renderHook(() => usePermissionsByRole('lib'), { wrapper });
+      });
+    } catch (e) {
+      expect(e).toEqual(new Error('Not found'));
+    }
   });
 });

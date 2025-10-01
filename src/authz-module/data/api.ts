@@ -8,6 +8,12 @@ export interface GetTeamMembersResponse {
   totalCount: number;
 }
 
+export type PermissionsByRole = {
+  key: string;
+  permissions: string[];
+  userCount: number;
+};
+
 // TODO: replece api path once is created
 export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users?scope=${object}`));
@@ -23,4 +29,11 @@ export const getLibrary = async (libraryId: string): Promise<LibraryMetadata> =>
     title: data.title,
     slug: data.slug,
   };
+};
+
+export const getPermissionsByRole = async (scope: string): Promise<PermissionsByRole[]> => {
+  const url = new URL(getApiUrl('/api/authz/v1/roles'));
+  url.searchParams.append('scope', scope);
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
 };
