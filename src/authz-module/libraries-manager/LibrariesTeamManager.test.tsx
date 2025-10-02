@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary } from '@src/authz-module/data/hooks';
@@ -29,6 +29,17 @@ jest.mock('./components/AddNewTeamMemberModal', () => ({
   AddNewTeamMemberTrigger: () => <div data-testid="add-team-member-trigger">MockAddNewTeamMemberTrigger</div>,
 }));
 
+jest.mock('../components/RoleCard', () => ({
+  __esModule: true,
+  default: ({ title, description, permissions }: { title: string, description: string, permissions: any[] }) => (
+    <div data-testid="role-card">
+      <div>{title}</div>
+      <div>{description}</div>
+      <div>{permissions.length} permissions</div>
+    </div>
+  ),
+}));
+
 describe('LibrariesTeamManager', () => {
   beforeEach(() => {
     initializeMockApp({
@@ -41,8 +52,19 @@ describe('LibrariesTeamManager', () => {
       libraryName: 'Mock Library',
       libraryOrg: 'MockOrg',
       username: 'mockuser',
-      roles: ['admin'],
-      permissions: [],
+      roles: [
+        {
+          name: 'Instructor',
+          description: 'Can manage content.',
+          userCount: 3,
+          permissions: ['view', 'edit'],
+        },
+      ],
+      permissions: [
+        { key: 'view_library', label: 'view', resource: 'library' },
+        { key: 'edit_library', name: 'edit', resource: 'library' },
+      ],
+      resources: [{ key: 'library', displayName: 'Library' }],
       canManageTeam: true,
     });
 
@@ -71,5 +93,20 @@ describe('LibrariesTeamManager', () => {
 
     // AddNewTeamMemberTrigger is rendered
     expect(screen.getByTestId('add-team-member-trigger')).toBeInTheDocument();
+  });
+
+  it('renders role cards when "Roles" tab is selected', async () => {
+    renderWrapper(<LibrariesTeamManager />);
+
+    // Click on "Roles" tab
+    const rolesTab = await screen.findByRole('tab', { name: /roles/i });
+    fireEvent.click(rolesTab);
+
+    const roleCards = await screen.findAllByTestId('role-card');
+
+    expect(roleCards.length).toBeGreaterThan(0);
+    expect(screen.getByText('Instructor')).toBeInTheDocument();
+    expect(screen.getByText(/Can manage content/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 permissions/i)).toBeInTheDocument();
   });
 });
