@@ -9,7 +9,7 @@ export interface GetTeamMembersResponse {
 }
 
 export type PermissionsByRole = {
-  key: string;
+  role: string;
   permissions: string[];
   userCount: number;
 };

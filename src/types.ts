@@ -1,6 +1,5 @@
 export interface PermissionValidationRequest {
   action: string;
-  object?: string;
   scope?: string;
 }
 
@@ -11,6 +10,7 @@ export interface PermissionValidationResponse extends PermissionValidationReques
 // Libraries AuthZ types
 export interface TeamMember {
   username: string;
+  fullName: string;
   email: string;
   roles: string[];
 }
@@ -23,7 +23,7 @@ export interface LibraryMetadata {
 }
 
 export interface RoleMetadata {
-  key: string;
+  role: string;
   name: string;
   description: string;
 }

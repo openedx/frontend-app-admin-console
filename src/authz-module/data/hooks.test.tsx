@@ -127,8 +127,8 @@ describe('useLibrary', () => {
 describe('usePermissionsByRole', () => {
   it('fetches roles for a given scope', async () => {
     const mockRoles = [
-      { key: 'admin', permissions: ['perm1'], userCount: 1 },
-      { key: 'user', permissions: ['perm2'], userCount: 2 },
+      { role: 'admin', permissions: ['perm1'], userCount: 1 },
+      { role: 'user', permissions: ['perm2'], userCount: 2 },
     ];
 
     getAuthenticatedHttpClient.mockReturnValue({

@@ -51,7 +51,10 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
   }
 
   const { data: libraryRoles } = usePermissionsByRole(LIBRARY_AUTHZ_SCOPE);
-  const roles = libraryRoles.map(role => ({ ...role, ...libraryRolesMetadata.find(r => r.key === role.key) } as Role));
+  const roles = libraryRoles.map(role => ({
+    ...role,
+    ...libraryRolesMetadata.find(r => r.role === role.role),
+  } as Role));
 
   const value = useMemo((): LibraryAuthZContextType => ({
     username: authenticatedUser.username,

@@ -16,7 +16,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   usePermissionsByRole: jest.fn().mockReturnValue({
     data: [
       {
-        key: 'library_author',
+        role: 'library_author',
         permissions: [
           'view_library_team',
           'edit_library',
