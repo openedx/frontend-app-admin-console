@@ -1,11 +1,16 @@
 import { ComponentType, lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initializeMockApp } from '@edx/frontend-platform/testing';
 import AuthZModule from './index';
 
-// eslint-disable-next-line no-promise-executor-return
-jest.mock('./libraries-manager/LibrariesTeamManager', () => lazy(() => new Promise<{ default: ComponentType<any> }>(resolve => setTimeout(() => resolve({ default: () => <div data-testid="libraries-manager">Loaded</div> }), 100))));
+jest.mock('./libraries-manager', () => ({
+  // eslint-disable-next-line no-promise-executor-return
+  LibrariesLayout: lazy(() => new Promise<{ default: ComponentType<any> }>(resolve => setTimeout(() => resolve({ default: () => <div data-testid="layout"><Outlet /></div> }), 100))),
+  LibrariesTeamManager: () => <div data-testid="libraries-manager">Libraries Team Page</div>,
+  LibrariesUserManager: () => <div data-testid="libraries-user-manager">Libraries User Page</div>,
+}));
 
 const createTestQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -16,6 +21,12 @@ const createTestQueryClient = () => new QueryClient({
 });
 
 describe('AuthZModule', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    initializeMockApp({
+      authenticatedUser: { username: 'testuser' },
+    });
+  });
   it('renders LoadingPage then LibrariesTeamManager when route matches', async () => {
     const queryClient = createTestQueryClient();
     const path = '/libraries/lib:123';
@@ -32,6 +43,22 @@ describe('AuthZModule', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('libraries-manager')).toBeInTheDocument();
+    });
+  });
+
+  it('renders LoadingPage then LibrariesUserManager when user route matches', async () => {
+    const queryClient = createTestQueryClient();
+    const path = '/libraries/lib:123/testuser';
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[path]}>
+          <AuthZModule />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('libraries-user-manager')).toBeInTheDocument();
     });
   });
 });

@@ -3,11 +3,11 @@ import { Tab, Tabs } from '@openedx/paragon';
 import { useLibrary } from '@src/authz-module/data/hooks';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
-import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
+import { useLibraryAuthZ } from './context';
 
 import messages from './messages';
 
-const LibrariesAuthZTeamView = () => {
+const LibrariesTeamManager = () => {
   const intl = useIntl();
   const { libraryId } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
@@ -42,10 +42,5 @@ const LibrariesAuthZTeamView = () => {
     </div>
   );
 };
-const LibrariesTeamManager = () => (
-  <LibraryAuthZProvider>
-    <LibrariesAuthZTeamView />
-  </LibraryAuthZProvider>
-);
 
 export default LibrariesTeamManager;

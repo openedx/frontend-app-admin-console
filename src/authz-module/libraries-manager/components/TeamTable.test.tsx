@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ROUTES } from '@src/authz-module/constants';
 import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import TeamTable from './TeamTable';
@@ -91,7 +90,7 @@ describe('TeamTable', () => {
 
     await userEvent.click(editButtons[0]);
     expect(mockNavigate).toHaveBeenCalledWith(
-      `/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', 'bob')}`,
+      `/authz/libraries/${mockAuthZ.libraryId}/bob`,
     );
   });
 
