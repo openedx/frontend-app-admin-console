@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import debounce from 'lodash.debounce';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTable, Button, Chip, Skeleton,
@@ -92,7 +93,7 @@ const TeamTable = () => {
       manualPagination
       isSortable
       manualSortBy
-      fetchData={handleFetchData}
+      fetchData={debounce(handleFetchData, 1000)}
       data={rows}
       itemCount={rows?.length}
       additionalColumns={[
