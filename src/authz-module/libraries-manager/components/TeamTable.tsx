@@ -2,12 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTable, Button, Chip, Skeleton,
+  TextFilter,
+  CheckboxFilter,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '../context';
 import messages from './messages';
+import TableControlBar from './TableControlBar';
 
 const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
   username: 'skeleton',
@@ -58,9 +61,38 @@ const TeamTable = () => {
 
   const navigate = useNavigate();
 
+  const reducedChoices = teamMembers?.reduce((acc, currentObject) => {
+    const { roles } = currentObject;
+    roles.forEach((role) => {
+      if (role in acc) {
+        acc[role].number += 1;
+      } else {
+        acc[role] = {
+          name: role,
+          number: 1,
+          value: role,
+        };
+      }
+    });
+    return acc;
+  }, {}) ?? {};
+
+  const handleFetchData = (querySettings) => {
+    console.log('Filters', querySettings.filters);
+    console.log('Sorting', querySettings.sortBy);
+  };
+
   return (
     <DataTable
       isPaginated
+      isFilterable
+      defaultColumnValues={{ Filter: TextFilter }}
+      numBreakoutFilters={3}
+      manualFilters
+      manualPagination
+      isSortable
+      manualSortBy
+      fetchData={handleFetchData}
       data={rows}
       itemCount={rows?.length}
       additionalColumns={[
@@ -83,6 +115,7 @@ const TeamTable = () => {
       ]}
       initialState={{
         pageSize: 10,
+        hiddenColumns: ['createdAt'],
       }}
       columns={
         [
@@ -90,11 +123,14 @@ const TeamTable = () => {
             Header: intl.formatMessage(messages['library.authz.team.table.username']),
             accessor: 'username',
             Cell: NameCell,
+            disableSortBy: true,
           },
           {
             Header: intl.formatMessage(messages['library.authz.team.table.email']),
             accessor: 'email',
             Cell: EmailCell,
+            disableFilters: true,
+            disableSortBy: true,
           },
           {
             Header: intl.formatMessage(messages['library.authz.team.table.roles']),
@@ -107,10 +143,23 @@ const TeamTable = () => {
                 <Chip key={`${row.original.username}-role-${role}`}>{roleLabels[role]}</Chip>
               ))
             )),
+            Filter: CheckboxFilter,
+            filter: 'includesValue',
+            filterChoices: Object.values(reducedChoices),
+            disableSortBy: true,
+          },
+          {
+            accessor: 'createdAt',
+            Filter: false,
+            disableFilters: true,
+            disableSortBy: true,
           },
         ]
       }
-    />
+    >
+      <TableControlBar />
+      <DataTable.Table />
+    </DataTable>
   );
 };
 
