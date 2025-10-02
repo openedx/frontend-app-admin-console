@@ -8,9 +8,10 @@ import { useLocation } from 'react-router-dom';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import RoleCard from '../components/RoleCard';
+import PermissionTable from '../components/PermissionTable';
 import { useLibraryAuthZ } from './context';
 import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
-import { buildPermissionsByRoleMatrix } from './utils';
+import { buildPermissionMatrix, buildPermissionsByRoleMatrix } from './utils';
 
 import messages from './messages';
 
@@ -29,6 +30,11 @@ const LibrariesTeamManager = () => {
       rolePermissions: role.permissions, permissions, resources, intl,
     }),
   })), [roles, permissions, resources, intl]);
+
+  const permissionsTable = useMemo(() => {
+    if (!roles || !permissions || !resources) return [];
+    return buildPermissionMatrix(roles, permissions, resources, intl);
+  }, [roles, permissions, resources]);
 
   return (
     <div className="authz-libraries">
@@ -67,11 +73,13 @@ const LibrariesTeamManager = () => {
             </Container>
           </Tab>
           <Tab id="libraries-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['library.authz.tabs.permissions'])}>
-            Permissions tab.
+            <Container className="p-5 container-mw-lg">
+              <PermissionTable permissionsTable={permissionsTable} roles={libraryRoles} />
+            </Container>
           </Tab>
         </Tabs>
       </AuthZLayout>
-    </div>
+    </div >
   );
 };
 
