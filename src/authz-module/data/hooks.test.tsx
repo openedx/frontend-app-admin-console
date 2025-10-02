@@ -10,13 +10,13 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 const mockMembers = [
   {
-    displayName: 'Alice',
+    fullName: 'Alice',
     username: 'user1',
     email: 'alice@example.com',
     roles: ['admin', 'author'],
   },
   {
-    displayName: 'Bob',
+    fullName: 'Bob',
     username: 'user2',
     email: 'bob@example.com',
     roles: ['collaborator'],
