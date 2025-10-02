@@ -10,7 +10,7 @@ import AddNewTeamMemberTrigger from './components/AddNewTeamMemberTrigger';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();
-  const { libraryId } = useLibraryAuthZ();
+  const { libraryId, canManageTeam } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
@@ -22,9 +22,11 @@ const LibrariesTeamManager = () => {
         activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
-        actions={[
-          <AddNewTeamMemberTrigger libraryId={libraryId} />,
-        ]}
+        actions={
+          canManageTeam
+            ? [<AddNewTeamMemberTrigger libraryId={libraryId} />]
+            : []
+        }
       >
         <Tabs
           variant="tabs"
