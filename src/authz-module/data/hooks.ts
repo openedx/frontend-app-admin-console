@@ -1,11 +1,14 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
-import { getLibrary, getTeamMembers } from './api';
+import {
+  getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
+} from './api';
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
   teamMembers: (object: string) => [...authzQueryKeys.all, 'teamMembers', object] as const,
+  permissionsByRole: (scope: string) => [...authzQueryKeys.all, 'permissionsByRole', scope] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
 };
 
@@ -24,6 +27,23 @@ export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>(
   queryKey: authzQueryKeys.teamMembers(object),
   queryFn: () => getTeamMembers(object),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+});
+
+/**
+ * React Query hook to fetch all the roles for the specific object/scope.
+ * It retrieves the full list of roles with the corresponding permissions.
+ *
+ * @param scope - The unique identifier of the object/scope
+ *
+ * @example
+ * ```tsx
+ * const { data: roles, isLoading, isError } = useTeamMembers('lib:123');
+ * ```
+ */
+export const usePermissionsByRole = (scope: string) => useSuspenseQuery<PermissionsByRole[], Error>({
+  queryKey: authzQueryKeys.permissionsByRole(scope),
+  queryFn: () => getPermissionsByRole(scope),
+  retry: false,
 });
 
 /**

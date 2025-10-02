@@ -1,6 +1,5 @@
 export interface PermissionValidationRequest {
   action: string;
-  object?: string;
   scope?: string;
 }
 
@@ -11,6 +10,7 @@ export interface PermissionValidationResponse extends PermissionValidationReques
 // Libraries AuthZ types
 export interface TeamMember {
   username: string;
+  fullName: string;
   email: string;
   roles: string[];
 }
@@ -21,6 +21,29 @@ export interface LibraryMetadata {
   title: string;
   slug: string;
 }
+
+export interface RoleMetadata {
+  role: string;
+  name: string;
+  description: string;
+}
+export interface Role extends RoleMetadata {
+  userCount: number;
+  permissions: string[];
+}
+
+export type ResourceMetadata = {
+  key: string;
+  label: string;
+  description: string;
+};
+
+export type PermissionMetadata = {
+  key: string;
+  resource: string;
+  label?: string;
+  description?: string;
+};
 
 // Paragon table type
 export interface TableCellValue<T> {
