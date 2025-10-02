@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Breadcrumb, Col, Container, Row, Button, Badge,
 } from '@openedx/paragon';
@@ -26,6 +27,7 @@ const AuthZTitle = ({
 }: AuthZTitleProps) => (
   <Container className="p-5 bg-light-100">
     <Breadcrumb
+      linkAs={Link}
       links={navLinks}
       activeLabel={activeLabel}
     />
