@@ -6,10 +6,11 @@ import AuthZLayout from '../components/AuthZLayout';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 import messages from './messages';
+import AddNewTeamMemberTrigger from './components/AddNewTeamMemberTrigger';
 
 const LibrariesAuthZTeamView = () => {
   const intl = useIntl();
-  const { libraryId } = useLibraryAuthZ();
+  const { libraryId, canManageTeam } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
@@ -21,7 +22,11 @@ const LibrariesAuthZTeamView = () => {
         activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
-        actions={[]}
+        actions={
+          canManageTeam
+            ? [<AddNewTeamMemberTrigger libraryId={libraryId} />]
+            : []
+        }
       >
         <Tabs
           variant="tabs"

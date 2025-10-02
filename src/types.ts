@@ -22,6 +22,13 @@ export interface LibraryMetadata {
   slug: string;
 }
 
+export interface TeamRole {
+  role: string;
+  description: string;
+  userCount: number;
+  objects: { object: string; description: string; actions: string[] }[];
+}
+
 // Paragon table type
 export interface TableCellValue<T> {
   row: {
