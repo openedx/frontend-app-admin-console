@@ -5,7 +5,6 @@ import {
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
-import { ROUTES } from '@src/authz-module/constants';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '../context';
 import messages from './messages';
@@ -82,7 +81,7 @@ const TeamTable = () => {
                 variant="link"
                 size="sm"
                 // TODO: update the view with the team member view
-                onClick={() => navigate(`/authz/${ROUTES.LIBRARIES_USER_PATH.replace(':username', row.original.username)}`)}
+                onClick={() => navigate(`/authz/libraries/${libraryId}/${row.original.username}`)}
               >
                 {intl.formatMessage(messages['authz.libraries.team.table.edit.action'])}
               </Button>
