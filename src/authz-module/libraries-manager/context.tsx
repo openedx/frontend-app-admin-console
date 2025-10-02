@@ -8,7 +8,7 @@ import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
 
-const LIBRARY_TEAM_PERMISSIONS = ['act:view_library_team', 'act:manage_library_team'];
+const LIBRARY_TEAM_PERMISSIONS = ['view_library_team', 'manage_library_team'];
 const LIBRARY_AUTHZ_SCOPE = 'lib:*';
 
 export type AppContextType = {
@@ -41,7 +41,7 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
   if (!libraryId) {
     throw new Error('MissingLibrary');
   }
-  const permissions = LIBRARY_TEAM_PERMISSIONS.map(action => ({ action, object: libraryId }));
+  const permissions = LIBRARY_TEAM_PERMISSIONS.map(action => ({ action, scope: libraryId }));
 
   const { data: userPermissions } = useValidateUserPermissions(permissions);
   const [{ allowed: canViewTeam }, { allowed: canManageTeam }] = userPermissions;
