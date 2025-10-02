@@ -1,6 +1,11 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AuthZTitle, { AuthZTitleProps } from './AuthZTitle';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  Link: ({ children, to }:{ children:ReactNode, to:string }) => <a href={to}>{children}</a>,
+}));
 
 describe('AuthZTitle', () => {
   const defaultProps: AuthZTitleProps = {
@@ -24,8 +29,9 @@ describe('AuthZTitle', () => {
 
     render(<AuthZTitle {...defaultProps} navLinks={navLinks} />);
 
-    navLinks.forEach(({ label }) => {
+    navLinks.forEach(({ label, to }) => {
       expect(screen.getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toHaveAttribute('href', expect.stringContaining(to));
     });
 
     expect(screen.getByText(defaultProps.activeLabel)).toBeInTheDocument();
