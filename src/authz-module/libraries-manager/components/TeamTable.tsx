@@ -1,14 +1,22 @@
 import { useNavigate } from 'react-router-dom';
+import debounce from 'lodash.debounce';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTable, Button, Chip, Skeleton,
+  TextFilter,
+  CheckboxFilter,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
 import { ROUTES } from '@src/authz-module/constants';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
+import {
+  useMemo,
+} from 'react';
 import { useLibraryAuthZ } from '../context';
+import { useQuerySettings } from '../hooks';
 import messages from './messages';
+import TableControlBar from './TableControlBar';
 
 const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
   username: 'skeleton',
@@ -54,20 +62,42 @@ const RolesCell = ({ row }: CellProps) => (row.original.username === SKELETON_RO
 
 const TeamTable = () => {
   const intl = useIntl();
-  const { libraryId, canManageTeam, username } = useLibraryAuthZ();
+
+  const { querySettings, handleTableFetch } = useQuerySettings();
+
+  const {
+    libraryId, canManageTeam, username, roles,
+  } = useLibraryAuthZ();
 
   // TODO: Display error in the notification system
   const {
     data: teamMembers, isLoading, isError,
-  } = useTeamMembers(libraryId);
+  } = useTeamMembers(libraryId, querySettings);
 
   const rows = isError ? [] : (teamMembers || SKELETON_ROWS);
 
   const navigate = useNavigate();
 
+  const adaptedFilterChoices = useMemo(
+    () => roles.map((role) => ({
+      name: role.name,
+      number: role.userCount,
+      value: role.role,
+    })),
+    [roles],
+  );
+
   return (
     <DataTable
       isPaginated
+      isFilterable
+      defaultColumnValues={{ Filter: TextFilter }}
+      numBreakoutFilters={3}
+      manualFilters
+      manualPagination
+      isSortable
+      manualSortBy
+      fetchData={debounce(handleTableFetch, 1000)}
       data={rows}
       itemCount={rows?.length}
       additionalColumns={[
@@ -91,6 +121,7 @@ const TeamTable = () => {
       ]}
       initialState={{
         pageSize: 10,
+        hiddenColumns: ['createdAt'],
       }}
       columns={
         [
@@ -98,20 +129,36 @@ const TeamTable = () => {
             Header: intl.formatMessage(messages['library.authz.team.table.username']),
             accessor: 'username',
             Cell: NameCell,
+            disableSortBy: true,
           },
           {
             Header: intl.formatMessage(messages['library.authz.team.table.email']),
             accessor: 'email',
             Cell: EmailCell,
+            disableFilters: true,
+            disableSortBy: true,
           },
           {
             Header: intl.formatMessage(messages['library.authz.team.table.roles']),
             accessor: 'roles',
             Cell: RolesCell,
+            Filter: CheckboxFilter,
+            filter: 'includesValue',
+            filterChoices: Object.values(adaptedFilterChoices),
+            disableSortBy: true,
+          },
+          {
+            accessor: 'createdAt',
+            Filter: false,
+            disableFilters: true,
+            disableSortBy: true,
           },
         ]
       }
-    />
+    >
+      <TableControlBar />
+      <DataTable.Table />
+    </DataTable>
   );
 };
 
