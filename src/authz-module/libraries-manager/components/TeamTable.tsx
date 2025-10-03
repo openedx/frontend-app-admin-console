@@ -10,7 +10,11 @@ import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
 import { ROUTES } from '@src/authz-module/constants';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
+import {
+  useMemo,
+} from 'react';
 import { useLibraryAuthZ } from '../context';
+import { useQuerySettings } from '../hooks';
 import messages from './messages';
 import TableControlBar from './TableControlBar';
 
@@ -58,37 +62,30 @@ const RolesCell = ({ row }: CellProps) => (row.original.username === SKELETON_RO
 
 const TeamTable = () => {
   const intl = useIntl();
-  const { libraryId, canManageTeam, username } = useLibraryAuthZ();
+
+  const { querySettings, handleTableFetch } = useQuerySettings();
+
+  const {
+    libraryId, canManageTeam, username, roles,
+  } = useLibraryAuthZ();
 
   // TODO: Display error in the notification system
   const {
     data: teamMembers, isLoading, isError,
-  } = useTeamMembers(libraryId);
+  } = useTeamMembers(libraryId, querySettings);
 
   const rows = isError ? [] : (teamMembers || SKELETON_ROWS);
 
   const navigate = useNavigate();
 
-  const reducedChoices = teamMembers?.reduce((acc, currentObject) => {
-    const { roles } = currentObject;
-    roles.forEach((role) => {
-      if (role in acc) {
-        acc[role].number += 1;
-      } else {
-        acc[role] = {
-          name: role,
-          number: 1,
-          value: role,
-        };
-      }
-    });
-    return acc;
-  }, {}) ?? {};
-
-  const handleFetchData = (querySettings) => {
-    console.log('Filters', querySettings.filters);
-    console.log('Sorting', querySettings.sortBy);
-  };
+  const adaptedFilterChoices = useMemo(
+    () => roles.map((role) => ({
+      name: role.name,
+      number: role.userCount,
+      value: role.role,
+    })),
+    [roles],
+  );
 
   return (
     <DataTable
@@ -100,7 +97,7 @@ const TeamTable = () => {
       manualPagination
       isSortable
       manualSortBy
-      fetchData={debounce(handleFetchData, 1000)}
+      fetchData={debounce(handleTableFetch, 1000)}
       data={rows}
       itemCount={rows?.length}
       additionalColumns={[
@@ -147,7 +144,7 @@ const TeamTable = () => {
             Cell: RolesCell,
             Filter: CheckboxFilter,
             filter: 'includesValue',
-            filterChoices: Object.values(reducedChoices),
+            filterChoices: Object.values(adaptedFilterChoices),
             disableSortBy: true,
           },
           {

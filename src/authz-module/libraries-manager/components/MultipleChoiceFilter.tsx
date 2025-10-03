@@ -47,7 +47,7 @@ const MultipleChoiceFilter: FC<MultipleChoiceFilterProps> = ({
             <Form.Checkbox
               className="m-2"
               key={name}
-              value={name}
+              value={value}
               onChange={() => changeCheckbox(value)}
               aria-label={name}
             >
