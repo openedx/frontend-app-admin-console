@@ -3,6 +3,7 @@ import {
   useEffect,
   FC,
 } from 'react';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTableContext,
   Dropdown,
@@ -28,38 +29,33 @@ const SORT_BY_OPTIONS: SortByOptions = {
   oldest: { id: 'createdAt', desc: false },
 };
 
-const SORT_LABELS: Record<string, string> = {
-  'name-a-z': 'Name A-Z',
-  'name-z-a': 'Name Z-A',
-  newest: 'Newest',
-  oldest: 'Oldest',
-};
-
 const SortDropdown: FC = () => {
+  const intl = useIntl();
   const { toggleSortBy, state } = useContext<DataTableContext>(DataTableContext);
   const [sortOrder, setSortOrder] = useState<string | undefined>(undefined);
 
-  // Get current sort state from DataTable context
+  const SORT_LABELS: Record<string, string> = useMemo(() => ({
+    'name-a-z': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-a-z', defaultMessage: 'Name A-Z' }),
+    'name-z-a': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-z-a', defaultMessage: 'Name Z-A' }),
+    newest: intl.formatMessage({ id: 'authz.libraries.team.table.sort.newest', defaultMessage: 'Newest' }),
+    oldest: intl.formatMessage({ id: 'authz.libraries.team.table.sort.oldest', defaultMessage: 'Oldest' }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+
   const currentSort = useMemo(() => {
     if (!state?.sortBy?.length) { return undefined; }
 
     const activeSortBy = state.sortBy[0];
     return Object.entries(SORT_BY_OPTIONS).find(
       ([, option]) => option.id === activeSortBy.id && option.desc === activeSortBy.desc,
-    )?.[0];
+    )?.[0]; // return the key
   }, [state?.sortBy]);
 
-  // Update local state when external sort changes
   useEffect(() => {
     setSortOrder(currentSort);
   }, [currentSort]);
 
   const handleChangeSortBy = useCallback((newSortOrder: string) => {
-    if (!SORT_BY_OPTIONS[newSortOrder]) {
-      console.warn(`Invalid sort option: ${newSortOrder}`);
-      return;
-    }
-
     setSortOrder(newSortOrder);
     const { id, desc } = SORT_BY_OPTIONS[newSortOrder];
     toggleSortBy(id, desc);
@@ -71,6 +67,7 @@ const SortDropdown: FC = () => {
       ...option,
       label: SORT_LABELS[key],
     })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -78,10 +75,7 @@ const SortDropdown: FC = () => {
 
   return (
     <Dropdown onSelect={handleChangeSortBy}>
-      <Dropdown.Toggle
-        variant="outline-primary"
-        aria-label={`Sort options. Currently sorted by: ${currentSortLabel}`}
-      >
+      <Dropdown.Toggle variant="outline-primary">
         <Stack direction="horizontal" gap={2}>
           <Icon color="primary" src={SwapVert} />
           {currentSortLabel}
@@ -94,7 +88,6 @@ const SortDropdown: FC = () => {
             key={key}
             active={sortOrder === key}
             eventKey={key}
-            aria-label={`Sort by ${label}`}
           >
             {label}
           </Dropdown.Item>
