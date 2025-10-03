@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTable, DataTableContext,
   CheckboxFilter,
@@ -10,8 +11,10 @@ import {
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import SortDropdown from './SortDropdown';
 import SearchFilter from './SearchFilter';
+import messages from './messages';
 
 const TableControlBar = () => {
+  const intl = useIntl();
   const {
     columns,
     setAllFilters,
@@ -24,6 +27,11 @@ const TableControlBar = () => {
     .filter((column) => column.Filter === TextFilter)
     .map((column) => column.Header);
 
+  const getSearchPlaceholder = () => intl.formatMessage(messages['authz.libraries.team.table.search'], {
+    firstField: columnTextFilterHeaders[0] || 'field',
+    secondField: columnTextFilterHeaders[1] || 'field',
+  });
+
   return (
     <Stack className="pgn__data-table-status-bar mb-3 flex-wrap" gap={2} direction="horizontal">
 
@@ -35,9 +43,10 @@ const TableControlBar = () => {
         if (column.Filter === TextFilter) {
           return (
             <SearchFilter
+              key={column.id || column.accessor}
               filterValue={column.filterValue}
               setFilter={column.setFilter}
-              placeholder={`Search by ${columnTextFilterHeaders.map((header) => header).join(' or ')}`}
+              placeholder={getSearchPlaceholder()}
             />
           );
         }
