@@ -61,7 +61,7 @@ const TableControlBar = () => {
         variant="link"
         onClick={() => setAllFilters([])}
       >
-        Clear filters
+        {intl.formatMessage(messages['authz.libraries.team.table.clearFilters'])}
       </Button>
       )}
 

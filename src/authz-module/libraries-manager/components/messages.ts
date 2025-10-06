@@ -81,6 +81,11 @@ const messages = defineMessages({
     defaultMessage: 'Oldest',
     description: 'Sort by oldest',
   },
+  'authz.libraries.team.table.clearFilters': {
+    id: 'authz.libraries.team.table.clearFilters',
+    defaultMessage: 'Clear filters',
+    description: 'Button to clear all active filters in the table',
+  },
 });
 
 export default messages;
