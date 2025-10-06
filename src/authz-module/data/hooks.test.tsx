@@ -61,7 +61,15 @@ describe('useTeamMembers', () => {
       get: jest.fn().mockResolvedValue({ data: { results: mockMembers } }),
     });
 
-    const { result } = renderHook(() => useTeamMembers('lib:123'), {
+    const mockQuerySettings = {
+      roles: null,
+      search: null,
+      ordering: null,
+      pageSize: 10,
+      pageIndex: 0,
+    };
+
+    const { result } = renderHook(() => useTeamMembers('lib:123', mockQuerySettings), {
       wrapper: createWrapper(),
     });
 
@@ -76,7 +84,15 @@ describe('useTeamMembers', () => {
       get: jest.fn().mockRejectedValue(new Error('API failure')),
     });
 
-    const { result } = renderHook(() => useTeamMembers('lib:123'), {
+    const mockQuerySettings = {
+      roles: null,
+      search: null,
+      ordering: null,
+      pageSize: 10,
+      pageIndex: 0,
+    };
+
+    const { result } = renderHook(() => useTeamMembers('lib:123', mockQuerySettings), {
       wrapper: createWrapper(),
     });
 

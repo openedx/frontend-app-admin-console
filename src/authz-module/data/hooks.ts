@@ -11,15 +11,15 @@ import {
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
-  teamMembers: (object: string, querySettings: QuerySettings) => [
+  teamMembers: (object: string, querySettings?: QuerySettings) => [
     ...authzQueryKeys.all,
     'teamMembers',
     object,
-    querySettings.roles,
-    querySettings.search,
-    querySettings.ordering,
-    querySettings.pageSize,
-    querySettings.pageIndex,
+    querySettings?.roles ?? null,
+    querySettings?.search ?? null,
+    querySettings?.ordering ?? null,
+    querySettings?.pageSize ?? 10,
+    querySettings?.pageIndex ?? 0,
   ] as const,
   permissionsByRole: (scope: string) => [...authzQueryKeys.all, 'permissionsByRole', scope] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
