@@ -10,6 +10,7 @@ import { useLibrary, useTeamMembers } from '../data/hooks';
 import { buildPermissionsByRoleMatrix } from './utils';
 
 import messages from './messages';
+import AddNewMemberRoleTrigger from './components/AssignNewRoleTrigger';
 
 const LibrariesUserManager = () => {
   const intl = useIntl();
@@ -42,7 +43,13 @@ const LibrariesUserManager = () => {
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
-        actions={[]}
+        actions={user
+          ? [<AddNewMemberRoleTrigger
+              username={user.username}
+              libraryId={libraryId}
+              currentUserRoles={userRoles.map(role => role.role)}
+          />]
+          : []}
       >
         <Container className="bg-light-200 p-5">
           {isLoading ? <Skeleton count={2} height={200} /> : null}
