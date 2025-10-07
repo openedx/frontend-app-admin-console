@@ -51,6 +51,11 @@ const messages = defineMessages({
     defaultMessage: 'Save',
     description: 'Libraries AuthZ save button title',
   },
+  'libraries.authz.manage.assign.role.success': {
+    id: 'libraries.authz.manage.assign.role.success',
+    defaultMessage: 'Role added successfully.',
+    description: 'Libraries AuthZ assign role success message',
+  },
 });
 
 export default messages;

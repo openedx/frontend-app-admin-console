@@ -16,7 +16,7 @@ const LibrariesUserManager = () => {
   const intl = useIntl();
   const { username } = useParams();
   const {
-    libraryId, permissions, roles, resources,
+    libraryId, permissions, roles, resources, canManageTeam,
   } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
@@ -43,7 +43,7 @@ const LibrariesUserManager = () => {
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
-        actions={user
+        actions={user && canManageTeam
           ? [<AddNewMemberRoleTrigger
               username={user.username}
               libraryId={libraryId}

@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Button, useToggle } from '@openedx/paragon';
+import { Button, Toast, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
@@ -21,6 +21,7 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
 }) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { roles } = useLibraryAuthZ();
 
   const [newRole, setNewRole] = useState<string>('');
@@ -36,6 +37,11 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
 
     assignTeamMembersRole({ data }, {
       onSuccess: () => {
+        setToastMessage(
+          intl.formatMessage(
+            messages['libraries.authz.manage.assign.role.success'],
+          ),
+        );
         close();
         setNewRole('');
       },
@@ -62,6 +68,15 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
           selectedRole={newRole}
           handleChangeSelectedRole={(e) => setNewRole(e.target.value)}
         />
+      )}
+
+      {toastMessage && (
+        <Toast
+          onClose={() => setToastMessage(null)}
+          show={!!toastMessage}
+        >
+          {toastMessage}
+        </Toast>
       )}
     </>
   );
