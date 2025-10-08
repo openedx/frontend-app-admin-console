@@ -1,5 +1,5 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { LibraryMetadata, TeamMember, TeamRole } from '@src/types';
+import { LibraryMetadata, TeamMember } from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
@@ -35,11 +35,6 @@ export const addTeamMembers = async (
 ): Promise<PutTeamMembersResponse> => {
   const res = await getAuthenticatedHttpClient().put(getApiUrl('/api/authz/v1/roles/users'), data);
   return camelCaseObject(res.data);
-};
-
-export const getTeamRoles = async (libraryId: string): Promise<TeamRole[]> => {
-  const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/?scope=${libraryId}`));
-  return data;
 };
 
 // TODO: this should be replaced in the future with Console API
