@@ -13,12 +13,12 @@ export type PermissionsByRole = {
   permissions: string[];
   userCount: number;
 };
-export interface PutTeamMembersResponse {
+export interface PutAssignTeamMembersRoleResponse {
   completed: { user: string; status: string }[];
-  errors: { user: string; error: string }[];
+  errors: { userIdentifier: string; error: string }[];
 }
 
-export interface AddTeamMembersRequest {
+export interface AssignTeamMembersRoleRequest {
   users: string[];
   role: string;
   scope: string;
@@ -30,10 +30,10 @@ export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   return camelCaseObject(data.results);
 };
 
-export const addTeamMembers = async (
-  data: AddTeamMembersRequest,
-): Promise<PutTeamMembersResponse> => {
-  const res = await getAuthenticatedHttpClient().put(getApiUrl('/api/authz/v1/roles/users'), data);
+export const assignTeamMembersRole = async (
+  data: AssignTeamMembersRoleRequest,
+): Promise<PutAssignTeamMembersRoleResponse> => {
+  const res = await getAuthenticatedHttpClient().put(getApiUrl('/api/authz/v1/roles/users/'), data);
   return camelCaseObject(res.data);
 };
 

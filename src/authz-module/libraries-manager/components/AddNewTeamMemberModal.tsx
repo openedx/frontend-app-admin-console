@@ -1,14 +1,17 @@
 import { FC } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  ActionRow, Button, Form, ModalDialog,
+  ActionRow, Form, Icon, ModalDialog,
   Stack,
+  StatefulButton,
 } from '@openedx/paragon';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
+import { SpinnerSimple } from '@openedx/paragon/icons';
 import messages from './messages';
 
 interface AddNewTeamMemberModalProps {
   isOpen: boolean;
+  isError: boolean;
   isLoading: boolean;
   formValues: {
     users: string;
@@ -20,7 +23,7 @@ interface AddNewTeamMemberModalProps {
 }
 
 const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
-  isOpen, isLoading, formValues, close, onSave, handleChangeForm,
+  isOpen, isError, isLoading, formValues, close, onSave, handleChangeForm,
 }) => {
   const intl = useIntl();
   const { roles } = useLibraryAuthZ();
@@ -50,19 +53,23 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
           <Form.Group controlId="users_list">
             <Form.Label>{intl.formatMessage(messages['libraries.authz.manage.add.member.users.label'])}</Form.Label>
             <Form.Control
+              isInvalid={isError}
               as="textarea"
               name="users"
               rows="3"
               value={formValues.users}
               onChange={(e) => handleChangeForm(e)}
+              style={{ color: isError && 'var(--pgn-color-form-feedback-invalid)' }}
             />
           </Form.Group>
 
           <Form.Group controlId="role_options">
             <Form.Label>{intl.formatMessage(messages['libraries.authz.manage.add.member.roles.label'])}</Form.Label>
             <Form.Control as="select" name="role" value={formValues.role} onChange={(e) => handleChangeForm(e)}>
-              <option value="" disabled>Select a role</option>
-              {roles.map(({ role }) => <option key={role}>{role}</option>)}
+              <option value="" disabled>
+                {intl.formatMessage(messages['libraries.authz.manage.add.member.select.default'])}
+              </option>
+              {roles.map((role) => <option key={role.role} value={role.role}>{role.name}</option>)}
             </Form.Control>
           </Form.Group>
         </Stack>
@@ -71,17 +78,22 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
       <ModalDialog.Footer>
         <ActionRow>
           <ModalDialog.CloseButton variant="tertiary" disabled={isLoading}>
-            {intl.formatMessage(messages['libraries.authz.manage.add.member.cancel.button'])}
+            {intl.formatMessage(messages['libraries.authz.manage.cancel.button'])}
           </ModalDialog.CloseButton>
-          <Button
+          <StatefulButton
             className="px-4"
+            labels={{
+              default: intl.formatMessage(messages['libraries.authz.manage.save.button']),
+              pending: intl.formatMessage(messages['libraries.authz.manage.saving.button']),
+            }}
+            icons={{
+              pending: <Icon src={SpinnerSimple} />,
+            }}
+            state={isLoading ? 'pending' : 'default'}
             onClick={() => onSave()}
-            disabled={!formValues.users || !formValues.role || isLoading}
-          >
-            {isLoading
-              ? intl.formatMessage(messages['libraries.authz.manage.add.member.saving.button'])
-              : intl.formatMessage(messages['libraries.authz.manage.add.member.save.button'])}
-          </Button>
+            disabledStates={['pending']}
+            disabled={!formValues.users || !formValues.role}
+          />
         </ActionRow>
       </ModalDialog.Footer>
     </ModalDialog>

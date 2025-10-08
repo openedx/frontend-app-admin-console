@@ -4,7 +4,9 @@ import {
 import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
 import {
-  addTeamMembers, AddTeamMembersRequest, getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
+  assignTeamMembersRole,
+  AssignTeamMembersRoleRequest,
+  getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
 } from './api';
 
 const authzQueryKeys = {
@@ -68,17 +70,15 @@ export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadat
  * It provides a mutation function to add users with specified roles to the library's team.
  *
  * @example
- * ```tsx
- * const { mutate: addTeamMember, isPending } = useAddTeamMember();
- * addTeamMember({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
- * ```
+ * const { mutate: assignTeamMembersRole } = useAssignTeamMembersRole();
+ * assignTeamMembersRole({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
  */
-export const useAddTeamMember = () => {
+export const useAssignTeamMembersRole = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ data }: {
-      data: AddTeamMembersRequest
-    }) => addTeamMembers(data),
+      data: AssignTeamMembersRoleRequest
+    }) => assignTeamMembersRole(data),
     onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scope) });
     },

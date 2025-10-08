@@ -3,7 +3,8 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, Toast, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
-import { useAddTeamMember } from '@src/authz-module/data/hooks';
+import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { PutAssignTeamMembersRoleResponse } from 'authz-module/data/api';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';
 
@@ -23,8 +24,9 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   const [isOpen, open, close] = useToggle(false);
   const [additionMessage, setAdditionMessage] = useState<string | null>(null);
   const [formValues, setFormValues] = useState(DEFAULT_FORM_VALUES);
+  const [isError, setIsError] = useState(false);
 
-  const { mutate: addTeamMember, isPending: isAddingNewTeamMember } = useAddTeamMember();
+  const { mutate: assignTeamMembersRole, isPending: isAssignTeamMembersRolePending } = useAssignTeamMembersRole();
 
   const handleChangeForm = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -34,6 +36,29 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
     }));
   };
 
+  const handleErrors = (errors: PutAssignTeamMembersRoleResponse['errors']) => {
+    setIsError(false);
+    const notFoundUsers = errors.filter(err => err.error === 'user_not_found').map(err => err.userIdentifier);
+
+    if (notFoundUsers.length) {
+      setIsError(true);
+      setFormValues((prev) => ({
+        ...prev,
+        users: prev.users
+          .split(',')
+          .map(user => user.trim())
+          .filter(user => notFoundUsers.includes(user))
+          .join(', '),
+      }));
+      setAdditionMessage((prevMessage) => (
+        `${prevMessage ? `${prevMessage} ` : ''}${intl.formatMessage(
+          messages['libraries.authz.manage.add.member.failure'],
+          { count: notFoundUsers.length },
+        )}`
+      ));
+    }
+  };
+
   const handleAddTeamMember = () => {
     const data = {
       users: formValues.users.split(',').map(user => user.trim()),
@@ -41,8 +66,10 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
       scope: libraryId,
     };
 
-    addTeamMember({ data }, {
+    assignTeamMembersRole({ data }, {
       onSuccess: (successData) => {
+        setAdditionMessage(null);
+
         if (successData.completed.length) {
           setAdditionMessage(
             intl.formatMessage(
@@ -53,13 +80,9 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
         }
 
         if (successData.errors.length) {
-          setAdditionMessage((prevMessage) => (
-            `${prevMessage ? `${prevMessage} ` : ''}${intl.formatMessage(
-              messages['libraries.authz.manage.add.member.failure'],
-              { count: successData.errors.length },
-            )}`
-          ));
+          handleErrors(successData.errors);
         } else {
+          setIsError(false);
           close();
           setFormValues(DEFAULT_FORM_VALUES);
         }
@@ -80,9 +103,10 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
       {isOpen && (
         <AddNewTeamMemberModal
           isOpen={isOpen}
+          isError={isError}
           close={close}
           onSave={handleAddTeamMember}
-          isLoading={isAddingNewTeamMember}
+          isLoading={isAssignTeamMembersRolePending}
           formValues={formValues}
           handleChangeForm={handleChangeForm}
         />
