@@ -17,18 +17,10 @@ export const libraryResourceTypes: ResourceMetadata[] = [
 ];
 
 export const libraryPermissions: PermissionMetadata[] = [
-  { key: 'create_library', resource: 'library', description: 'Allows the user to create new libraries.' },
-  { key: 'edit_library', resource: 'library', description: 'Allows the user to modify library settings and metadata.' },
-  { key: 'delete_library', resource: 'library', description: 'Allows the user to delete the library and all its contents.' },
-  { key: 'publish_library', resource: 'library', description: 'Publish the library (change from draft mode to published).' },
   { key: 'view_library', resource: 'library', description: 'View content, search, filter, and sort within the library.' },
-  {
-    key: 'manage_library_tags', resource: 'library', description: 'Add or remove tags from content.',
-  },
+  { key: 'manage_library_tags', resource: 'library', description: 'Add or remove tags from content.' },
 
-  { key: 'create_library_content', resource: 'library_content', description: 'Create new components or content units.' },
   { key: 'edit_library_content', resource: 'library_content', description: 'Edit content in draft mode' },
-  { key: 'delete_library_content', resource: 'library_content', description: 'Delete individual content (not collections).' },
   { key: 'publish_library_content', resource: 'library_content', description: 'Publish content, making it available for reuse' },
   { key: 'reuse_library_content', resource: 'library_content', description: 'Reuse published content within a course.' },
 
