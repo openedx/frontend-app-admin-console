@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
 import { usePermissionsByRole } from '@src/authz-module/data/hooks';
+import { CustomErrors } from '@src/constants';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -112,7 +113,7 @@ describe('LibraryAuthZProvider', () => {
           <TestComponent />
         </LibraryAuthZProvider>,
       );
-    }).toThrow('NoAccess');
+    }).toThrow(CustomErrors.NO_ACCESS);
   });
 
   it('provides context when user can view but not manage team', () => {
@@ -141,7 +142,7 @@ describe('LibraryAuthZProvider', () => {
           <TestComponent />
         </LibraryAuthZProvider>,
       );
-    }).toThrow('MissingLibrary');
+    }).toThrow(CustomErrors.NOT_FOUND);
   });
 
   it('throws error when useLibraryAuthZ is used outside provider', () => {
