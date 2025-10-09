@@ -37,7 +37,7 @@ export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>(
  *
  * @example
  * ```tsx
- * const { data: roles, isLoading, isError } = useTeamMembers('lib:123');
+ * const { data: roles } = usePermissionsByRole('lib:123');
  * ```
  */
 export const usePermissionsByRole = (scope: string) => useSuspenseQuery<PermissionsByRole[], Error>({
