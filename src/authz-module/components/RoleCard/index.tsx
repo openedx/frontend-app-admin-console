@@ -14,7 +14,7 @@ interface CardTitleProps {
 interface RoleCardProps extends CardTitleProps {
   objectName?: string | null;
   description: string;
-  showDelete?: boolean;
+  handleDelete?: () => void;
   permissionsByResource: any[];
 }
 
@@ -31,7 +31,7 @@ const CardTitle = ({ title, userCounter = null }: CardTitleProps) => (
 );
 
 const RoleCard = ({
-  title, objectName, description, showDelete, permissionsByResource, userCounter,
+  title, objectName, description, handleDelete, permissionsByResource, userCounter,
 }: RoleCardProps) => {
   const intl = useIntl();
 
@@ -41,7 +41,9 @@ const RoleCard = ({
         title={<CardTitle title={title} userCounter={userCounter} />}
         subtitle={(objectName && <span className="text-info-400 lead">{objectName}</span>) || ''}
         actions={
-          showDelete && <IconButton variant="danger" alt="Delete role action" src={Delete} />
+          handleDelete && (
+            <IconButton variant="danger" onClick={handleDelete} alt="Delete role action" src={Delete} />
+          )
         }
       />
       <Card.Section>

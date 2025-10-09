@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
@@ -7,18 +7,20 @@ import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
 import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
-import { useLibrary, useTeamMembers } from '../data/hooks';
+import { useLibrary, useRevokeUserRoles, useTeamMembers } from '../data/hooks';
 import { buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
 
 const LibrariesUserManager = () => {
   const intl = useIntl();
+  const navigate = useNavigate();
   const { username } = useParams();
   const {
     libraryId, permissions, roles, resources, canManageTeam,
   } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
+  const { mutate: revokeUserRoles } = useRevokeUserRoles();
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageManageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
   const querySettings = {
@@ -33,6 +35,8 @@ const LibrariesUserManager = () => {
   const { data: teamMember, isLoading: isLoadingTeamMember } = useTeamMembers(libraryId, querySettings);
   const user = teamMember?.results?.find(member => member.username === username);
 
+  const teamMembersPath = `/authz/${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
+
   const userRoles = useMemo(() => {
     const assignedRoles = roles.filter(role => user?.roles.includes(role.role));
     return buildPermissionMatrixByRole({
@@ -40,11 +44,30 @@ const LibrariesUserManager = () => {
     });
   }, [roles, user?.roles, permissions, resources, intl]);
 
+  const handleRevokeUserRole = (role: string) => {
+    if (user) {
+      const data = {
+        users: user.username,
+        role,
+        scope: libraryId,
+      };
+
+      revokeUserRoles({ data });
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoadingTeamMember && !userRoles.length) {
+      navigate(teamMembersPath);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRoles, libraryId]);
+
   return (
     <div className="authz-libraries">
       <AuthZLayout
         context={{ id: libraryId, title: library.title, org: library.org }}
-        navLinks={[{ label: rootBreadcrumb }, { label: pageManageTitle, to: `/authz/${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}` }]}
+        navLinks={[{ label: rootBreadcrumb }, { label: pageManageTitle, to: teamMembersPath }]}
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
@@ -64,7 +87,7 @@ const LibrariesUserManager = () => {
               title={role.name}
               objectName={library.title}
               description={role.description}
-              showDelete
+              handleDelete={() => handleRevokeUserRole(role.role)}
               permissionsByResource={role.resources as any[]}
             />
           ))}
