@@ -132,7 +132,7 @@ describe('usePermissionsByRole', () => {
     ];
 
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: mockRoles }),
+      get: jest.fn().mockResolvedValue({ data: { results: mockRoles } }),
     });
 
     const wrapper = createWrapper();

@@ -16,7 +16,7 @@ export type PermissionsByRole = {
 
 // TODO: replece api path once is created
 export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
-  const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users?scope=${object}`));
+  const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
   return camelCaseObject(data.results);
 };
 
@@ -32,8 +32,8 @@ export const getLibrary = async (libraryId: string): Promise<LibraryMetadata> =>
 };
 
 export const getPermissionsByRole = async (scope: string): Promise<PermissionsByRole[]> => {
-  const url = new URL(getApiUrl('/api/authz/v1/roles'));
+  const url = new URL(getApiUrl('/api/authz/v1/roles/'));
   url.searchParams.append('scope', scope);
   const { data } = await getAuthenticatedHttpClient().get(url);
-  return camelCaseObject(data);
+  return camelCaseObject(data.results);
 };
