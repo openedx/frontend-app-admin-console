@@ -35,7 +35,7 @@ const LibrariesUserManager = () => {
     sortBy: null,
   };
 
-  const [roleToDelete, setRoleToDelete] = useState('');
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const { handleShowToast, handleDiscardToast } = useToastManager();
 
@@ -52,34 +52,46 @@ const LibrariesUserManager = () => {
   }, [roles, user?.roles, permissions, resources, intl]);
 
   const handleCloseConfirmDeletionModal = () => {
-    setRoleToDelete('');
+    setRoleToDelete(null);
     setShowConfirmDeletionModal(false);
   };
 
-  const handleShowConfirmDeletionModal = (role: Pick<Role, 'name' | 'role'>) => {
+  const handleShowConfirmDeletionModal = (role: Role) => {
+    if (isRevokingUserRole) { return; }
+
     handleDiscardToast();
-    setRoleToDelete(role.name);
+    setRoleToDelete(role);
     setShowConfirmDeletionModal(true);
   };
 
-  const handleRevokeUserRole = (role: string) => {
-    if (user) {
-      const data = {
-        users: user.username,
-        role: roles.find(r => r.name === role)!.role,
-        scope: libraryId,
-      };
+  const handleRevokeUserRole = () => {
+    if (!user || !roleToDelete) { return; }
 
-      revokeUserRoles({ data }, {
-        onSuccess: () => {
-          handleShowToast(intl.formatMessage(messages['library.authz.team.remove.user.toast.success.description'], {
-            role,
-            rolesCount: userRoles.length - 1,
-          }));
-          handleCloseConfirmDeletionModal();
-        },
-      });
-    }
+    const data = {
+      users: user.username,
+      role: roleToDelete.role,
+      scope: libraryId,
+    };
+
+    revokeUserRoles({ data }, {
+      onSuccess: () => {
+        const remainingRolesCount = userRoles.length - 1;
+        handleShowToast(intl.formatMessage(
+          messages['library.authz.team.remove.user.toast.success.description'],
+          {
+            role: roleToDelete.name,
+            rolesCount: remainingRolesCount,
+          },
+        ));
+        handleCloseConfirmDeletionModal();
+      },
+      onError: (error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to revoke user role:', error);
+        handleCloseConfirmDeletionModal();
+        // Could add error toast here if needed
+      },
+    });
   };
 
   useEffect(() => {
@@ -87,19 +99,19 @@ const LibrariesUserManager = () => {
       navigate(teamMembersPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userRoles, libraryId]);
+  }, [userRoles.length]);
 
   return (
     <div className="authz-libraries">
       <ConfirmDeletionModal
         isOpen={showConfirmDeletionModal}
         close={handleCloseConfirmDeletionModal}
-        onSave={() => handleRevokeUserRole(roleToDelete)}
+        onSave={handleRevokeUserRole}
         isDeleting={isRevokingUserRole}
         context={{
           userName: user?.username || '',
           scope: library.title,
-          role: roleToDelete,
+          role: roleToDelete?.name || '',
           rolesCount: userRoles.length,
         }}
       />
