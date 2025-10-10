@@ -4,6 +4,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
+import { useToastManager } from 'authz-module/libraries-manager/ToastManagerContext';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
@@ -36,6 +37,7 @@ const LibrariesUserManager = () => {
 
   const [roleToDelete, setRoleToDelete] = useState('');
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
+  const { handleShowToast, handleDiscardToast } = useToastManager();
 
   const { data: teamMember, isLoading: isLoadingTeamMember } = useTeamMembers(libraryId, querySettings);
   const user = teamMember?.results?.find(member => member.username === username);
@@ -50,11 +52,12 @@ const LibrariesUserManager = () => {
   }, [roles, user?.roles, permissions, resources, intl]);
 
   const handleCloseConfirmDeletionModal = () => {
-    setShowConfirmDeletionModal(false);
     setRoleToDelete('');
+    setShowConfirmDeletionModal(false);
   };
 
   const handleShowConfirmDeletionModal = (role: Pick<Role, 'name' | 'role'>) => {
+    handleDiscardToast();
     setRoleToDelete(role.name);
     setShowConfirmDeletionModal(true);
   };
@@ -69,6 +72,10 @@ const LibrariesUserManager = () => {
 
       revokeUserRoles({ data }, {
         onSuccess: () => {
+          handleShowToast(intl.formatMessage(messages['library.authz.team.remove.user.toast.success.description'], {
+            role,
+            rolesCount: userRoles.length - 1,
+          }));
           handleCloseConfirmDeletionModal();
         },
       });
