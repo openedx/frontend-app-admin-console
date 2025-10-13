@@ -89,7 +89,11 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
       },
     });
   };
-
+  const handleClose = () => {
+    setFormValues(DEFAULT_FORM_VALUES);
+    setIsError(false)
+    close();
+  }
   return (
     <>
       <Button
@@ -104,7 +108,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
         <AddNewTeamMemberModal
           isOpen={isOpen}
           isError={isError}
-          close={close}
+          close={handleClose}
           onSave={handleAddTeamMember}
           isLoading={isAssignTeamMembersRolePending}
           formValues={formValues}
