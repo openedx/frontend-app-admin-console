@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Container } from '@openedx/paragon';
+import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
@@ -21,7 +21,7 @@ const LibrariesUserManager = () => {
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageManageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
 
-  const { data: teamMembers } = useTeamMembers(libraryId);
+  const { data: teamMembers, isLoading } = useTeamMembers(libraryId);
   const user = teamMembers?.find(member => member.username === username);
   const userRoles = useMemo(() => {
     const assignedRoles = roles.filter(role => user?.roles.includes(role.role))
@@ -45,6 +45,7 @@ const LibrariesUserManager = () => {
         actions={[]}
       >
         <Container className="bg-light-200 p-5">
+          {isLoading ? <Skeleton count={2} height={200} /> : null}
           {userRoles && userRoles.map(role => (
             <RoleCard
               key={`${role}-${username}`}
