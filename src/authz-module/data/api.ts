@@ -3,6 +3,14 @@ import { LibraryMetadata, TeamMember } from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
+export interface QuerySettings {
+  roles: string | null;
+  search: string | null;
+  ordering: string | null;
+  pageSize: number;
+  pageIndex: number;
+}
+
 export interface GetTeamMembersResponse {
   members: TeamMember[];
   totalCount: number;
@@ -24,8 +32,23 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
-export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
-  const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
+// TODO: replece api path once is created
+export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<TeamMember[]> => {
+  const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
+
+  if (querySettings.roles) {
+    url.searchParams.set('roles', querySettings.roles);
+  }
+  if (querySettings.search) {
+    url.searchParams.set('search', querySettings.search);
+  }
+  if (querySettings.ordering) {
+    url.searchParams.set('ordering', querySettings.ordering);
+  }
+  url.searchParams.set('page_size', querySettings.pageSize.toString());
+  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+
+  const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data.results);
 };
 

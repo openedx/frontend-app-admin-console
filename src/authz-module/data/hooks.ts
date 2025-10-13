@@ -6,12 +6,21 @@ import { LibraryMetadata, TeamMember } from '@src/types';
 import {
   assignTeamMembersRole,
   AssignTeamMembersRoleRequest,
-  getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
+  getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole, QuerySettings,
 } from './api';
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
-  teamMembers: (object: string) => [...authzQueryKeys.all, 'teamMembers', object] as const,
+  teamMembers: (object: string, querySettings: QuerySettings) => [
+    ...authzQueryKeys.all,
+    'teamMembers',
+    object,
+    querySettings.roles,
+    querySettings.search,
+    querySettings.ordering,
+    querySettings.pageSize,
+    querySettings.pageIndex,
+  ] as const,
   permissionsByRole: (scope: string) => [...authzQueryKeys.all, 'permissionsByRole', scope] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
 };
@@ -21,17 +30,24 @@ const authzQueryKeys = {
  * It retrieves the full list of members who have access to the given scope.
  *
  * @param object - The unique identifier of the object/scope
+ * @param querySettings - Optional query parameters for filtering, sorting, and pagination
  *
  * @example
  * ```tsx
- * const { data: teamMembers, isLoading, isError } = useTeamMembers('lib:123');
+ * const { data: teamMembers, isLoading, isError } = useTeamMembers('lib:123', querySettings);
  * ```
  */
-export const useTeamMembers = (object: string) => useQuery<TeamMember[], Error>({
-  queryKey: authzQueryKeys.teamMembers(object),
-  queryFn: () => getTeamMembers(object),
-  staleTime: 1000 * 60 * 30, // refetch after 30 minutes
-});
+export const useTeamMembers = (object: string, querySettings: QuerySettings) => {
+  const queryKey = authzQueryKeys.teamMembers(object, querySettings);
+
+  return useQuery<TeamMember[], Error>({
+    queryKey,
+    queryFn: () => getTeamMembers(object, querySettings),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!object,
+    refetchOnWindowFocus: false,
+  });
+};
 
 /**
  * React Query hook to fetch all the roles for the specific object/scope.
