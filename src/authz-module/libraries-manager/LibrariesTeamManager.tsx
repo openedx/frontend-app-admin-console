@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Container, Tab, Tabs } from '@openedx/paragon';
+import {
+  Container, Skeleton, Tab, Tabs,
+} from '@openedx/paragon';
 import { useLibrary } from '@src/authz-module/data/hooks';
 import { useLocation } from 'react-router-dom';
 import TeamTable from './components/TeamTable';
@@ -52,6 +54,7 @@ const LibrariesTeamManager = () => {
           </Tab>
           <Tab eventKey="roles" title={intl.formatMessage(messages['library.authz.tabs.roles'])}>
             <Container className="p-5">
+              {!libraryRoles ? <Skeleton count={2} height={200} /> : null}
               {libraryRoles && libraryRoles.map(role => (
                 <RoleCard
                   key={`${role}-description`}
