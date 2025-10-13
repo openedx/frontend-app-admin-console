@@ -44,18 +44,12 @@ const NameCell = ({ row }: CellProps) => {
   return row.original.username;
 };
 
-const RolesCell = ({ row }: CellProps) => (row.original.username === SKELETON_ROWS[0].username ? (
-  <Skeleton width="80px" />
-) : (
-  row.original.roles.map((role) => (
-    <Chip key={`${row.original.username}-role-${role}`}>{role}</Chip>
-  ))
-));
-
 const TeamTable = () => {
   const intl = useIntl();
-  const { libraryId, canManageTeam, username } = useLibraryAuthZ();
-
+  const {
+    libraryId, canManageTeam, username, roles,
+  } = useLibraryAuthZ();
+  const roleLabels = roles.reduce((acc, role) => ({ ...acc, [role.role]: role.name }), {} as Record<string, string>);
   // TODO: Display error in the notification system
   const {
     data: teamMembers, isLoading, isError,
@@ -107,7 +101,14 @@ const TeamTable = () => {
           {
             Header: intl.formatMessage(messages['library.authz.team.table.roles']),
             accessor: 'roles',
-            Cell: RolesCell,
+            // eslint-disable-next-line react/no-unstable-nested-components
+            Cell: ({ row }: CellProps) => (row.original.username === SKELETON_ROWS[0].username ? (
+              <Skeleton width="80px" />
+            ) : (
+              row.original.roles.map((role) => (
+                <Chip key={`${row.original.username}-role-${role}`}>{roleLabels[role]}</Chip>
+              ))
+            )),
           },
         ]
       }
