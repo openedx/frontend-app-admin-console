@@ -18,6 +18,7 @@ export const libraryResourceTypes: ResourceMetadata[] = [
 
 export const libraryPermissions: PermissionMetadata[] = [
   { key: 'view_library', resource: 'library', description: 'View content, search, filter, and sort within the library.' },
+  { key: 'delete_library', resource: 'library', description: 'Allows the user to delete the library and all its contents.' },
   { key: 'manage_library_tags', resource: 'library', description: 'Add or remove tags from content.' },
 
   { key: 'edit_library_content', resource: 'library_content', description: 'Edit content in draft mode' },
