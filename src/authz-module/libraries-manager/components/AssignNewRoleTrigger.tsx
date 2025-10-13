@@ -4,7 +4,7 @@ import { Button, Toast, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
-import { useAssignTeamMembersRole } from 'authz-module/data/hooks';
+import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
 import AssignNewRoleModal from './AssignNewRoleModal';
 
@@ -28,12 +28,18 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
 
   const { mutate: assignTeamMembersRole, isPending: isAssignTeamMembersRolePending } = useAssignTeamMembersRole();
 
-  const handleAddTeamMember = () => {
+  const handleAddRole = () => {
     const data = {
       users: [username],
       role: newRole,
       scope: libraryId,
     };
+
+    if (currentUserRoles.includes(newRole)) {
+      close();
+      setNewRole('');
+      return;
+    }
 
     assignTeamMembersRole({ data }, {
       onSuccess: () => {
@@ -62,11 +68,12 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
         <AssignNewRoleModal
           isOpen={isOpen}
           close={close}
-          onSave={handleAddTeamMember}
+          onSave={handleAddRole}
           isLoading={isAssignTeamMembersRolePending}
-          roleOptions={roles.filter(role => !currentUserRoles.includes(role.role))}
+          roleOptions={roles}
           selectedRole={newRole}
           handleChangeSelectedRole={(e) => setNewRole(e.target.value)}
+
         />
       )}
 
