@@ -92,7 +92,7 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
             state={isLoading ? 'pending' : 'default'}
             onClick={() => onSave()}
             disabledStates={['pending']}
-            disabled={!formValues.users || !formValues.role}
+            disabled={isLoading || !formValues.users || !formValues.role}
           />
         </ActionRow>
       </ModalDialog.Footer>

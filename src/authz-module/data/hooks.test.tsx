@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
-  useLibrary, usePermissionsByRole, useTeamMembers, useAddTeamMember,
+  useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -158,7 +158,7 @@ describe('usePermissionsByRole', () => {
     }
   });
 
-  describe('useAddTeamMember', () => {
+  describe('useAssignTeamMembersRole', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -182,7 +182,7 @@ describe('usePermissionsByRole', () => {
         put: jest.fn().mockResolvedValue({ data: mockResponse }),
       });
 
-      const { result } = renderHook(() => useAddTeamMember(), {
+      const { result } = renderHook(() => useAssignTeamMembersRole(), {
         wrapper: createWrapper(),
       });
 
@@ -207,7 +207,7 @@ describe('usePermissionsByRole', () => {
         put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
       });
 
-      const { result } = renderHook(() => useAddTeamMember(), {
+      const { result } = renderHook(() => useAssignTeamMembersRole(), {
         wrapper: createWrapper(),
       });
 

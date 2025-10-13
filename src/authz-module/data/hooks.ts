@@ -66,8 +66,8 @@ export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadat
 });
 
 /**
- * React Query hook to add new team members to a specific library.
- * It provides a mutation function to add users with specified roles to the library's team.
+ * React Query hook to add new team members to a specific scope or manage the corresponding roles.
+ * It provides a mutation function to add users with specified roles to the team or assign new roles.
  *
  * @example
  * const { mutate: assignTeamMembersRole } = useAssignTeamMembersRole();

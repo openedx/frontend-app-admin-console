@@ -3,8 +3,9 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, Toast, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
-import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import { PutAssignTeamMembersRoleResponse } from 'authz-module/data/api';
+import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { RoleOperationErrorStatus } from '@src/authz-module/constants';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';
 
@@ -38,7 +39,8 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
 
   const handleErrors = (errors: PutAssignTeamMembersRoleResponse['errors']) => {
     setIsError(false);
-    const notFoundUsers = errors.filter(err => err.error === 'user_not_found').map(err => err.userIdentifier);
+    const notFoundUsers = errors.filter(err => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
+      .map(err => err.userIdentifier);
 
     if (notFoundUsers.length) {
       setIsError(true);
@@ -91,9 +93,10 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   };
   const handleClose = () => {
     setFormValues(DEFAULT_FORM_VALUES);
-    setIsError(false)
+    setIsError(false);
     close();
-  }
+  };
+
   return (
     <>
       <Button

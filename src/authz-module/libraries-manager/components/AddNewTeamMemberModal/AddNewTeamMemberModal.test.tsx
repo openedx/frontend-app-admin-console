@@ -33,6 +33,7 @@ const defaultProps = {
 const mockRoles = [
   {
     role: 'instructor',
+    name: 'instructor',
     description: 'Can create and edit content',
     userCount: 3,
     objects: [
@@ -45,6 +46,7 @@ const mockRoles = [
   },
   {
     role: 'admin',
+    name: 'admin',
     description: 'Full access to the library',
     userCount: 1,
     objects: [
