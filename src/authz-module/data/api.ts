@@ -24,6 +24,17 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
+export interface PutAssignTeamMembersRoleResponse {
+  completed: { user: string; status: string }[];
+  errors: { user: string; error: string }[];
+}
+
+export interface AssignTeamMembersRoleRequest {
+  users: string[];
+  role: string;
+  scope: string;
+}
+
 // TODO: replece api path once is created
 export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
