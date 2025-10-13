@@ -1,12 +1,12 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
+import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
-import { useLibraryAuthZ } from '../context';
 
 // Mock the context module
-jest.mock('../context', () => {
-  const actual = jest.requireActual('../context');
+jest.mock('@src/authz-module/libraries-manager/context', () => {
+  const actual = jest.requireActual('@src/authz-module/libraries-manager/context');
   return {
     ...actual,
     useLibraryAuthZ: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock('../context', () => {
 });
 const mockedUseLibraryAuthZ = useLibraryAuthZ as jest.Mock;
 
-jest.mock('../../data/hooks', () => ({
+jest.mock('@src/authz-module/data/hooks', () => ({
   useTeamRoles: jest.fn(),
 }));
 

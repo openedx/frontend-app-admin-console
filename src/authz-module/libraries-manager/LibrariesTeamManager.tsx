@@ -4,9 +4,9 @@ import { useLibrary } from '@src/authz-module/data/hooks';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
+import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
 
 import messages from './messages';
-import AddNewTeamMemberTrigger from './components/AddNewTeamMemberTrigger';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();

@@ -2,14 +2,14 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
-import { useAddTeamMember } from '@src/authz-module/data/hooks';
+import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
 
 const mockMutate = jest.fn();
 
 // Mock the hooks module
 jest.mock('@src/authz-module/data/hooks', () => ({
-  useAddTeamMember: jest.fn(),
+  useAssignTeamMembersRole: jest.fn(),
 }));
 
 jest.mock('./AddNewTeamMemberModal', () => {
@@ -50,7 +50,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAddTeamMember as jest.Mock).mockReturnValue({
+    (useAssignTeamMembersRole as jest.Mock).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
       isError: false,
@@ -272,7 +272,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
 
     // Mock loading state
-    (useAddTeamMember as jest.Mock).mockReturnValue({
+    (useAssignTeamMembersRole as jest.Mock).mockReturnValue({
       mutate: mockMutate,
       isPending: true,
       isError: false,
