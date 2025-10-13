@@ -4,7 +4,7 @@ import {
   ActionRow, Button, Form, ModalDialog,
 } from '@openedx/paragon';
 import { Role } from 'types';
-import messages from './messages';
+import messages from '../messages';
 
 interface AssignNewRoleModalProps {
   isOpen: boolean;

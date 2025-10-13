@@ -5,7 +5,7 @@ import { Plus } from '@openedx/paragon/icons';
 
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
-import messages from './messages';
+import messages from '../messages';
 import AssignNewRoleModal from './AssignNewRoleModal';
 
 interface AssignNewRoleTriggerProps {

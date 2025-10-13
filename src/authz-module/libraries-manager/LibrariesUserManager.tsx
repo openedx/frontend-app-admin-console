@@ -6,11 +6,11 @@ import { ROUTES } from '@src/authz-module/constants';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
+import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
 import { useLibrary, useTeamMembers } from '../data/hooks';
 import { buildPermissionsByRoleMatrix } from './utils';
 
 import messages from './messages';
-import AddNewMemberRoleTrigger from './components/AssignNewRoleTrigger';
 
 const LibrariesUserManager = () => {
   const intl = useIntl();
@@ -44,7 +44,7 @@ const LibrariesUserManager = () => {
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
         actions={user && canManageTeam
-          ? [<AddNewMemberRoleTrigger
+          ? [<AssignNewRoleTrigger
               username={user.username}
               libraryId={libraryId}
               currentUserRoles={userRoles.map(role => role.role)}
