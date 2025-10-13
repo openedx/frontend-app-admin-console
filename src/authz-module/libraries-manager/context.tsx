@@ -9,8 +9,6 @@ import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
 
 const LIBRARY_TEAM_PERMISSIONS = ['view_library_team', 'manage_library_team'];
-// Note: This value can change in the future
-const LIBRARY_AUTHZ_SCOPE = '*';
 
 export type AppContextType = {
   authenticatedUser: {
@@ -51,7 +49,7 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
     throw new Error('NoAccess');
   }
 
-  const { data: libraryRoles } = usePermissionsByRole(LIBRARY_AUTHZ_SCOPE);
+  const { data: libraryRoles } = usePermissionsByRole(libraryId);
   const roles = libraryRoles.map(role => ({
     ...role,
     ...libraryRolesMetadata.find(r => r.role === role.role),
