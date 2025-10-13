@@ -1,6 +1,18 @@
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
 import actionMessages from '../components/RoleCard/messages';
 
+/**
+ * Builds a permission matrix for a role.
+ *
+ * Builds a permission matrix grouped by resource, mapping each action to its display label
+ * and enabled/disabled state based on the role's allowed permissions.
+ *
+ * @param rolePermissions - Array of permission keys allowed for the current role.
+ * @param permissions - Permissions metadata.
+ * @param resources - Resources metadata.
+ * @param intl - the i18n function to enable label translations.
+ * @returns An array of permission groupings by resource with action-level details.
+ */
 const buildPermissionsByRoleMatrix = ({
   rolePermissions, permissions, resources, intl,
 }) => {
