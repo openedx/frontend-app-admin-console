@@ -8,22 +8,22 @@ const PermissionTable = ({ permissionsTable, roles }) => (
       <tr>
         <th className='bg-light-100'></th>
         {roles.map(role => (
-          <th key={role.name} className="text-center bg-light-100">{role.name}</th>
+          <th key={role.name} className="text-center bg-light-100 py-3">{role.name}</th>
         ))}
       </tr>
     </thead>
     <tbody>
       {permissionsTable.map(resourceGroup => (
         <>
-          <tr className="bg-info-100 text-primary lead">
-            <td colSpan={roles.length + 1} className="text-start py-3">
+          <tr className="bg-info-100 text-primary">
+            <td colSpan={roles.length + 1} className="text-start py-3 px-4">
               <strong>{resourceGroup.resourceLabel}</strong>
             </td>
           </tr>
           {
             resourceGroup.permissions.map(permission => (
               <tr key={permission.key} className='border-top'>
-                <td className="text-start d-flex align-items-center">{
+                <td className="text-start d-flex align-items-center small px-4 py-3">{
                   <Icon className="d-inline-block mr-2" size="sm" src={actionsDictionary[permission.actionKey]} />}
                   {permission.label}
                 </td>
