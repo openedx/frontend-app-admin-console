@@ -3,6 +3,23 @@ import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
 import actionMessages from '../components/RoleCard/messages';
 import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 
+/**
+ * Derives the localized label and action key for a given permission.
+ *
+ * This function attempts to extract a known `actionKey` from the permission's key,
+ * and uses that to construct an internationalized label using `intl.formatMessage`.
+ * If a label is already defined in the permission metadata, that is returned as-is.
+ *
+ * Special handling is applied for action keys like `'tag'` and `'team'`, which are
+ * normalized to `'manage'` and given a custom resource string for translation.
+ *
+ * @param permission - The permission metadata, typically containing a key and optional label.
+ * @param intl - The `IntlShape` object used to generate localized labels.
+ *
+ * @returns An object containing:
+ * - `label`: The human-readable, localized label for the permission.
+ * - `actionKey`: A string representing icon to be displayed (e.g., `'Read'`, `'Edit'`), or `undefined` if not matched.
+ */
 function getPermissionMetadata(
   permission: PermissionMetadata,
   intl: IntlShape,
@@ -83,6 +100,20 @@ type PermissionMatrix = {
     roles: Record<string, boolean>;
   }[];
 }[];
+
+/**
+ * Builds a permission matrix from the given roles, permissions, and resources.
+ *
+ * The matrix groups permissions under their respective resources and maps
+ * each permission to which roles have access to it.
+ *
+ * @param roles - List of roles, each containing a list of granted permission keys.
+ * @param permissions - Metadata describing each permission, including its associated resource.
+ * @param resources - List of resource metadata used to group permissions.
+ * @param intl - The internationalization object used to localize permission labels.
+ *
+ * @returns A permission matrix grouped by resource, with role mappings per permission.
+ */
 
 export function buildPermissionMatrix(
   roles: Role[],
