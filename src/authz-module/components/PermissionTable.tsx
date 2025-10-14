@@ -1,12 +1,19 @@
-import { Check, Close } from "@openedx/paragon/icons";
-import { actionsDictionary } from "./RoleCard/constants";
-import { Icon } from "@openedx/paragon";
+import { Check, Close } from '@openedx/paragon/icons';
+import { Icon } from '@openedx/paragon';
+import { Role } from '@src/types';
+import { PermissionMatrix } from '@src/authz-module/libraries-manager/utils';
+import { actionsDictionary } from './RoleCard/constants';
 
-const PermissionTable = ({ permissionsTable, roles }) => (
-  <table className="pgn__data-table bg-light-100">
+type PermissionTableProps = {
+  roles: Role[];
+  permissionsTable: PermissionMatrix;
+};
+
+const PermissionTable = ({ permissionsTable, roles }: PermissionTableProps) => (
+  <table className="pgn__data-table bg-light-100" data-testid="permissions-matrix">
     <thead>
       <tr>
-        <th className='bg-light-100'></th>
+        <th className="bg-light-100" aria-hidden="true" />
         {roles.map(role => (
           <th key={role.name} className="text-center bg-light-100 py-3">{role.name}</th>
         ))}
@@ -22,9 +29,9 @@ const PermissionTable = ({ permissionsTable, roles }) => (
           </tr>
           {
             resourceGroup.permissions.map(permission => (
-              <tr key={permission.key} className='border-top'>
-                <td className="text-start d-flex align-items-center small px-4 py-3">{
-                  <Icon className="d-inline-block mr-2" size="sm" src={actionsDictionary[permission.actionKey]} />}
+              <tr key={permission.key} className="border-top">
+                <td className="text-start d-flex align-items-center small px-4 py-3">
+                  <Icon className="d-inline-block mr-2" size="sm" src={actionsDictionary[permission.actionKey]} />
                   {permission.label}
                 </td>
                 {roles.map(role => (

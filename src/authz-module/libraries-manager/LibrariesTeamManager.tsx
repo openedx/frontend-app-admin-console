@@ -32,9 +32,9 @@ const LibrariesTeamManager = () => {
   })), [roles, permissions, resources, intl]);
 
   const permissionsTable = useMemo(() => {
-    if (!roles || !permissions || !resources) return [];
+    if (!roles || !permissions || !resources) { return []; }
     return buildPermissionMatrix(roles, permissions, resources, intl);
-  }, [roles, permissions, resources]);
+  }, [roles, permissions, resources, intl]);
 
   return (
     <div className="authz-libraries">
@@ -74,12 +74,13 @@ const LibrariesTeamManager = () => {
           </Tab>
           <Tab id="libraries-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['library.authz.tabs.permissions'])}>
             <Container className="p-5 container-mw-lg">
-              <PermissionTable permissionsTable={permissionsTable} roles={libraryRoles} />
+              {!permissionsTable ? <Skeleton count={2} height={200} />
+                : <PermissionTable permissionsTable={permissionsTable} roles={roles} />}
             </Container>
           </Tab>
         </Tabs>
       </AuthZLayout>
-    </div >
+    </div>
   );
 };
 

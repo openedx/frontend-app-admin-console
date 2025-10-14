@@ -1,7 +1,7 @@
 import { IntlShape } from '@edx/frontend-platform/i18n';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
+import { PermissionMetadata, ResourceMetadata, Role } from '@src/types';
 import actionMessages from '../components/RoleCard/messages';
-import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 
 /**
  * Derives the localized label and action key for a given permission.
@@ -18,13 +18,13 @@ import { PermissionMetadata, ResourceMetadata, Role } from 'types';
  *
  * @returns An object containing:
  * - `label`: The human-readable, localized label for the permission.
- * - `actionKey`: A string representing icon to be displayed (e.g., `'Read'`, `'Edit'`), or `undefined` if not matched.
+ * - `actionKey`: A string representing icon to be displayed (e.g., `'Read'`, `'Edit'`), or '' if not matched.
  */
 function getPermissionMetadata(
   permission: PermissionMetadata,
   intl: IntlShape,
-): { label: string; actionKey: string | undefined } {
-  const actionKey = actionKeys.find(action => permission.key.includes(action));
+): { label: string; actionKey: string } {
+  const actionKey = actionKeys.find(action => permission.key.includes(action)) || '';
   let messageKey = `authz.permissions.actions.${actionKey}`;
   let messageResource = '';
 
@@ -61,13 +61,12 @@ const buildPermissionsByRoleMatrix = ({
   const allowedPermissions = new Set(rolePermissions);
 
   permissions.forEach((permission) => {
-    const resourceLabel =
-      resources.find((r) => r.key === permission.resource)?.label ||
-      permission.resource;
+    const resourceLabel = resources.find((r) => r.key === permission.resource)?.label
+      || permission.resource;
 
     const { label, actionKey } = getPermissionMetadata(permission, intl);
 
-    if (!actionKey) return; // Skip unknown actions
+    if (!actionKey) { return; } // Skip unknown actions
 
     // Initialize resource group if not already present
     if (!permissionsMatrix[permission.resource]) {
@@ -88,15 +87,13 @@ const buildPermissionsByRoleMatrix = ({
   return Object.values(permissionsMatrix);
 };
 
-
-
-
-type PermissionMatrix = {
+export type PermissionMatrix = {
   resource: string;
   resourceLabel: string;
   permissions: {
     key: string;
     label: string;
+    actionKey: string;
     roles: Record<string, boolean>;
   }[];
 }[];
@@ -122,12 +119,12 @@ export function buildPermissionMatrix(
   intl: IntlShape,
 ): PermissionMatrix {
   const permissionsByResource = permissions.reduce<Record<string, PermissionMetadata[]>>((acc, perm) => {
-    if (!acc[perm.resource]) acc[perm.resource] = [];
+    if (!acc[perm.resource]) { acc[perm.resource] = []; }
     acc[perm.resource].push(perm);
     return acc;
   }, {});
 
-  const matrix: PermissionMatrix = resources.map(resource => {
+  const matrix = resources.map(resource => {
     const resourcePermissions = permissionsByResource[resource.key] || [];
 
     const permissionRows = resourcePermissions.map(permission => {
@@ -156,6 +153,5 @@ export function buildPermissionMatrix(
 
   return matrix;
 }
-
 
 export { buildPermissionsByRoleMatrix };

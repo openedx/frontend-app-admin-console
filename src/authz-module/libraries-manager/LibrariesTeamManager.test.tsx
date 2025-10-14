@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
@@ -63,9 +63,9 @@ describe('LibrariesTeamManager', () => {
       ],
       permissions: [
         { key: 'view_library', label: 'view', resource: 'library' },
-        { key: 'edit_library', name: 'edit', resource: 'library' },
+        { key: 'edit_library', label: 'edit', resource: 'library' },
       ],
-      resources: [{ key: 'library', displayName: 'Library' }],
+      resources: [{ key: 'library', label: 'Library' }],
       canManageTeam: true,
     });
 
@@ -106,10 +106,28 @@ describe('LibrariesTeamManager', () => {
     await user.click(rolesTab);
 
     const roleCards = await screen.findAllByTestId('role-card');
-
-    expect(roleCards.length).toBeGreaterThan(0);
-    expect(screen.getByText('Instructor')).toBeInTheDocument();
+    const rolesScope = within(roleCards[0]);
+    expect(roleCards.length).toBe(1);
+    expect(rolesScope.getByText('Instructor')).toBeInTheDocument();
     expect(screen.getByText(/Can manage content/i)).toBeInTheDocument();
     expect(screen.getByText(/1 permissions/i)).toBeInTheDocument();
+  });
+
+  it('renders role matrix when "Permissions" tab is selected', async () => {
+    const user = userEvent.setup();
+
+    renderWrapper(<LibrariesTeamManager />);
+
+    // Click on "Permissions" tab
+    const permissionsTab = await screen.findByRole('tab', { name: /permissions/i });
+    await user.click(permissionsTab);
+
+    const permissionsMatrix = await screen.findByTestId('permissions-matrix');
+    const metrixScope = within(permissionsMatrix);
+
+    expect(metrixScope.getByText('Instructor')).toBeInTheDocument();
+    expect(metrixScope.getByText('Library')).toBeInTheDocument();
+    expect(metrixScope.getByText('edit')).toBeInTheDocument();
+    expect(metrixScope.getByText('view')).toBeInTheDocument();
   });
 });
