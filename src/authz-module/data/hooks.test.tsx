@@ -10,26 +10,38 @@ jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
 }));
 
-const mockMembers = [
-  {
-    fullName: 'Alice',
-    username: 'user1',
-    email: 'alice@example.com',
-    roles: ['admin', 'author'],
-  },
-  {
-    fullName: 'Bob',
-    username: 'user2',
-    email: 'bob@example.com',
-    roles: ['contributor'],
-  },
-];
+const mockMembers = {
+  count: 2,
+  results: [
+    {
+      fullName: 'Alice',
+      username: 'user1',
+      email: 'alice@example.com',
+      roles: ['admin', 'author'],
+    },
+    {
+      fullName: 'Bob',
+      username: 'user2',
+      email: 'bob@example.com',
+      roles: ['collaborator'],
+    },
+  ],
+};
 
 const mockLibrary = {
   id: 'lib:123',
   org: 'demo-org',
   title: 'Test Library',
   slug: 'test-library',
+};
+
+const mockQuerySettings = {
+  roles: null,
+  search: null,
+  order: null,
+  sortBy: null,
+  pageSize: 10,
+  pageIndex: 0,
 };
 
 const createWrapper = () => {
@@ -58,16 +70,8 @@ describe('useTeamMembers', () => {
 
   it('returns data when API call succeeds', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { results: mockMembers } }),
+      get: jest.fn().mockResolvedValue({ data: mockMembers }),
     });
-
-    const mockQuerySettings = {
-      roles: null,
-      search: null,
-      ordering: null,
-      pageSize: 10,
-      pageIndex: 0,
-    };
 
     const { result } = renderHook(() => useTeamMembers('lib:123', mockQuerySettings), {
       wrapper: createWrapper(),
@@ -83,14 +87,6 @@ describe('useTeamMembers', () => {
     getAuthenticatedHttpClient.mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('API failure')),
     });
-
-    const mockQuerySettings = {
-      roles: null,
-      search: null,
-      ordering: null,
-      pageSize: 10,
-      pageIndex: 0,
-    };
 
     const { result } = renderHook(() => useTeamMembers('lib:123', mockQuerySettings), {
       wrapper: createWrapper(),

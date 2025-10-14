@@ -11,7 +11,7 @@ import {
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import SortDropdown from './SortDropdown';
 import SearchFilter from './SearchFilter';
-import messages from './messages';
+import messages from '../messages';
 
 const TableControlBar = () => {
   const intl = useIntl();

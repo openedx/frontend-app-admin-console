@@ -6,14 +6,15 @@ import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 export interface QuerySettings {
   roles: string | null;
   search: string | null;
-  ordering: string | null;
+  order: string | null;
+  sortBy: string | null;
   pageSize: number;
   pageIndex: number;
 }
 
 export interface GetTeamMembersResponse {
-  members: TeamMember[];
-  totalCount: number;
+  results: TeamMember[];
+  count: number;
 }
 
 export type PermissionsByRole = {
@@ -33,7 +34,7 @@ export interface AssignTeamMembersRoleRequest {
 }
 
 // TODO: replece api path once is created
-export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<TeamMember[]> => {
+export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
 
   if (querySettings.roles) {
@@ -42,14 +43,15 @@ export const getTeamMembers = async (object: string, querySettings: QuerySetting
   if (querySettings.search) {
     url.searchParams.set('search', querySettings.search);
   }
-  if (querySettings.ordering) {
-    url.searchParams.set('ordering', querySettings.ordering);
+  if (querySettings.sortBy && querySettings.order) {
+    url.searchParams.set('sort_by', querySettings.sortBy);
+    url.searchParams.set('order', querySettings.order);
   }
   url.searchParams.set('page_size', querySettings.pageSize.toString());
   url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
 
   const { data } = await getAuthenticatedHttpClient().get(url);
-  return camelCaseObject(data.results);
+  return camelCaseObject(data);
 };
 
 export const assignTeamMembersRole = async (

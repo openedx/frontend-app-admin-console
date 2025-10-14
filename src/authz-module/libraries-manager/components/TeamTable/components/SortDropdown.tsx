@@ -25,8 +25,6 @@ interface SortByOptions {
 const SORT_BY_OPTIONS: SortByOptions = {
   'name-a-z': { id: 'username', desc: false },
   'name-z-a': { id: 'username', desc: true },
-  newest: { id: 'createdAt', desc: true },
-  oldest: { id: 'createdAt', desc: false },
 };
 
 const SortDropdown: FC = () => {
@@ -37,8 +35,6 @@ const SortDropdown: FC = () => {
   const SORT_LABELS: Record<string, string> = useMemo(() => ({
     'name-a-z': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-a-z', defaultMessage: 'Name A-Z' }),
     'name-z-a': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-z-a', defaultMessage: 'Name Z-A' }),
-    newest: intl.formatMessage({ id: 'authz.libraries.team.table.sort.newest', defaultMessage: 'Newest' }),
-    oldest: intl.formatMessage({ id: 'authz.libraries.team.table.sort.oldest', defaultMessage: 'Oldest' }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []);
 

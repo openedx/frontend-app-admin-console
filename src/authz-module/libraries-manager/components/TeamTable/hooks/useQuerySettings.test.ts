@@ -8,7 +8,8 @@ describe('useQuerySettings', () => {
     search: null,
     pageSize: 10,
     pageIndex: 0,
-    ordering: null,
+    sortBy: null,
+    order: null,
   };
 
   it('should initialize with default query settings when no initial settings provided', () => {
@@ -24,7 +25,8 @@ describe('useQuerySettings', () => {
       search: 'test-user',
       pageSize: 20,
       pageIndex: 2,
-      ordering: 'username',
+      sortBy: 'username',
+      order: 'asc',
     };
 
     const { result } = renderHook(() => useQuerySettings(customInitialSettings));
@@ -54,7 +56,8 @@ describe('useQuerySettings', () => {
       search: 'john',
       pageSize: 15,
       pageIndex: 1,
-      ordering: 'username',
+      sortBy: 'username',
+      order: 'asc',
     });
   });
 
@@ -72,7 +75,7 @@ describe('useQuerySettings', () => {
       result.current.handleTableFetch(tableFilters);
     });
 
-    expect(result.current.querySettings.ordering).toBe('-email');
+    expect(result.current.querySettings.order).toBe('desc');
   });
 
   it('should convert camelCase sort field to snake_case', () => {
@@ -89,7 +92,7 @@ describe('useQuerySettings', () => {
       result.current.handleTableFetch(tableFilters);
     });
 
-    expect(result.current.querySettings.ordering).toBe('first_name');
+    expect(result.current.querySettings.sortBy).toBe('first_name');
   });
 
   it('should convert camelCase sort field to snake_case with descending order', () => {
@@ -106,7 +109,7 @@ describe('useQuerySettings', () => {
       result.current.handleTableFetch(tableFilters);
     });
 
-    expect(result.current.querySettings.ordering).toBe('-last_name');
+    expect(result.current.querySettings.order).toBe('desc');
   });
 
   it('should handle empty filters by setting values to null', () => {
@@ -128,7 +131,8 @@ describe('useQuerySettings', () => {
       search: null,
       pageSize: 10,
       pageIndex: 0,
-      ordering: null,
+      order: null,
+      sortBy: null,
     });
   });
 
@@ -154,7 +158,8 @@ describe('useQuerySettings', () => {
       search: null,
       pageSize: 10,
       pageIndex: 0,
-      ordering: null,
+      order: null,
+      sortBy: null,
     });
   });
 
@@ -180,7 +185,8 @@ describe('useQuerySettings', () => {
       search: null,
       pageSize: 10,
       pageIndex: 0,
-      ordering: null,
+      order: null,
+      sortBy: null,
     });
   });
 
@@ -264,7 +270,8 @@ describe('useQuerySettings', () => {
       search: 'test@example.com',
       pageSize: 25,
       pageIndex: 3,
-      ordering: '-user_role',
+      order: 'desc',
+      sortBy: 'user_role',
     });
   });
 
@@ -282,7 +289,7 @@ describe('useQuerySettings', () => {
       result.current.handleTableFetch(tableFilters);
     });
 
-    expect(result.current.querySettings.ordering).toBe('user_first_last_name');
+    expect(result.current.querySettings.sortBy).toBe('user_first_last_name');
   });
 
   it('should preserve handleTableFetch function reference across renders', () => {
@@ -398,7 +405,8 @@ describe('useQuerySettings', () => {
     });
 
     expect(result.current.querySettings).not.toBe(settingsAfterFirstUpdate);
-    expect(result.current.querySettings.ordering).toBe('-email');
+    expect(result.current.querySettings.sortBy).toBe('email');
+    expect(result.current.querySettings.order).toBe('desc');
   });
 
   it('should detect changes in pageSize', () => {

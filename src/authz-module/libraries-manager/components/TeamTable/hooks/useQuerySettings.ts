@@ -13,6 +13,11 @@ interface UseQuerySettingsReturn {
   handleTableFetch: (tableFilters: DataTableFilters) => void;
 }
 
+enum SortOrderKeys {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 /**
  * Custom hook to manage query settings for table data fetching
  * Converts DataTable filter/sort/pagination settings to API query parameters
@@ -27,7 +32,8 @@ export const useQuerySettings = (
     search: null,
     pageSize: 10,
     pageIndex: 0,
-    ordering: null,
+    order: null,
+    sortBy: null,
   },
 ): UseQuerySettingsReturn => {
   const [querySettings, setQuerySettings] = useState<QuerySettings>(initialQuerySettings);
@@ -42,21 +48,18 @@ export const useQuerySettings = (
       const { pageSize = 10, pageIndex = 0 } = tableFilters;
 
       // Extract and convert sorting
-      let ordering = '';
+      let sortByOption = '';
+      let sortByOrder = '';
       if (tableFilters.sortBy.length) {
-        const snakeCaseId = tableFilters.sortBy[0].id.replace(/([A-Z])/g, '_$1').toLowerCase();
-
-        if (tableFilters.sortBy[0].desc) {
-          ordering = `-${snakeCaseId}`;
-        } else {
-          ordering = snakeCaseId;
-        }
+        sortByOption = tableFilters.sortBy[0].id.replace(/([A-Z])/g, '_$1').toLowerCase();
+        sortByOrder = tableFilters.sortBy[0].desc ? SortOrderKeys.DESC : SortOrderKeys.ASC;
       }
 
       const newQuerySettings: QuerySettings = {
         roles: rolesFilter || null,
         search: searchFilter || null,
-        ordering: ordering || null,
+        sortBy: sortByOption || null,
+        order: sortByOrder || null,
         pageSize,
         pageIndex,
       };
@@ -66,7 +69,8 @@ export const useQuerySettings = (
         || prevSettings.search !== newQuerySettings.search
         || prevSettings.pageSize !== newQuerySettings.pageSize
         || prevSettings.pageIndex !== newQuerySettings.pageIndex
-        || prevSettings.ordering !== newQuerySettings.ordering
+        || prevSettings.sortBy !== newQuerySettings.sortBy
+        || prevSettings.order !== newQuerySettings.order
       );
 
       if (!hasChanged) {

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 import { useIntl } from '@edx/frontend-platform/i18n';
@@ -5,17 +6,15 @@ import {
   DataTable, Button, Chip, Skeleton,
   TextFilter,
   CheckboxFilter,
+  TableFooter,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
-import {
-  useMemo,
-} from 'react';
-import { useLibraryAuthZ } from '../context';
-import { useQuerySettings } from '../hooks';
+import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
+import { useQuerySettings } from './hooks/useQuerySettings';
+import TableControlBar from './components/TableControlBar';
 import messages from './messages';
-import TableControlBar from './TableControlBar';
 
 const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
   username: 'skeleton',
@@ -23,6 +22,8 @@ const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
   email: '',
   roles: [],
 }));
+
+const DEFAULT_PAGE_SIZE = 10;
 
 type CellProps = TableCellValue<TeamMember>;
 
@@ -65,7 +66,8 @@ const TeamTable = () => {
     data: teamMembers, isLoading, isError,
   } = useTeamMembers(libraryId, querySettings);
 
-  const rows = isError ? [] : (teamMembers || SKELETON_ROWS);
+  const rows = isError ? [] : (teamMembers?.results || SKELETON_ROWS);
+  const pageCount = teamMembers?.count ? Math.ceil(teamMembers.count / DEFAULT_PAGE_SIZE) : 1;
 
   const navigate = useNavigate();
 
@@ -80,17 +82,19 @@ const TeamTable = () => {
 
   return (
     <DataTable
-      isPaginated
       isFilterable
-      defaultColumnValues={{ Filter: TextFilter }}
-      numBreakoutFilters={3}
+      isPaginated
+      isSortable
       manualFilters
       manualPagination
-      isSortable
       manualSortBy
+      defaultColumnValues={{ Filter: TextFilter }}
+      numBreakoutFilters={3}
       fetchData={debounce(handleTableFetch, 1000)}
       data={rows}
-      itemCount={rows?.length}
+      itemCount={teamMembers?.count || 0}
+      pageCount={pageCount}
+      initialState={{ pageSize: DEFAULT_PAGE_SIZE }}
       additionalColumns={[
         {
           id: 'action',
@@ -109,10 +113,6 @@ const TeamTable = () => {
             ) : null),
         },
       ]}
-      initialState={{
-        pageSize: 10,
-        hiddenColumns: ['createdAt'],
-      }}
       columns={
         [
           {
@@ -144,17 +144,12 @@ const TeamTable = () => {
             filterChoices: Object.values(adaptedFilterChoices),
             disableSortBy: true,
           },
-          {
-            accessor: 'createdAt',
-            Filter: false,
-            disableFilters: true,
-            disableSortBy: true,
-          },
         ]
       }
     >
       <TableControlBar />
       <DataTable.Table />
+      <TableFooter />
     </DataTable>
   );
 };

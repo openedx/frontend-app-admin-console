@@ -56,8 +56,6 @@ describe('SortDropdown', () => {
 
     expect(screen.getByText('Name A-Z')).toBeInTheDocument();
     expect(screen.getByText('Name Z-A')).toBeInTheDocument();
-    expect(screen.getByText('Newest')).toBeInTheDocument();
-    expect(screen.getByText('Oldest')).toBeInTheDocument();
   });
 
   it('should display current sort when a sort is active', () => {
@@ -86,32 +84,6 @@ describe('SortDropdown', () => {
     expect(screen.getByText('Name Z-A')).toBeInTheDocument();
   });
 
-  it('should display newest sort correctly', () => {
-    const contextWithSort = {
-      state: {
-        ...defaultDataTableState,
-        sortBy: [{ id: 'createdAt', desc: true }],
-      },
-    };
-
-    renderSortDropdown(contextWithSort);
-
-    expect(screen.getByText('Newest')).toBeInTheDocument();
-  });
-
-  it('should display oldest sort correctly', () => {
-    const contextWithSort = {
-      state: {
-        ...defaultDataTableState,
-        sortBy: [{ id: 'createdAt', desc: false }],
-      },
-    };
-
-    renderSortDropdown(contextWithSort);
-
-    expect(screen.getByText('Oldest')).toBeInTheDocument();
-  });
-
   it('should handle sort selection and call toggleSortBy', () => {
     renderSortDropdown();
 
@@ -133,14 +105,6 @@ describe('SortDropdown', () => {
     });
 
     expect(mockToggleSortBy).toHaveBeenCalledWith('username', true);
-
-    const newestOption = screen.getByText('Newest');
-
-    act(() => {
-      fireEvent.click(newestOption);
-    });
-
-    expect(mockToggleSortBy).toHaveBeenCalledWith('createdAt', true);
   });
 
   it('should mark the active sort option as active', () => {
