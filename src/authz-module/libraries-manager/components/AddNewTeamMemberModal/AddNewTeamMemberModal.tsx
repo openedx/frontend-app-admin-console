@@ -1,7 +1,7 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useRef } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  ActionRow, Button, Form, Hyperlink, Icon, IconButton, IconButtonToggle, ModalDialog,
+  ActionRow, Form, Hyperlink, Icon, IconButton, ModalDialog,
   ModalPopup,
   Stack,
   StatefulButton,
@@ -10,7 +10,6 @@ import {
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { Info, SpinnerSimple } from '@openedx/paragon/icons';
 import messages from './messages';
-
 
 interface AddNewTeamMemberModalProps {
   isOpen: boolean;
@@ -39,14 +38,16 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
         placement="right"
         positionRef={targetRolesPopUpRef.current}
         isOpen={isOpenRolesPopUp}
-        onClose={closeRolesPopUp}>
+        onClose={closeRolesPopUp}
+      >
         <div
           className="bg-white p-3 rounded shadow border x-small"
-          style={{ textAlign: 'start' }}>
+          style={{ textAlign: 'start' }}
+        >
           <ul>
             {roles.map((role) => <li key={`role-tooltip-${role.role}`}><b>{role.name}:</b>{role.description}</li>)}
           </ul>
-          <Hyperlink destination="#libraries-permissions-tab" target='_blank'>{intl.formatMessage(messages['libraries.authz.manage.tooltip.roles.extra.info'])}</Hyperlink>
+          <Hyperlink destination="#libraries-permissions-tab" target="_blank">{intl.formatMessage(messages['libraries.authz.manage.tooltip.roles.extra.info'])}</Hyperlink>
         </div>
       </ModalPopup>
       <ModalDialog
@@ -87,7 +88,7 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
             <Form.Group controlId="role_options">
               <Form.Label>
                 {intl.formatMessage(messages['libraries.authz.manage.add.member.roles.label'])}
-                <IconButton alt="tooptip-extra-info" size="inline" src={Info} onClick={openRolesPopUp} ref={targetRolesPopUpRef}/>
+                <IconButton alt="tooptip-extra-info" size="inline" src={Info} onClick={openRolesPopUp} ref={targetRolesPopUpRef} />
               </Form.Label>
               <Form.Control as="select" name="role" value={formValues.role} onChange={(e) => handleChangeForm(e)}>
                 <option value="" disabled>

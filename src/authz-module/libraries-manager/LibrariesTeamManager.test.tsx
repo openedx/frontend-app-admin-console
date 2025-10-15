@@ -24,9 +24,9 @@ jest.mock('./components/TeamTable', () => ({
   default: () => <div data-testid="team-table">MockTeamTable</div>,
 }));
 
-jest.mock('./components/AddNewTeamMemberTrigger', () => ({
+jest.mock('./components/AddNewTeamMemberModal', () => ({
   __esModule: true,
-  default: () => <div data-testid="add-team-member-trigger">MockAddNewTeamMemberTrigger</div>,
+  AddNewTeamMemberTrigger: () => <div data-testid="add-team-member-trigger">MockAddNewTeamMemberTrigger</div>,
 }));
 
 describe('LibrariesTeamManager', () => {

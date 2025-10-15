@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
+import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -27,13 +28,6 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   }),
 }));
 
-jest.mock('../data/hooks', () => ({
-  useTeamRoles: jest.fn(),
-}));
-
-// Get the mocked function
-const { useTeamRoles } = jest.requireMock('../data/hooks');
-
 const TestComponent = () => {
   const context = useLibraryAuthZ();
   return (
@@ -52,7 +46,7 @@ describe('LibraryAuthZProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
-    (useTeamRoles as jest.Mock).mockReturnValue({
+    (usePermissionsByRole as jest.Mock).mockReturnValue({
       data: [
         {
           role: 'instructor',
