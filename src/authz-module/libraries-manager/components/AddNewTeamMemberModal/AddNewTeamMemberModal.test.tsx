@@ -21,6 +21,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 const defaultProps = {
   isOpen: true,
   isLoading: false,
+  isError: false,
   formValues: {
     users: '',
     role: '',
@@ -103,7 +104,7 @@ describe('AddNewTeamMemberModal', () => {
     it('renders the role select dropdown with correct label', () => {
       renderModal();
 
-      expect(screen.getByLabelText('Roles')).toBeInTheDocument();
+      expect(screen.getAllByLabelText('Roles')[0]).toBeInTheDocument();
       expect(screen.getByRole('combobox', { name: /roles/i })).toBeInTheDocument();
     });
 

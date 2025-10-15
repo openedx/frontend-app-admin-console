@@ -56,6 +56,11 @@ const messages = defineMessages({
     defaultMessage: 'We couldn\'t find a user for {count, plural, one {# email address or username.} other {# email addresses or usernames.}} Please check the values and try again, or invite them to join your organization first.',
     description: 'Error message when adding new team members',
   },
+  'libraries.authz.manage.tooltip.roles.extra.info': {
+    id: 'libraries.authz.manage.tooltip.roles.extra.info',
+    defaultMessage: 'View detailed permissions for each role.',
+    description: 'Invite the user to check a detailed view of permissions',
+  },
 });
 
 export default messages;
