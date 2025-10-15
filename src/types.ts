@@ -45,6 +45,35 @@ export type PermissionMetadata = {
   description?: string;
 };
 
+// Permissions Matrix
+
+export type EnrichedPermission = PermissionMetadata & {
+  actionKey: string;
+};
+
+export type PermissionWithRoles = EnrichedPermission & {
+  roles: Record<string, boolean>;
+};
+
+export type PermissionsResourceGrouped = ResourceMetadata & {
+  permissions: PermissionWithRoles[];
+};
+
+export type RolePermission = EnrichedPermission & {
+  disabled: boolean;
+};
+
+export type RoleResourceGroup = {
+  key: string;
+  label: string;
+  description: string;
+  permissions: RolePermission[];
+};
+
+export type PermissionsRoleGrouped = Role & {
+  resources: RoleResourceGroup[];
+};
+
 // Paragon table type
 export interface TableCellValue<T> {
   row: {

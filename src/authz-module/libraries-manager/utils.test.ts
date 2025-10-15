@@ -1,52 +1,87 @@
-import { buildPermissionMatrix, buildPermissionsByRoleMatrix } from './utils';
+import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
-const intl = { formatMessage: jest.fn((msg: any) => msg.defaultMessage) };
+const intl = { formatMessage: jest.fn((msg: any) => msg) };
+
 const permissions = [
-  { key: 'create_library', resource: 'library', label: 'Create Library' },
-  { key: 'edit_library', resource: 'library', label: 'Edit Library' },
+  {
+    key: 'create_library', resource: 'library', label: 'Create Library', description: '',
+  },
+  {
+    key: 'edit_library', resource: 'library', label: 'Edit Library', description: '',
+  },
 ];
 const resources = [
   { key: 'library', label: 'Library', description: '' },
 ];
+const roles = [
+  {
+    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '',
+  },
+  {
+    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '',
+  },
+  {
+    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '',
+  },
+];
 
-describe('buildPermissionsByRoleMatrix', () => {
-  it('returns permissions matrix for given role', () => {
-    const rolePermissions = ['create_library'];
-
-    const matrix = buildPermissionsByRoleMatrix({
-      rolePermissions, permissions, resources, intl,
-    }) as Array<{ key: string; actions: Array<{ disabled: boolean }> }>;
-    expect(matrix[0].key).toBe('library');
-    expect(matrix[0].actions.length).toBe(2);
-    expect(matrix[0].actions[0].disabled).toBe(false);
-    expect(matrix[0].actions[1].disabled).toBe(true);
+describe('buildPermissionsMatrix', () => {
+  it('returns permissions a matrix of given roles', () => {
+    const matrix = buildPermissionMatrixByRole({
+      roles, permissions, resources, intl,
+    });
+    expect(matrix.length).toBe(3);
+    expect(matrix[1]).toEqual({
+      name: 'editor',
+      userCount: 2,
+      role: 'editor',
+      description: '',
+      permissions: ['edit_library'],
+      resources: [
+        {
+          key: 'library',
+          label: 'Library',
+          description: '',
+          permissions: [
+            {
+              actionKey: 'create',
+              description: '',
+              disabled: true,
+              key: 'create_library',
+              label: 'Create Library',
+              resource: 'library',
+            },
+            {
+              key: 'edit_library',
+              resource: 'library',
+              label: 'Edit Library',
+              description: '',
+              actionKey: 'edit',
+              disabled: false,
+            },
+          ],
+        },
+      ],
+    });
   });
-});
 
-describe('buildPermissionsByRoleMatrix', () => {
   it('should build permission matrix grouped by resources with role access mapped', () => {
-    const roles = [
-      {
-        name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '',
-      },
-      {
-        name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '',
-      },
-      {
-        name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '',
-      },
-    ];
-    const matrix = buildPermissionMatrix(roles, permissions, resources, intl);
+    const matrix = buildPermissionMatrixByResource({
+      roles, permissions, resources, intl,
+    });
 
     expect(matrix).toEqual([
       {
-        resource: 'library',
-        resourceLabel: 'Library',
+        key: 'library',
+        label: 'Library',
+        description: '',
         permissions: [
           {
             key: 'create_library',
             actionKey: 'create',
             label: 'Create Library',
+            resource: 'library',
+            description: '',
             roles: {
               admin: true,
               editor: false,
@@ -56,7 +91,9 @@ describe('buildPermissionsByRoleMatrix', () => {
           {
             key: 'edit_library',
             actionKey: 'edit',
+            resource: 'library',
             label: 'Edit Library',
+            description: '',
             roles: {
               admin: true,
               editor: true,

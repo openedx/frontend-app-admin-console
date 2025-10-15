@@ -1,13 +1,16 @@
 import { IntlShape } from '@edx/frontend-platform/i18n';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
-import { PermissionMetadata, ResourceMetadata, Role } from '@src/types';
+import {
+  EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,
+  PermissionsRoleGrouped, ResourceMetadata, Role, RoleResourceGroup,
+} from '@src/types';
 import actionMessages from '../components/RoleCard/messages';
 
 /**
  * Derives the localized label and action key for a given permission.
  *
- * This function attempts to extract a known `actionKey` from the permission's key,
- * and uses that to construct an internationalized label using `intl.formatMessage`.
+ * This function enhance the permissions metadata mapping the key to a list of prefefined actions
+ * to add visual elemments (icons) and a localized label.
  * If a label is already defined in the permission metadata, that is returned as-is.
  *
  * Special handling is applied for action keys like `'tag'` and `'team'`, which are
@@ -20,10 +23,7 @@ import actionMessages from '../components/RoleCard/messages';
  * - `label`: The human-readable, localized label for the permission.
  * - `actionKey`: A string representing icon to be displayed (e.g., `'Read'`, `'Edit'`), or '' if not matched.
  */
-function getPermissionMetadata(
-  permission: PermissionMetadata,
-  intl: IntlShape,
-): { label: string; actionKey: string } {
+const getPermissionMetadata = (permission: PermissionMetadata, intl: IntlShape): EnrichedPermission => {
   const actionKey = actionKeys.find(action => permission.key.includes(action)) || '';
   let messageKey = `authz.permissions.actions.${actionKey}`;
   let messageResource = '';
@@ -33,70 +33,20 @@ function getPermissionMetadata(
     messageResource = actionKey === 'tag' ? 'Tags' : '';
   }
 
-  const label = permission.label || intl.formatMessage(actionMessages[messageKey], { resource: messageResource });
+  const messageDescriptor = actionMessages[messageKey];
+  const label = permission.label || (messageDescriptor
+    ? intl.formatMessage(messageDescriptor, { resource: messageResource })
+    : permission.key);
 
-  return { label, actionKey };
-}
-
-
-/**
- * Builds a permission matrix for a role.
- *
- * Builds a permission matrix grouped by resource, mapping each action to its display label
- * and enabled/disabled state based on the role's allowed permissions.
- *
- * @param rolePermissions - Array of permission keys allowed for the current role.
- * @param permissions - Permissions metadata.
- * @param resources - Resources metadata.
- * @param intl - the i18n function to enable label translations.
- * @returns An array of permission groupings by resource with action-level details.
- */
-const buildPermissionsByRoleMatrix = ({
-  rolePermissions,
-  permissions,
-  resources,
-  intl,
-}) => {
-  const permissionsMatrix = {};
-  const allowedPermissions = new Set(rolePermissions);
-
-  permissions.forEach((permission) => {
-    const resourceLabel = resources.find((r) => r.key === permission.resource)?.label
-      || permission.resource;
-
-    const { label, actionKey } = getPermissionMetadata(permission, intl);
-
-    if (!actionKey) { return; } // Skip unknown actions
-
-    // Initialize resource group if not already present
-    if (!permissionsMatrix[permission.resource]) {
-      permissionsMatrix[permission.resource] = {
-        key: permission.resource,
-        label: resourceLabel,
-        actions: [],
-      };
-    }
-
-    permissionsMatrix[permission.resource].actions.push({
-      key: actionKey,
-      label,
-      disabled: !allowedPermissions.has(permission.key),
-    });
-  });
-
-  return Object.values(permissionsMatrix);
+  return { ...permission, label, actionKey };
 };
 
-export type PermissionMatrix = {
-  resource: string;
-  resourceLabel: string;
-  permissions: {
-    key: string;
-    label: string;
-    actionKey: string;
-    roles: Record<string, boolean>;
-  }[];
-}[];
+type BuildPermissionsMatrixProps = {
+  roles: Role[];
+  permissions: PermissionMetadata[];
+  resources: ResourceMetadata[];
+  intl: IntlShape;
+};
 
 /**
  * Builds a permission matrix from the given roles, permissions, and resources.
@@ -111,47 +61,97 @@ export type PermissionMatrix = {
  *
  * @returns A permission matrix grouped by resource, with role mappings per permission.
  */
+const buildPermissionMatrixByResource = ({
+  roles, permissions, resources, intl,
+}: BuildPermissionsMatrixProps): PermissionsResourceGrouped[] => {
+  const enrichedPermissions = permissions.reduce((acc, perm) => {
+    acc[perm.key] = getPermissionMetadata(perm, intl);
+    return acc;
+  }, {} as Record<string, EnrichedPermission>);
 
-export function buildPermissionMatrix(
-  roles: Role[],
-  permissions: PermissionMetadata[],
-  resources: ResourceMetadata[],
-  intl: IntlShape,
-): PermissionMatrix {
   const permissionsByResource = permissions.reduce<Record<string, PermissionMetadata[]>>((acc, perm) => {
     if (!acc[perm.resource]) { acc[perm.resource] = []; }
     acc[perm.resource].push(perm);
     return acc;
   }, {});
 
-  const matrix = resources.map(resource => {
-    const resourcePermissions = permissionsByResource[resource.key] || [];
+  return resources.map(resource => {
+    const perms = permissionsByResource[resource.key] || [];
 
-    const permissionRows = resourcePermissions.map(permission => {
-      const rolesMap: Record<string, boolean> = {};
-
-      roles.forEach(role => {
-        rolesMap[role.name] = role.permissions.includes(permission.key);
-      });
-
-      const { label, actionKey } = getPermissionMetadata(permission, intl);
+    const permissionRows = perms.map(permission => {
+      const enriched = enrichedPermissions[permission.key];
+      const rolesMap = roles.reduce((acc, role) => {
+        acc[role.name] = role.permissions.includes(permission.key);
+        return acc;
+      }, {} as Record<string, boolean>);
 
       return {
-        key: permission.key,
-        actionKey, // Important for icon mapping
-        label,
+        ...enriched,
         roles: rolesMap,
       };
     });
 
     return {
-      resource: resource.key,
-      resourceLabel: resource.label,
+      ...resource,
       permissions: permissionRows,
     };
   });
+};
 
-  return matrix;
-}
+/**
+ * Builds a permission matrix for grouped by roles.
+ *
+ * Builds a permission matrix grouped by resource, mapping each action to its display label
+ * and enabled/disabled state based on the role's allowed permissions.
+ *
+ * @param roles - Array of roles metadata.
+ * @param permissions - Permissions metadata.
+ * @param resources - Resources metadata.
+ * @param intl - the i18n function to enable label translations.
+ * @returns An array of permission groupings by role and resource with action-level details.
+ */
+const buildPermissionMatrixByRole = ({
+  roles, permissions, resources, intl,
+}: BuildPermissionsMatrixProps): PermissionsRoleGrouped[] => {
+  const enrichedPermissions = permissions.reduce((acc, perm) => {
+    acc[perm.key] = getPermissionMetadata(perm, intl);
+    return acc;
+  }, {} as Record<string, EnrichedPermission>);
 
-export { buildPermissionsByRoleMatrix };
+  return roles.map(role => {
+    const allowed = new Set(role.permissions);
+    const permissionsGroupedByResource: Record<string, RoleResourceGroup> = {};
+
+    permissions.forEach(permission => {
+      const enriched = enrichedPermissions[permission.key];
+      const { resource } = permission;
+
+      if (!enriched.actionKey) { return; }
+
+      if (!permissionsGroupedByResource[resource]) {
+        const resourceInfo = resources.find(r => r.key === resource);
+        if (!resourceInfo) { return; }
+
+        permissionsGroupedByResource[resource] = {
+          key: resourceInfo.key,
+          label: resourceInfo.label,
+          description: resourceInfo.description,
+          permissions: [],
+        };
+      }
+
+      permissionsGroupedByResource[resource].permissions.push({
+        ...enriched,
+        description: permission.description,
+        disabled: !allowed.has(permission.key),
+      });
+    });
+
+    return {
+      ...role,
+      resources: Object.values(permissionsGroupedByResource),
+    };
+  });
+};
+
+export { buildPermissionMatrixByResource, buildPermissionMatrixByRole };

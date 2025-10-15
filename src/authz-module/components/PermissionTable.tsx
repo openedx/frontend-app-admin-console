@@ -1,12 +1,12 @@
 import { Check, Close } from '@openedx/paragon/icons';
 import { Icon } from '@openedx/paragon';
-import { Role } from '@src/types';
-import { PermissionMatrix } from '@src/authz-module/libraries-manager/utils';
+import { PermissionsResourceGrouped, Role } from '@src/types';
 import { actionsDictionary } from './RoleCard/constants';
+import ResourceTooltip from './ResourceTooltip';
 
 type PermissionTableProps = {
   roles: Role[];
-  permissionsTable: PermissionMatrix;
+  permissionsTable: PermissionsResourceGrouped[];
 };
 
 const PermissionTable = ({ permissionsTable, roles }: PermissionTableProps) => (
@@ -24,7 +24,8 @@ const PermissionTable = ({ permissionsTable, roles }: PermissionTableProps) => (
         <>
           <tr className="bg-info-100 text-primary">
             <td colSpan={roles.length + 1} className="text-start py-3 px-4">
-              <strong>{resourceGroup.resourceLabel}</strong>
+              <strong>{resourceGroup.label}</strong>
+              <ResourceTooltip resourceGroup={resourceGroup} />
             </td>
           </tr>
           {

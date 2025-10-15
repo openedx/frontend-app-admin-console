@@ -32,11 +32,15 @@ jest.mock('./components/AddNewTeamMemberModal', () => ({
 
 jest.mock('../components/RoleCard', () => ({
   __esModule: true,
-  default: ({ title, description, permissions }: { title: string, description: string, permissions: any[] }) => (
+  default: ({ title, description, permissionsByResource }: {
+    title: string,
+    description: string,
+    permissionsByResource: any[]
+  }) => (
     <div data-testid="role-card">
       <div>{title}</div>
       <div>{description}</div>
-      <div>{permissions.length} permissions</div>
+      <div>{permissionsByResource.length} permissions</div>
     </div>
   ),
 }));

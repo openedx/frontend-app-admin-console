@@ -22,13 +22,17 @@ describe('RoleCard', () => {
     description: 'Can manage everything',
     showDelete: true,
     userCounter: 2,
-    permissions: [
+    permissionsByResource: [
       {
         key: 'library',
         label: 'Library Resource',
-        actions: [
-          { key: 'view', label: 'View' },
-          { key: 'manage', label: 'Manage', disabled: true },
+        permissions: [
+          {
+            key: 'view', label: 'View', actionKey: 'view', disabled: false,
+          },
+          {
+            key: 'manage', label: 'Manage', actionKey: 'manage', disabled: true,
+          },
         ],
       },
     ],
@@ -83,7 +87,7 @@ describe('RoleCard', () => {
   });
 
   it('handles empty permissions gracefully', () => {
-    renderWrapper(<RoleCard {...defaultProps} permissions={[]} />);
+    renderWrapper(<RoleCard {...defaultProps} permissionsByResource={[]} />);
     expect(screen.queryByText('Library Resource')).not.toBeInTheDocument();
   });
 });
