@@ -1,10 +1,9 @@
-import {
-  render, screen, fireEvent,
-} from '@testing-library/react';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { screen } from '@testing-library/react';
 import {
   DataTableContext, CheckboxFilter, TextFilter,
 } from '@openedx/paragon';
+import { renderWrapper } from '@src/setupTest';
+import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
 
 jest.mock('./MultipleChoiceFilter', () => {
@@ -61,12 +60,10 @@ describe('TableControlBar', () => {
   };
 
   const renderWithContext = (contextValue = defaultContextValue) => (
-    render(
-      <IntlProvider locale="en">
-        <DataTableContext.Provider value={contextValue}>
-          <TableControlBar />
-        </DataTableContext.Provider>
-      </IntlProvider>,
+    renderWrapper(
+      <DataTableContext.Provider value={contextValue}>
+        <TableControlBar />
+      </DataTableContext.Provider>,
     )
   );
 
@@ -101,7 +98,8 @@ describe('TableControlBar', () => {
     expect(screen.getByText('Clear filters')).toBeInTheDocument();
   });
 
-  it('should call setAllFilters with empty array when Clear filters is clicked', () => {
+  it('should call setAllFilters with empty array when Clear filters is clicked', async () => {
+    const user = userEvent.setup();
     const contextWithFilters = {
       ...defaultContextValue,
       state: {
@@ -112,7 +110,7 @@ describe('TableControlBar', () => {
     renderWithContext(contextWithFilters);
 
     const clearButton = screen.getByText('Clear filters');
-    fireEvent.click(clearButton);
+    await user.click(clearButton);
 
     expect(mockSetAllFilters).toHaveBeenCalledWith([]);
   });

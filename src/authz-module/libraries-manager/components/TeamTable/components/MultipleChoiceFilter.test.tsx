@@ -1,7 +1,5 @@
-import React from 'react';
-import {
-  render, screen, fireEvent,
-} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 
 describe('MultipleChoiceFilter', () => {
@@ -37,28 +35,32 @@ describe('MultipleChoiceFilter', () => {
     expect(icon).toBeInTheDocument();
   });
 
-  it('should show all filter choices when dropdown is opened', () => {
+  it('should show all filter choices when dropdown is opened', async () => {
+    const user = userEvent.setup();
+
     render(<MultipleChoiceFilter {...defaultProps} />);
 
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
 
     expect(screen.getByText('Option 1 (5)')).toBeInTheDocument();
     expect(screen.getByText('Option 2 (3)')).toBeInTheDocument();
     expect(screen.getByText('Option 3 (0)')).toBeInTheDocument();
   });
 
-  it('should add value to filter when checkbox is checked', () => {
+  it('should add value to filter when checkbox is checked', async () => {
+    const user = userEvent.setup();
     render(<MultipleChoiceFilter {...defaultProps} />);
 
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
 
     const checkbox1 = screen.getByLabelText('Option 1');
-    fireEvent.click(checkbox1);
+    await user.click(checkbox1);
 
     expect(mockSetFilter).toHaveBeenCalledWith(['option1']);
   });
 
-  it('should remove value from filter when checkbox is unchecked', () => {
+  it('should remove value from filter when checkbox is unchecked', async () => {
+    const user = userEvent.setup();
     const propsWithSelectedValue = {
       ...defaultProps,
       filterValue: ['option1', 'option2'],
@@ -66,15 +68,16 @@ describe('MultipleChoiceFilter', () => {
 
     render(<MultipleChoiceFilter {...propsWithSelectedValue} />);
 
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
 
     const checkbox1 = screen.getByLabelText('Option 1');
-    fireEvent.click(checkbox1);
+    await user.click(checkbox1);
 
     expect(mockSetFilter).toHaveBeenCalledWith(['option2']);
   });
 
-  it('should show checked checkboxes for pre-selected values', () => {
+  it('should show checked checkboxes for pre-selected values', async () => {
+    const user = userEvent.setup();
     const propsWithSelectedValues = {
       ...defaultProps,
       filterValue: ['option1', 'option3'],
@@ -82,7 +85,7 @@ describe('MultipleChoiceFilter', () => {
 
     render(<MultipleChoiceFilter {...propsWithSelectedValues} />);
 
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
 
     const checkbox1 = screen.getByLabelText('Option 1');
     const checkbox2 = screen.getByLabelText('Option 2');
@@ -93,7 +96,8 @@ describe('MultipleChoiceFilter', () => {
     expect(checkbox3).toBeChecked();
   });
 
-  it('should call setFilter with correct array when adding to existing selections', () => {
+  it('should call setFilter with correct array when adding to existing selections', async () => {
+    const user = userEvent.setup();
     const propsWithExistingSelection = {
       ...defaultProps,
       filterValue: ['option2'],
@@ -101,10 +105,10 @@ describe('MultipleChoiceFilter', () => {
 
     render(<MultipleChoiceFilter {...propsWithExistingSelection} />);
 
-    fireEvent.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button'));
 
     const checkbox1 = screen.getByLabelText('Option 1');
-    fireEvent.click(checkbox1);
+    await user.click(checkbox1);
 
     expect(mockSetFilter).toHaveBeenCalledWith(['option2', 'option1']);
   });

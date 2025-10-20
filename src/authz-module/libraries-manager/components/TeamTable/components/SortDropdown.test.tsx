@@ -1,8 +1,7 @@
-import {
-  render, screen, fireEvent, act,
-} from '@testing-library/react';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
+import { renderWrapper } from '@src/setupTest';
 import SortDropdown from './SortDropdown';
 
 jest.mock('@edx/frontend-platform/i18n', () => jest.requireActual('@edx/frontend-platform/i18n'));
@@ -28,12 +27,10 @@ describe('SortDropdown', () => {
       ...contextOverrides,
     };
 
-    return render(
-      <IntlProvider locale="en">
-        <DataTableContext.Provider value={contextValue}>
-          <SortDropdown />
-        </DataTableContext.Provider>
-      </IntlProvider>,
+    return renderWrapper(
+      <DataTableContext.Provider value={contextValue}>
+        <SortDropdown />
+      </DataTableContext.Provider>,
     );
   };
 
@@ -48,11 +45,12 @@ describe('SortDropdown', () => {
     expect(screen.getByText('Sort')).toBeInTheDocument();
   });
 
-  it('should render all sort options when dropdown is opened', () => {
+  it('should render all sort options when dropdown is opened', async () => {
+    const user = userEvent.setup();
     renderSortDropdown();
 
     const toggleButton = screen.getByRole('button');
-    fireEvent.click(toggleButton);
+    await user.click(toggleButton);
 
     expect(screen.getByText('Name A-Z')).toBeInTheDocument();
     expect(screen.getByText('Name Z-A')).toBeInTheDocument();
@@ -84,30 +82,29 @@ describe('SortDropdown', () => {
     expect(screen.getByText('Name Z-A')).toBeInTheDocument();
   });
 
-  it('should handle sort selection and call toggleSortBy', () => {
+  it('should handle sort selection and call toggleSortBy', async () => {
+    const user = userEvent.setup();
     renderSortDropdown();
 
     const toggleButton = screen.getByRole('button');
-    fireEvent.click(toggleButton);
+    await user.click(toggleButton);
 
     const nameAZOption = screen.getByText('Name A-Z');
 
-    act(() => {
-      fireEvent.click(nameAZOption);
-    });
+    await user.click(nameAZOption);
 
     expect(mockToggleSortBy).toHaveBeenCalledWith('username', false);
 
     const nameZAOption = screen.getByText('Name Z-A');
 
-    act(() => {
-      fireEvent.click(nameZAOption);
-    });
+    await user.click(toggleButton);
+    await user.click(nameZAOption);
 
     expect(mockToggleSortBy).toHaveBeenCalledWith('username', true);
   });
 
-  it('should mark the active sort option as active', () => {
+  it('should mark the active sort option as active', async () => {
+    const user = userEvent.setup();
     const contextWithSort = {
       state: {
         ...defaultDataTableState,
@@ -118,7 +115,7 @@ describe('SortDropdown', () => {
     renderSortDropdown(contextWithSort);
 
     const toggleButton = screen.getByRole('button');
-    fireEvent.click(toggleButton);
+    await user.click(toggleButton);
 
     // Get all elements with "Name A-Z" text and find the dropdown item
     const nameAZOptions = screen.getAllByText('Name A-Z');
