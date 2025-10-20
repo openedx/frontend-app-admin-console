@@ -1,6 +1,5 @@
-import {
-  screen, fireEvent, waitFor,
-} from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from 'react-error-boundary';
 import { renderWrapper } from '@src/setupTest';
 import LibrariesErrorFallback from './index';
@@ -67,9 +66,8 @@ describe('LibrariesErrorFallback', () => {
         <ThrowError error={error} />
       </ErrorBoundary>,
     );
-    const reloadBtn = screen.getByText(/Reload Page/i);
-    fireEvent.click(reloadBtn);
-    // If your ErrorPage uses error.refetch, this will be called
-    await waitFor(() => expect(refetch).toHaveBeenCalled());
+    const user = userEvent.setup();
+    await user.click(screen.getByText(/Reload Page/i));
+    expect(refetch).toHaveBeenCalled();
   });
 });
