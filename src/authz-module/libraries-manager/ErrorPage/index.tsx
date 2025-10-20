@@ -43,8 +43,6 @@ const getErrorConfig = ({ errorMessage, errorStatus }) => {
   });
 };
 
-const librariesUrl = () => `${getConfig().AUTHORING_BASE_URL}/libraries`;
-
 const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
   const intl = useIntl();
   const [reloading, setReloading] = useState(false);
@@ -56,12 +54,11 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
   } = getErrorConfig({ errorMessage, errorStatus });
 
   const handleReload = () => {
-    if (reloading) { return; }
     setReloading(true);
     resetErrorBoundary();
   };
   return (
-    <Container className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light-200" data-testid="error-page">
+    <Container className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light-200">
       <h1 className="display-4 text-primary-200">{statusCode}</h1>
       <h1 className="text-primary">{intl.formatMessage(title)}</h1>
       <p>{intl.formatMessage(description)}</p>
@@ -78,7 +75,7 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
         {showBackButton && (
         <Button
           as={Hyperlink}
-          destination={librariesUrl()}
+          destination={`${getConfig().COURSE_AUTHORING_MICROFRONTEND_URL}/libraries`}
           className="m-2"
           variant={showReloadButton ? 'outline-primary' : 'primary'}
         >

@@ -46,7 +46,7 @@ initialize({
   handlers: {
     config: () => {
       mergeConfig({
-        AUTHORING_BASE_URL: process.env.AUTHORING_BASE_URL || null,
+        COURSE_AUTHORING_MICROFRONTEND_URL: process.env.COURSE_AUTHORING_MICROFRONTEND_URL || null,
       }, 'AdminConsoleAppConfig');
     },
   },
