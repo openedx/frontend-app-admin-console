@@ -43,7 +43,7 @@ const getErrorConfig = ({ errorMessage, errorStatus }) => {
   });
 };
 
-const LIBRARIES_URL = `${getConfig().AUTHORING_BASE_URL}/authoring/libraries`;
+const librariesUrl = () => `${getConfig().AUTHORING_BASE_URL}/libraries`;
 
 const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
   const intl = useIntl();
@@ -78,7 +78,7 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
         {showBackButton && (
         <Button
           as={Hyperlink}
-          destination={LIBRARIES_URL}
+          destination={librariesUrl()}
           className="m-2"
           variant={showReloadButton ? 'outline-primary' : 'primary'}
         >
