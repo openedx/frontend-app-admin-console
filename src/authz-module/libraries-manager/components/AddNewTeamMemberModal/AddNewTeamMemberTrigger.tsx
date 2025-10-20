@@ -23,6 +23,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
 }) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
+  const [showToast, setShowToast] = useState(false);
   const [additionMessage, setAdditionMessage] = useState<string | null>(null);
   const [formValues, setFormValues] = useState(DEFAULT_FORM_VALUES);
   const [isError, setIsError] = useState(false);
@@ -45,10 +46,10 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
     const notFoundUsers = errors.filter(err => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
       .map(err => err.userIdentifier);
 
-    if (errors.length == 1 && errors[0].error == RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE) {
+    if (errors.length === 1 && errors[0].error === RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE) {
       setFormValues(DEFAULT_FORM_VALUES);
       close();
-    };
+    }
 
     if (notFoundUsers.length) {
       setIsError(true);
@@ -66,6 +67,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
           { count: notFoundUsers.length },
         )}`
       ));
+      setShowToast(true);
     }
   };
 
@@ -87,6 +89,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
               { count: successData.completed.length },
             ),
           );
+          setShowToast(true);
         }
 
         if (successData.errors.length) {
@@ -102,6 +105,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   const handleClose = () => {
     setFormValues(DEFAULT_FORM_VALUES);
     setIsError(false);
+    setAdditionMessage(null);
     close();
   };
 
@@ -129,8 +133,8 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
 
       {additionMessage && (
         <Toast
-          onClose={() => setAdditionMessage(null)}
-          show={!!additionMessage}
+          onClose={() => setShowToast(false)}
+          show={showToast}
         >
           {additionMessage}
         </Toast>
