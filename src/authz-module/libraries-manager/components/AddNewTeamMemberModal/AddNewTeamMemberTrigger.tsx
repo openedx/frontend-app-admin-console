@@ -31,6 +31,9 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
 
   const handleChangeForm = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (isError) {
+      setIsError(false);
+    }
     setFormValues((prev) => ({
       ...prev,
       [name]: value,
@@ -41,6 +44,11 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
     setIsError(false);
     const notFoundUsers = errors.filter(err => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
       .map(err => err.userIdentifier);
+
+    if (errors.length == 1 && errors[0].error == RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE) {
+      setFormValues(DEFAULT_FORM_VALUES);
+      close();
+    };
 
     if (notFoundUsers.length) {
       setIsError(true);
