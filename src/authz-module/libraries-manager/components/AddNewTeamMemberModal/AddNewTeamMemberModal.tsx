@@ -35,15 +35,12 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
     <>
       <ModalPopup
         hasArrow
-        placement="right"
+        placement="auto"
         positionRef={targetRolesPopUpRef.current}
         isOpen={isOpenRolesPopUp}
         onClose={closeRolesPopUp}
       >
-        <div
-          className="bg-white p-3 rounded shadow border x-small"
-          style={{ textAlign: 'start' }}
-        >
+        <div className="bg-white p-3 rounded shadow border x-small">
           <ul>
             {roles.map((role) => <li key={`role-tooltip-${role.role}`}><b>{role.name}: </b>{role.description}</li>)}
           </ul>
