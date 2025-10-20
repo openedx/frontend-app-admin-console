@@ -11,6 +11,11 @@ const messages = defineMessages({
     defaultMessage: 'Add users by username or email',
     description: 'Label for the users input field in the add new team member modal',
   },
+  'libraries.authz.manage.add.member.users.placeholder': {
+    id: 'libraries.authz.manage.add.member.users.placeholder',
+    defaultMessage: 'Enter one or more email addresses or usernames, comma-separated.',
+    description: 'Placeholder for the users input field in the add new team member modal',
+  },
   'libraries.authz.manage.add.member.roles.label': {
     id: 'libraries.authz.manage.add.member.roles.label',
     defaultMessage: 'Roles',

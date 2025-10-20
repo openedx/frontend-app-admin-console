@@ -11,8 +11,8 @@ import messages from './messages';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();
-  const location = useLocation();
-  const { hash } = location; const { libraryId, canManageTeam } = useLibraryAuthZ();
+  const { hash } = useLocation();
+  const { libraryId, canManageTeam } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);

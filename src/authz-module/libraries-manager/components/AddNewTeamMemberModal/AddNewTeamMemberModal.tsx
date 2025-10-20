@@ -45,7 +45,7 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
           style={{ textAlign: 'start' }}
         >
           <ul>
-            {roles.map((role) => <li key={`role-tooltip-${role.role}`}><b>{role.name}:</b>{role.description}</li>)}
+            {roles.map((role) => <li key={`role-tooltip-${role.role}`}><b>{role.name}: </b>{role.description}</li>)}
           </ul>
           <Hyperlink destination="#libraries-permissions-tab" target="_blank">{intl.formatMessage(messages['libraries.authz.manage.tooltip.roles.extra.info'])}</Hyperlink>
         </div>
@@ -81,6 +81,7 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
                 rows="3"
                 value={formValues.users}
                 onChange={(e) => handleChangeForm(e)}
+                placeholder={intl.formatMessage(messages['libraries.authz.manage.add.member.users.placeholder'])}
                 style={{ color: isError && 'var(--pgn-color-form-feedback-invalid)' }}
               />
             </Form.Group>
