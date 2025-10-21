@@ -1,15 +1,18 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLibrary } from '@src/authz-module/data/hooks';
+import { useLocation } from 'react-router-dom';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
+import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
 
 import messages from './messages';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();
-  const { libraryId } = useLibraryAuthZ();
+  const { hash } = useLocation();
+  const { libraryId, canManageTeam } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
@@ -21,11 +24,15 @@ const LibrariesTeamManager = () => {
         activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
-        actions={[]}
+        actions={
+          canManageTeam
+            ? [<AddNewTeamMemberTrigger libraryId={libraryId} />]
+            : []
+        }
       >
         <Tabs
           variant="tabs"
-          defaultActiveKey="team"
+          defaultActiveKey={hash ? 'permissions' : 'team'}
           className="bg-light-100 px-5"
         >
           <Tab eventKey="team" title={intl.formatMessage(messages['library.authz.tabs.team'])} className="p-5">
@@ -34,7 +41,7 @@ const LibrariesTeamManager = () => {
           <Tab eventKey="roles" title={intl.formatMessage(messages['library.authz.tabs.roles'])}>
             Role tab.
           </Tab>
-          <Tab eventKey="permissions" title={intl.formatMessage(messages['library.authz.tabs.permissions'])}>
+          <Tab id="libraries-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['library.authz.tabs.permissions'])}>
             Permissions tab.
           </Tab>
         </Tabs>

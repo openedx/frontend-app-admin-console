@@ -65,4 +65,32 @@ describe('AuthZTitle', () => {
       expect(onClick).toHaveBeenCalled();
     });
   });
+
+  it('renders action buttons with icons', () => {
+    const mockIcon = () => <span data-testid="mock-icon">Icon</span>;
+    const onClick = jest.fn();
+    const actions = [
+      { label: 'Save', icon: mockIcon, onClick },
+    ];
+
+    render(<AuthZTitle {...defaultProps} actions={actions} />);
+
+    const button = screen.getByRole('button', { name: 'Icon Save' });
+    expect(button).toBeInTheDocument();
+    expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
+  });
+
+  it('renders ReactNode actions alongside button actions', () => {
+    const onClick = jest.fn();
+    const customAction = <div data-testid="custom-action">Custom Action</div>;
+    const actions = [
+      { label: 'Save', onClick },
+      customAction,
+    ];
+
+    render(<AuthZTitle {...defaultProps} actions={actions} />);
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+    expect(screen.getByTestId('custom-action')).toBeInTheDocument();
+  });
 });

@@ -13,11 +13,28 @@ export type PermissionsByRole = {
   permissions: string[];
   userCount: number;
 };
+export interface PutAssignTeamMembersRoleResponse {
+  completed: { user: string; status: string }[];
+  errors: { userIdentifier: string; error: string }[];
+}
+
+export interface AssignTeamMembersRoleRequest {
+  users: string[];
+  role: string;
+  scope: string;
+}
 
 // TODO: replece api path once is created
 export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
   return camelCaseObject(data.results);
+};
+
+export const assignTeamMembersRole = async (
+  data: AssignTeamMembersRoleRequest,
+): Promise<PutAssignTeamMembersRoleResponse> => {
+  const res = await getAuthenticatedHttpClient().put(getApiUrl('/api/authz/v1/roles/users/'), data);
+  return camelCaseObject(res.data);
 };
 
 // TODO: this should be replaced in the future with Console API

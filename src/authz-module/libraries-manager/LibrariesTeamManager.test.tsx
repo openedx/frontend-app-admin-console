@@ -24,6 +24,11 @@ jest.mock('./components/TeamTable', () => ({
   default: () => <div data-testid="team-table">MockTeamTable</div>,
 }));
 
+jest.mock('./components/AddNewTeamMemberModal', () => ({
+  __esModule: true,
+  AddNewTeamMemberTrigger: () => <div data-testid="add-team-member-trigger">MockAddNewTeamMemberTrigger</div>,
+}));
+
 describe('LibrariesTeamManager', () => {
   beforeEach(() => {
     initializeMockApp({
@@ -63,5 +68,8 @@ describe('LibrariesTeamManager', () => {
 
     // TeamTable is rendered
     expect(screen.getByTestId('team-table')).toBeInTheDocument();
+
+    // AddNewTeamMemberTrigger is rendered
+    expect(screen.getByTestId('add-team-member-trigger')).toBeInTheDocument();
   });
 });

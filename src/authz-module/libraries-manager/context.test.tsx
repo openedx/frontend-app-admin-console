@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
+import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -45,6 +46,34 @@ describe('LibraryAuthZProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
+    (usePermissionsByRole as jest.Mock).mockReturnValue({
+      data: [
+        {
+          role: 'instructor',
+          description: 'Can create and edit content',
+          userCount: 3,
+          objects: [
+            {
+              object: 'library',
+              description: 'Library permissions',
+              actions: ['view', 'edit', 'delete'],
+            },
+          ],
+        },
+        {
+          role: 'admin',
+          description: 'Full access to the library',
+          userCount: 1,
+          objects: [
+            {
+              object: 'library',
+              description: 'Library permissions',
+              actions: ['view', 'edit', 'delete', 'manage'],
+            },
+          ],
+        },
+      ],
+    });
   });
 
   it('provides the correct context values to consumers', () => {

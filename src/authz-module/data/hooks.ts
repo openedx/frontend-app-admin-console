@@ -1,7 +1,11 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useMutation, useQuery, useQueryClient, useSuspenseQuery,
+} from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata, TeamMember } from '@src/types';
 import {
+  assignTeamMembersRole,
+  AssignTeamMembersRoleRequest,
   getLibrary, getPermissionsByRole, getTeamMembers, PermissionsByRole,
 } from './api';
 
@@ -60,3 +64,23 @@ export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadat
   queryFn: () => getLibrary(libraryId),
   retry: false,
 });
+
+/**
+ * React Query hook to add new team members to a specific scope or manage the corresponding roles.
+ * It provides a mutation function to add users with specified roles to the team or assign new roles.
+ *
+ * @example
+ * const { mutate: assignTeamMembersRole } = useAssignTeamMembersRole();
+ * assignTeamMembersRole({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
+ */
+export const useAssignTeamMembersRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ data }: {
+      data: AssignTeamMembersRoleRequest
+    }) => assignTeamMembersRole(data),
+    onSettled: (_data, _error, { data: { scope } }) => {
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scope) });
+    },
+  });
+};

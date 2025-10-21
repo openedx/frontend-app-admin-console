@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ComponentType, isValidElement, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Breadcrumb, Col, Container, Row, Button, Badge,
@@ -11,6 +11,7 @@ interface BreadcrumbLink {
 
 interface Action {
   label: string;
+  icon?: ComponentType;
   onClick: () => void;
 }
 
@@ -19,7 +20,7 @@ export interface AuthZTitleProps {
   pageTitle: string;
   pageSubtitle: string | ReactNode;
   navLinks?: BreadcrumbLink[];
-  actions?: Action[];
+  actions?: (Action | ReactNode)[];
 }
 
 const AuthZTitle = ({
@@ -41,7 +42,22 @@ const AuthZTitle = ({
       <Col xs={12} md={4}>
         <div className="d-flex justify-content-md-end">
           {
-            actions.map(({ label, onClick }) => <Button key={`authz-header-action-${label}`} onClick={onClick}>{label}</Button>)
+            actions.map((action) => {
+              if (isValidElement(action)) {
+                return action;
+              }
+
+              const { label, icon, onClick } = action as Action;
+              return (
+                <Button
+                  key={`authz-header-action-${label}`}
+                  iconBefore={icon}
+                  onClick={onClick}
+                >
+                  {label}
+                </Button>
+              );
+            })
           }
         </div>
       </Col>
