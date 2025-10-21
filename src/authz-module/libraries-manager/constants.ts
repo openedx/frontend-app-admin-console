@@ -5,7 +5,7 @@ import { PermissionMetadata, ResourceMetadata, RoleMetadata } from 'types';
 export const libraryRolesMetadata: RoleMetadata[] = [
   { role: 'library_admin', name: 'Library Admin', description: 'The Library Admin has full control over the library, including managing users, modifying content, and handling publishing workflows. They ensure content is properly maintained and accessible as needed.' },
   { role: 'library_author', name: 'Library Author', description: 'The Library Author is responsible for creating, editing, and publishing content within a library. They can manage tags and collections but cannot delete libraries or manage users.' },
-  { role: 'library_collaborator', name: 'Library Collaborator', description: 'The Library Collaborator can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.' },
+  { role: 'library_contributor', name: 'Library Contributor', description: 'The Library Contributor can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.' },
   { role: 'library_user', name: 'Library User', description: 'The Library User can view and reuse content but cannot edit or delete any resource.' },
 ];
 
