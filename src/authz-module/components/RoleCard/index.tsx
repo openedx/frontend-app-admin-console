@@ -21,7 +21,7 @@ interface RoleCardProps extends CardTitleProps {
 const CardTitle = ({ title, userCounter }: CardTitleProps) => (
   <div className="d-flex align-items-center">
     <span className="mr-4 text-primary">{title}</span>
-    {userCounter !== null && userCounter !== undefined && (
+    {userCounter !== null && (
       <span className="d-flex align-items-center font-weight-normal">
         <Icon src={Person} className="mr-1" />
         {userCounter}
