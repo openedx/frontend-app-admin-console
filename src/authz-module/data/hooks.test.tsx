@@ -19,7 +19,7 @@ const mockMembers = [
     fullName: 'Bob',
     username: 'user2',
     email: 'bob@example.com',
-    roles: ['collaborator'],
+    roles: ['contributor'],
   },
 ];
 
