@@ -1,5 +1,6 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { renderWrapper } from '@src/setupTest';
+import userEvent from '@testing-library/user-event';
 import RoleCard from '.';
 
 jest.mock('@openedx/paragon/icons', () => ({
@@ -33,7 +34,8 @@ describe('RoleCard', () => {
     ],
   };
 
-  it('renders all role card sections correctly', () => {
+  it('renders all role card sections correctly', async () => {
+    const user = userEvent.setup();
     renderWrapper(<RoleCard {...defaultProps} />);
 
     // Title
@@ -55,7 +57,7 @@ describe('RoleCard', () => {
     // Collapsible title
     expect(screen.getByText('Permissions')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Permissions'));
+    await user.click(screen.getByText('Permissions'));
 
     // Resource label
     expect(screen.getByText('Library Resource')).toBeInTheDocument();
