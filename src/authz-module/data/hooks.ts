@@ -4,7 +4,7 @@ import {
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
 import {
-  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers, 
+  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings,
 } from './api';
 
@@ -83,7 +83,7 @@ export const useAssignTeamMembersRole = () => {
       data: AssignTeamMembersRoleRequest
     }) => assignTeamMembersRole(data),
     onSettled: (_data, _error, { data: { scope } }) => {
-      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scope) });
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
     },
   });
 };
