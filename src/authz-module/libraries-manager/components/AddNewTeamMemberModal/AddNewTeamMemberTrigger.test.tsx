@@ -133,8 +133,8 @@ describe('AddNewTeamMemberTrigger', () => {
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [
-        { user: 'alice@example.com', status: 'role_added' },
-        { user: 'bob@example.com', status: 'added_to_team' },
+        { userIdentifier: 'alice@example.com', status: 'role_added' },
+        { userIdentifier: 'bob@example.com', status: 'added_to_team' },
       ],
       errors: [],
     });
@@ -160,10 +160,10 @@ describe('AddNewTeamMemberTrigger', () => {
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [
-        { user: 'alice@example.com', status: 'role_added' },
+        { userIdentifier: 'alice@example.com', status: 'role_added' },
       ],
       errors: [
-        { user: 'unknown@example.com', error: 'user_not_found' },
+        { userIdentifier: 'unknown@example.com', error: 'user_not_found' },
       ],
     });
 
@@ -191,8 +191,8 @@ describe('AddNewTeamMemberTrigger', () => {
     onSuccess({
       completed: [],
       errors: [
-        { user: 'unknown1@example.com', error: 'user_not_found' },
-        { user: 'unknown2@example.com', error: 'user_not_found' },
+        { userIdentifier: 'unknown1@example.com', error: 'user_not_found' },
+        { userIdentifier: 'unknown2@example.com', error: 'user_not_found' },
       ],
     });
 
@@ -222,7 +222,7 @@ describe('AddNewTeamMemberTrigger', () => {
     // Simulate successful response with no errors
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
-      completed: [{ user: 'alice@example.com', status: 'role_added' }],
+      completed: [{ userIdentifier: 'alice@example.com', status: 'role_added' }],
       errors: [],
     });
 
@@ -249,7 +249,7 @@ describe('AddNewTeamMemberTrigger', () => {
     // Simulate successful response
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
-      completed: [{ user: 'alice@example.com', status: 'role_added' }],
+      completed: [{ userIdentifier: 'alice@example.com', status: 'role_added' }],
       errors: [],
     });
 

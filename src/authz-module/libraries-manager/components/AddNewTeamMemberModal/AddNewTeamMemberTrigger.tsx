@@ -44,7 +44,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   const handleErrors = (errors: PutAssignTeamMembersRoleResponse['errors']) => {
     setIsError(false);
     const notFoundUsers = errors.filter(err => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
-      .map(err => err.userIdentifier);
+      .map(err => err.userIdentifier.trim());
 
     if (errors.length === 1 && errors[0].error === RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE) {
       setFormValues(DEFAULT_FORM_VALUES);
@@ -55,12 +55,9 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
       setIsError(true);
       setFormValues((prev) => ({
         ...prev,
-        users: prev.users
-          .split(',')
-          .map(user => user.trim())
-          .filter(user => notFoundUsers.includes(user))
-          .join(', '),
+        users: notFoundUsers.join(', '),
       }));
+
       setAdditionMessage((prevMessage) => (
         `${prevMessage ? `${prevMessage} ` : ''}${intl.formatMessage(
           messages['libraries.authz.manage.add.member.failure'],
@@ -72,8 +69,9 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   };
 
   const handleAddTeamMember = () => {
+    const normalizedUsers = new Set(formValues.users.split(',').map(user => user.trim()).filter(user => user));
     const data = {
-      users: formValues.users.split(',').map(user => user.trim()),
+      users: [...normalizedUsers],
       role: formValues.role,
       scope: libraryId,
     };
