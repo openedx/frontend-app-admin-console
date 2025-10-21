@@ -27,14 +27,23 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   const [additionMessage, setAdditionMessage] = useState<string | null>(null);
   const [formValues, setFormValues] = useState(DEFAULT_FORM_VALUES);
   const [isError, setIsError] = useState(false);
-
+  const [errorValidationUsers, setNotFoundUsers] = useState<string[]>([]);
   const { mutate: assignTeamMembersRole, isPending: isAssignTeamMembersRolePending } = useAssignTeamMembersRole();
 
   const handleChangeForm = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (isError) {
+    const userIds = value
+      .split(',')
+      .map(userId => userId.trim())
+      .filter(Boolean);
+    const hasErrorUser = errorValidationUsers.find((noUser) => userIds.includes(noUser));
+
+    if (hasErrorUser) {
+      setIsError(true);
+    } else {
       setIsError(false);
     }
+
     setFormValues((prev) => ({
       ...prev,
       [name]: value,
@@ -52,6 +61,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
     }
 
     if (notFoundUsers.length) {
+      setNotFoundUsers(notFoundUsers);
       setIsError(true);
       setFormValues((prev) => ({
         ...prev,
@@ -94,6 +104,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
           handleErrors(successData.errors);
         } else {
           setIsError(false);
+          setNotFoundUsers([]);
           close();
           setFormValues(DEFAULT_FORM_VALUES);
         }
@@ -102,6 +113,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({
   };
   const handleClose = () => {
     setFormValues(DEFAULT_FORM_VALUES);
+    setNotFoundUsers([]);
     setIsError(false);
     setAdditionMessage(null);
     close();
