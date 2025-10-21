@@ -10,6 +10,7 @@ interface CardTitleProps {
   title: string;
   userCounter?: number | null;
 }
+
 interface RoleCardProps extends CardTitleProps {
   objectName?: string | null;
   description: string;
