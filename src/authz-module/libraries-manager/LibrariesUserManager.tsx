@@ -6,6 +6,7 @@ import { ROUTES } from '@src/authz-module/constants';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
+import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
 import { useLibrary, useTeamMembers } from '../data/hooks';
 import { buildPermissionsByRoleMatrix } from './utils';
 
@@ -15,7 +16,7 @@ const LibrariesUserManager = () => {
   const intl = useIntl();
   const { username } = useParams();
   const {
-    libraryId, permissions, roles, resources,
+    libraryId, permissions, roles, resources, canManageTeam,
   } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
@@ -42,7 +43,13 @@ const LibrariesUserManager = () => {
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
-        actions={[]}
+        actions={user && canManageTeam
+          ? [<AssignNewRoleTrigger
+              username={user.username}
+              libraryId={libraryId}
+              currentUserRoles={userRoles.map(role => role.role)}
+          />]
+          : []}
       >
         <Container className="bg-light-200 p-5">
           {isLoading ? <Skeleton count={2} height={200} /> : null}

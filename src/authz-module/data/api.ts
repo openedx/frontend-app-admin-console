@@ -24,7 +24,6 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
-// TODO: replece api path once is created
 export const getTeamMembers = async (object: string): Promise<TeamMember[]> => {
   const { data } = await getAuthenticatedHttpClient().get(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
   return camelCaseObject(data.results);
