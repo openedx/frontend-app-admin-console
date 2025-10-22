@@ -25,12 +25,12 @@ describe('TeamTable', () => {
     results: [
       {
         email: 'alice@example.com',
-        roles: ['Admin', 'Editor'],
+        roles: ['admin', 'editor'],
         username: 'alice',
       },
       {
         email: 'bob@example.com',
-        roles: ['Viewer'],
+        roles: ['viewer'],
         username: 'bob',
       },
     ],

@@ -39,7 +39,7 @@ const AssignNewRoleModal: FC<AssignNewRoleModalProps> = ({
 
       <ModalDialog.Body className="my-4">
         <Form.Group controlId="role_options">
-          <Form.Label>{intl.formatMessage(messages['library.authz.team.table.roles'])}</Form.Label>
+          <Form.Label>{intl.formatMessage(messages['library.authz.manage.role.select.label'])}</Form.Label>
           <Form.Control as="select" name="role" value={selectedRole} onChange={handleChangeSelectedRole}>
             <option value="" disabled>Select a role</option>
             {roleOptions.map((role) => <option key={role.role} value={role.role}>{role.name}</option>)}
