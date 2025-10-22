@@ -57,7 +57,7 @@ const LibrariesTeamManager = () => {
               {!libraryRoles ? <Skeleton count={2} height={200} /> : null}
               {libraryRoles && libraryRoles.map(role => (
                 <RoleCard
-                  key={`${role}-description`}
+                  key={`${role.role}-description`}
                   title={role.name}
                   userCounter={role.userCount}
                   description={role.description}
