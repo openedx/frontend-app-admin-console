@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
-import { useToastManager } from 'authz-module/libraries-manager/ToastManagerContext';
+import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
 import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
+import ConfirmDeletionModal from './components/ConfirmDeletionModal';
 import { useLibrary, useRevokeUserRoles, useTeamMembers } from '../data/hooks';
 import { buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
-import ConfirmDeletionModal from './components/ConfirmDeletionModal';
 
 const LibrariesUserManager = () => {
   const intl = useIntl();
@@ -22,6 +23,15 @@ const LibrariesUserManager = () => {
   const {
     libraryId, permissions, roles, resources, canManageTeam,
   } = useLibraryAuthZ();
+  const teamMembersPath = `/authz/${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
+
+  useEffect(() => {
+    if (!canManageTeam) {
+      navigate(teamMembersPath);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canManageTeam]);
+
   const { data: library } = useLibrary(libraryId);
   const { mutate: revokeUserRoles, isPending: isRevokingUserRole } = useRevokeUserRoles();
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
@@ -39,10 +49,8 @@ const LibrariesUserManager = () => {
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const { handleShowToast, handleDiscardToast } = useToastManager();
 
-  const { data: teamMember, isLoading: isLoadingTeamMember } = useTeamMembers(libraryId, querySettings);
+  const { data: teamMember, isLoading: isLoadingTeamMember, isFetching: isFetchingMember } = useTeamMembers(libraryId, querySettings);
   const user = teamMember?.results?.find(member => member.username === username);
-
-  const teamMembersPath = `/authz/${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
 
   const userRoles = useMemo(() => {
     const assignedRoles = roles.filter(role => user?.roles.includes(role.role));
@@ -50,6 +58,15 @@ const LibrariesUserManager = () => {
       roles: assignedRoles, permissions, resources, intl,
     });
   }, [roles, user?.roles, permissions, resources, intl]);
+
+  useEffect(() => {
+    if (!isFetchingMember) {
+      if (!isLoadingTeamMember && !user?.username) {
+        navigate(teamMembersPath);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFetchingMember, isLoadingTeamMember, user?.username]);
 
   const handleCloseConfirmDeletionModal = () => {
     setRoleToDelete(null);
@@ -86,10 +103,10 @@ const LibrariesUserManager = () => {
         handleCloseConfirmDeletionModal();
       },
       onError: (error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to revoke user role:', error);
+        logError(error);
+        // eslint-disable-next-line react/no-unstable-nested-components
+        handleShowToast(intl.formatMessage(messages['library.authz.team.default.error.toast.message'], { b: chunk => <b>{chunk}</b>, br: () => <br /> }));
         handleCloseConfirmDeletionModal();
-        // Could add error toast here if needed
       },
     });
   };

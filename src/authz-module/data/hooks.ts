@@ -88,7 +88,6 @@ export const useAssignTeamMembersRole = () => {
   });
 };
 
-
 /**
  * React Query hook to remove roles for a specific team member within a scope.
  *

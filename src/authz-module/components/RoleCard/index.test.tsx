@@ -20,7 +20,7 @@ describe('RoleCard', () => {
     title: 'Admin',
     objectName: 'Test Library',
     description: 'Can manage everything',
-    showDelete: true,
+    handleDelete: jest.fn(),
     userCounter: 2,
     permissionsByResource: [
       {
@@ -75,8 +75,8 @@ describe('RoleCard', () => {
     expect(screen.getByTestId('manage-icon')).toBeInTheDocument();
   });
 
-  it('does not show delete button when showDelete is false', () => {
-    renderWrapper(<RoleCard {...defaultProps} showDelete={false} />);
+  it('does not show delete button when handleDelete is not passed', () => {
+    renderWrapper(<RoleCard {...defaultProps} handleDelete={undefined} />);
     expect(screen.queryByRole('button', { name: /delete role action/i })).not.toBeInTheDocument();
   });
 

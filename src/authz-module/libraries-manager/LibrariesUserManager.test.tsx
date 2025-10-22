@@ -4,6 +4,7 @@ import { renderWrapper } from '@src/setupTest';
 import LibrariesUserManager from './LibrariesUserManager';
 import { useLibraryAuthZ } from './context';
 import { useLibrary, useTeamMembers } from '../data/hooks';
+import { ToastManagerProvider } from './ToastManagerContext';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -17,6 +18,11 @@ jest.mock('./context', () => ({
 jest.mock('../data/hooks', () => ({
   useLibrary: jest.fn(),
   useTeamMembers: jest.fn(),
+  useRevokeUserRoles: jest.fn(() => ({
+    isPending: false,
+    mutation: jest.fn(),
+
+  })),
 }));
 jest.mock('../components/RoleCard', () => ({
   __esModule: true,
@@ -75,7 +81,7 @@ describe('LibrariesUserManager', () => {
   });
 
   it('renders the user roles correctly', () => {
-    renderWrapper(<LibrariesUserManager />);
+    renderWrapper(<ToastManagerProvider><LibrariesUserManager /></ToastManagerProvider>);
 
     // Breadcrumb check
     expect(screen.getByText('Manage Access')).toBeInTheDocument();
