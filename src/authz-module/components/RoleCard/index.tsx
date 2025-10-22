@@ -18,7 +18,7 @@ interface RoleCardProps extends CardTitleProps {
   permissions: any[];
 }
 
-const CardTitle = ({ title, userCounter }: CardTitleProps) => (
+const CardTitle = ({ title, userCounter = null }: CardTitleProps) => (
   <div className="d-flex align-items-center">
     <span className="mr-4 text-primary">{title}</span>
     {userCounter !== null && (
