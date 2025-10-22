@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import {
-  ActionRow, Icon, ModalDialog, Stack,
+  ActionRow, AlertModal, Icon, ModalDialog, Stack,
   StatefulButton,
 } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
@@ -26,37 +26,12 @@ const ConfirmDeletionModal: FC<ConfirmDeletionModalProps> = ({
 }) => {
   const intl = useIntl();
   return (
-    <ModalDialog
+    <AlertModal
       title={intl.formatMessage(messages['library.authz.team.remove.user.modal.title'])}
       isOpen={isOpen}
       onClose={close}
       size="lg"
-      hasCloseButton
-      isFullscreenOnMobile
-      isOverflowVisible={false}
-    >
-      <ModalDialog.Header>
-        <ModalDialog.Title className="text-primary-500">
-          {intl.formatMessage(messages['library.authz.team.remove.user.modal.title'])}
-        </ModalDialog.Title>
-      </ModalDialog.Header>
-
-      <ModalDialog.Body>
-        <Stack gap={3}>
-          <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.1'], {
-            userName: context.userName,
-            scope: context.scope,
-            role: context.role,
-          })}
-          </p>
-          {context.rolesCount === 1 && (
-            <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.2'])}</p>
-          )}
-          <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.3'])}</p>
-        </Stack>
-      </ModalDialog.Body>
-
-      <ModalDialog.Footer>
+      footerNode={(
         <ActionRow>
           <ModalDialog.CloseButton variant="tertiary">
             {intl.formatMessage(messages['libraries.authz.manage.cancel.button'])}
@@ -65,8 +40,8 @@ const ConfirmDeletionModal: FC<ConfirmDeletionModalProps> = ({
             className="px-4"
             variant="danger"
             labels={{
-              default: intl.formatMessage(messages['libraries.authz.manage.save.button']),
-              pending: intl.formatMessage(messages['libraries.authz.manage.saving.button']),
+              default: intl.formatMessage(messages['libraries.authz.manage.remove.button']),
+              pending: intl.formatMessage(messages['libraries.authz.manage.removing.button']),
             }}
             icons={{
               pending: <Icon src={SpinnerSimple} />,
@@ -76,8 +51,23 @@ const ConfirmDeletionModal: FC<ConfirmDeletionModalProps> = ({
             disabledStates={['pending']}
           />
         </ActionRow>
-      </ModalDialog.Footer>
-    </ModalDialog>
+      )}
+      isOverflowVisible={false}
+    >
+      <Stack gap={3}>
+        <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.1'], {
+          userName: context.userName,
+          scope: context.scope,
+          role: context.role,
+        })}
+        </p>
+        {context.rolesCount === 1 && (
+        <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.2'])}</p>
+        )}
+        <p>{intl.formatMessage(messages['library.authz.team.remove.user.modal.body.3'])}</p>
+      </Stack>
+
+    </AlertModal>
   );
 };
 

@@ -5,6 +5,7 @@ const messages = defineMessages({
     id: 'libraries.authz.manage.assign.new.role.title',
     defaultMessage: 'Add New Role',
     description: 'Libraries AuthZ assign a new role to a user button title',
+  },
   'library.authz.team.remove.user.modal.title': {
     id: 'library.authz.team.remove.user.modal.title',
     defaultMessage: 'Remove role?',
@@ -35,15 +36,15 @@ const messages = defineMessages({
     defaultMessage: 'Cancel',
     description: 'Libraries AuthZ cancel button title',
   },
-  'libraries.authz.manage.saving.button': {
-    id: 'libraries.authz.manage.saving.button',
-    defaultMessage: 'Saving...',
-    description: 'Libraries AuthZ saving button title',
+  'libraries.authz.manage.removing.button': {
+    id: 'libraries.authz.manage.removing.button',
+    defaultMessage: 'Removing...',
+    description: 'Libraries AuthZ removing button title',
   },
-  'libraries.authz.manage.save.button': {
-    id: 'libraries.authz.manage.save.button',
-    defaultMessage: 'Save',
-    description: 'Libraries AuthZ save button title',
+  'libraries.authz.manage.remove.button': {
+    id: 'libraries.authz.manage.remove.button',
+    defaultMessage: 'Remove',
+    description: 'Libraries AuthZ remove button title',
   },
   'libraries.authz.manage.assign.role.success': {
     id: 'libraries.authz.manage.assign.role.success',
