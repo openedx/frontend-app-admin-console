@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
 import AuthZModule from './index';
 
 jest.mock('./libraries-manager', () => ({
@@ -32,11 +33,13 @@ describe('AuthZModule', () => {
     const path = '/libraries/lib:123';
 
     render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[path]}>
-          <AuthZModule />
-        </MemoryRouter>
-      </QueryClientProvider>,
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[path]}>
+            <AuthZModule />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </IntlProvider>,
     );
 
     expect(screen.getByTestId('loading-page')).toBeInTheDocument();
@@ -51,11 +54,13 @@ describe('AuthZModule', () => {
     const path = '/libraries/lib:123/testuser';
 
     render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[path]}>
-          <AuthZModule />
-        </MemoryRouter>
-      </QueryClientProvider>,
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[path]}>
+            <AuthZModule />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </IntlProvider>,
     );
     await waitFor(() => {
       expect(screen.getByTestId('libraries-user-manager')).toBeInTheDocument();
