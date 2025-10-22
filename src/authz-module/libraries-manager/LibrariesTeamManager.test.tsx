@@ -1,4 +1,5 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary } from '@src/authz-module/data/hooks';
@@ -96,11 +97,13 @@ describe('LibrariesTeamManager', () => {
   });
 
   it('renders role cards when "Roles" tab is selected', async () => {
+    const user = userEvent.setup();
+
     renderWrapper(<LibrariesTeamManager />);
 
     // Click on "Roles" tab
     const rolesTab = await screen.findByRole('tab', { name: /roles/i });
-    fireEvent.click(rolesTab);
+    await user.click(rolesTab);
 
     const roleCards = await screen.findAllByTestId('role-card');
 
