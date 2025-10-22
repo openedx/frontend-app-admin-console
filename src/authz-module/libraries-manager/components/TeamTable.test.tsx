@@ -23,12 +23,12 @@ describe('TeamTable', () => {
   const mockTeamMembers = [
     {
       email: 'alice@example.com',
-      roles: ['Admin', 'Editor'],
+      roles: ['admin', 'editor'],
       username: 'alice',
     },
     {
       email: 'bob@example.com',
-      roles: ['Viewer'],
+      roles: ['viewer'],
       username: 'bob',
     },
   ];
@@ -37,6 +37,38 @@ describe('TeamTable', () => {
     libraryId: 'lib:123',
     canManageTeam: true,
     username: 'alice',
+    roles: [
+      {
+        role: 'admin',
+        permissions: [
+          'delete_library',
+          'publish_library',
+          'manage_library_team',
+        ],
+        userCount: 3,
+        name: 'Admin',
+        description: 'The Admin role',
+      },
+      {
+        role: 'editor',
+        permissions: [
+          'edit_library',
+          'publish_library',
+        ],
+        userCount: 3,
+        name: 'Editor',
+        description: 'The Editor role',
+      },
+      {
+        role: 'viewer',
+        permissions: [
+          'view_library',
+        ],
+        userCount: 3,
+        name: 'Viewer',
+        description: 'The Viewer role',
+      },
+    ],
   };
 
   beforeEach(() => {
