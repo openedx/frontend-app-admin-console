@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
-  useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole,
+  useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -238,5 +238,105 @@ describe('usePermissionsByRole', () => {
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
       expect(result.current.error).toEqual(new Error('Failed to add members'));
     });
+  });
+});
+
+describe('useRevokeUserRoles', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('successfully revokes user roles', async () => {
+    const mockResponse = {
+      completed: [
+        {
+          userIdentifiers: 'jdoe',
+          status: 'role_removed',
+        },
+      ],
+      errors: [],
+    };
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      delete: jest.fn().mockResolvedValue({ data: mockResponse }),
+    });
+
+    const { result } = renderHook(() => useRevokeUserRoles(), {
+      wrapper: createWrapper(),
+    });
+
+    const revokeRoleData = {
+      scope: 'lib:123',
+      users: 'jdoe',
+      role: 'author',
+    };
+
+    await act(async () => {
+      result.current.mutate({ data: revokeRoleData });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('handles error when revoking roles fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      delete: jest.fn().mockRejectedValue(new Error('Failed to revoke roles')),
+    });
+
+    const { result } = renderHook(() => useRevokeUserRoles(), {
+      wrapper: createWrapper(),
+    });
+
+    const revokeRoleData = {
+      scope: 'lib:123',
+      users: 'jdoe',
+      role: 'author',
+    };
+
+    await act(async () => {
+      result.current.mutate({ data: revokeRoleData });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.error).toEqual(new Error('Failed to revoke roles'));
+  });
+
+  it('constructs URL with correct query parameters', async () => {
+    const mockDelete = jest.fn().mockResolvedValue({
+      data: { completed: [], errors: [] },
+    });
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      delete: mockDelete,
+    });
+
+    const { result } = renderHook(() => useRevokeUserRoles(), {
+      wrapper: createWrapper(),
+    });
+
+    const revokeRoleData = {
+      scope: 'lib:org/test-lib',
+      users: 'user1@example.com',
+      role: 'instructor',
+    };
+
+    await act(async () => {
+      result.current.mutate({ data: revokeRoleData });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockDelete).toHaveBeenCalled();
+    const calledUrl = new URL(mockDelete.mock.calls[0][0]);
+
+    // Verify the URL contains the correct query parameters
+    expect(calledUrl.searchParams.get('users')).toBe(revokeRoleData.users);
+    expect(calledUrl.searchParams.get('role')).toBe(revokeRoleData.role);
+    expect(calledUrl.searchParams.get('scope')).toBe(revokeRoleData.scope);
   });
 });

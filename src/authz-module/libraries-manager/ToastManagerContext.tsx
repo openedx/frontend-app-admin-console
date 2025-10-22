@@ -35,17 +35,15 @@ export const ToastManagerProvider = ({ handleClose, children }: ToastManagerProv
     <ToastManagerContext.Provider value={value}>
       {children}
 
-      {toastMessage && (
-        <Toast
-          onClose={() => {
-            if (handleClose) { handleClose(); }
-            setToastMessage(null);
-          }}
-          show={!!toastMessage}
-        >
-          {toastMessage}
-        </Toast>
-      )}
+      <Toast
+        onClose={() => {
+          if (handleClose) { handleClose(); }
+          setToastMessage(null);
+        }}
+        show={!!toastMessage}
+      >
+        {toastMessage ?? ''}
+      </Toast>
     </ToastManagerContext.Provider>
   );
 };
