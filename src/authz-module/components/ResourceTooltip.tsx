@@ -11,7 +11,7 @@ const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
     key={`overlay-${resourceGroup.key}`}
     placement="auto"
     overlay={(
-      <Popover variant="light" id={`tooltip-${resourceGroup.label}`}>
+      <Popover id={`tooltip-${resourceGroup.label}`}>
         <Popover.Content className="p-3">
           <h4 className="text-primary">{resourceGroup.label}</h4>
           <p className="small">{resourceGroup.description}</p>
