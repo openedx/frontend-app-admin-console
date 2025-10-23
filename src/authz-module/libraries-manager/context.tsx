@@ -6,6 +6,7 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { PermissionMetadata, ResourceMetadata, Role } from 'types';
+import { CustomErrors } from '@src/constants';
 import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
 
 const LIBRARY_TEAM_PERMISSIONS = ['view_library_team', 'manage_library_team'];
@@ -38,7 +39,7 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
 
   // TODO: Implement a custom error view
   if (!libraryId) {
-    throw new Error('MissingLibrary');
+    throw new Error(CustomErrors.NOT_FOUND);
   }
   const permissions = LIBRARY_TEAM_PERMISSIONS.map(action => ({ action, scope: libraryId }));
 
@@ -46,7 +47,7 @@ export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:
   const [{ allowed: canViewTeam }, { allowed: canManageTeam }] = userPermissions;
 
   if (!canViewTeam && !canManageTeam) {
-    throw new Error('NoAccess');
+    throw new Error(CustomErrors.NO_ACCESS);
   }
 
   const { data: libraryRoles } = usePermissionsByRole(libraryId);

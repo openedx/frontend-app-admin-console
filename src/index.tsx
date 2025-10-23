@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppProvider, ErrorPage } from '@edx/frontend-platform/react';
 import {
-  APP_INIT_ERROR, APP_READY, subscribe, initialize,
+  APP_INIT_ERROR, APP_READY, subscribe, initialize, mergeConfig,
 } from '@edx/frontend-platform';
 import AuthZModule from 'authz-module';
 
@@ -43,4 +43,11 @@ subscribe(APP_INIT_ERROR, (error) => {
 initialize({
   messages,
   requireAuthenticatedUser: true,
+  handlers: {
+    config: () => {
+      mergeConfig({
+        COURSE_AUTHORING_MICROFRONTEND_URL: process.env.COURSE_AUTHORING_MICROFRONTEND_URL || null,
+      }, 'AdminConsoleAppConfig');
+    },
+  },
 });
