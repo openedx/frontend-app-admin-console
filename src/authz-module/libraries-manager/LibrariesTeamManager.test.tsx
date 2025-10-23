@@ -126,12 +126,12 @@ describe('LibrariesTeamManager', () => {
     const permissionsTab = await screen.findByRole('tab', { name: /permissions/i });
     await user.click(permissionsTab);
 
-    const permissionsMatrix = await screen.findByTestId('permissions-matrix');
-    const metrixScope = within(permissionsMatrix);
+    const tablePermissionMatrix = await screen.getByRole('table');
+    const matrixScope = within(tablePermissionMatrix);
 
-    expect(metrixScope.getByText('Instructor')).toBeInTheDocument();
-    expect(metrixScope.getByText('Library')).toBeInTheDocument();
-    expect(metrixScope.getByText('edit')).toBeInTheDocument();
-    expect(metrixScope.getByText('view')).toBeInTheDocument();
+    expect(matrixScope.getByText('Library')).toBeInTheDocument();
+    expect(matrixScope.getByText('Instructor')).toBeInTheDocument();
+    expect(matrixScope.getByText('edit')).toBeInTheDocument();
+    expect(matrixScope.getByText('view')).toBeInTheDocument();
   });
 });

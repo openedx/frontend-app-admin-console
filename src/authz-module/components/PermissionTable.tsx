@@ -10,7 +10,7 @@ type PermissionTableProps = {
 };
 
 const PermissionTable = ({ permissionsTable, roles }: PermissionTableProps) => (
-  <table className="pgn__data-table bg-light-100" data-testid="permissions-matrix">
+  <table className="pgn__data-table bg-light-100">
     <thead>
       <tr>
         <th className="bg-light-100" aria-hidden="true" />
