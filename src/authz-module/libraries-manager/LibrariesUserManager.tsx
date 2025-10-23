@@ -21,9 +21,18 @@ const LibrariesUserManager = () => {
   const { data: library } = useLibrary(libraryId);
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageManageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
+  const querySettings = {
+    order: null,
+    pageIndex: 0,
+    pageSize: 1,
+    roles: null,
+    search: username || null,
+    sortBy: null,
+  };
 
-  const { data: teamMembers, isLoading } = useTeamMembers(libraryId);
-  const user = teamMembers?.find(member => member.username === username);
+  const { data: teamMember, isLoading: isLoadingTeamMember } = useTeamMembers(libraryId, querySettings);
+  const user = teamMember?.results?.find(member => member.username === username);
+
   const userRoles = useMemo(() => {
     const assignedRoles = roles.filter(role => user?.roles.includes(role.role))
       .map(role => ({
@@ -52,10 +61,10 @@ const LibrariesUserManager = () => {
           : []}
       >
         <Container className="bg-light-200 p-5">
-          {isLoading ? <Skeleton count={2} height={200} /> : null}
+          {isLoadingTeamMember ? <Skeleton count={2} height={200} /> : null}
           {userRoles && userRoles.map(role => (
             <RoleCard
-              key={`${role}-${username}`}
+              key={`${role.role}-${username}`}
               title={role.name}
               objectName={library.title}
               description={role.description}

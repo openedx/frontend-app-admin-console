@@ -2,8 +2,8 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
-import TeamTable from './TeamTable';
-import { useLibraryAuthZ } from '../context';
+import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
+import TeamTable from './index';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -15,23 +15,26 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   useTeamMembers: jest.fn(),
 }));
 
-jest.mock('../context', () => ({
+jest.mock('@src/authz-module/libraries-manager/context', () => ({
   useLibraryAuthZ: jest.fn(),
 }));
 
 describe('TeamTable', () => {
-  const mockTeamMembers = [
-    {
-      email: 'alice@example.com',
-      roles: ['admin', 'editor'],
-      username: 'alice',
-    },
-    {
-      email: 'bob@example.com',
-      roles: ['viewer'],
-      username: 'bob',
-    },
-  ];
+  const mockTeamMembers = {
+    count: 2,
+    results: [
+      {
+        email: 'alice@example.com',
+        roles: ['admin', 'editor'],
+        username: 'alice',
+      },
+      {
+        email: 'bob@example.com',
+        roles: ['viewer'],
+        username: 'bob',
+      },
+    ],
+  };
 
   const mockAuthZ = {
     libraryId: 'lib:123',

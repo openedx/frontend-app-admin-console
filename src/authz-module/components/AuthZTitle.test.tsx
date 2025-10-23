@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import AuthZTitle, { AuthZTitleProps } from './AuthZTitle';
 
 jest.mock('react-router-dom', () => ({
@@ -58,10 +59,11 @@ describe('AuthZTitle', () => {
 
     render(<AuthZTitle {...defaultProps} actions={actions} />);
 
-    actions.forEach(({ label, onClick }) => {
+    actions.forEach(async ({ label, onClick }) => {
+      const user = userEvent.setup();
       const button = screen.getByRole('button', { name: label });
       expect(button).toBeInTheDocument();
-      fireEvent.click(button);
+      await user.click(button);
       expect(onClick).toHaveBeenCalled();
     });
   });

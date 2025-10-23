@@ -13,6 +13,7 @@ export interface TeamMember {
   fullName: string;
   email: string;
   roles: string[];
+  createdAt: string;
 }
 
 export interface LibraryMetadata {

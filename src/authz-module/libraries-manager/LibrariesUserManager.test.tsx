@@ -62,13 +62,15 @@ describe('LibrariesUserManager', () => {
 
     // Mock team members
     (useTeamMembers as jest.Mock).mockReturnValue({
-      data: [
-        {
-          username: 'testuser',
-          email: 'testuser@example.com',
-          roles: ['admin'],
-        },
-      ],
+      data: {
+        results: [
+          {
+            username: 'testuser',
+            email: 'testuser@example.com',
+            roles: ['admin'],
+          },
+        ],
+      },
     });
   });
 
