@@ -29,7 +29,7 @@ const LibrariesUserManager = () => {
     if (!canManageTeam) {
       navigate(teamMembersPath);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canManageTeam]);
 
   const { data: library } = useLibrary(libraryId);
@@ -49,7 +49,9 @@ const LibrariesUserManager = () => {
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const { handleShowToast, handleDiscardToast } = useToastManager();
 
-  const { data: teamMember, isLoading: isLoadingTeamMember, isFetching: isFetchingMember } = useTeamMembers(libraryId, querySettings);
+  const {
+    data: teamMember, isLoading: isLoadingTeamMember, isFetching: isFetchingMember,
+  } = useTeamMembers(libraryId, querySettings);
   const user = teamMember?.results?.find(member => member.username === username);
 
   const userRoles = useMemo(() => {
@@ -65,7 +67,7 @@ const LibrariesUserManager = () => {
         navigate(teamMembersPath);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetchingMember, isLoadingTeamMember, user?.username]);
 
   const handleCloseConfirmDeletionModal = () => {
@@ -110,13 +112,6 @@ const LibrariesUserManager = () => {
       },
     });
   };
-
-  useEffect(() => {
-    if (!isLoadingTeamMember && !userRoles.length) {
-      navigate(teamMembersPath);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userRoles.length]);
 
   return (
     <div className="authz-libraries">

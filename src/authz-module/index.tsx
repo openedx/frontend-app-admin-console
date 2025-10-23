@@ -24,7 +24,6 @@ const AuthZModule = () => (
             </Routes>
           </Suspense>
         </ToastManagerProvider>
-
       </ErrorBoundary>
     )}
   </QueryErrorResetBoundary>
