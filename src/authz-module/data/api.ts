@@ -33,7 +33,6 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
-// TODO: replece api path once is created
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
 
