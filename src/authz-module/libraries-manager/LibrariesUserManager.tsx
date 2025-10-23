@@ -8,7 +8,7 @@ import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
 import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
 import { useLibrary, useTeamMembers } from '../data/hooks';
-import { buildPermissionsByRoleMatrix } from './utils';
+import { buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
 
@@ -34,14 +34,10 @@ const LibrariesUserManager = () => {
   const user = teamMember?.results?.find(member => member.username === username);
 
   const userRoles = useMemo(() => {
-    const assignedRoles = roles.filter(role => user?.roles.includes(role.role))
-      .map(role => ({
-        ...role,
-        permissions: buildPermissionsByRoleMatrix({
-          rolePermissions: role.permissions, permissions, resources, intl,
-        }),
-      }));
-    return assignedRoles;
+    const assignedRoles = roles.filter(role => user?.roles.includes(role.role));
+    return buildPermissionMatrixByRole({
+      roles: assignedRoles, permissions, resources, intl,
+    });
   }, [roles, user?.roles, permissions, resources, intl]);
 
   return (
@@ -69,7 +65,7 @@ const LibrariesUserManager = () => {
               objectName={library.title}
               description={role.description}
               showDelete
-              permissions={role.permissions as any[]}
+              permissionsByResource={role.resources as any[]}
             />
           ))}
         </Container>

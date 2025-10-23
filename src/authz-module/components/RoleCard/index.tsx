@@ -15,7 +15,7 @@ interface RoleCardProps extends CardTitleProps {
   objectName?: string | null;
   description: string;
   showDelete?: boolean;
-  permissions: any[];
+  permissionsByResource: any[];
 }
 
 const CardTitle = ({ title, userCounter = null }: CardTitleProps) => (
@@ -31,7 +31,7 @@ const CardTitle = ({ title, userCounter = null }: CardTitleProps) => (
 );
 
 const RoleCard = ({
-  title, objectName, description, showDelete, permissions, userCounter,
+  title, objectName, description, showDelete, permissionsByResource, userCounter,
 }: RoleCardProps) => {
   const intl = useIntl();
 
@@ -51,13 +51,11 @@ const RoleCard = ({
         title={intl.formatMessage(messages['authz.permissions.title'])}
       >
         <Container>
-          {permissions.map(({ key, label, actions }) => (
+          {permissionsByResource.map((resourceGroup) => (
             <PermissionRow
-              key={`${title}-${key}`}
-              resourceLabel={label}
-              actions={actions}
+              key={`${title}-${resourceGroup.key}`}
+              resource={resourceGroup}
             />
-
           ))}
         </Container>
       </Collapsible>

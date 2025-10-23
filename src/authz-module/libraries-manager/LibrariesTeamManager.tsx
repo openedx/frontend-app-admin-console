@@ -8,9 +8,10 @@ import { useLocation } from 'react-router-dom';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import RoleCard from '../components/RoleCard';
+import PermissionTable from '../components/PermissionTable';
 import { useLibraryAuthZ } from './context';
 import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
-import { buildPermissionsByRoleMatrix } from './utils';
+import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
 
@@ -23,12 +24,18 @@ const LibrariesTeamManager = () => {
   const { data: library } = useLibrary(libraryId);
   const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
-  const libraryRoles = useMemo(() => roles.map(role => ({
-    ...role,
-    permissions: buildPermissionsByRoleMatrix({
-      rolePermissions: role.permissions, permissions, resources, intl,
-    }),
-  })), [roles, permissions, resources, intl]);
+
+  const [libraryPermissionsByRole, libraryPermissionsByResource] = useMemo(() => {
+    if (!roles && !permissions && !resources) { return [null, null]; }
+    const permissionsByRole = buildPermissionMatrixByRole({
+      roles, permissions, resources, intl,
+    });
+    const permissionsByResource = buildPermissionMatrixByResource({
+      roles, permissions, resources, intl,
+    });
+
+    return [permissionsByRole, permissionsByResource];
+  }, [roles, permissions, resources, intl]);
 
   return (
     <div className="authz-libraries">
@@ -54,20 +61,23 @@ const LibrariesTeamManager = () => {
           </Tab>
           <Tab eventKey="roles" title={intl.formatMessage(messages['library.authz.tabs.roles'])}>
             <Container className="p-5">
-              {!libraryRoles ? <Skeleton count={2} height={200} /> : null}
-              {libraryRoles && libraryRoles.map(role => (
-                <RoleCard
-                  key={`${role.role}-description`}
-                  title={role.name}
-                  userCounter={role.userCount}
-                  description={role.description}
-                  permissions={role.permissions as any[]}
-                />
-              ))}
+              {!libraryPermissionsByRole ? <Skeleton count={2} height={200} />
+                : libraryPermissionsByRole.map(role => (
+                  <RoleCard
+                    key={`${role.role}-description`}
+                    title={role.name}
+                    userCounter={role.userCount}
+                    description={role.description}
+                    permissionsByResource={role.resources as any[]}
+                  />
+                ))}
             </Container>
           </Tab>
           <Tab id="libraries-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['library.authz.tabs.permissions'])}>
-            Permissions tab.
+            <Container className="p-5 container-mw-lg">
+              {!libraryPermissionsByResource ? <Skeleton count={2} height={200} />
+                : <PermissionTable permissionsTable={libraryPermissionsByResource} roles={roles} />}
+            </Container>
           </Tab>
         </Tabs>
       </AuthZLayout>
