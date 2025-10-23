@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 import { useIntl } from '@edx/frontend-platform/i18n';
@@ -80,6 +80,10 @@ const TeamTable = () => {
     [roles],
   );
 
+  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
+
+  useEffect(() => () => fetchData.cancel(), [fetchData]);
+
   return (
     <DataTable
       isFilterable
@@ -90,7 +94,7 @@ const TeamTable = () => {
       manualSortBy
       defaultColumnValues={{ Filter: TextFilter }}
       numBreakoutFilters={3}
-      fetchData={debounce(handleTableFetch, 1000)}
+      fetchData={fetchData}
       data={rows}
       itemCount={teamMembers?.count || 0}
       pageCount={pageCount}

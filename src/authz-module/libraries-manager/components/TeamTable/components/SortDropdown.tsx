@@ -35,8 +35,7 @@ const SortDropdown: FC = () => {
   const SORT_LABELS: Record<string, string> = useMemo(() => ({
     'name-a-z': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-a-z', defaultMessage: 'Name A-Z' }),
     'name-z-a': intl.formatMessage({ id: 'authz.libraries.team.table.sort.name-z-a', defaultMessage: 'Name Z-A' }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
+  }), [intl]);
 
   const currentSort = useMemo(() => {
     if (!state?.sortBy?.length) { return undefined; }
@@ -63,8 +62,7 @@ const SortDropdown: FC = () => {
       ...option,
       label: SORT_LABELS[key],
     })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [SORT_LABELS],
   );
 
   const currentSortLabel = sortOrder ? SORT_LABELS[sortOrder] : 'Sort';
