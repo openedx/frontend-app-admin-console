@@ -28,13 +28,23 @@ jest.mock('../data/hooks', () => ({
 
 jest.mock('../components/RoleCard', () => ({
   __esModule: true,
-  default: ({ title, description, handleDelete }: { title: string; description: string; handleDelete: () => void }) => (
+  default: ({
+    title,
+    description,
+    handleDelete,
+  }: {
+    title: string;
+    description: string;
+    handleDelete?: () => void;
+  }) => (
     <div data-testid="role-card">
       <div>{title}</div>
       <div>{description}</div>
-      <button type="button" onClick={handleDelete} data-testid={`delete-role-${title}`}>
-        Delete
-      </button>
+      {handleDelete && (
+        <button type="button" onClick={handleDelete} data-testid={`delete-role-${title}`}>
+          Delete
+        </button>
+      )}
     </div>
   ),
 }));
@@ -91,13 +101,15 @@ describe('LibrariesUserManager', () => {
 
     // Mock team members
     (useTeamMembers as jest.Mock).mockReturnValue({
-      data: [
-        {
-          username: 'testuser',
-          email: 'testuser@example.com',
-          roles: ['admin', 'instructor'],
-        },
-      ],
+      data: {
+        results: [
+          {
+            username: 'testuser',
+            email: 'testuser@example.com',
+            roles: ['admin', 'instructor'],
+          },
+        ],
+      },
       isLoading: false,
       isFetching: false,
     });
@@ -255,13 +267,15 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
 
       (useTeamMembers as jest.Mock).mockReturnValue({
-        data: [
-          {
-            username: 'testuser',
-            email: 'testuser@example.com',
-            roles: ['admin'],
-          },
-        ],
+        data: {
+          results: [
+            {
+              username: 'testuser',
+              email: 'testuser@example.com',
+              roles: ['admin'],
+            },
+          ],
+        },
         isLoading: false,
         isFetching: false,
       });
