@@ -42,7 +42,7 @@ const RoleCard = ({
         subtitle={(objectName && <span className="text-info-400 lead">{objectName}</span>) || ''}
         actions={
           handleDelete && (
-            <IconButton variant="danger" onClick={handleDelete} alt="Delete role action" src={Delete} />
+            <IconButton variant="danger" onClick={handleDelete} alt={intl.formatMessage(messages['authz.role.card.delete.action.alt'])} src={Delete} />
           )
         }
       />

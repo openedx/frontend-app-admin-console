@@ -56,7 +56,7 @@ describe('RoleCard', () => {
     expect(screen.getByText('Can manage everything')).toBeInTheDocument();
 
     // Delete button
-    expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Delete role action/i })).toBeInTheDocument();
 
     // Collapsible title
     expect(screen.getByText('Permissions')).toBeInTheDocument();

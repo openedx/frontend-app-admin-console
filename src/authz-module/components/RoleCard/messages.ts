@@ -46,6 +46,11 @@ const messages = defineMessages({
     defaultMessage: 'Reuse {resource}',
     description: 'Default label for the reuse action',
   },
+  'authz.role.card.delete.action.alt': {
+    id: 'authz.role.card.delete.action.alt',
+    defaultMessage: 'Delete role action',
+    description: 'Alt description for delete button',
+  },
 });
 
 export default messages;

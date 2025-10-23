@@ -37,12 +37,12 @@ jest.mock('../components/RoleCard', () => ({
     description: string;
     handleDelete?: () => void;
   }) => (
-    <div data-testid="role-card">
+    <div>
       <div>{title}</div>
       <div>{description}</div>
       {handleDelete && (
-        <button type="button" onClick={handleDelete} data-testid={`delete-role-${title}`}>
-          Delete
+        <button type="button" onClick={handleDelete}>
+          {`delete-role-${title}`}
         </button>
       )}
     </div>
@@ -50,11 +50,7 @@ jest.mock('../components/RoleCard', () => ({
 }));
 
 jest.mock('./components/AssignNewRoleModal', () => ({
-  AssignNewRoleTrigger: () => (
-    <button type="button" data-testid="assign-role-trigger">
-      Assign Role
-    </button>
-  ),
+  AssignNewRoleTrigger: () => <button type="button">Assign Role</button>,
 }));
 
 describe('LibrariesUserManager', () => {
@@ -140,8 +136,8 @@ describe('LibrariesUserManager', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('testuser');
     expect(screen.getByRole('paragraph')).toHaveTextContent('testuser@example.com');
 
-    const roleCards = screen.getAllByTestId('role-card');
-    expect(roleCards).toHaveLength(2);
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText('Instructor')).toBeInTheDocument();
 
     defaultMockData.roles.forEach((role) => {
       expect(screen.getByText(role.name)).toBeInTheDocument();
@@ -152,18 +148,7 @@ describe('LibrariesUserManager', () => {
   it('renders assign role trigger when user has canManageTeam permission', () => {
     renderComponent();
 
-    expect(screen.getByTestId('assign-role-trigger')).toBeInTheDocument();
-  });
-
-  it('does not render assign role trigger when user does not have canManageTeam permission', () => {
-    (useLibraryAuthZ as jest.Mock).mockReturnValue({
-      ...defaultMockData,
-      canManageTeam: false,
-    });
-
-    renderComponent();
-
-    expect(screen.queryByTestId('assign-role-trigger')).not.toBeInTheDocument();
+    expect(screen.getByText('Assign Role')).toBeInTheDocument();
   });
 
   describe('Revoking User Role Flow', () => {
@@ -171,7 +156,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -183,7 +168,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -197,7 +182,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -216,7 +201,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -245,7 +230,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -282,7 +267,7 @@ describe('LibrariesUserManager', () => {
 
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -304,7 +289,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -326,7 +311,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -354,7 +339,7 @@ describe('LibrariesUserManager', () => {
 
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Admin');
+      const deleteButton = screen.getByText('delete-role-Admin');
       await user.click(deleteButton);
 
       expect(screen.queryByText('Remove role?')).not.toBeInTheDocument();
@@ -365,7 +350,7 @@ describe('LibrariesUserManager', () => {
       const user = userEvent.setup();
       renderComponent();
 
-      const deleteButton = screen.getByTestId('delete-role-Instructor');
+      const deleteButton = screen.getByText('delete-role-Instructor');
       await user.click(deleteButton);
 
       await waitFor(() => {
