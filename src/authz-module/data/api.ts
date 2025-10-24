@@ -17,6 +17,23 @@ export interface GetTeamMembersResponse {
   count: number;
 }
 
+export type RevokeUserRolesRequest = {
+  users: string;
+  role: string;
+  scope: string;
+};
+
+export interface DeleteRevokeUserRolesResponse {
+  completed: {
+    userIdentifiers: string;
+    status: string;
+  }[],
+  errors: {
+    userIdentifiers: string;
+    error: string;
+  }[],
+}
+
 export type PermissionsByRole = {
   role: string;
   permissions: string[];
@@ -76,4 +93,17 @@ export const getPermissionsByRole = async (scope: string): Promise<PermissionsBy
   url.searchParams.append('scope', scope);
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data.results);
+};
+
+export const revokeUserRoles = async (
+  data: RevokeUserRolesRequest,
+): Promise<DeleteRevokeUserRolesResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/roles/users/'));
+  url.searchParams.append('users', data.users);
+  url.searchParams.append('role', data.role);
+  url.searchParams.append('scope', data.scope);
+
+  // If this is not transformed to string, it shows a 404 with the token CSRF acquisition request
+  const res = await getAuthenticatedHttpClient().delete(url.toString());
+  return camelCaseObject(res.data);
 };

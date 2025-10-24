@@ -26,6 +26,16 @@ const messages = defineMessages({
     defaultMessage: 'Permissions',
     description: 'Libreries AuthZ title for the permissions tab',
   },
+  'library.authz.team.remove.user.toast.success.description': {
+    id: 'library.authz.team.remove.user.toast.success.description',
+    defaultMessage: 'The {role} role has been successfully removed.{rolesCount, plural, =0 { The user no longer has access to this library and has been removed from the member list.} other {}}',
+    description: 'Libraries team management remove user toast success',
+  },
+  'library.authz.team.default.error.toast.message': {
+    id: 'library.authz.team.default.error.toast.message',
+    defaultMessage: '<b>Something went wrong on our end</b> <br></br> Please try again later.',
+    description: 'Libraries team management remove user toast success',
+  },
 });
 
 export default messages;

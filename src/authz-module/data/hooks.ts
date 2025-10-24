@@ -5,7 +5,7 @@ import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
-  GetTeamMembersResponse, PermissionsByRole, QuerySettings,
+  GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
 } from './api';
 
 const authzQueryKeys = {
@@ -82,6 +82,25 @@ export const useAssignTeamMembersRole = () => {
     mutationFn: async ({ data }: {
       data: AssignTeamMembersRoleRequest
     }) => assignTeamMembersRole(data),
+    onSettled: (_data, _error, { data: { scope } }) => {
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
+    },
+  });
+};
+
+/**
+ * React Query hook to remove roles for a specific team member within a scope.
+ *
+ * @example
+ * const { mutate: revokeUserRoles } = useRevokeUserRoles();
+ * revokeUserRoles({ data: { libraryId: 'lib:123', users: ['jdoe'], role: 'editor' } });
+ */
+export const useRevokeUserRoles = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ data }: {
+      data: RevokeUserRolesRequest
+    }) => revokeUserRoles(data),
     onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
     },
