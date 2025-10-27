@@ -21,6 +21,7 @@ export interface LibraryMetadata {
   org: string;
   title: string;
   slug: string;
+  allowPublicRead: boolean;
 }
 
 export interface RoleMetadata {
