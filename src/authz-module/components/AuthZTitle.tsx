@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import {
   Breadcrumb, Col, Container, Row, Button, Badge,
   Stack,
+  useMediaQuery,
+  breakpoints,
 } from '@openedx/paragon';
 
 interface BreadcrumbLink {
@@ -37,23 +39,25 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 
 const AuthZTitle = ({
   activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
-}: AuthZTitleProps) => (
-  <Container className="p-5 bg-light-100">
-    <Breadcrumb
-      linkAs={Link}
-      links={navLinks}
-      activeLabel={activeLabel}
-    />
-    <Row className="mt-4">
-      <Col xs={12} md={7} className="mb-4">
-        <h1 className="text-primary">{pageTitle}</h1>
-        {typeof pageSubtitle === 'string'
-          ? <h3><Badge className="py-2 px-3 font-weight-normal" variant="light">{pageSubtitle}</Badge></h3>
-          : pageSubtitle}
-      </Col>
-      <Col xs={12} md={5}>
-        <Stack gap={3} direction="horizontal">
-          {
+}: AuthZTitleProps) => {
+  const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
+  return (
+    <Container className="p-5 bg-light-100">
+      <Breadcrumb
+        linkAs={Link}
+        links={navLinks}
+        activeLabel={activeLabel}
+      />
+      <Row className="mt-4">
+        <Col xs={12} md={7} className="mb-4">
+          <h1 className="text-primary">{pageTitle}</h1>
+          {typeof pageSubtitle === 'string'
+            ? <h3><Badge className="py-2 px-3 font-weight-normal" variant="light">{pageSubtitle}</Badge></h3>
+            : pageSubtitle}
+        </Col>
+        <Col xs={12} md={5}>
+          <Stack className="justify-content-end" direction={isDesktop ? 'horizontal' : 'vertical'}>
+            {
             actions.map((action, index) => {
               const content = isValidElement(action)
                 ? action
@@ -65,15 +69,16 @@ const AuthZTitle = ({
                 <Fragment key={`authz-header-action-${key}`}>
                   {content}
                   {(index === actions.length - 1) ? null
-                    : (<hr className="border-right" />)}
+                    : (<hr className="mx-lg-5" />)}
                 </Fragment>
               );
             })
           }
-        </Stack>
-      </Col>
-    </Row>
-  </Container>
-);
+          </Stack>
+        </Col>
+      </Row>
+    </Container>
+  );
+};
 
 export default AuthZTitle;
