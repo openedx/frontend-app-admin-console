@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { useLibrary } from '@src/authz-module/data/hooks';
+import { useLibrary, useUpdateLibrary } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
 
@@ -18,6 +18,7 @@ const mockedUseLibraryAuthZ = useLibraryAuthZ as jest.Mock;
 
 jest.mock('@src/authz-module/data/hooks', () => ({
   useLibrary: jest.fn(),
+  useUpdateLibrary: jest.fn(),
 }));
 
 jest.mock('./components/TeamTable', () => ({
@@ -46,6 +47,14 @@ jest.mock('../components/RoleCard', () => ({
 }));
 
 describe('LibrariesTeamManager', () => {
+  const libraryData = {
+    id: 'lib-001',
+    title: 'Test Library',
+    org: 'Test Org',
+    allowPublicRead: false,
+  };
+  const mutate = jest.fn();
+
   beforeEach(() => {
     initializeMockApp({
       authenticatedUser: {
@@ -53,9 +62,9 @@ describe('LibrariesTeamManager', () => {
       },
     });
     mockedUseLibraryAuthZ.mockReturnValue({
-      libraryId: 'lib-001',
-      libraryName: 'Mock Library',
-      libraryOrg: 'MockOrg',
+      libraryId: libraryData.id,
+      libraryName: libraryData.title,
+      libraryOrg: libraryData.org,
       username: 'mockuser',
       roles: [
         {
@@ -74,10 +83,10 @@ describe('LibrariesTeamManager', () => {
     });
 
     (useLibrary as jest.Mock).mockReturnValue({
-      data: {
-        title: 'Test Library',
-        org: 'Test Org',
-      },
+      data: libraryData,
+    });
+    (useUpdateLibrary as jest.Mock).mockReturnValue({
+      mutate,
     });
   });
 
@@ -133,5 +142,19 @@ describe('LibrariesTeamManager', () => {
     expect(matrixScope.getByText('Instructor')).toBeInTheDocument();
     expect(matrixScope.getByText('edit')).toBeInTheDocument();
     expect(matrixScope.getByText('view')).toBeInTheDocument();
+  });
+
+  it('renders allow public library read toggle and change the value by user interaction', async () => {
+    const user = userEvent.setup();
+
+    renderWrapper(<LibrariesTeamManager />);
+
+    const readPublicToggle = await screen.findByRole('switch', { name: /Allow public read/i });
+
+    await user.click(readPublicToggle);
+    expect(mutate).toHaveBeenCalledWith({
+      libraryId: 'lib-001',
+      updatedData: { allowPublicRead: !libraryData.allowPublicRead },
+    });
   });
 });

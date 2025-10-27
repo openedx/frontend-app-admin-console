@@ -61,6 +61,16 @@ const messages = defineMessages({
     defaultMessage: 'Remove',
     description: 'Libraries AuthZ remove button title',
   },
+  'libraries.authz.public.read.toggle.label': {
+    id: 'libraries.authz.public.read.toggle.label',
+    defaultMessage: 'Allow public read',
+    description: 'Library label toggle to allow public read',
+  },
+  'libraries.authz.public.read.toggle.subtext': {
+    id: 'libraries.authz.public.read.toggle.subtext',
+    defaultMessage: 'Allows reuse of library content in courses.',
+    description: 'Library description toggle to allow public read',
+  },
 });
 
 export default messages;
