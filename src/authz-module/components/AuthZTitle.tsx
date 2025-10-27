@@ -1,4 +1,6 @@
-import { ComponentType, isValidElement, ReactNode } from 'react';
+import {
+  ComponentType, isValidElement, ReactNode, Fragment,
+} from 'react';
 import { Link } from 'react-router-dom';
 import {
   Breadcrumb, Col, Container, Row, Button, Badge,
@@ -23,6 +25,15 @@ export interface AuthZTitleProps {
   actions?: (Action | ReactNode)[];
 }
 
+export const ActionButton = ({ label, icon, onClick }: Action) => (
+  <Button
+    iconBefore={icon}
+    onClick={onClick}
+  >
+    {label}
+  </Button>
+);
+
 const AuthZTitle = ({
   activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
 }: AuthZTitleProps) => (
@@ -33,29 +44,28 @@ const AuthZTitle = ({
       activeLabel={activeLabel}
     />
     <Row className="mt-4">
-      <Col xs={12} md={8} className="mb-4">
+      <Col xs={12} md={7} className="mb-4">
         <h1 className="text-primary">{pageTitle}</h1>
         {typeof pageSubtitle === 'string'
           ? <h3><Badge className="py-2 px-3 font-weight-normal" variant="light">{pageSubtitle}</Badge></h3>
           : pageSubtitle}
       </Col>
-      <Col xs={12} md={4}>
-        <div className="d-flex justify-content-md-end">
+      <Col xs={12} md={5}>
+        <div className="d-flex justify-content-md-end align-items-center flex-wrap flex-md-nowrap">
           {
-            actions.map((action) => {
-              if (isValidElement(action)) {
-                return action;
-              }
-
-              const { label, icon, onClick } = action as Action;
+            actions.map((action, index) => {
+              const content = isValidElement(action)
+                ? action
+                : <ActionButton {...action as Action} />;
+              const key = isValidElement(action)
+                ? action.key
+                : (action as Action).label;
               return (
-                <Button
-                  key={`authz-header-action-${label}`}
-                  iconBefore={icon}
-                  onClick={onClick}
-                >
-                  {label}
-                </Button>
+                <Fragment key={`authz-header-action-${key}`}>
+                  {content}
+                  {(index === actions.length - 1) ? null
+                    : (<hr className="border-right mx-5" style={{ height: '30px' }} />)}
+                </Fragment>
               );
             })
           }
