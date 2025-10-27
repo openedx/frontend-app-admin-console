@@ -1,7 +1,12 @@
 .authz-libraries {
+  --height-action-devider: 30px;
+
   .pgn__breadcrumb li:first-child a {
     color: var(--pgn-color-breadcrumb-active);
     text-decoration: none;
+  }
+  hr {
+    height: var(--height-action-devider);
   }
 
   .tab-content {

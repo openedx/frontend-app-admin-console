@@ -4,6 +4,7 @@ import {
 import { Link } from 'react-router-dom';
 import {
   Breadcrumb, Col, Container, Row, Button, Badge,
+  Stack,
 } from '@openedx/paragon';
 
 interface BreadcrumbLink {
@@ -51,7 +52,7 @@ const AuthZTitle = ({
           : pageSubtitle}
       </Col>
       <Col xs={12} md={5}>
-        <div className="d-flex justify-content-md-end align-items-center flex-wrap flex-md-nowrap">
+        <Stack gap={3} direction="horizontal">
           {
             actions.map((action, index) => {
               const content = isValidElement(action)
@@ -64,12 +65,12 @@ const AuthZTitle = ({
                 <Fragment key={`authz-header-action-${key}`}>
                   {content}
                   {(index === actions.length - 1) ? null
-                    : (<hr className="border-right mx-5" style={{ height: '30px' }} />)}
+                    : (<hr className="border-right" />)}
                 </Fragment>
               );
             })
           }
-        </div>
+        </Stack>
       </Col>
     </Row>
   </Container>
