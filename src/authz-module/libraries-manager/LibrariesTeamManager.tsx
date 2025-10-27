@@ -47,10 +47,9 @@ const LibrariesTeamManager = () => {
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
         actions={
-          canManageTeam
-            ? [<PublicReadToggle libraryId={libraryId} key="allow-public-read" />,
-              <AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />]
-            : []
+          [<PublicReadToggle libraryId={libraryId} canEditToggle={canManageTeam} key="allow-public-read" />,
+          ...(canManageTeam ? [<AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />]: [])
+          ]
         }
       >
         <Tabs
