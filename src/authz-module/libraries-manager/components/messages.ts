@@ -74,7 +74,7 @@ const messages = defineMessages({
   'libraries.authz.public.read.toggle.success': {
     id: 'libraries.authz.public.read.toggle.success',
     defaultMessage: 'The library setting has been updated successfully.',
-    description: 'Sucessfull message for allow public read',
+    description: 'Success message for allow public read',
   },
 });
 
