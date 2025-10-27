@@ -5,6 +5,7 @@ import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary, useUpdateLibrary } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
+import { ToastManagerProvider } from './ToastManagerContext';
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -46,6 +47,7 @@ jest.mock('../components/RoleCard', () => ({
   ),
 }));
 
+const renderTeamManager = () => renderWrapper(<ToastManagerProvider><LibrariesTeamManager /></ToastManagerProvider>);
 describe('LibrariesTeamManager', () => {
   const libraryData = {
     id: 'lib-001',
@@ -54,6 +56,26 @@ describe('LibrariesTeamManager', () => {
     allowPublicRead: false,
   };
   const mutate = jest.fn();
+  const libraryAuthZContext = {
+    libraryId: libraryData.id,
+    libraryName: libraryData.title,
+    libraryOrg: libraryData.org,
+    username: 'mockuser',
+    roles: [
+      {
+        name: 'Instructor',
+        description: 'Can manage content.',
+        userCount: 3,
+        permissions: ['view', 'edit'],
+      },
+    ],
+    permissions: [
+      { key: 'view_library', label: 'view', resource: 'library' },
+      { key: 'edit_library', label: 'edit', resource: 'library' },
+    ],
+    resources: [{ key: 'library', label: 'Library' }],
+    canManageTeam: true,
+  };
 
   beforeEach(() => {
     initializeMockApp({
@@ -61,38 +83,20 @@ describe('LibrariesTeamManager', () => {
         username: 'admin',
       },
     });
-    mockedUseLibraryAuthZ.mockReturnValue({
-      libraryId: libraryData.id,
-      libraryName: libraryData.title,
-      libraryOrg: libraryData.org,
-      username: 'mockuser',
-      roles: [
-        {
-          name: 'Instructor',
-          description: 'Can manage content.',
-          userCount: 3,
-          permissions: ['view', 'edit'],
-        },
-      ],
-      permissions: [
-        { key: 'view_library', label: 'view', resource: 'library' },
-        { key: 'edit_library', label: 'edit', resource: 'library' },
-      ],
-      resources: [{ key: 'library', label: 'Library' }],
-      canManageTeam: true,
-    });
+    jest.resetAllMocks();
+    mockedUseLibraryAuthZ.mockReturnValue(libraryAuthZContext);
 
     (useLibrary as jest.Mock).mockReturnValue({
       data: libraryData,
     });
     (useUpdateLibrary as jest.Mock).mockReturnValue({
       mutate,
+      isPending: false,
     });
   });
 
   it('renders tabs and layout content correctly', () => {
-    renderWrapper(<LibrariesTeamManager />);
-
+    renderTeamManager();
     // Tabs
     expect(screen.getByRole('tab', { name: /Team Members/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Roles/i })).toBeInTheDocument();
@@ -112,7 +116,7 @@ describe('LibrariesTeamManager', () => {
   it('renders role cards when "Roles" tab is selected', async () => {
     const user = userEvent.setup();
 
-    renderWrapper(<LibrariesTeamManager />);
+    renderTeamManager();
 
     // Click on "Roles" tab
     const rolesTab = await screen.findByRole('tab', { name: /roles/i });
@@ -129,7 +133,7 @@ describe('LibrariesTeamManager', () => {
   it('renders role matrix when "Permissions" tab is selected', async () => {
     const user = userEvent.setup();
 
-    renderWrapper(<LibrariesTeamManager />);
+    renderTeamManager();
 
     // Click on "Permissions" tab
     const permissionsTab = await screen.findByRole('tab', { name: /permissions/i });
@@ -147,14 +151,39 @@ describe('LibrariesTeamManager', () => {
   it('renders allow public library read toggle and change the value by user interaction', async () => {
     const user = userEvent.setup();
 
-    renderWrapper(<LibrariesTeamManager />);
+    renderTeamManager();
 
     const readPublicToggle = await screen.findByRole('switch', { name: /Allow public read/i });
 
     await user.click(readPublicToggle);
-    expect(mutate).toHaveBeenCalledWith({
-      libraryId: 'lib-001',
-      updatedData: { allowPublicRead: !libraryData.allowPublicRead },
-    });
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        libraryId: 'lib-001',
+        updatedData: { allowPublicRead: !libraryData.allowPublicRead },
+      },
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+      }),
+    );
+  });
+
+  it('should not render the toggle if the user can not manage team and the Library Public Read is disabled', () => {
+    (useLibrary as jest.Mock).mockReturnValue({ data: { ...libraryData, allowPublicRead: false } });
+    (useLibraryAuthZ as jest.Mock).mockReturnValue({ ...libraryAuthZContext, canManageTeam: false });
+
+    renderTeamManager();
+    expect(screen.queryByRole('switch', { name: /Allow public read/i })).not.toBeInTheDocument();
+  });
+
+  it('should render the toggle as disabled if the user can not manage team but the Library Public Read is enabled', async () => {
+    (useLibrary as jest.Mock).mockReturnValue({ data: { ...libraryData, allowPublicRead: true } });
+    (useLibraryAuthZ as jest.Mock).mockReturnValue({ ...libraryAuthZContext, canManageTeam: false });
+
+    renderTeamManager();
+
+    const readPublicToggle = await screen.findByRole('switch', { name: /Allow public read/i });
+
+    expect(readPublicToggle).toBeInTheDocument();
+    expect(readPublicToggle).toBeDisabled();
   });
 });

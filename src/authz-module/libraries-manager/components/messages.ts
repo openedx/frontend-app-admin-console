@@ -71,6 +71,11 @@ const messages = defineMessages({
     defaultMessage: 'Allows reuse of library content in courses.',
     description: 'Library description toggle to allow public read',
   },
+  'libraries.authz.public.read.toggle.success': {
+    id: 'libraries.authz.public.read.toggle.success',
+    defaultMessage: 'The library setting has been updated successfully.',
+    description: 'Sucessfull message for allow public read',
+  },
 });
 
 export default messages;
