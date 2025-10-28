@@ -232,7 +232,7 @@ describe('AssignNewRoleTrigger', () => {
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/role added successfully/i)).toBeInTheDocument();
@@ -252,7 +252,7 @@ describe('AssignNewRoleTrigger', () => {
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
