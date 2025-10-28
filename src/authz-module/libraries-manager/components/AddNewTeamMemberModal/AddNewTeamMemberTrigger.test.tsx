@@ -3,6 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
 
 const mockMutate = jest.fn();
@@ -59,7 +60,7 @@ describe('AddNewTeamMemberTrigger', () => {
   });
 
   it('renders the trigger button', () => {
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const button = screen.getByRole('button', { name: /add new team member/i });
     expect(button).toBeInTheDocument();
@@ -67,7 +68,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('opens modal when trigger button is clicked', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -77,7 +78,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('closes modal when close button is clicked', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -92,7 +93,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('calls addTeamMember with correct data when save is clicked', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -121,7 +122,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('displays success toast and closes modal on successful addition with no errors', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -148,7 +149,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('displays mixed success and error toast on partial success', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -178,7 +179,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('displays only error toast when all additions fail', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -206,7 +207,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('resets form values after successful addition with no errors', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -238,7 +239,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
   it('allows closing the success/error toast message', async () => {
     const user = userEvent.setup();
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
@@ -271,20 +272,64 @@ describe('AddNewTeamMemberTrigger', () => {
   it('displays loading state when adding team member', async () => {
     const user = userEvent.setup();
 
-    // Mock loading state
-    (useAssignTeamMembersRole as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
-      isPending: true,
+    const { rerender } = renderWrapper(
+      <ToastManagerProvider>
+        <AddNewTeamMemberTrigger libraryId="lib:123" />
+      </ToastManagerProvider>,
+    );
+
+    const rerenderHook = () => rerender(
+      <ToastManagerProvider>
+        <AddNewTeamMemberTrigger libraryId="lib:123" />
+      </ToastManagerProvider>,
+    );
+
+    let isPending = false;
+    const mutateMock = jest.fn((_args, { onSuccess }) => {
+      isPending = true;
+      rerenderHook();
+      setTimeout(() => {
+        isPending = false;
+        rerenderHook();
+        onSuccess?.({
+          completed: [{ userIdentifier: _args.data.users[0], status: 'role_added' }],
+          errors: [],
+        });
+      }, 10);
+    });
+
+    (useAssignTeamMembersRole as jest.Mock).mockImplementation(() => ({
+      mutate: mutateMock,
+      isPending,
       isError: false,
       isSuccess: false,
-    } as any);
-
-    renderWrapper(<AddNewTeamMemberTrigger libraryId={mockLibraryId} />);
+    }));
 
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    // Loading indicator should be visible in the modal
-    expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
+    const userInput = screen.getByTestId('users-input');
+    const roleSelect = screen.getByTestId('role-select');
+    await user.type(userInput, 'alice@example.com');
+    await user.selectOptions(roleSelect, 'editor');
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    // should now reflect isPending = true
+    const loadingIndicator = await screen.findByTestId('loading-indicator');
+    expect(loadingIndicator).toBeInTheDocument();
+    expect(loadingIndicator).toHaveTextContent('Loading...');
+
+    expect(mutateMock).toHaveBeenCalledWith(
+      {
+        data: {
+          users: ['alice@example.com'],
+          role: 'editor',
+          scope: 'lib:123',
+        },
+      },
+      expect.any(Object),
+    );
   });
 });

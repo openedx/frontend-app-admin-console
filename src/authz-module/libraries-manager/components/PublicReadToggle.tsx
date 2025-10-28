@@ -14,13 +14,19 @@ const PublicReadToggle = ({ libraryId, canEditToggle }: PublicReadToggleProps) =
   const intl = useIntl();
   const { data: library } = useLibrary(libraryId);
   const { mutate: updateLibrary, isPending } = useUpdateLibrary();
-  const { handleShowToast } = useToastManager();
+  const { showToast, showErrorToast } = useToastManager();
   const onChangeToggle = () => updateLibrary({
     libraryId,
     updatedData: { allowPublicRead: !library.allowPublicRead },
   }, {
     onSuccess: () => {
-      handleShowToast(intl.formatMessage(messages['libraries.authz.public.read.toggle.success']));
+      showToast({
+        message: intl.formatMessage(messages['libraries.authz.public.read.toggle.success']),
+        type: 'success',
+      });
+    },
+    onError: (error, variables) => {
+      showErrorToast(error, () => updateLibrary(variables));
     },
   });
 

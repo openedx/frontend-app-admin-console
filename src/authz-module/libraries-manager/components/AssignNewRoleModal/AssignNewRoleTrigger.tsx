@@ -1,12 +1,14 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Button, Toast, useToggle } from '@openedx/paragon';
+import { Button, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
-import messages from '../messages';
+import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AssignNewRoleModal from './AssignNewRoleModal';
+
+import messages from '../messages';
 
 interface AssignNewRoleTriggerProps {
   username: string;
@@ -21,9 +23,8 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
 }) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { roles } = useLibraryAuthZ();
-
+  const { showToast } = useToastManager();
   const [newRole, setNewRole] = useState<string>('');
 
   const { mutate: assignTeamMembersRole, isPending: isAssignTeamMembersRolePending } = useAssignTeamMembersRole();
@@ -36,6 +37,10 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
     };
 
     if (currentUserRoles.includes(newRole)) {
+      showToast({
+        message: intl.formatMessage(messages['libraries.authz.manage.assign.role.existing']),
+        type: 'success',
+      });
       close();
       setNewRole('');
       return;
@@ -43,11 +48,10 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
 
     assignTeamMembersRole({ data }, {
       onSuccess: () => {
-        setToastMessage(
-          intl.formatMessage(
-            messages['libraries.authz.manage.assign.role.success'],
-          ),
-        );
+        showToast({
+          message: intl.formatMessage(messages['libraries.authz.manage.assign.role.success']),
+          type: 'success',
+        });
         close();
         setNewRole('');
       },
@@ -75,15 +79,6 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
           handleChangeSelectedRole={(e) => setNewRole(e.target.value)}
 
         />
-      )}
-
-      {toastMessage && (
-        <Toast
-          onClose={() => setToastMessage(null)}
-          show={!!toastMessage}
-        >
-          {toastMessage}
-        </Toast>
       )}
     </>
   );

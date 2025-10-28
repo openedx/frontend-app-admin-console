@@ -26,6 +26,11 @@ const messages = defineMessages({
     defaultMessage: 'Role added successfully.',
     description: 'Libraries AuthZ assign role success message',
   },
+  'libraries.authz.manage.assign.role.existing': {
+    id: 'libraries.authz.manage.assign.existing',
+    defaultMessage: 'The user already has the role.',
+    description: 'Libraries AuthZ assign existing role',
+  },
   'library.authz.team.remove.user.modal.title': {
     id: 'library.authz.team.remove.user.modal.title',
     defaultMessage: 'Remove role?',

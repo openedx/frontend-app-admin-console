@@ -47,7 +47,7 @@ const LibrariesUserManager = () => {
 
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
-  const { handleShowToast, handleDiscardToast } = useToastManager();
+  const { showToast, Bold, Br } = useToastManager();
 
   const {
     data: teamMember, isLoading: isLoadingTeamMember, isFetching: isFetchingMember,
@@ -78,7 +78,6 @@ const LibrariesUserManager = () => {
   const handleShowConfirmDeletionModal = (role: Role) => {
     if (isRevokingUserRole) { return; }
 
-    handleDiscardToast();
     setRoleToDelete(role);
     setShowConfirmDeletionModal(true);
   };
@@ -95,19 +94,26 @@ const LibrariesUserManager = () => {
     revokeUserRoles({ data }, {
       onSuccess: () => {
         const remainingRolesCount = userRoles.length - 1;
-        handleShowToast(intl.formatMessage(
-          messages['library.authz.team.remove.user.toast.success.description'],
-          {
-            role: roleToDelete.name,
-            rolesCount: remainingRolesCount,
-          },
-        ));
+        showToast({
+          message: intl.formatMessage(
+            messages['library.authz.team.remove.user.toast.success.description'],
+            {
+              role: roleToDelete.name,
+              rolesCount: remainingRolesCount,
+            },
+          ),
+          type: 'success',
+        });
+
         handleCloseConfirmDeletionModal();
       },
       onError: (error) => {
         logError(error);
-        // eslint-disable-next-line react/no-unstable-nested-components
-        handleShowToast(intl.formatMessage(messages['library.authz.team.default.error.toast.message'], { b: chunk => <b>{chunk}</b>, br: () => <br /> }));
+
+        showToast({
+          type: 'error',
+          message: intl.formatMessage(messages['library.authz.team.toast.default.error.message'], { Bold, Br }),
+        });
         handleCloseConfirmDeletionModal();
       },
     });
