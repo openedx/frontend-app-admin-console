@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { logError } from '@edx/frontend-platform/logging';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
@@ -47,7 +46,9 @@ const LibrariesUserManager = () => {
 
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
-  const { showToast, Bold, Br } = useToastManager();
+  const {
+    showToast, showErrorToast, Bold, Br,
+  } = useToastManager();
 
   const {
     data: teamMember, isLoading: isLoadingTeamMember, isFetching: isFetchingMember,
@@ -91,32 +92,42 @@ const LibrariesUserManager = () => {
       scope: libraryId,
     };
 
-    revokeUserRoles({ data }, {
-      onSuccess: () => {
-        const remainingRolesCount = userRoles.length - 1;
-        showToast({
-          message: intl.formatMessage(
-            messages['library.authz.team.remove.user.toast.success.description'],
-            {
-              role: roleToDelete.name,
-              rolesCount: remainingRolesCount,
-            },
-          ),
-          type: 'success',
-        });
+    const runRevokeRole = (variables = { data }) => {
+      revokeUserRoles(variables, {
+        onSuccess: (response) => {
+          const { errors } = response;
 
-        handleCloseConfirmDeletionModal();
-      },
-      onError: (error) => {
-        logError(error);
+          if (errors.length) {
+            showToast({
+              type: 'error',
+              message: intl.formatMessage(
+                messages['library.authz.team.toast.default.error.message'],
+                { Bold, Br },
+              ),
+            });
+            return;
+          }
 
-        showToast({
-          type: 'error',
-          message: intl.formatMessage(messages['library.authz.team.toast.default.error.message'], { Bold, Br }),
-        });
-        handleCloseConfirmDeletionModal();
-      },
-    });
+          const remainingRolesCount = userRoles.length - 1;
+          showToast({
+            message: intl.formatMessage(
+              messages['library.authz.team.remove.user.toast.success.description'],
+              {
+                role: roleToDelete.name,
+                rolesCount: remainingRolesCount,
+              },
+            ),
+            type: 'success',
+          });
+        },
+        onError: (error, retryVariables) => {
+          showErrorToast(error, () => runRevokeRole(retryVariables));
+        },
+      });
+    };
+
+    handleCloseConfirmDeletionModal();
+    runRevokeRole();
   };
 
   return (

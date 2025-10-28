@@ -121,9 +121,8 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
       scope: libraryId,
     };
 
-    assignTeamMembersRole(
-      { data: payload },
-      {
+    const runAssignMembers = (variables = { data: payload }) => {
+      assignTeamMembersRole(variables, {
         onSuccess: (response) => {
           const { completed, errors } = response;
 
@@ -142,11 +141,12 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
             handleErrors(errors, completed.length);
           }
         },
-        onError: (error, variables) => {
-          showErrorToast(error, () => assignTeamMembersRole(variables));
+        onError: (error, retryVariables) => {
+          showErrorToast(error, () => runAssignMembers(retryVariables));
         },
-      },
-    );
+      });
+    };
+    runAssignMembers();
   };
 
   return (

@@ -24,7 +24,7 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
   const { roles } = useLibraryAuthZ();
-  const { showToast } = useToastManager();
+  const { showToast, showErrorToast } = useToastManager();
   const [newRole, setNewRole] = useState<string>('');
 
   const { mutate: assignTeamMembersRole, isPending: isAssignTeamMembersRolePending } = useAssignTeamMembersRole();
@@ -46,16 +46,23 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
       return;
     }
 
-    assignTeamMembersRole({ data }, {
-      onSuccess: () => {
-        showToast({
-          message: intl.formatMessage(messages['libraries.authz.manage.assign.role.success']),
-          type: 'success',
-        });
-        close();
-        setNewRole('');
-      },
-    });
+    const runAssignRole = (variables = { data }) => {
+      assignTeamMembersRole(variables, {
+        onSuccess: () => {
+          showToast({
+            message: intl.formatMessage(messages['libraries.authz.manage.assign.role.success']),
+            type: 'success',
+          });
+          close();
+          setNewRole('');
+        },
+        onError: (error, retryVariables) => {
+          showErrorToast(error, () => runAssignRole(retryVariables));
+        },
+      });
+    };
+
+    runAssignRole();
   };
 
   return (

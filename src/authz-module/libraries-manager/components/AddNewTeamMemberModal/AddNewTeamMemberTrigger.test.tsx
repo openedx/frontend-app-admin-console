@@ -6,6 +6,8 @@ import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
 
+jest.mock('@edx/frontend-platform/logging');
+
 const mockMutate = jest.fn();
 
 // Mock the hooks module
@@ -267,6 +269,47 @@ describe('AddNewTeamMemberTrigger', () => {
     await waitFor(() => {
       expect(screen.queryByText('1 team member added successfully.')).not.toBeInTheDocument();
     });
+  });
+
+  it('shows retry toast on API failure and displays another toast when retry fails again', async () => {
+    const user = userEvent.setup();
+
+    const mockError = new Error('Network error');
+
+    mockMutate.mockImplementationOnce((_vars, { onError }) => {
+      onError(mockError, _vars);
+    });
+
+    renderWrapper(
+      <ToastManagerProvider>
+        <AddNewTeamMemberTrigger libraryId={mockLibraryId} />
+      </ToastManagerProvider>,
+    );
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByTestId('save-modal');
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+    });
+
+    mockMutate.mockImplementationOnce((_vars, { onError }) => {
+      onError(new Error('Network error'), _vars);
+    });
+
+    const retryButton = screen.getByRole('button', { name: /retry/i });
+    await user.click(retryButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
+    });
+
+    // Ensure mutate was called twice (original + retry)
+    expect(mockMutate).toHaveBeenCalledTimes(2);
   });
 
   it('displays loading state when adding team member', async () => {

@@ -241,7 +241,7 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/The Admin role has been successfully removed/)).toBeInTheDocument();
@@ -278,7 +278,7 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/The user no longer has access to this library/)).toBeInTheDocument();
@@ -322,7 +322,7 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.queryByText('Remove role?')).not.toBeInTheDocument();
