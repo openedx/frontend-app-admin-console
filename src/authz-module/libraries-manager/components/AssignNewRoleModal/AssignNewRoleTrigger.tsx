@@ -9,6 +9,7 @@ import { useToastManager } from '@src/authz-module/libraries-manager/ToastManage
 import AssignNewRoleModal from './AssignNewRoleModal';
 
 import messages from '../messages';
+import authZLibrariesMessages from '../../messages';
 
 interface AssignNewRoleTriggerProps {
   username: string;
@@ -57,7 +58,7 @@ const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
             showToast({
               type: 'error',
               message: intl.formatMessage(
-                messages['library.authz.team.toast.default.error.message'],
+                authZLibrariesMessages['library.authz.team.toast.default.error.message'],
                 { Bold, Br },
               ),
             });
