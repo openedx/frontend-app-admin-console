@@ -1,7 +1,24 @@
+@use "@openedx/paragon/styles/css/core/custom-media-breakpoints" as paragonCustomMediaBreakpoints;
+
 .authz-libraries {
+  --height-action-divider: 30px;
+
   .pgn__breadcrumb li:first-child a {
     color: var(--pgn-color-breadcrumb-active);
     text-decoration: none;
+  }
+
+  hr {
+    border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
+    width: 100%;
+  }
+
+  @media (--pgn-size-breakpoint-min-width-lg) {
+    hr {
+      border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      height: var(--height-action-divider);
+      width: 0;
+    }
   }
 
   .tab-content {

@@ -14,6 +14,7 @@ import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
 import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
+import PublicReadToggle from './components/PublicReadToggle';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();
@@ -46,9 +47,9 @@ const LibrariesTeamManager = () => {
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
         actions={
-          canManageTeam
-            ? [<AddNewTeamMemberTrigger libraryId={libraryId} />]
-            : []
+          [<PublicReadToggle libraryId={libraryId} canEditToggle={canManageTeam} key="allow-public-read" />,
+            ...(canManageTeam ? [<AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />] : []),
+          ]
         }
       >
         <Tabs

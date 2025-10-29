@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
   useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
+  useUpdateLibrary,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -338,5 +339,82 @@ describe('useRevokeUserRoles', () => {
     expect(calledUrl.searchParams.get('users')).toBe(revokeRoleData.users);
     expect(calledUrl.searchParams.get('role')).toBe(revokeRoleData.role);
     expect(calledUrl.searchParams.get('scope')).toBe(revokeRoleData.scope);
+  });
+});
+
+describe('useUpdateLibrary', () => {
+  const queryKeyTest = ['org.openedx.frontend.app.adminConsole', 'authz', 'library', 'lib:123'];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls updateLibrary with correct params and updates cache', async () => {
+    const mockData = { id: 'lib:123', title: 'Library Test' };
+    getAuthenticatedHttpClient.mockReturnValue({
+      patch: jest.fn().mockResolvedValue({ data: mockData }),
+    });
+    const { result } = renderHook(() => useUpdateLibrary(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        libraryId: 'lib:123',
+        updatedData: { title: 'Library Test' },
+      });
+    });
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+  });
+
+  it('sets query data on success', async () => {
+    const mockData = { id: 'lib:123', title: 'Updated Library' };
+    getAuthenticatedHttpClient.mockReturnValue({
+      patch: jest.fn().mockResolvedValue({ data: mockData }),
+    });
+
+    const queryClient = new QueryClient();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useUpdateLibrary(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        libraryId: 'lib:123',
+        updatedData: { title: 'Updated Library' },
+      });
+    });
+
+    // verify cache updated with the returned data
+    expect(queryClient.getQueryData(queryKeyTest)).toEqual(mockData);
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+  });
+
+  it('invalidates query on settled', async () => {
+    const mockData = { id: 'lib:123', title: 'Final Title' };
+    getAuthenticatedHttpClient.mockReturnValue({
+      patch: jest.fn().mockResolvedValue({ data: mockData }),
+    });
+    const queryClient = new QueryClient();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useUpdateLibrary(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        libraryId: 'lib:123',
+        updatedData: { title: 'Final Title' },
+      });
+    });
+
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeyTest,
+    });
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
   });
 });
