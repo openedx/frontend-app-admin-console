@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AssignNewRoleTrigger from './AssignNewRoleTrigger';
+
+jest.mock('@edx/frontend-platform/logging');
 
 jest.mock('@src/authz-module/libraries-manager/context', () => ({
   useLibraryAuthZ: jest.fn(),
@@ -90,7 +93,7 @@ describe('AssignNewRoleTrigger', () => {
 
   const renderComponent = (props = {}) => {
     const finalProps = { ...defaultProps, ...props };
-    return renderWrapper(<AssignNewRoleTrigger {...finalProps} />);
+    return renderWrapper(<ToastManagerProvider><AssignNewRoleTrigger {...finalProps} /></ToastManagerProvider>);
   };
 
   describe('Initial Render', () => {
@@ -231,7 +234,7 @@ describe('AssignNewRoleTrigger', () => {
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/role added successfully/i)).toBeInTheDocument();
@@ -251,7 +254,7 @@ describe('AssignNewRoleTrigger', () => {
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
@@ -260,6 +263,74 @@ describe('AssignNewRoleTrigger', () => {
       // Open modal again to check if role is reset
       await user.click(screen.getByRole('button', { name: /add new role/i }));
       expect(screen.getByTestId('role-select')).toHaveValue('');
+    });
+  });
+
+  describe('Error handle', () => {
+    it('shows error toast when API fails to assign a role', async () => {
+      const user = userEvent.setup();
+
+      renderComponent();
+
+      await user.click(screen.getByRole('button', { name: /add new role/i }));
+      await user.selectOptions(screen.getByTestId('role-select'), 'admin');
+      await user.click(screen.getByTestId('save-button'));
+
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ errors: [{ error: 'role_assignment_error' }] });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
+        expect(screen.getByTestId('role-select')).toHaveValue(''); // role reset
+      });
+    });
+
+    it('shows error toast on API failure and allows retry', async () => {
+      const user = userEvent.setup();
+      const mockError = new Error('Network error');
+
+      // First call to mutate triggers onError
+      mockMutate.mockImplementationOnce((_vars, { onError }) => {
+        onError(mockError, _vars);
+      });
+
+      renderWrapper(
+        <ToastManagerProvider>
+          <AssignNewRoleTrigger
+            username="testuser"
+            libraryId="lib:test-library"
+            currentUserRoles={['instructor']}
+          />
+        </ToastManagerProvider>,
+      );
+
+      // Open modal and select a role
+      await user.click(screen.getByRole('button', { name: /add new role/i }));
+      await user.selectOptions(screen.getByTestId('role-select'), 'admin');
+      await user.click(screen.getByTestId('save-button'));
+
+      // Wait for the error toast to appear with a retry button
+      await waitFor(() => {
+        expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      });
+
+      // Second call to mutate also fails
+      mockMutate.mockImplementationOnce((_vars, { onError }) => {
+        onError(new Error('Network error'), _vars);
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // The retry toast should appear again
+      await waitFor(() => {
+        expect(screen.getAllByText(/Something went wrong/i).length).toBeGreaterThanOrEqual(1);
+      });
+
+      // Ensure mutate was called twice (original + retry)
+      expect(mockMutate).toHaveBeenCalledTimes(2);
     });
   });
 });

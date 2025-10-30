@@ -241,7 +241,7 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/The Admin role has been successfully removed/)).toBeInTheDocument();
@@ -278,14 +278,14 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.getByText(/The user no longer has access to this library/)).toBeInTheDocument();
       });
     });
 
-    it('shows error toast when role revocation fails', async () => {
+    it('shows error toast when role revocation fails with server error', async () => {
       const user = userEvent.setup();
       renderComponent();
 
@@ -302,8 +302,50 @@ describe('LibrariesUserManager', () => {
       const onErrorCallback = mockMutate.mock.calls[0][1].onError;
       onErrorCallback(new Error('Network error'));
 
+      // Wait for the error toast to appear with a retry button
       await waitFor(() => {
-        expect(screen.getByText(/Something went wrong on our end/)).toBeInTheDocument();
+        expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      });
+
+      // Second call to mutate also fails
+      mockMutate.mockImplementationOnce((_vars, { onError }) => {
+        onError(new Error('Network error'), _vars);
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // The retry toast should appear again
+      await waitFor(() => {
+        expect(screen.getAllByText(/Something went wrong/i).length).toBeGreaterThanOrEqual(1);
+      });
+
+      // Ensure mutate was called twice (original + retry)
+      expect(mockMutate).toHaveBeenCalledTimes(2);
+    });
+
+    it('shows error toast when API fails to remove a role', async () => {
+      const user = userEvent.setup();
+
+      renderComponent();
+
+      const deleteButton = screen.getByText('delete-role-Admin');
+      await user.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Remove role?')).toBeInTheDocument();
+      });
+
+      const removeButton = screen.getByText('Remove');
+      await user.click(removeButton);
+
+      const { onSuccess } = mockMutate.mock.calls[0][1];
+      onSuccess({ errors: [{ error: 'role_removal_error' }] });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
       });
     });
 
@@ -322,11 +364,12 @@ describe('LibrariesUserManager', () => {
       await user.click(removeButton);
 
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
-      onSuccessCallback();
+      onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
         expect(screen.queryByText('Remove role?')).not.toBeInTheDocument();
       });
+      expect(await screen.findByText(/role has been successfully removed/i)).toBeInTheDocument();
     });
 
     it('disables delete action when revocation is in progress', async () => {

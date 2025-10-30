@@ -15,6 +15,7 @@ jest.mock('./context', () => {
     LibraryAuthZProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   };
 });
+
 const mockedUseLibraryAuthZ = useLibraryAuthZ as jest.Mock;
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -165,6 +166,10 @@ describe('LibrariesTeamManager', () => {
         onSuccess: expect.any(Function),
       }),
     );
+    const { onSuccess } = (mutate as jest.Mock).mock.calls[0][1];
+    onSuccess?.();
+
+    expect(await screen.findByText(/updated successfully/i)).toBeInTheDocument();
   });
 
   it('should not render the toggle if the user can not manage team and the Library Public Read is disabled', () => {

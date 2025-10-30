@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
+import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import TeamTable from './index';
 
 const mockNavigate = jest.fn();
@@ -85,7 +86,7 @@ describe('TeamTable', () => {
     });
     (useLibraryAuthZ as jest.Mock).mockReturnValue(mockAuthZ);
 
-    renderWrapper(<TeamTable />);
+    renderWrapper(<ToastManagerProvider><TeamTable /></ToastManagerProvider>);
 
     const skeletons = screen.getAllByText('', { selector: '[aria-busy="true"]' });
     expect(skeletons.length).toBeGreaterThan(0);
@@ -98,7 +99,7 @@ describe('TeamTable', () => {
     });
     (useLibraryAuthZ as jest.Mock).mockReturnValue(mockAuthZ);
 
-    renderWrapper(<TeamTable />);
+    renderWrapper(<ToastManagerProvider><TeamTable /></ToastManagerProvider>);
 
     expect(screen.getByText('alice')).toBeInTheDocument();
     expect(screen.getByText('alice@example.com')).toBeInTheDocument();
@@ -117,7 +118,7 @@ describe('TeamTable', () => {
     });
     (useLibraryAuthZ as jest.Mock).mockReturnValue(mockAuthZ);
 
-    renderWrapper(<TeamTable />);
+    renderWrapper(<ToastManagerProvider><TeamTable /></ToastManagerProvider>);
 
     const editButtons = screen.queryAllByText('Edit');
     // Should not find Edit button for current user
@@ -139,7 +140,7 @@ describe('TeamTable', () => {
       canManageTeam: false,
     });
 
-    renderWrapper(<TeamTable />);
+    renderWrapper(<ToastManagerProvider><TeamTable /></ToastManagerProvider>);
 
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
   });
@@ -151,7 +152,7 @@ describe('TeamTable', () => {
     });
     (useLibraryAuthZ as jest.Mock).mockReturnValue(mockAuthZ);
 
-    renderWrapper(<TeamTable />);
+    renderWrapper(<ToastManagerProvider><TeamTable /></ToastManagerProvider>);
 
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
   });

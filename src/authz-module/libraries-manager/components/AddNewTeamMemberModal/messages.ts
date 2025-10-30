@@ -58,8 +58,18 @@ const messages = defineMessages({
   },
   'libraries.authz.manage.add.member.failure': {
     id: 'libraries.authz.manage.add.member.failure',
-    defaultMessage: 'We couldn\'t find a user for {count, plural, one {# email address or username.} other {# email addresses or usernames.}} Please check the values and try again, or invite them to join your organization first.',
+    defaultMessage: '<Bold>We couldn\'t find a user for {count, plural, one {# email address or username.} other {# email addresses or usernames.}}</Bold><Br></Br> Please check the values and try again, or invite them to join your organization first.',
     description: 'Error message when adding new team members',
+  },
+  'libraries.authz.manage.add.member.partial': {
+    id: 'libraries.authz.manage.add.member.failure',
+    defaultMessage: '<Bold>{countSuccess, plural, one {# team member added successfully.} other {# team members added successfully.}}. We couldn\'t find a user for {countFailure, plural, one {# email address or username.} other {# email addresses or usernames.}}</Bold><Br></Br> Please check the values and try again, or invite them to join your organization first.',
+    description: 'Error message when adding new team members',
+  },
+  'libraries.authz.manage.assign.role.existing': {
+    id: 'libraries.authz.manage.assign.existing',
+    defaultMessage: 'The user already has the role.',
+    description: 'Libraries AuthZ assign existing role',
   },
   'libraries.authz.manage.tooltip.roles.extra.info': {
     id: 'libraries.authz.manage.tooltip.roles.extra.info',

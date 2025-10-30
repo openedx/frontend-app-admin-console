@@ -12,6 +12,7 @@ import { Edit } from '@openedx/paragon/icons';
 import { TableCellValue, TeamMember } from '@src/types';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
+import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import { useQuerySettings } from './hooks/useQuerySettings';
 import TableControlBar from './components/TableControlBar';
 import messages from './messages';
@@ -58,13 +59,17 @@ const TeamTable = () => {
     libraryId, canManageTeam, username, roles,
   } = useLibraryAuthZ();
   const roleLabels = roles.reduce((acc, role) => ({ ...acc, [role.role]: role.name }), {} as Record<string, string>);
+  const { showErrorToast } = useToastManager();
 
   const { querySettings, handleTableFetch } = useQuerySettings();
 
-  // TODO: Display error in the notification system
   const {
-    data: teamMembers, isLoading, isError,
+    data: teamMembers, isLoading, isError, error, refetch,
   } = useTeamMembers(libraryId, querySettings);
+
+  if (error) {
+    showErrorToast(error, refetch);
+  }
 
   const rows = isError ? [] : (teamMembers?.results || SKELETON_ROWS);
   const pageCount = teamMembers?.count ? Math.ceil(teamMembers.count / DEFAULT_PAGE_SIZE) : 1;

@@ -28,6 +28,7 @@ const AssignNewRoleModal: FC<AssignNewRoleModalProps> = ({
       size="lg"
       variant="dark"
       hasCloseButton
+      isBlocking
       isOverflowVisible={false}
       zIndex={5}
     >

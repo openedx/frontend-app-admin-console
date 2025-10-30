@@ -54,6 +54,7 @@ const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
         size="lg"
         variant="dark"
         hasCloseButton
+        isBlocking
         isOverflowVisible={false}
         zIndex={5}
       >

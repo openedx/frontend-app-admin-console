@@ -1,28 +1,20 @@
-import { screen, waitFor, render as rtlRender } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { renderWrapper } from '@src/setupTest';
+import { logError } from '@edx/frontend-platform/logging';
 import { ToastManagerProvider, useToastManager } from './ToastManagerContext';
 
-const render = (ui: React.ReactElement) => rtlRender(
-  <IntlProvider locale="en">
-    {ui}
-  </IntlProvider>,
-);
-
+jest.mock('@edx/frontend-platform/logging');
 const TestComponent = () => {
-  const { handleShowToast, handleDiscardToast } = useToastManager();
+  const { showToast } = useToastManager();
+
+  const handleShowToast = () => showToast({ message: 'Test toast message', type: 'error' });
+  const handleShowAnotherToast = () => showToast({ message: 'Another message', type: 'success' });
 
   return (
     <div>
-      <button type="button" onClick={() => handleShowToast('Test toast message')}>
-        Show Toast
-      </button>
-      <button type="button" onClick={() => handleShowToast('Another message')}>
-        Show Another Toast
-      </button>
-      <button type="button" onClick={handleDiscardToast}>
-        Discard Toast
-      </button>
+      <button type="button" onClick={handleShowToast}>Show Toast</button>
+      <button type="button" onClick={handleShowAnotherToast}>Show Another Toast</button>
     </div>
   );
 };
@@ -30,7 +22,7 @@ const TestComponent = () => {
 describe('ToastManagerContext', () => {
   describe('ToastManagerProvider', () => {
     it('does not show toast initially', () => {
-      render(
+      renderWrapper(
         <ToastManagerProvider>
           <TestComponent />
         </ToastManagerProvider>,
@@ -39,15 +31,14 @@ describe('ToastManagerContext', () => {
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
-    it('shows toast when handleShowToast is called', async () => {
+    it('shows toast when showToast is called', async () => {
       const user = userEvent.setup();
-      render(
+      renderWrapper(
         <ToastManagerProvider>
           <TestComponent />
         </ToastManagerProvider>,
       );
 
-      // handleShowToast is called on button click
       const showButton = screen.getByText('Show Toast');
       await user.click(showButton);
 
@@ -57,59 +48,29 @@ describe('ToastManagerContext', () => {
       });
     });
 
-    it('updates toast message when handleShowToast is called with different message', async () => {
+    it('adds multiple toasts when showToast is called multiple times', async () => {
       const user = userEvent.setup();
-      render(
+      renderWrapper(
         <ToastManagerProvider>
           <TestComponent />
         </ToastManagerProvider>,
       );
 
-      // Show first toast
       const showButton = screen.getByText('Show Toast');
-      await user.click(showButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Test toast message')).toBeInTheDocument();
-      });
-
-      // Show another toast
       const showAnotherButton = screen.getByText('Show Another Toast');
+
+      await user.click(showButton);
       await user.click(showAnotherButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Another message')).toBeInTheDocument();
-        expect(screen.queryByText('Test toast message')).not.toBeInTheDocument();
-      });
-    });
-
-    it('hides toast when handleDiscardToast is called', async () => {
-      const user = userEvent.setup();
-      render(
-        <ToastManagerProvider>
-          <TestComponent />
-        </ToastManagerProvider>,
-      );
-
-      const showButton = screen.getByText('Show Toast');
-      await user.click(showButton);
-
-      await waitFor(() => {
         expect(screen.getByText('Test toast message')).toBeInTheDocument();
-      });
-
-      // handleDiscardToast is called on button click
-      const discardButton = screen.getByText('Discard Toast');
-      await user.click(discardButton);
-
-      await waitFor(() => {
-        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        expect(screen.getByText('Another message')).toBeInTheDocument();
       });
     });
 
     it('hides toast when close button is clicked', async () => {
       const user = userEvent.setup();
-      render(
+      renderWrapper(
         <ToastManagerProvider>
           <TestComponent />
         </ToastManagerProvider>,
@@ -127,39 +88,13 @@ describe('ToastManagerContext', () => {
 
       await waitFor(() => {
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-      });
-    });
-
-    it('calls handleClose callback when toast is closed', async () => {
-      const user = userEvent.setup();
-      const mockHandleClose = jest.fn();
-
-      render(
-        <ToastManagerProvider handleClose={mockHandleClose}>
-          <TestComponent />
-        </ToastManagerProvider>,
-      );
-
-      const showButton = screen.getByText('Show Toast');
-      await user.click(showButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Test toast message')).toBeInTheDocument();
-      });
-
-      const closeButton = screen.getByLabelText('Close');
-      await user.click(closeButton);
-
-      await waitFor(() => {
-        expect(mockHandleClose).toHaveBeenCalledTimes(1);
-      });
+      }, { timeout: 500 });
     });
   });
 
   describe('useToastManager hook', () => {
     it('throws error when used outside ToastManagerProvider', () => {
-      // Suppress console.error for this test
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
 
       const TestComponentWithoutProvider = () => {
         useToastManager();
@@ -167,10 +102,39 @@ describe('ToastManagerContext', () => {
       };
 
       expect(() => {
-        render(<TestComponentWithoutProvider />);
-      }).toThrow('useToastManager must be used within an ToastManagerProvider');
+        renderWrapper(<TestComponentWithoutProvider />);
+      }).toThrow('useToastManager must be used within a ToastManagerProvider');
 
       consoleSpy.mockRestore();
     });
+  });
+
+  it('calls retry function when retry button is clicked', async () => {
+    const user = userEvent.setup();
+    const retryFn = jest.fn();
+
+    const ErrorTestComponent = () => {
+      const { showErrorToast } = useToastManager();
+      return (
+        <button
+          type="button"
+          onClick={() => showErrorToast({ customAttributes: { httpErrorStatus: 500 } }, retryFn)}
+        >Retry Error
+        </button>
+      );
+    };
+
+    renderWrapper(
+      <ToastManagerProvider>
+        <ErrorTestComponent />
+      </ToastManagerProvider>,
+    );
+
+    await user.click(screen.getByText('Retry Error'));
+    const retryButton = await screen.findByText('Retry');
+    await user.click(retryButton);
+
+    expect(logError).toHaveBeenCalled();
+    expect(retryFn).toHaveBeenCalled();
   });
 });
