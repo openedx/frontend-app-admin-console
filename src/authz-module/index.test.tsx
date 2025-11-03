@@ -8,9 +8,12 @@ import AuthZModule from './index';
 
 jest.mock('./libraries-manager', () => ({
   // eslint-disable-next-line no-promise-executor-return
-  LibrariesLayout: lazy(() => new Promise<{ default: ComponentType<any> }>(resolve => setTimeout(() => resolve({ default: () => <div data-testid="layout"><Outlet /></div> }), 100))),
-  LibrariesTeamManager: () => <div data-testid="libraries-manager">Libraries Team Page</div>,
-  LibrariesUserManager: () => <div data-testid="libraries-user-manager">Libraries User Page</div>,
+  LibrariesLayout: lazy(() => new Promise<{ default: ComponentType<any> }>(resolve => setTimeout(
+    () => resolve({ default: () => <div><Outlet /></div> }),
+    100,
+  ))),
+  LibrariesTeamManager: () => <div>Libraries Team Page</div>,
+  LibrariesUserManager: () => <div>Libraries User Page</div>,
 }));
 
 const createTestQueryClient = () => new QueryClient({
@@ -42,10 +45,10 @@ describe('AuthZModule', () => {
       </IntlProvider>,
     );
 
-    expect(screen.getByTestId('loading-page')).toBeInTheDocument();
+    expect(document.querySelector('.spinner-border')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByTestId('libraries-manager')).toBeInTheDocument();
+      expect(screen.getByText('Libraries Team Page')).toBeInTheDocument();
     });
   });
 
@@ -63,7 +66,7 @@ describe('AuthZModule', () => {
       </IntlProvider>,
     );
     await waitFor(() => {
-      expect(screen.getByTestId('libraries-user-manager')).toBeInTheDocument();
+      expect(screen.getByText('Libraries User Page')).toBeInTheDocument();
     });
   });
 });

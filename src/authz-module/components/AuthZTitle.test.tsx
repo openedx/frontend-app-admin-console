@@ -44,9 +44,9 @@ describe('AuthZTitle', () => {
   });
 
   it('renders page subtitle as ReactNode', () => {
-    const subtitleNode = <div data-testid="custom-subtitle">Custom Subtitle</div>;
+    const subtitleNode = <div>Custom Subtitle</div>;
     render(<AuthZTitle {...defaultProps} pageSubtitle={subtitleNode} />);
-    expect(screen.getByTestId('custom-subtitle')).toBeInTheDocument();
+    expect(screen.getByText('Custom Subtitle')).toBeInTheDocument();
   });
 
   it('renders action buttons and triggers onClick', () => {
@@ -69,7 +69,7 @@ describe('AuthZTitle', () => {
   });
 
   it('renders action buttons with icons', () => {
-    const mockIcon = () => <span data-testid="mock-icon">Icon</span>;
+    const mockIcon = () => <span role="img" aria-label="save icon">Icon</span>;
     const onClick = jest.fn();
     const actions = [
       { label: 'Save', icon: mockIcon, onClick },
@@ -77,14 +77,14 @@ describe('AuthZTitle', () => {
 
     render(<AuthZTitle {...defaultProps} actions={actions} />);
 
-    const button = screen.getByRole('button', { name: 'Icon Save' });
+    const button = screen.getByRole('button', { name: 'save icon Save' });
     expect(button).toBeInTheDocument();
-    expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'save icon' })).toBeInTheDocument();
   });
 
   it('renders ReactNode actions alongside button actions', () => {
     const onClick = jest.fn();
-    const customAction = <div data-testid="custom-action">Custom Action</div>;
+    const customAction = <div role="region" aria-label="custom action area">Custom Action</div>;
     const actions = [
       { label: 'Save', onClick },
       customAction,
@@ -93,6 +93,6 @@ describe('AuthZTitle', () => {
     render(<AuthZTitle {...defaultProps} actions={actions} />);
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
-    expect(screen.getByTestId('custom-action')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'custom action area' })).toBeInTheDocument();
   });
 });

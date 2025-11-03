@@ -25,12 +25,12 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 
 jest.mock('./components/TeamTable', () => ({
   __esModule: true,
-  default: () => <div data-testid="team-table">MockTeamTable</div>,
+  default: () => <div role="table" aria-label="Team Members Table">Team member list</div>,
 }));
 
 jest.mock('./components/AddNewTeamMemberModal', () => ({
   __esModule: true,
-  AddNewTeamMemberTrigger: () => <div data-testid="add-team-member-trigger">MockAddNewTeamMemberTrigger</div>,
+  AddNewTeamMemberTrigger: () => <button type="button">Add Team Member</button>,
 }));
 
 jest.mock('../components/RoleCard', () => ({
@@ -40,10 +40,10 @@ jest.mock('../components/RoleCard', () => ({
     description: string,
     permissionsByResource: any[]
   }) => (
-    <div data-testid="role-card">
-      <div>{title}</div>
-      <div>{description}</div>
-      <div>{permissionsByResource.length} permissions</div>
+    <div role="article" aria-label={`Role: ${title}`}>
+      <h3>{title}</h3>
+      <p>{description}</p>
+      <span>{permissionsByResource.length} permissions</span>
     </div>
   ),
 }));
@@ -108,10 +108,10 @@ describe('LibrariesTeamManager', () => {
     expect(screen.getByText('lib-001')).toBeInTheDocument(); // subtitle
 
     // TeamTable is rendered
-    expect(screen.getByTestId('team-table')).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Team Members Table' })).toBeInTheDocument();
 
     // AddNewTeamMemberTrigger is rendered
-    expect(screen.getByTestId('add-team-member-trigger')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Team Member' })).toBeInTheDocument();
   });
 
   it('renders role cards when "Roles" tab is selected', async () => {
@@ -123,10 +123,10 @@ describe('LibrariesTeamManager', () => {
     const rolesTab = await screen.findByRole('tab', { name: /roles/i });
     await user.click(rolesTab);
 
-    const roleCards = await screen.findAllByTestId('role-card');
+    const roleCards = await screen.findAllByRole('article', { name: /Role:/ });
     const rolesScope = within(roleCards[0]);
     expect(roleCards.length).toBe(1);
-    expect(rolesScope.getByText('Instructor')).toBeInTheDocument();
+    expect(rolesScope.getByRole('heading', { name: 'Instructor' })).toBeInTheDocument();
     expect(screen.getByText(/Can manage content/i)).toBeInTheDocument();
     expect(screen.getByText(/1 permissions/i)).toBeInTheDocument();
   });

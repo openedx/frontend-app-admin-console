@@ -26,9 +26,9 @@ jest.mock('./AssignNewRoleModal', () => {
     selectedRole,
     handleChangeSelectedRole,
   }: any) => (isOpen ? (
-    <div data-testid="assign-new-role-modal">
+    <div role="dialog" aria-label="Assign New Role">
       <h2>Add New Role</h2>
-      <select data-testid="role-select" value={selectedRole} onChange={handleChangeSelectedRole}>
+      <select value={selectedRole} onChange={handleChangeSelectedRole} aria-label="Select role">
         <option value="">Select a role</option>
         {roleOptions.map((role: any) => (
           <option key={role.role} value={role.role}>
@@ -36,10 +36,10 @@ jest.mock('./AssignNewRoleModal', () => {
           </option>
         ))}
       </select>
-      <button type="button" onClick={onSave} disabled={isLoading} data-testid="save-button">
+      <button type="button" onClick={onSave} disabled={isLoading} aria-label="Save role assignment">
         {isLoading ? 'Saving...' : 'Save'}
       </button>
-      <button type="button" onClick={close} data-testid="cancel-button">
+      <button type="button" onClick={close} aria-label="Cancel role assignment">
         Cancel
       </button>
     </div>
@@ -106,7 +106,7 @@ describe('AssignNewRoleTrigger', () => {
     it('does not show modal initially', () => {
       renderComponent();
 
-      expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Assign New Role' })).not.toBeInTheDocument();
     });
 
     it('does not show toast initially', () => {
@@ -124,7 +124,7 @@ describe('AssignNewRoleTrigger', () => {
       const triggerButton = screen.getByRole('button', { name: /add new role/i });
       await user.click(triggerButton);
 
-      expect(screen.getByTestId('assign-new-role-modal')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Assign New Role' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: /add new role/i })).toBeInTheDocument();
     });
 
@@ -134,11 +134,11 @@ describe('AssignNewRoleTrigger', () => {
 
       // Open modal
       await user.click(screen.getByRole('button', { name: /add new role/i }));
-      expect(screen.getByTestId('assign-new-role-modal')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Assign New Role' })).toBeInTheDocument();
 
       // Close modal
-      await user.click(screen.getByTestId('cancel-button'));
-      expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Cancel role assignment' }));
+      expect(screen.queryByRole('dialog', { name: 'Assign New Role' })).not.toBeInTheDocument();
     });
   });
 
@@ -149,7 +149,7 @@ describe('AssignNewRoleTrigger', () => {
 
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
-      const roleSelect = screen.getByTestId('role-select');
+      const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
       await user.selectOptions(roleSelect, 'admin');
 
       expect(roleSelect).toHaveValue('admin');
@@ -163,11 +163,11 @@ describe('AssignNewRoleTrigger', () => {
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
       // Select a role
-      const roleSelect = screen.getByTestId('role-select');
+      const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
       await user.selectOptions(roleSelect, choosenRole);
 
       // Click save
-      await user.click(screen.getByTestId('save-button'));
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       expect(mockMutate).toHaveBeenCalledWith(
         {
@@ -191,15 +191,15 @@ describe('AssignNewRoleTrigger', () => {
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
       // Select a role that user already has
-      const roleSelect = screen.getByTestId('role-select');
+      const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
       await user.selectOptions(roleSelect, choosenRole);
 
-      await user.click(screen.getByTestId('save-button'));
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       // Should not call assignTeamMembersRole
       expect(mockMutate).not.toHaveBeenCalled();
       // Modal should be closed
-      expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Assign New Role' })).not.toBeInTheDocument();
     });
   });
 
@@ -215,7 +215,7 @@ describe('AssignNewRoleTrigger', () => {
 
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
-      expect(screen.getByTestId('save-button')).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Save role assignment' })).toBeDisabled();
       expect(screen.getByText('Saving...')).toBeInTheDocument();
     });
   });
@@ -227,10 +227,10 @@ describe('AssignNewRoleTrigger', () => {
 
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
-      const roleSelect = screen.getByTestId('role-select');
+      const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
       await user.selectOptions(roleSelect, 'admin');
 
-      await user.click(screen.getByTestId('save-button'));
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
@@ -247,22 +247,22 @@ describe('AssignNewRoleTrigger', () => {
 
       await user.click(screen.getByRole('button', { name: /add new role/i }));
 
-      const roleSelect = screen.getByTestId('role-select');
+      const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
       await user.selectOptions(roleSelect, 'admin');
 
-      await user.click(screen.getByTestId('save-button'));
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       // Simulate successful API call
       const onSuccessCallback = mockMutate.mock.calls[0][1].onSuccess;
       onSuccessCallback({ errors: [] });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('assign-new-role-modal')).not.toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Assign New Role' })).not.toBeInTheDocument();
       });
 
       // Open modal again to check if role is reset
       await user.click(screen.getByRole('button', { name: /add new role/i }));
-      expect(screen.getByTestId('role-select')).toHaveValue('');
+      expect(screen.getByRole('combobox', { name: 'Select role' })).toHaveValue('');
     });
   });
 
@@ -273,15 +273,15 @@ describe('AssignNewRoleTrigger', () => {
       renderComponent();
 
       await user.click(screen.getByRole('button', { name: /add new role/i }));
-      await user.selectOptions(screen.getByTestId('role-select'), 'admin');
-      await user.click(screen.getByTestId('save-button'));
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Select role' }), 'admin');
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       const { onSuccess } = mockMutate.mock.calls[0][1];
       onSuccess({ errors: [{ error: 'role_assignment_error' }] });
 
       await waitFor(() => {
         expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
-        expect(screen.getByTestId('role-select')).toHaveValue(''); // role reset
+        expect(screen.getByRole('combobox', { name: 'Select role' })).toHaveValue(''); // role reset
       });
     });
 
@@ -306,8 +306,8 @@ describe('AssignNewRoleTrigger', () => {
 
       // Open modal and select a role
       await user.click(screen.getByRole('button', { name: /add new role/i }));
-      await user.selectOptions(screen.getByTestId('role-select'), 'admin');
-      await user.click(screen.getByTestId('save-button'));
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Select role' }), 'admin');
+      await user.click(screen.getByRole('button', { name: 'Save role assignment' }));
 
       // Wait for the error toast to appear with a retry button
       await waitFor(() => {
