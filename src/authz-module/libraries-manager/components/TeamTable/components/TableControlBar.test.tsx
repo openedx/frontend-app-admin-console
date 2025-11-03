@@ -7,10 +7,8 @@ import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
 
 jest.mock('./MultipleChoiceFilter', () => {
-  // eslint-disable-next-line react/prop-types
-  const MockMultipleChoiceFilter = (props) => (
-    // eslint-disable-next-line react/prop-types
-    <div data-testid="multiple-choice-filter" data-column-id={props.id || props.accessor}>
+  const MockMultipleChoiceFilter = (props: { id?: string; accessor?: string }) => (
+    <div role="group" aria-label={`Filter by ${props.id || props.accessor}`}>
       Multiple Choice Filter
     </div>
   );
@@ -20,7 +18,7 @@ jest.mock('./MultipleChoiceFilter', () => {
 
 jest.mock('./SortDropdown', () => {
   const MockSortDropdown = () => (
-    <div data-testid="sort-dropdown">
+    <div role="group" aria-label="Sort options">
       Sort Dropdown
     </div>
   );
@@ -31,7 +29,7 @@ jest.mock('./SortDropdown', () => {
 jest.mock('./SearchFilter', () => {
   // eslint-disable-next-line react/prop-types
   const MockSearchFilter = (props) => (
-    <div data-testid="search-filter">
+    <div role="search" aria-label="Search filter">
       <input
         // eslint-disable-next-line react/prop-types
         placeholder={props.placeholder}
@@ -39,7 +37,7 @@ jest.mock('./SearchFilter', () => {
         value={props.filterValue || ''}
         // eslint-disable-next-line react/prop-types
         onChange={(e) => props.setFilter(e.target.value)}
-        data-testid="search-input"
+        aria-label="Search input"
       />
     </div>
   );
@@ -74,7 +72,7 @@ describe('TableControlBar', () => {
   it('should render basic structure with SortDropdown and RowStatus', () => {
     renderWithContext();
 
-    expect(screen.getByTestId('sort-dropdown')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Sort options' })).toBeInTheDocument();
     const container = screen.getByText('Sort Dropdown').closest('.pgn__data-table-status-bar');
     expect(container).toHaveClass('pgn__data-table-status-bar', 'mb-3', 'flex-wrap');
   });
@@ -131,9 +129,9 @@ describe('TableControlBar', () => {
 
     renderWithContext(contextWithCheckboxColumn);
 
-    const multipleChoiceFilter = screen.getByTestId('multiple-choice-filter');
+    const multipleChoiceFilter = screen.getByRole('group', { name: 'Filter by roles' });
     expect(multipleChoiceFilter).toBeInTheDocument();
-    expect(multipleChoiceFilter).toHaveAttribute('data-column-id', 'roles');
+    expect(screen.getByText('Multiple Choice Filter')).toBeInTheDocument();
   });
 
   it('should render SearchFilter for columns with TextFilter', () => {
@@ -154,8 +152,8 @@ describe('TableControlBar', () => {
 
     renderWithContext(contextWithTextColumn);
 
-    expect(screen.getByTestId('search-filter')).toBeInTheDocument();
-    expect(screen.getByTestId('search-input')).toBeInTheDocument();
+    expect(screen.getByRole('search', { name: 'Search filter' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Search input' })).toBeInTheDocument();
   });
 
   it('should not render any filter for unsupported Filter types', () => {
@@ -176,8 +174,8 @@ describe('TableControlBar', () => {
     renderWithContext(contextWithCustomFilter);
 
     // Only SortDropdown should be present, no filter components
-    expect(screen.getByTestId('sort-dropdown')).toBeInTheDocument();
-    expect(screen.queryByTestId('search-filter')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('multiple-choice-filter')).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Sort options' })).toBeInTheDocument();
+    expect(screen.queryByRole('search', { name: 'Search filter' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: /Filter by/ })).not.toBeInTheDocument();
   });
 });
