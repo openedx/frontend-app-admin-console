@@ -3,11 +3,6 @@
 .authz-libraries {
   --height-action-divider: 30px;
 
-  .pgn__breadcrumb li:first-child a {
-    color: var(--pgn-color-breadcrumb-active);
-    text-decoration: none;
-  }
-
   hr {
     border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
     width: 100%;

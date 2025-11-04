@@ -22,7 +22,7 @@ const LibrariesUserManager = () => {
   const {
     libraryId, permissions, roles, resources, canManageTeam,
   } = useLibraryAuthZ();
-  const teamMembersPath = `/authz/${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
+  const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
 
   useEffect(() => {
     if (!canManageTeam) {
@@ -147,7 +147,9 @@ const LibrariesUserManager = () => {
 
       <AuthZLayout
         context={{ id: libraryId, title: library.title, org: library.org }}
-        navLinks={[{ label: rootBreadcrumb }, { label: pageManageTitle, to: teamMembersPath }]}
+        // Temporarily setting '/authz/libraries/:libraryId' as the URL for Manage Access breadcrumb for now as
+        // currently we do not have a dedicated page. TODO: Update when such page is created.
+        navLinks={[{ label: rootBreadcrumb, to: teamMembersPath }, { label: pageManageTitle, to: teamMembersPath }]}
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={<p>{user?.email}</p>}
