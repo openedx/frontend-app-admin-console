@@ -192,4 +192,12 @@ describe('LibrariesTeamManager', () => {
     expect(readPublicToggle).toBeInTheDocument();
     expect(readPublicToggle).toBeDisabled();
   });
+
+  it('renders correct navigation link label and URL on breadcrumb', () => {
+    renderTeamManager();
+    const navLink = screen.getByRole('link', { name: 'Manage Access' });
+    expect(navLink).toBeInTheDocument();
+    // TODO: Update expected URL when dedicated Manage Access page is created
+    expect(navLink).toHaveAttribute('href', '/authz/libraries/lib-001');
+  });
 });

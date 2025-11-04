@@ -5,6 +5,7 @@ import {
 } from '@openedx/paragon';
 import { useLibrary } from '@src/authz-module/data/hooks';
 import { useLocation } from 'react-router-dom';
+import { ROUTES } from '@src/authz-module/constants';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import RoleCard from '../components/RoleCard';
@@ -23,8 +24,9 @@ const LibrariesTeamManager = () => {
     libraryId, canManageTeam, roles, permissions, resources,
   } = useLibraryAuthZ();
   const { data: library } = useLibrary(libraryId);
-  const rootBradecrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
+  const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
+  const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
 
   const [libraryPermissionsByRole, libraryPermissionsByResource] = useMemo(() => {
     if (!roles && !permissions && !resources) { return [null, null]; }
@@ -42,7 +44,9 @@ const LibrariesTeamManager = () => {
     <div className="authz-libraries">
       <AuthZLayout
         context={{ id: libraryId, title: library.title, org: library.org }}
-        navLinks={[{ label: rootBradecrumb }]}
+        // Temporarily setting '/authz/libraries/:libraryId' as the URL for Manage Access breadcrumb for now as
+        // currently we do not have a dedicated page. TODO: Update when such page is created.
+        navLinks={[{ label: rootBreadcrumb, to: teamMembersPath }]}
         activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
