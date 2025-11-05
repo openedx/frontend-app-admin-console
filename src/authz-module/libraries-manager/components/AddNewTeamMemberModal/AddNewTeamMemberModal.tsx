@@ -1,4 +1,4 @@
-import { FC, useRef } from 'react';
+import { useRef } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   ActionRow, Form, Hyperlink, Icon, IconButton, ModalDialog,
@@ -24,9 +24,9 @@ interface AddNewTeamMemberModalProps {
   handleChangeForm: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
-const AddNewTeamMemberModal: FC<AddNewTeamMemberModalProps> = ({
+const AddNewTeamMemberModal = ({
   isOpen, isError, isLoading, formValues, close, onSave, handleChangeForm,
-}) => {
+}: AddNewTeamMemberModalProps) => {
   const intl = useIntl();
   const { roles } = useLibraryAuthZ();
   const [isOpenRolesPopUp, openRolesPopUp, closeRolesPopUp] = useToggle(false);

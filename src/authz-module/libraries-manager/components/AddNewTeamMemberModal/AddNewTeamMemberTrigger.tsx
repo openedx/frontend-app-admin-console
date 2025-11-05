@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
@@ -19,7 +19,7 @@ const DEFAULT_FORM_VALUES = {
   role: '',
 };
 
-const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }) => {
+const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
   const [formValues, setFormValues] = useState(DEFAULT_FORM_VALUES);
