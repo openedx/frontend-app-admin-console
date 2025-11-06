@@ -151,6 +151,17 @@ describe('LibrariesUserManager', () => {
     expect(screen.getByText('Assign Role')).toBeInTheDocument();
   });
 
+  it('renders correct navigation link label and URL on breadcrumb', () => {
+    renderComponent();
+    const navLinkManageAccess = screen.getByRole('link', { name: 'Manage Access' });
+    expect(navLinkManageAccess).toBeInTheDocument();
+    // TODO: Update expected URL when dedicated Manage Access page is created
+    expect(navLinkManageAccess).toHaveAttribute('href', '/authz/libraries/lib:123');
+    const navLinkLibraryTeamManagement = screen.getByRole('link', { name: 'Library Team Management' });
+    expect(navLinkLibraryTeamManagement).toBeInTheDocument();
+    expect(navLinkLibraryTeamManagement).toHaveAttribute('href', '/authz/libraries/lib:123');
+  });
+
   describe('Revoking User Role Flow', () => {
     it('opens confirmation modal when delete role button is clicked', async () => {
       const user = userEvent.setup();
