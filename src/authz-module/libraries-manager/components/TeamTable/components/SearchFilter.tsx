@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import {
   Form,
   Icon,
@@ -11,9 +10,9 @@ interface SearchFilterProps {
   placeholder: string;
 }
 
-const SearchFilter: FC<SearchFilterProps> = ({
+const SearchFilter = ({
   filterValue, setFilter, placeholder,
-}) => (
+}: SearchFilterProps) => (
   <Form.Control
     className="mw-xs mr-0"
     trailingElement={<Icon src={Search} />}
