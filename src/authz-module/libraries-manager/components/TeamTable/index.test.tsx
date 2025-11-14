@@ -45,9 +45,9 @@ describe('TeamTable', () => {
       {
         role: 'admin',
         permissions: [
-          'delete_library',
-          'publish_library',
-          'manage_library_team',
+          'content_libraries.delete_library',
+          'content_libraries.publish_library_content',
+          'content_libraries.manage_library_team',
         ],
         userCount: 3,
         name: 'Admin',
@@ -56,8 +56,8 @@ describe('TeamTable', () => {
       {
         role: 'editor',
         permissions: [
-          'edit_library',
-          'publish_library',
+          'content_libraries.edit_library_content',
+          'content_libraries.publish_library_content',
         ],
         userCount: 3,
         name: 'Editor',
@@ -66,7 +66,7 @@ describe('TeamTable', () => {
       {
         role: 'viewer',
         permissions: [
-          'view_library',
+          'content_libraries.view_library',
         ],
         userCount: 3,
         name: 'Viewer',

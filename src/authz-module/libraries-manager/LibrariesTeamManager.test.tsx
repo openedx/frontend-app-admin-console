@@ -71,8 +71,8 @@ describe('LibrariesTeamManager', () => {
       },
     ],
     permissions: [
-      { key: 'view_library', label: 'view', resource: 'library' },
-      { key: 'edit_library', label: 'edit', resource: 'library' },
+      { key: 'content_libraries.view_library', label: 'view', resource: 'library' },
+      { key: 'content_libraries.edit_library', label: 'edit', resource: 'library' },
     ],
     resources: [{ key: 'library', label: 'Library' }],
     canManageTeam: true,
