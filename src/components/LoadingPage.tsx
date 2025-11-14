@@ -1,7 +1,7 @@
 import { Spinner, Container } from '@openedx/paragon';
 
 const LoadingPage = () => (
-  <Container className="d-flex vh-100" data-testid="loading-page">
+  <Container className="d-flex vh-100">
     <Spinner
       variant="primary"
       animation="border"

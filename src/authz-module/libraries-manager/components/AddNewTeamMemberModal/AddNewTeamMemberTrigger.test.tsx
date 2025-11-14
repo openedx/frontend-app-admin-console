@@ -21,26 +21,27 @@ jest.mock('./AddNewTeamMemberModal', () => {
     isOpen, close, onSave, isLoading, formValues, handleChangeForm,
   }) => (
     isOpen ? (
-      <div data-testid="add-team-member-modal">
-        <button type="button" onClick={close} data-testid="close-modal">Close</button>
-        <button type="button" onClick={onSave} data-testid="save-modal">Save</button>
+      <div role="dialog" aria-label="Add New Team Member">
+        <button type="button" onClick={close} aria-label="Close modal">Close</button>
+        <button type="button" onClick={onSave} aria-label="Save team member">Save</button>
         <textarea
           name="users"
           value={formValues?.users || ''}
           onChange={handleChangeForm}
-          data-testid="users-input"
+          aria-label="Enter user emails or usernames"
+          placeholder="Enter emails or usernames"
         />
         <select
           name="role"
           value={formValues?.role || ''}
           onChange={handleChangeForm}
-          data-testid="role-select"
+          aria-label="Select role"
         >
           <option value="">Select role</option>
           <option value="admin">Admin</option>
           <option value="editor">Editor</option>
         </select>
-        {isLoading && <div data-testid="loading-indicator">Loading...</div>}
+        {isLoading && <div role="status" aria-label="Adding team member loader">Loading...</div>}
       </div>
     ) : null
   );
@@ -75,7 +76,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
   });
 
   it('closes modal when close button is clicked', async () => {
@@ -85,12 +86,12 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
 
-    const closeButton = screen.getByTestId('close-modal');
+    const closeButton = screen.getByRole('button', { name: 'Close modal' });
     await user.click(closeButton);
 
-    expect(screen.queryByTestId('add-team-member-modal')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Add New Team Member' })).not.toBeInTheDocument();
   });
 
   it('calls addTeamMember with correct data when save is clicked', async () => {
@@ -100,9 +101,9 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const usersInput = screen.getByTestId('users-input');
-    const roleSelect = screen.getByTestId('role-select');
-    const saveButton = screen.getByTestId('save-modal');
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
 
     await user.type(usersInput, 'alice@example.com, bob@example.com');
     await user.selectOptions(roleSelect, 'editor');
@@ -129,7 +130,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     // Simulate successful response with no errors
@@ -143,7 +144,7 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId('add-team-member-modal')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'Add New Team Member' })).not.toBeInTheDocument();
     });
 
     expect(screen.getByText('2 team members added successfully.')).toBeInTheDocument();
@@ -156,7 +157,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     // Simulate partial success response
@@ -176,7 +177,7 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     // Modal should remain open when there are errors
-    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
   });
 
   it('displays only error toast when all additions fail', async () => {
@@ -186,7 +187,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     // Simulate all failed response
@@ -204,7 +205,7 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     // Modal should remain open when there are errors
-    expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
   });
 
   it('resets form values after successful addition with no errors', async () => {
@@ -214,9 +215,9 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const usersInput = screen.getByTestId('users-input');
-    const roleSelect = screen.getByTestId('role-select');
-    const saveButton = screen.getByTestId('save-modal');
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
 
     await user.type(usersInput, 'alice@example.com');
     await user.selectOptions(roleSelect, 'editor');
@@ -232,8 +233,8 @@ describe('AddNewTeamMemberTrigger', () => {
     // Open modal again to check if form is reset
     await user.click(triggerButton);
 
-    const newUsersInput = screen.getByTestId('users-input');
-    const newRoleSelect = screen.getByTestId('role-select');
+    const newUsersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    const newRoleSelect = screen.getByRole('combobox', { name: 'Select role' });
 
     expect(newUsersInput).toHaveValue('');
     expect(newRoleSelect).toHaveValue('');
@@ -246,7 +247,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     // Simulate successful response
@@ -289,7 +290,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     await waitFor(() => {
@@ -351,16 +352,16 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /add new team member/i });
     await user.click(triggerButton);
 
-    const userInput = screen.getByTestId('users-input');
-    const roleSelect = screen.getByTestId('role-select');
+    const userInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
     await user.type(userInput, 'alice@example.com');
     await user.selectOptions(roleSelect, 'editor');
 
-    const saveButton = screen.getByTestId('save-modal');
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
     // should now reflect isPending = true
-    const loadingIndicator = await screen.findByTestId('loading-indicator');
+    const loadingIndicator = await screen.findByRole('status', { name: 'Adding team member loader' });
     expect(loadingIndicator).toBeInTheDocument();
     expect(loadingIndicator).toHaveTextContent('Loading...');
 

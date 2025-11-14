@@ -49,14 +49,12 @@ const TestComponent = () => {
   const context = useLibraryAuthZ();
   return (
     <div>
-      <div data-testid="username">{context.username}</div>
-      <div data-testid="libraryId">{context.libraryId}</div>
-      <div data-testid="canManageTeam">{context.canManageTeam ? 'true' : 'false'}</div>
-      <div data-testid="roles">{Array.isArray(context.roles) ? context.roles.length : 'undefined'}</div>
-      <div data-testid="permissions">
-        {Array.isArray(context.permissions) ? context.permissions.length : 'undefined'}
-      </div>
-      <div data-testid="resources">{Array.isArray(context.resources) ? context.resources.length : 'undefined'}</div>
+      <div>Username: {context.username}</div>
+      <div>Library ID: {context.libraryId}</div>
+      <div>Can manage team: {context.canManageTeam ? 'Yes' : 'No'}</div>
+      <div>Roles count: {Array.isArray(context.roles) ? context.roles.length : 'undefined'}</div>
+      <div>Permissions count: {Array.isArray(context.permissions) ? context.permissions.length : 'undefined'}</div>
+      <div>Resources count: {Array.isArray(context.resources) ? context.resources.length : 'undefined'}</div>
     </div>
   );
 };
@@ -109,12 +107,12 @@ describe('LibraryAuthZProvider', () => {
       </LibraryAuthZProvider>,
     );
 
-    expect(screen.getByTestId('username')).toHaveTextContent('testuser');
-    expect(screen.getByTestId('libraryId')).toHaveTextContent('lib123');
-    expect(screen.getByTestId('canManageTeam')).toHaveTextContent('true');
-    expect(Number(screen.getByTestId('roles').textContent)).not.toBeNaN();
-    expect(Number(screen.getByTestId('permissions').textContent)).not.toBeNaN();
-    expect(Number(screen.getByTestId('resources').textContent)).not.toBeNaN();
+    expect(screen.getByText(/Username: testuser/)).toBeInTheDocument();
+    expect(screen.getByText(/Library ID: lib123/)).toBeInTheDocument();
+    expect(screen.getByText(/Can manage team: Yes/)).toBeInTheDocument();
+    expect(screen.getByText(/Roles count: \d+/)).toBeInTheDocument();
+    expect(screen.getByText(/Permissions count: \d+/)).toBeInTheDocument();
+    expect(screen.getByText(/Resources count: \d+/)).toBeInTheDocument();
   });
 
   it('throws error when user lacks both view and manage permissions', () => {
@@ -148,7 +146,7 @@ describe('LibraryAuthZProvider', () => {
       </LibraryAuthZProvider>,
     );
 
-    expect(screen.getByTestId('canManageTeam')).toHaveTextContent('false');
+    expect(screen.getByText(/Can manage team: No/)).toBeInTheDocument();
   });
 
   it('throws error when libraryId is missing', () => {

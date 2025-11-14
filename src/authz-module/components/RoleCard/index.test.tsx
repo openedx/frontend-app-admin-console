@@ -4,14 +4,14 @@ import userEvent from '@testing-library/user-event';
 import RoleCard from '.';
 
 jest.mock('@openedx/paragon/icons', () => ({
-  Delete: () => <svg data-testid="delete-icon" />,
-  Person: () => <svg data-testid="person-icon" />,
+  Delete: () => <svg role="img" aria-label="delete icon" />,
+  Person: () => <svg role="img" aria-label="person icon" />,
 }));
 
 jest.mock('./constants', () => ({
   actionsDictionary: {
-    view: () => <svg data-testid="view-icon" />,
-    manage: () => <svg data-testid="manage-icon" />,
+    view: () => <svg role="img" aria-label="view action icon" />,
+    manage: () => <svg role="img" aria-label="manage action icon" />,
   },
 }));
 
@@ -47,7 +47,7 @@ describe('RoleCard', () => {
 
     // User counter with icon
     expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByTestId('person-icon')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'person icon' })).toBeInTheDocument();
 
     // Subtitle (object name)
     expect(screen.getByText('Test Library')).toBeInTheDocument();
@@ -71,8 +71,8 @@ describe('RoleCard', () => {
     expect(screen.getByText('Manage')).toBeInTheDocument();
 
     // Action icons
-    expect(screen.getByTestId('view-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('manage-icon')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'view action icon' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'manage action icon' })).toBeInTheDocument();
   });
 
   it('does not show delete button when handleDelete is not passed', () => {
@@ -82,7 +82,7 @@ describe('RoleCard', () => {
 
   it('handles no userCounter gracefully', () => {
     renderWrapper(<RoleCard {...defaultProps} userCounter={null} />);
-    expect(screen.queryByTestId('person-icon')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'person icon' })).not.toBeInTheDocument();
     expect(screen.queryByText('2')).not.toBeInTheDocument();
   });
 
