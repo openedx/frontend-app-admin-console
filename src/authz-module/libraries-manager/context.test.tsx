@@ -20,7 +20,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
     data: [
       {
         role: 'library_author',
-        permissions: ['view_library_team', 'edit_library'],
+        permissions: ['content_libraries.view_library_team', 'content_libraries.edit_library_content'],
         user_count: 12,
       },
     ],

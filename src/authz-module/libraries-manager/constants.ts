@@ -17,18 +17,18 @@ export const libraryResourceTypes: ResourceMetadata[] = [
 ];
 
 export const libraryPermissions: PermissionMetadata[] = [
-  { key: 'delete_library', resource: 'library', description: 'Allows the user to delete the library and all its contents.' },
-  { key: 'manage_library_tags', resource: 'library', description: 'Add or remove tags from content.' },
-  { key: 'view_library', resource: 'library', description: 'View content, search, filter, and sort within the library.' },
+  { key: 'content_libraries.delete_library', resource: 'library', description: 'Allows the user to delete the library and all its contents.' },
+  { key: 'content_libraries.manage_library_tags', resource: 'library', description: 'Add or remove tags from content.' },
+  { key: 'content_libraries.view_library', resource: 'library', description: 'View content, search, filter, and sort within the library.' },
 
-  { key: 'edit_library_content', resource: 'library_content', description: 'Edit content in draft mode' },
-  { key: 'publish_library_content', resource: 'library_content', description: 'Publish content, making it available for reuse' },
-  { key: 'reuse_library_content', resource: 'library_content', description: 'Reuse published content within a course.' },
+  { key: 'content_libraries.edit_library_content', resource: 'library_content', description: 'Edit content in draft mode' },
+  { key: 'content_libraries.publish_library_content', resource: 'library_content', description: 'Publish content, making it available for reuse' },
+  { key: 'content_libraries.reuse_library_content', resource: 'library_content', description: 'Reuse published content within a course.' },
 
-  { key: 'create_library_collection', resource: 'library_collection', description: 'Create new collections within a library.' },
-  { key: 'edit_library_collection', resource: 'library_collection', description: 'Add or remove content from existing collections.' },
-  { key: 'delete_library_collection', resource: 'library_collection', description: 'Delete entire collections from the library.' },
+  { key: 'content_libraries.create_library_collection', resource: 'library_collection', description: 'Create new collections within a library.' },
+  { key: 'content_libraries.edit_library_collection', resource: 'library_collection', description: 'Add or remove content from existing collections.' },
+  { key: 'content_libraries.delete_library_collection', resource: 'library_collection', description: 'Delete entire collections from the library.' },
 
-  { key: 'manage_library_team', resource: 'library_team', description: 'View the list of users who have access to the library.' },
-  { key: 'view_library_team', resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },
+  { key: 'content_libraries.manage_library_team', resource: 'library_team', description: 'View the list of users who have access to the library.' },
+  { key: 'content_libraries.view_library_team', resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },
 ];

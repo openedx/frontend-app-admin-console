@@ -9,7 +9,7 @@ import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { CustomErrors } from '@src/constants';
 import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
 
-const LIBRARY_TEAM_PERMISSIONS = ['view_library_team', 'manage_library_team'];
+const LIBRARY_TEAM_PERMISSIONS = ['content_libraries.view_library_team', 'content_libraries.manage_library_team'];
 
 export type AppContextType = {
   authenticatedUser: {
