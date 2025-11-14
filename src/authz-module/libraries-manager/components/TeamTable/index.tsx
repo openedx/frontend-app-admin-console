@@ -1,70 +1,37 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  DataTable, Button, Chip, Skeleton,
+  DataTable,
   TextFilter,
   CheckboxFilter,
   TableFooter,
 } from '@openedx/paragon';
-import { Edit } from '@openedx/paragon/icons';
-import { TableCellValue, TeamMember } from '@src/types';
+
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { SKELETON_ROWS } from '@src/authz-module/libraries-manager/constants';
 import { useQuerySettings } from './hooks/useQuerySettings';
 import TableControlBar from './components/TableControlBar';
 import messages from './messages';
-
-const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
-  username: 'skeleton',
-  name: '',
-  email: '',
-  roles: [],
-}));
+import {
+  ActionCell, EmailCell, NameCell, RolesCell,
+} from './components/Cells';
 
 const DEFAULT_PAGE_SIZE = 10;
-
-type CellProps = TableCellValue<TeamMember>;
-
-const EmailCell = ({ row }: CellProps) => (row.original?.username === SKELETON_ROWS[0].username ? (
-  <Skeleton width="180px" />
-) : (
-  row.original.email
-));
-
-const NameCell = ({ row }: CellProps) => {
-  const intl = useIntl();
-  const { username } = useLibraryAuthZ();
-
-  if (row.original.username === SKELETON_ROWS[0].username) {
-    return <Skeleton width="180px" />;
-  }
-
-  if (row.original.username === username) {
-    return (
-      <span>
-        {username}
-        <span className="text-gray-500">{intl.formatMessage(messages['library.authz.team.table.username.current'])}</span>
-      </span>
-    );
-  }
-  return row.original.username;
-};
 
 const TeamTable = () => {
   const intl = useIntl();
   const {
-    libraryId, canManageTeam, username, roles,
+    libraryId, roles,
   } = useLibraryAuthZ();
-  const roleLabels = roles.reduce((acc, role) => ({ ...acc, [role.role]: role.name }), {} as Record<string, string>);
   const { showErrorToast } = useToastManager();
 
   const { querySettings, handleTableFetch } = useQuerySettings();
 
   const {
-    data: teamMembers, isLoading, isError, error, refetch,
+    data: teamMembers, isError, error, refetch,
   } = useTeamMembers(libraryId, querySettings);
 
   if (error) {
@@ -73,8 +40,6 @@ const TeamTable = () => {
 
   const rows = isError ? [] : (teamMembers?.results || SKELETON_ROWS);
   const pageCount = teamMembers?.count ? Math.ceil(teamMembers.count / DEFAULT_PAGE_SIZE) : 1;
-
-  const navigate = useNavigate();
 
   const adaptedFilterChoices = useMemo(
     () => roles.map((role) => ({
@@ -108,18 +73,7 @@ const TeamTable = () => {
         {
           id: 'action',
           Header: intl.formatMessage(messages['library.authz.team.table.action']),
-          // eslint-disable-next-line react/no-unstable-nested-components
-          Cell: ({ row }: CellProps) => (
-            canManageTeam && row.original.username !== username && !isLoading ? (
-              <Button
-                iconBefore={Edit}
-                variant="link"
-                size="sm"
-                onClick={() => navigate(`/authz/libraries/${libraryId}/${row.original.username}`)}
-              >
-                {intl.formatMessage(messages['authz.libraries.team.table.edit.action'])}
-              </Button>
-            ) : null),
+          Cell: ActionCell,
         },
       ]}
       columns={
@@ -140,14 +94,7 @@ const TeamTable = () => {
           {
             Header: intl.formatMessage(messages['library.authz.team.table.roles']),
             accessor: 'roles',
-            // eslint-disable-next-line react/no-unstable-nested-components
-            Cell: ({ row }: CellProps) => (row.original.username === SKELETON_ROWS[0].username ? (
-              <Skeleton width="80px" />
-            ) : (
-              row.original.roles.map((role) => (
-                <Chip key={`${row.original.username}-role-${role}`}>{roleLabels[role]}</Chip>
-              ))
-            )),
+            Cell: RolesCell,
             Filter: CheckboxFilter,
             filter: 'includesValue',
             filterChoices: Object.values(adaptedFilterChoices),
