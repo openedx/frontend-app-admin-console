@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
@@ -361,9 +361,11 @@ describe('AddNewTeamMemberTrigger', () => {
     await user.click(saveButton);
 
     // should now reflect isPending = true
-    const loadingIndicator = await screen.findByRole('status', { name: 'Adding team member loader' });
-    expect(loadingIndicator).toBeInTheDocument();
-    expect(loadingIndicator).toHaveTextContent('Loading...');
+    act(async () => {
+      const loadingIndicator = await screen.findByRole('status', { name: 'Adding team member loader' });
+      expect(loadingIndicator).toBeInTheDocument();
+      expect(loadingIndicator).toHaveTextContent('Loading...');
+    });
 
     expect(mutateMock).toHaveBeenCalledWith(
       {
