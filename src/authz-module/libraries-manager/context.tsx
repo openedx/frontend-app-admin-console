@@ -7,9 +7,14 @@ import { useValidateUserPermissions } from '@src/data/hooks';
 import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { CustomErrors } from '@src/constants';
-import { libraryPermissions, libraryResourceTypes, libraryRolesMetadata } from './constants';
+import {
+  CONTENT_LIBRARY_PERMISSIONS, libraryPermissions, libraryResourceTypes, libraryRolesMetadata,
+} from './constants';
 
-const LIBRARY_TEAM_PERMISSIONS = ['content_libraries.view_library_team', 'content_libraries.manage_library_team'];
+const LIBRARY_TEAM_PERMISSIONS = [
+  CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,
+  CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
+];
 
 export type AppContextType = {
   authenticatedUser: {

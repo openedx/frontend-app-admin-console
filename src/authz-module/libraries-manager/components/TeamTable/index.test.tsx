@@ -4,6 +4,7 @@ import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/libraries-manager/constants';
 import TeamTable from './index';
 
 const mockNavigate = jest.fn();
@@ -45,9 +46,9 @@ describe('TeamTable', () => {
       {
         role: 'admin',
         permissions: [
-          'content_libraries.delete_library',
-          'content_libraries.publish_library_content',
-          'content_libraries.manage_library_team',
+          CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY,
+          CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT,
+          CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
         ],
         userCount: 3,
         name: 'Admin',
@@ -56,8 +57,8 @@ describe('TeamTable', () => {
       {
         role: 'editor',
         permissions: [
-          'content_libraries.edit_library_content',
-          'content_libraries.publish_library_content',
+          CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT,
+          CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT,
         ],
         userCount: 3,
         name: 'Editor',
@@ -66,7 +67,7 @@ describe('TeamTable', () => {
       {
         role: 'viewer',
         permissions: [
-          'content_libraries.view_library',
+          CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
         ],
         userCount: 3,
         name: 'Viewer',
