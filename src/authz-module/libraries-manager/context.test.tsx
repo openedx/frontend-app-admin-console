@@ -5,6 +5,7 @@ import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
 import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { CustomErrors } from '@src/constants';
+import { CONTENT_LIBRARY_PERMISSIONS } from './constants';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
@@ -15,16 +16,10 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissions: jest.fn(),
 }));
+
+// Move the mock after imports and use actual values
 jest.mock('@src/authz-module/data/hooks', () => ({
-  usePermissionsByRole: jest.fn().mockReturnValue({
-    data: [
-      {
-        role: 'library_author',
-        permissions: ['content_libraries.view_library_team', 'content_libraries.edit_library_content'],
-        user_count: 12,
-      },
-    ],
-  }),
+  usePermissionsByRole: jest.fn(),
 }));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error?: Error }> {
@@ -65,6 +60,14 @@ describe('LibraryAuthZProvider', () => {
     (useParams as jest.Mock).mockReturnValue({ libraryId: 'lib123' });
     (usePermissionsByRole as jest.Mock).mockReturnValue({
       data: [
+        {
+          role: 'library_author',
+          permissions: [
+            CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,
+            CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT,
+          ],
+          user_count: 12,
+        },
         {
           role: 'instructor',
           description: 'Can create and edit content',

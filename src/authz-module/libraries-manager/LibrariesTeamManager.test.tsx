@@ -6,6 +6,7 @@ import { useLibrary, useUpdateLibrary } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
 import { ToastManagerProvider } from './ToastManagerContext';
+import { CONTENT_LIBRARY_PERMISSIONS } from './constants';
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -71,8 +72,8 @@ describe('LibrariesTeamManager', () => {
       },
     ],
     permissions: [
-      { key: 'content_libraries.view_library', label: 'view', resource: 'library' },
-      { key: 'content_libraries.edit_library', label: 'edit', resource: 'library' },
+      { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY, label: 'view', resource: 'library' },
+      { key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION, label: 'edit', resource: 'library' },
     ],
     resources: [{ key: 'library', label: 'Library' }],
     canManageTeam: true,
