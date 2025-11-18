@@ -85,6 +85,7 @@ export const useAssignTeamMembersRole = () => {
     }) => assignTeamMembersRole(data),
     onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
     },
   });
 };
@@ -104,6 +105,7 @@ export const useRevokeUserRoles = () => {
     }) => revokeUserRoles(data),
     onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
     },
   });
 };
