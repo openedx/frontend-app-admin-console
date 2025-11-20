@@ -49,3 +49,5 @@ export const libraryPermissions: PermissionMetadata[] = [
   { key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, resource: 'library_team', description: 'View the list of users who have access to the library.' },
   { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },
 ];
+
+export const DEFAULT_TOAST_DELAY = 5000;
