@@ -5,6 +5,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Toast } from '@openedx/paragon';
 import messages from './messages';
+import { DEFAULT_TOAST_DELAY } from './constants';
 
 type ToastType = 'success' | 'error' | 'error-retry';
 
@@ -19,11 +20,12 @@ export const ERROR_TOAST_MAP: Record<number | string, { type: ToastType; message
   DEFAULT: { type: 'error-retry', messageId: 'library.authz.team.toast.default.error.message' },
 };
 
-interface AppToast {
+export interface AppToast {
   id: string;
   message: string;
   type: ToastType;
   onRetry?: () => void;
+  delay?: number;
 }
 
 const Bold = (chunk: string) => <b>{chunk}</b>;
@@ -47,7 +49,7 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
   const [toasts, setToasts] = useState<(AppToast & { visible: boolean })[]>([]);
 
   const showToast = (toast: Omit<AppToast, 'id'>) => {
-    const id = `toast-notification-${Date.now()}`;
+    const id = `toast-notification-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
     const newToast = { ...toast, id, visible: true };
     setToasts(prev => [...prev, newToast]);
   };
@@ -92,6 +94,7 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
             key={toast.id}
             show={toast.visible}
             onClose={() => discardToast(toast.id)}
+            delay={toast.delay ?? DEFAULT_TOAST_DELAY}
             action={toast.onRetry ? {
               onClick: () => {
                 discardToast(toast.id);

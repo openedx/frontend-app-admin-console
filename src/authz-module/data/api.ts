@@ -40,7 +40,7 @@ export type PermissionsByRole = {
   userCount: number;
 };
 export interface PutAssignTeamMembersRoleResponse {
-  completed: { user: string; status: string }[];
+  completed: { userIdentifier: string; status: string }[];
   errors: { userIdentifier: string; error: string }[];
 }
 
