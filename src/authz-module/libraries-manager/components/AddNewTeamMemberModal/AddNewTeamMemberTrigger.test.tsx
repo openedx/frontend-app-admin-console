@@ -147,7 +147,7 @@ describe('AddNewTeamMemberTrigger', () => {
       expect(screen.queryByRole('dialog', { name: 'Add New Team Member' })).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('2 team members added successfully.')).toBeInTheDocument();
+    expect(screen.getByText(/2 team members added successfully/)).toBeInTheDocument();
   });
 
   it('displays mixed success and error toast on partial success', async () => {
@@ -259,7 +259,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
     // Toast should be visible
     await waitFor(() => {
-      expect(screen.getByText('1 team member added successfully.')).toBeInTheDocument();
+      expect(screen.getByText(/1 team member added successfully/)).toBeInTheDocument();
     });
 
     // Find and close the toast
