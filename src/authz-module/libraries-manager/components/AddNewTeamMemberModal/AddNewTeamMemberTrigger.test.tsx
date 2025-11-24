@@ -21,20 +21,23 @@ jest.mock('./AddNewTeamMemberModal', () => {
     isOpen, close, onSave, isLoading, formValues, handleChangeForm,
   }) => (
     isOpen ? (
-      <div data-testid="add-team-member-modal">
-        <button type="button" onClick={close} data-testid="close-modal">Close</button>
-        <button type="button" onClick={onSave} data-testid="save-modal">Save</button>
+      <div data-testid="add-team-member-modal" role="dialog" aria-label="Add New Team Member">
+        <button type="button" onClick={close} aria-label="Close modal" data-testid="close-modal">Close</button>
+        <button type="button" onClick={onSave} aria-label="Save team member" data-testid="save-modal">Save</button>
         <textarea
           name="users"
           value={formValues?.users || ''}
           onChange={handleChangeForm}
           data-testid="users-input"
+          aria-label="Enter user emails or usernames"
+          placeholder="Enter emails or usernames"
         />
         <select
           name="role"
           value={formValues?.role || ''}
           onChange={handleChangeForm}
           data-testid="role-select"
+          aria-label="Select role"
         >
           <option value="">Select role</option>
           <option value="admin">Admin</option>
@@ -146,7 +149,7 @@ describe('AddNewTeamMemberTrigger', () => {
       expect(screen.queryByTestId('add-team-member-modal')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('2 team members added successfully.')).toBeInTheDocument();
+    expect(screen.getByText(/2 team members added successfully/)).toBeInTheDocument();
   });
 
   it('displays mixed success and error toast on partial success', async () => {
@@ -179,6 +182,50 @@ describe('AddNewTeamMemberTrigger', () => {
     expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
   });
 
+  it('filters out successfully added users from error users list', async () => {
+    const user = userEvent.setup();
+
+    const mockPartialResponse = {
+      completed: [
+        { userIdentifier: 'alice@example.com' },
+      ],
+      errors: [
+        { userIdentifier: 'bob@example.com', error: 'USER_NOT_FOUND' },
+        { userIdentifier: 'charlie@example.com', error: 'USER_NOT_FOUND' },
+      ],
+    };
+
+    (useAssignTeamMembersRole as jest.Mock).mockReturnValue({
+      mutate: jest.fn((_variables, { onSuccess }) => {
+        onSuccess(mockPartialResponse);
+      }),
+      isPending: false,
+    });
+
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const usersInput = screen.getByRole('textbox', { name: /Enter user emails or usernames/i });
+    const roleSelect = screen.getByRole('combobox', { name: /Select role/i });
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
+
+    await user.type(usersInput, 'alice@example.com, bob@example.com, charlie@example.com');
+    await user.selectOptions(roleSelect, 'editor');
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(usersInput).toHaveValue('bob@example.com, charlie@example.com');
+    });
+
+    await user.type(usersInput, ', new@example.com');
+
+    await waitFor(() => {
+      expect(usersInput).toHaveValue('bob@example.com, charlie@example.com, new@example.com');
+    });
+  });
+
   it('displays only error toast when all additions fail', async () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
@@ -205,6 +252,33 @@ describe('AddNewTeamMemberTrigger', () => {
 
     // Modal should remain open when there are errors
     expect(screen.getByTestId('add-team-member-modal')).toBeInTheDocument();
+  });
+
+  it('displays different error toast when different errors happen', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
+
+    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    await user.click(triggerButton);
+
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
+    await user.click(saveButton);
+
+    const [, { onSuccess }] = mockMutate.mock.calls[0];
+    onSuccess({
+      completed: [],
+      errors: [
+        { userIdentifier: 'unknown@example.com', error: 'user_not_found' },
+        { userIdentifier: 'already@example.com', error: 'user_already_has_role' },
+      ],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/We couldn't find a user for 1 email address or username \(unknown@example.com\)/)).toBeInTheDocument();
+      expect(screen.getByText(/The user already has the role \(already@example.com\)/)).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
   });
 
   it('resets form values after successful addition with no errors', async () => {
@@ -258,7 +332,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
     // Toast should be visible
     await waitFor(() => {
-      expect(screen.getByText('1 team member added successfully.')).toBeInTheDocument();
+      expect(screen.getByText(/1 team member added successfully/)).toBeInTheDocument();
     });
 
     // Find and close the toast
