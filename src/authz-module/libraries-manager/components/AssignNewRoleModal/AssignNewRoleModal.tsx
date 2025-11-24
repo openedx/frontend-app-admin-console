@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   ActionRow, Button, Form, ModalDialog,
@@ -16,9 +15,9 @@ interface AssignNewRoleModalProps {
   handleChangeSelectedRole: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
-const AssignNewRoleModal: FC<AssignNewRoleModalProps> = ({
+const AssignNewRoleModal = ({
   isOpen, isLoading, selectedRole, roleOptions, close, onSave, handleChangeSelectedRole,
-}) => {
+}: AssignNewRoleModalProps) => {
   const intl = useIntl();
   return (
     <ModalDialog

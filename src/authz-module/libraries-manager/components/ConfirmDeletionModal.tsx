@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import {
   ActionRow, AlertModal, Icon, ModalDialog, Stack,
   StatefulButton,
@@ -21,9 +20,9 @@ interface ConfirmDeletionModalProps {
   }
 }
 
-const ConfirmDeletionModal: FC<ConfirmDeletionModalProps> = ({
+const ConfirmDeletionModal = ({
   isOpen, close, onSave, isDeleting, context,
-}) => {
+}: ConfirmDeletionModalProps) => {
   const intl = useIntl();
   return (
     <AlertModal
