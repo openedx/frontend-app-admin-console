@@ -68,7 +68,7 @@ const messages = defineMessages({
   },
   'libraries.authz.manage.assign.role.existing': {
     id: 'libraries.authz.manage.assign.existing',
-    defaultMessage: 'The user already has the role ({userIds}).',
+    defaultMessage: 'The {count, plural, one {user already has} other {users already have}} the role ({userIds}).',
     description: 'Libraries AuthZ assign existing role',
   },
   'libraries.authz.manage.tooltip.roles.extra.info': {
