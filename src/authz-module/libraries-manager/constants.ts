@@ -51,3 +51,9 @@ export const libraryPermissions: PermissionMetadata[] = [
 ];
 
 export const DEFAULT_TOAST_DELAY = 5000;
+export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
+  username: 'skeleton',
+  name: '',
+  email: '',
+  roles: [],
+}));
