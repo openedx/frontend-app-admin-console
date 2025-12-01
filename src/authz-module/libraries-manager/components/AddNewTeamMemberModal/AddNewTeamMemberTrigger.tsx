@@ -67,10 +67,6 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
       .filter((err) => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
       .map((err) => err.userIdentifier.trim());
 
-    const alreadyHasRole = errors
-      .filter((err) => err.error === RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE)
-      .map((err) => err.userIdentifier.trim());
-
     const otherErrors = errors.filter(
       (err) => err.error !== RoleOperationErrorStatus.USER_NOT_FOUND
        && err.error !== RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE,
@@ -79,10 +75,6 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
     const result: Array<AppToastOmitIdType> = [];
 
     const errorTypes = [
-      {
-        errorMessageId: 'libraries.authz.manage.assign.role.existing',
-        users: alreadyHasRole,
-      },
       {
         errorMessageId: 'libraries.authz.manage.add.member.failure.not.found',
         users: notFoundUsers,
@@ -120,6 +112,22 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
     };
   };
 
+  const buildRoleAlreadyAssignedMessage = (
+    roleAlreadyAsignedUsers: PutAssignTeamMembersRoleResponse['errors'],
+  ): AppToastOmitIdType => {
+    const roleAlreadyAssignedUserIds = roleAlreadyAsignedUsers.map((err) => err.userIdentifier.trim());
+    const roleAlreadyAssignedMessage = intl.formatMessage(messages['libraries.authz.manage.assign.role.existing'], {
+      count: roleAlreadyAssignedUserIds.length,
+      userIds: roleAlreadyAssignedUserIds.join(', '),
+      Bold,
+      Br,
+    });
+    return {
+      message: roleAlreadyAssignedMessage,
+      type: 'success',
+    };
+  };
+
   const handleAddTeamMember = () => {
     const normalizedUsers = [...new Set(
       formValues.users
@@ -139,15 +147,27 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
         onSuccess: (response) => {
           const { completed, errors } = response;
           const feedbackMessages: Array<AppToastOmitIdType> = [];
+          const { USER_ALREADY_HAS_ROLE } = RoleOperationErrorStatus;
+          // Users who already have the role assigned are not considered errors
+          const roleAlreadyAssignedUsers = errors.filter((error) => error.error === USER_ALREADY_HAS_ROLE);
+          const cleanErrors = errors.filter((error) => error.error !== USER_ALREADY_HAS_ROLE);
 
           if (completed.length) {
             feedbackMessages.push(buildSuccessMessage(completed));
           }
-          if (errors.length) {
-            const errorMessages = buildErrorMessages(errors);
+          if (roleAlreadyAssignedUsers.length) {
+            feedbackMessages.push(buildRoleAlreadyAssignedMessage(roleAlreadyAssignedUsers));
+          }
+          if (cleanErrors.length) {
+            const errorMessages = buildErrorMessages(cleanErrors);
             feedbackMessages.push(...errorMessages);
 
-            const errorUserIds = normalizedUsers.filter((user) => !completed.map(c => c.userIdentifier).includes(user));
+            const successUserIds = [
+              ...completed.map(c => c.userIdentifier),
+              ...roleAlreadyAssignedUsers.map(r => r.userIdentifier),
+            ];
+
+            const errorUserIds = normalizedUsers.filter((user) => !successUserIds.includes(user));
             setErrorUsers(errorUserIds);
             setIsError(true);
             setFormValues((prev) => ({
@@ -162,7 +182,7 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
             showToast({ message, type, delay });
           });
 
-          if (!errors.length) {
+          if (!cleanErrors.length) {
             handleClose();
           }
         },
