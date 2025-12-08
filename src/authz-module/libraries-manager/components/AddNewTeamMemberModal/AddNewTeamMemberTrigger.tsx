@@ -6,10 +6,12 @@ import { Plus } from '@openedx/paragon/icons';
 import { PutAssignTeamMembersRoleResponse } from 'authz-module/data/api';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import { RoleOperationErrorStatus } from '@src/authz-module/constants';
-import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { AppToast, useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { DEFAULT_TOAST_DELAY } from '@src/authz-module/libraries-manager/constants';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';
 
+type AppToastOmitIdType = Omit<AppToast, 'id'>;
 interface AddNewTeamMemberTriggerProps {
   libraryId: string;
 }
@@ -58,53 +60,72 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleErrors = (
+  const buildErrorMessages = (
     errors: PutAssignTeamMembersRoleResponse['errors'],
-    successfulCount: number,
-  ) => {
+  ): Array<AppToastOmitIdType> => {
     const notFoundUsers = errors
       .filter((err) => err.error === RoleOperationErrorStatus.USER_NOT_FOUND)
       .map((err) => err.userIdentifier.trim());
 
-    const alreadyHasRole = errors.some(
-      (err) => err.error === RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE,
+    const otherErrors = errors.filter(
+      (err) => err.error !== RoleOperationErrorStatus.USER_NOT_FOUND
+       && err.error !== RoleOperationErrorStatus.USER_ALREADY_HAS_ROLE,
     );
 
-    if (alreadyHasRole && errors.length === 1 && !successfulCount) {
-      showToast({
-        message: intl.formatMessage(messages['libraries.authz.manage.assign.role.existing']),
-        type: 'error',
+    const result: Array<AppToastOmitIdType> = [];
+
+    const errorTypes = [
+      {
+        errorMessageId: 'libraries.authz.manage.add.member.failure.not.found',
+        users: notFoundUsers,
+      },
+      {
+        errorMessageId: 'libraries.authz.manage.add.member.failure.generic',
+        users: otherErrors,
+      },
+    ];
+
+    errorTypes.forEach(({ errorMessageId, users }) => {
+      if (users.length === 0) { return; }
+      const errorMessage = intl.formatMessage(messages[errorMessageId], {
+        count: users.length,
+        userIds: users.join(', '),
+        Bold,
+        Br,
       });
-      handleClose();
-      return;
-    }
+      result.push({ message: errorMessage, type: 'error' });
+    });
 
-    if (notFoundUsers.length) {
-      setErrorUsers(notFoundUsers);
-      setIsError(true);
-      setFormValues((prev) => ({
-        ...prev,
-        users: notFoundUsers.join(', '),
-      }));
+    return result;
+  };
 
-      const toastMessage = successfulCount
-        ? intl.formatMessage(messages['libraries.authz.manage.add.member.partial'], {
-          countSuccess: successfulCount,
-          countFailure: notFoundUsers.length,
-          Bold,
-          Br,
-        })
-        : intl.formatMessage(messages['libraries.authz.manage.add.member.failure'], {
-          count: notFoundUsers.length,
-          Bold,
-          Br,
-        });
+  const buildSuccessMessage = (completed: PutAssignTeamMembersRoleResponse['completed']): AppToastOmitIdType => {
+    const userIds = completed.map((user) => user.userIdentifier).join(', ');
+    const successMessage = intl.formatMessage(messages['libraries.authz.manage.add.member.success'], {
+      count: completed.length,
+      userIds,
+    });
 
-      showToast({
-        message: toastMessage,
-        type: 'error',
-      });
-    }
+    return {
+      message: successMessage,
+      type: 'success',
+    };
+  };
+
+  const buildRoleAlreadyAssignedMessage = (
+    roleAlreadyAsignedUsers: PutAssignTeamMembersRoleResponse['errors'],
+  ): AppToastOmitIdType => {
+    const roleAlreadyAssignedUserIds = roleAlreadyAsignedUsers.map((err) => err.userIdentifier.trim());
+    const roleAlreadyAssignedMessage = intl.formatMessage(messages['libraries.authz.manage.assign.role.existing'], {
+      count: roleAlreadyAssignedUserIds.length,
+      userIds: roleAlreadyAssignedUserIds.join(', '),
+      Bold,
+      Br,
+    });
+    return {
+      message: roleAlreadyAssignedMessage,
+      type: 'success',
+    };
   };
 
   const handleAddTeamMember = () => {
@@ -125,20 +146,44 @@ const AddNewTeamMemberTrigger: FC<AddNewTeamMemberTriggerProps> = ({ libraryId }
       assignTeamMembersRole(variables, {
         onSuccess: (response) => {
           const { completed, errors } = response;
+          const feedbackMessages: Array<AppToastOmitIdType> = [];
+          const { USER_ALREADY_HAS_ROLE } = RoleOperationErrorStatus;
+          // Users who already have the role assigned are not considered errors
+          const roleAlreadyAssignedUsers = errors.filter((error) => error.error === USER_ALREADY_HAS_ROLE);
+          const cleanErrors = errors.filter((error) => error.error !== USER_ALREADY_HAS_ROLE);
 
-          if (completed.length && !errors.length) {
-            showToast({
-              message: intl.formatMessage(messages['libraries.authz.manage.add.member.success'], {
-                count: completed.length,
-              }),
-              type: 'success',
-            });
-            handleClose();
-            return;
+          if (completed.length) {
+            feedbackMessages.push(buildSuccessMessage(completed));
+          }
+          if (roleAlreadyAssignedUsers.length) {
+            feedbackMessages.push(buildRoleAlreadyAssignedMessage(roleAlreadyAssignedUsers));
+          }
+          if (cleanErrors.length) {
+            const errorMessages = buildErrorMessages(cleanErrors);
+            feedbackMessages.push(...errorMessages);
+
+            const successUserIds = [
+              ...completed.map(c => c.userIdentifier),
+              ...roleAlreadyAssignedUsers.map(r => r.userIdentifier),
+            ];
+
+            const errorUserIds = normalizedUsers.filter((user) => !successUserIds.includes(user));
+            setErrorUsers(errorUserIds);
+            setIsError(true);
+            setFormValues((prev) => ({
+              ...prev,
+              users: errorUserIds.join(', '),
+            }));
           }
 
-          if (errors.length) {
-            handleErrors(errors, completed.length);
+          // Calculate delay based on the number of feedback messages, 5 seconds per message
+          const delay = DEFAULT_TOAST_DELAY * feedbackMessages.length;
+          feedbackMessages.forEach(({ message, type }) => {
+            showToast({ message, type, delay });
+          });
+
+          if (!cleanErrors.length) {
+            handleClose();
           }
         },
         onError: (error, retryVariables) => {

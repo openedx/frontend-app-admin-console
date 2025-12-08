@@ -137,4 +137,80 @@ describe('ToastManagerContext', () => {
     expect(logError).toHaveBeenCalled();
     expect(retryFn).toHaveBeenCalled();
   });
+
+  it('respects custom delay when provided', async () => {
+    const user = userEvent.setup();
+
+    const DelayTestComponent = () => {
+      const { showToast } = useToastManager();
+
+      const handleShowToastWithDelay = () => showToast({
+        message: 'Custom delay toast',
+        type: 'success',
+        delay: 1000, // Custom 1 second delay
+      });
+
+      return (
+        <button type="button" onClick={handleShowToastWithDelay}>Show Toast With Custom Delay</button>
+      );
+    };
+
+    renderWrapper(
+      <ToastManagerProvider>
+        <DelayTestComponent />
+      </ToastManagerProvider>,
+    );
+
+    const showButton = screen.getByText('Show Toast With Custom Delay');
+    await user.click(showButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Custom delay toast')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Custom delay toast')).toBeInTheDocument();
+    }, { timeout: 600 });
+
+    // Toast should disappear after the custom delay (1000ms)
+    await waitFor(() => {
+      expect(screen.queryByText('Custom delay toast')).not.toBeInTheDocument();
+    }, { timeout: 1200 });
+  });
+
+  it('uses default delay when delay prop is not provided', async () => {
+    const user = userEvent.setup();
+
+    const DefaultDelayTestComponent = () => {
+      const { showToast } = useToastManager();
+
+      const handleShowToastWithoutDelay = () => showToast({
+        message: 'Default delay toast',
+        type: 'success',
+      // No delay prop provided
+      });
+
+      return (
+        <button type="button" onClick={handleShowToastWithoutDelay}>Show Toast With Default Delay</button>
+      );
+    };
+
+    renderWrapper(
+      <ToastManagerProvider>
+        <DefaultDelayTestComponent />
+      </ToastManagerProvider>,
+    );
+
+    const showButton = screen.getByText('Show Toast With Default Delay');
+    await user.click(showButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Default delay toast')).toBeInTheDocument();
+    });
+
+    // DEFAULT_TOAST_DELAY is 5000ms
+    await waitFor(() => {
+      expect(screen.queryByText('Default delay toast')).not.toBeInTheDocument();
+    }, { timeout: 5050 });
+  }, 5100);
 });
