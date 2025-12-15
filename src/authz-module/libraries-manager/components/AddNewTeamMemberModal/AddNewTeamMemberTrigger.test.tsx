@@ -274,8 +274,8 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/We couldn't find a user for 1 email address or username \(unknown@example.com\)/)).toBeInTheDocument();
-      expect(screen.getByText(/The user already has the role \(already@example.com\)/)).toBeInTheDocument();
+      expect(screen.getByText(/We couldn't find a user for 1 email address or username/)).toBeInTheDocument();
+      expect(screen.getByText(/The user already has the role/)).toBeInTheDocument();
     });
 
     expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();

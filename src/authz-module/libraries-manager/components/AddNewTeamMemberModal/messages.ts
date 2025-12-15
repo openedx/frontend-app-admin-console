@@ -58,7 +58,7 @@ const messages = defineMessages({
   },
   'libraries.authz.manage.add.member.failure.not.found': {
     id: 'libraries.authz.manage.add.member.failure.not.found',
-    defaultMessage: '<Bold>We couldn\'t find a user for {count, plural, one {# email address or username} other {# email addresses or usernames}} ({userIds}).</Bold><Br></Br> Please check the values and try again, or invite them to join your organization first.',
+    defaultMessage: '<Bold>We couldn\'t find a user for {count, plural, one {# email address or username} other {# email addresses or usernames}}.</Bold><Br></Br> Please check the values ({userIds}) and try again, or invite them to join your organization first.',
     description: 'Error message in case of user not found when adding new team members',
   },
   'libraries.authz.manage.add.member.failure.generic': {
