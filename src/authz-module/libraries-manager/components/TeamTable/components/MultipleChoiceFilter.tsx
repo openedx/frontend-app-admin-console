@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import {
   Dropdown, Form, Icon, Stack,
 } from '@openedx/paragon';
@@ -11,9 +10,9 @@ interface MultipleChoiceFilterProps {
   setFilter: (value: string[]) => void;
 }
 
-const MultipleChoiceFilter: FC<MultipleChoiceFilterProps> = ({
+const MultipleChoiceFilter = ({
   Header, filterChoices, filterValue, setFilter,
-}) => {
+}: MultipleChoiceFilterProps) => {
   const checkedBoxes = filterValue || [];
 
   const changeCheckbox = (value) => {

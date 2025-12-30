@@ -38,7 +38,7 @@ type AuthZProviderProps = {
   children: ReactNode;
 };
 
-export const LibraryAuthZProvider: React.FC<AuthZProviderProps> = ({ children }:AuthZProviderProps) => {
+export const LibraryAuthZProvider = ({ children }: AuthZProviderProps) => {
   const { libraryId } = useParams<{ libraryId: string }>();
   const { authenticatedUser } = useContext(AppContext) as AppContextType;
 

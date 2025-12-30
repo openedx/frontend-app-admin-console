@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
@@ -17,11 +17,11 @@ interface AssignNewRoleTriggerProps {
   currentUserRoles: string[];
 }
 
-const AssignNewRoleTrigger: FC<AssignNewRoleTriggerProps> = ({
+const AssignNewRoleTrigger = ({
   username,
   libraryId,
   currentUserRoles,
-}) => {
+}: AssignNewRoleTriggerProps) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(false);
   const { roles } = useLibraryAuthZ();
