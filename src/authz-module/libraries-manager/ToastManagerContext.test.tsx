@@ -213,4 +213,44 @@ describe('ToastManagerContext', () => {
       expect(screen.queryByText('Default delay toast')).not.toBeInTheDocument();
     }, { timeout: 5050 });
   }, 5100);
+
+  it('uses longer delay for error toasts with retry functionality', async () => {
+    const user = userEvent.setup();
+    const retryFn = jest.fn();
+
+    const RetryErrorDelayTestComponent = () => {
+      const { showErrorToast } = useToastManager();
+
+      const handleShowRetryErrorToast = () => showErrorToast(
+        { customAttributes: { httpErrorStatus: 500 } },
+        retryFn,
+      );
+
+      return (
+        <button type="button" onClick={handleShowRetryErrorToast}>
+          Show Retry Error Toast
+        </button>
+      );
+    };
+
+    renderWrapper(
+      <ToastManagerProvider>
+        <RetryErrorDelayTestComponent />
+      </ToastManagerProvider>,
+    );
+
+    const showButton = screen.getByText('Show Retry Error Toast');
+    await user.click(showButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(screen.getByText('Retry')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    }, { timeout: 5050 });
+
+    expect(logError).toHaveBeenCalled();
+  });
 });
