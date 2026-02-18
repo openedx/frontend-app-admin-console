@@ -5,7 +5,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Toast } from '@openedx/paragon';
 import messages from './messages';
-import { DEFAULT_TOAST_DELAY } from './constants';
+import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from './constants';
 
 type ToastType = 'success' | 'error' | 'error-retry';
 
@@ -68,11 +68,19 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
       const errorStatus = error?.customAttributes?.httpErrorStatus;
       const toastConfig = ERROR_TOAST_MAP[errorStatus] || ERROR_TOAST_MAP.DEFAULT;
       const message = intl.formatMessage(messages[toastConfig.messageId], { Bold, Br });
+      /**
+       * For retryable errors, we set a longer delay to give users more time to read the message
+       * and decide to retry, while for non-retryable errors we use the default delay.
+       * Since current toast implementation does not allow disabling the autohide prop,
+       * we use a longer delay for retryable errors to give users more time to read the message.
+       */
+      const delay = toastConfig.type === 'error-retry' && retryFn ? RETRY_TOAST_DELAY : DEFAULT_TOAST_DELAY;
 
       showToast({
         message,
         type: toastConfig.type,
         onRetry: toastConfig.type === 'error-retry' && retryFn ? retryFn : undefined,
+        delay,
       });
     };
 

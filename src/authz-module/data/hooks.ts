@@ -83,9 +83,11 @@ export const useAssignTeamMembersRole = () => {
     mutationFn: async ({ data }: {
       data: AssignTeamMembersRoleRequest
     }) => assignTeamMembersRole(data),
-    onSettled: (_data, _error, { data: { scope } }) => {
-      queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
-      queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
+    onSettled: (_data, error, { data: { scope } }) => {
+      if (!error) {
+        queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
+        queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
+      }
     },
   });
 };
