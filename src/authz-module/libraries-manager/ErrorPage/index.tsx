@@ -5,7 +5,9 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Button, Container, Hyperlink, Row,
 } from '@openedx/paragon';
-import { CustomErrors, ERROR_STATUS } from '@src/constants';
+import {
+  CustomErrors, ERROR_STATUS, STATUS_400, STATUS_404,
+} from '@src/constants';
 
 import messages from './messages';
 
@@ -18,11 +20,14 @@ const getErrorConfig = ({ errorMessage, errorStatus }) => {
       showBackButton: true,
     });
   }
+  // 400 errors are handled as 404 Not Found to avoid exposing potential sensitive information
+  // about the existence of resources and handling malformed library ids in the URL
   if (errorMessage === CustomErrors.NOT_FOUND || ERROR_STATUS.NOT_FOUND.includes(errorStatus)) {
+    const statusCode = errorStatus === STATUS_400 ? STATUS_404 : errorStatus;
     return ({
       title: messages['error.page.title.notFound'],
       description: messages['error.page.message.notFound'],
-      statusCode: errorStatus || ERROR_STATUS.NOT_FOUND[0],
+      statusCode: statusCode || STATUS_404,
       showBackButton: true,
     });
   }

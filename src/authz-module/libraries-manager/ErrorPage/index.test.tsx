@@ -11,7 +11,7 @@ const ThrowError = ({ error }: { error:Error }) => {
 
 describe('LibrariesErrorFallback', () => {
   it('renders Access Denied for 401', () => {
-    const error = { name: '', message: 'NO_ACCESS', customAtributtes: { httpErrorStatus: 401 } };
+    const error = { name: '', message: 'NO_ACCESS', customAttributes: { httpErrorStatus: 401 } };
     renderWrapper(
       <ErrorBoundary FallbackComponent={LibrariesErrorFallback}>
         <ThrowError error={error} />
@@ -21,8 +21,19 @@ describe('LibrariesErrorFallback', () => {
     expect(screen.getByText(/Back to Libraries/i)).toBeInTheDocument();
   });
 
+  it('renders Not Found for 400 error', () => {
+    const error = { name: '', message: 'Axios Error (Response): 400', customAttributes: { httpErrorStatus: 400 } };
+    renderWrapper(
+      <ErrorBoundary FallbackComponent={LibrariesErrorFallback}>
+        <ThrowError error={error} />
+      </ErrorBoundary>,
+    );
+    expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
+    expect(screen.getByText(/Back to Libraries/i)).toBeInTheDocument();
+  });
+
   it('renders Not Found for 404', () => {
-    const error = { name: '', message: 'NOT_FOUND', customAtributtes: { httpErrorStatus: 404 } };
+    const error = { name: '', message: 'NOT_FOUND', customAttributes: { httpErrorStatus: 404 } };
     renderWrapper(
       <ErrorBoundary FallbackComponent={LibrariesErrorFallback}>
         <ThrowError error={error} />
@@ -33,7 +44,7 @@ describe('LibrariesErrorFallback', () => {
   });
 
   it('renders Server Error for 500 and shows reload', async () => {
-    const error = { name: '', message: 'SERVER_ERROR', customAtributtes: { httpErrorStatus: 500 } };
+    const error = { name: '', message: 'SERVER_ERROR', customAttributes: { httpErrorStatus: 500 } };
     renderWrapper(
       <ErrorBoundary FallbackComponent={LibrariesErrorFallback}>
         <ThrowError error={error} />
@@ -45,7 +56,7 @@ describe('LibrariesErrorFallback', () => {
   });
 
   it('renders generic error for other error error', () => {
-    const error = { name: '', message: 'SOMETHING_ELSE', customAtributtes: { httpErrorStatus: 418 } };
+    const error = { name: '', message: 'SOMETHING_ELSE', customAttributes: { httpErrorStatus: 418 } };
     renderWrapper(
       <ErrorBoundary FallbackComponent={LibrariesErrorFallback}>
         <ThrowError error={error} />
@@ -59,7 +70,7 @@ describe('LibrariesErrorFallback', () => {
     // Simulate error with a refetch function
     const refetch = jest.fn();
     const error = {
-      name: '', message: 'SERVER_ERROR', customAtributtes: { httpErrorStatus: 500 }, refetch,
+      name: '', message: 'SERVER_ERROR', customAttributes: { httpErrorStatus: 500 }, refetch,
     };
     renderWrapper(
       <ErrorBoundary FallbackComponent={LibrariesErrorFallback} onReset={refetch}>
