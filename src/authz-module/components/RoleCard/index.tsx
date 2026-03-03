@@ -18,17 +18,26 @@ interface RoleCardProps extends CardTitleProps {
   permissionsByResource: any[];
 }
 
-const CardTitle = ({ title, userCounter = null }: CardTitleProps) => (
-  <div className="d-flex align-items-center">
-    <span className="mr-4 text-primary">{title}</span>
-    {userCounter !== null && (
-      <span className="d-flex align-items-center font-weight-normal">
-        <Icon src={Person} className="mr-1" />
-        {userCounter}
-      </span>
-    )}
-  </div>
-);
+const CardTitle = ({ title, userCounter = null }: CardTitleProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <div className="d-flex align-items-center">
+      <span className="mr-4 text-primary">{title}</span>
+      {userCounter !== null && (
+        <span className="d-flex align-items-center font-weight-normal">
+          <Icon
+            src={Person}
+            className="mr-1"
+            aria-label={formatMessage(messages['authz.role.card.userCounter'])}
+            screenReaderText={formatMessage(messages['authz.role.card.userCounter'])}
+          />
+          {userCounter}
+        </span>
+      )}
+    </div>
+  );
+};
 
 const RoleCard = ({
   title, objectName, description, handleDelete, permissionsByResource, userCounter,

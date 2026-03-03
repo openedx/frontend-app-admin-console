@@ -51,6 +51,26 @@ const messages = defineMessages({
     defaultMessage: 'Delete role action',
     description: 'Alt description for delete button',
   },
+  'authz.role.card.userCounter': {
+    id: 'authz.role.card.userCounter',
+    defaultMessage: 'Number of users with this role',
+    description: 'Screen reader text for the user counter icon in the role card header',
+  },
+  'authz.role.card.permissions.ariaLabel': {
+    id: 'authz.role.card.permissions.ariaLabel',
+    defaultMessage: '{permissionName} permission is {permissionStatus}',
+    description: 'Aria label for permission chips in the role card',
+  },
+  'authz.role.card.permissions.status.denied': {
+    id: 'authz.role.card.permissions.status.denied',
+    defaultMessage: 'denied',
+    description: 'Label for denied status of a permission in the role card',
+  },
+  'authz.role.card.permissions.status.granted': {
+    id: 'authz.role.card.permissions.status.granted',
+    defaultMessage: 'granted',
+    description: 'Label for granted status of a permission in the role card',
+  },
 });
 
 export default messages;
