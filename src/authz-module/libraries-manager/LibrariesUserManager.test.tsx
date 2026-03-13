@@ -133,8 +133,8 @@ describe('LibrariesUserManager', () => {
     expect(screen.getByText('Library Team Management')).toBeInTheDocument();
     expect(screen.getByRole('listitem', { current: 'page' })).toHaveTextContent('testuser');
     // Page title and subtitle
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('testuser');
-    expect(screen.getByRole('paragraph')).toHaveTextContent('testuser@example.com');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('testuser');
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('testuser@example.com');
 
     expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('Instructor')).toBeInTheDocument();

@@ -1,6 +1,6 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { LibraryMetadata, TeamMember } from '@src/types';
-import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform';
+import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
@@ -107,18 +107,4 @@ export const revokeUserRoles = async (
   // If this is not transformed to string, it shows a 404 with the token CSRF acquisition request
   const res = await getAuthenticatedHttpClient().delete(url.toString());
   return camelCaseObject(res.data);
-};
-
-export const updateLibrary = async (libraryId, updatedData): Promise<LibraryMetadata> => {
-  const { data } = await getAuthenticatedHttpClient().patch(
-    getStudioApiUrl(`/api/libraries/v2/${libraryId}/`),
-    snakeCaseObject(updatedData),
-  );
-  return {
-    id: data.id,
-    org: data.org,
-    title: data.title,
-    slug: data.slug,
-    allowPublicRead: data.allow_public_read,
-  };
 };

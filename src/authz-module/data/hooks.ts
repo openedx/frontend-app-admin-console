@@ -6,7 +6,6 @@ import { LibraryMetadata } from '@src/types';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
-  updateLibrary,
 } from './api';
 
 const authzQueryKeys = {
@@ -108,31 +107,6 @@ export const useRevokeUserRoles = () => {
     onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
-    },
-  });
-};
-
-/**
- * React Query hook to update the library metadata.
- *
- * @example
- * const { mutate: updateLibrary } = useUpdateLibrary();
- * updateLibrary({ libraryId: 'lib:123',  updatedData: { title: 'Library Test' }});
- */
-
-export const useUpdateLibrary = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ libraryId, updatedData }: {
-      libraryId: string;
-      updatedData: Partial<LibraryMetadata>
-    }) => updateLibrary(libraryId, updatedData),
-    onSuccess: (data) => {
-      queryClient.setQueryData(authzQueryKeys.library(data.id), data);
-    },
-    onSettled: (_data, _error, variables) => {
-      queryClient.invalidateQueries({ queryKey: authzQueryKeys.library(variables.libraryId) });
     },
   });
 };

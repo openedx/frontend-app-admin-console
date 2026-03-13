@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Breadcrumb, Col, Container, Row, Button, Badge,
+  Breadcrumb, Col, Container, Row, Button,
   Stack,
   useMediaQuery,
   breakpoints,
@@ -50,10 +50,13 @@ const AuthZTitle = ({
       />
       <Row className="mt-4">
         <Col xs={12} md={7} className="mb-4">
-          <h1 className="text-primary">{pageTitle}</h1>
-          {typeof pageSubtitle === 'string'
-            ? <h3><Badge className="py-2 px-3 font-weight-normal" variant="light">{pageSubtitle}</Badge></h3>
-            : pageSubtitle}
+          <div className="d-flex align-items-center">
+            <h2 className="text-primary mb-0">{pageTitle}</h2>
+            {typeof pageSubtitle === 'string'
+              ? <><hr className="mx-lg-3" /><h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
+              : <><hr className="mx-lg-3" /> <div className="mb-0">{pageSubtitle}</div></>}
+
+          </div>
         </Col>
         <Col xs={12} md={5}>
           <Stack className="justify-content-end" direction={isDesktop ? 'horizontal' : 'vertical'}>

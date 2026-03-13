@@ -152,7 +152,7 @@ const LibrariesUserManager = () => {
         navLinks={[{ label: rootBreadcrumb, to: teamMembersPath }, { label: pageManageTitle, to: teamMembersPath }]}
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
-        pageSubtitle={<p>{user?.email}</p>}
+        pageSubtitle={user?.email || ''}
         actions={user && canManageTeam
           ? [<AssignNewRoleTrigger
               username={user.username}

@@ -150,49 +150,6 @@ describe('LibrariesTeamManager', () => {
     expect(matrixScope.getByText('view')).toBeInTheDocument();
   });
 
-  it('renders allow public library read toggle and change the value by user interaction', async () => {
-    const user = userEvent.setup();
-
-    renderTeamManager();
-
-    const readPublicToggle = await screen.findByRole('switch', { name: /Allow public read/i });
-
-    await user.click(readPublicToggle);
-    expect(mutate).toHaveBeenCalledWith(
-      {
-        libraryId: 'lib-001',
-        updatedData: { allowPublicRead: !libraryData.allowPublicRead },
-      },
-      expect.objectContaining({
-        onSuccess: expect.any(Function),
-      }),
-    );
-    const { onSuccess } = (mutate as jest.Mock).mock.calls[0][1];
-    onSuccess?.();
-
-    expect(await screen.findByText(/updated successfully/i)).toBeInTheDocument();
-  });
-
-  it('should not render the toggle if the user can not manage team and the Library Public Read is disabled', () => {
-    (useLibrary as jest.Mock).mockReturnValue({ data: { ...libraryData, allowPublicRead: false } });
-    (useLibraryAuthZ as jest.Mock).mockReturnValue({ ...libraryAuthZContext, canManageTeam: false });
-
-    renderTeamManager();
-    expect(screen.queryByRole('switch', { name: /Allow public read/i })).not.toBeInTheDocument();
-  });
-
-  it('should render the toggle as disabled if the user can not manage team but the Library Public Read is enabled', async () => {
-    (useLibrary as jest.Mock).mockReturnValue({ data: { ...libraryData, allowPublicRead: true } });
-    (useLibraryAuthZ as jest.Mock).mockReturnValue({ ...libraryAuthZContext, canManageTeam: false });
-
-    renderTeamManager();
-
-    const readPublicToggle = await screen.findByRole('switch', { name: /Allow public read/i });
-
-    expect(readPublicToggle).toBeInTheDocument();
-    expect(readPublicToggle).toBeDisabled();
-  });
-
   it('renders correct navigation link label and URL on breadcrumb', () => {
     renderTeamManager();
     const navLink = screen.getByRole('link', { name: 'Manage Access' });

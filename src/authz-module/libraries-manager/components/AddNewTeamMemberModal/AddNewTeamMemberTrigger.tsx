@@ -201,7 +201,7 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
         onClick={open}
         disabled={isPending}
       >
-        {intl.formatMessage(messages['libraries.authz.manage.add.member.title'])}
+        {intl.formatMessage(messages['authz.manage.assign.role.title'])}
       </Button>
 
       {isOpen && (
