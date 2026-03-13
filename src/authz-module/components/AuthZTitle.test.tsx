@@ -40,7 +40,7 @@ describe('AuthZTitle', () => {
 
   it('renders page title', () => {
     render(<AuthZTitle {...defaultProps} />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(defaultProps.pageTitle);
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(defaultProps.pageTitle);
   });
 
   it('renders page subtitle as ReactNode', () => {

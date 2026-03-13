@@ -21,7 +21,7 @@ jest.mock('./AddNewTeamMemberModal', () => {
     isOpen, close, onSave, isLoading, formValues, handleChangeForm,
   }) => (
     isOpen ? (
-      <div role="dialog" aria-label="Add New Team Member">
+      <div role="dialog" aria-label="assign role">
         <button type="button" onClick={close} aria-label="Close modal">Close</button>
         <button type="button" onClick={onSave} aria-label="Save team member">Save</button>
         <textarea
@@ -65,7 +65,7 @@ describe('AddNewTeamMemberTrigger', () => {
   it('renders the trigger button', () => {
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const button = screen.getByRole('button', { name: /add new team member/i });
+    const button = screen.getByRole('button', { name: /assign role/i });
     expect(button).toBeInTheDocument();
   });
 
@@ -73,32 +73,32 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
-    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
   });
 
   it('closes modal when close button is clicked', async () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
-    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
 
     const closeButton = screen.getByRole('button', { name: 'Close modal' });
     await user.click(closeButton);
 
-    expect(screen.queryByRole('dialog', { name: 'Add New Team Member' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'assign role' })).not.toBeInTheDocument();
   });
 
   it('calls addTeamMember with correct data when save is clicked', async () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
@@ -127,7 +127,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -144,7 +144,7 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: 'Add New Team Member' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'assign role' })).not.toBeInTheDocument();
     });
 
     expect(screen.getByText(/2 team members added successfully/)).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -177,7 +177,7 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     // Modal should remain open when there are errors
-    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
   });
 
   it('filters out successfully added users from error users list', async () => {
@@ -202,7 +202,7 @@ describe('AddNewTeamMemberTrigger', () => {
 
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const usersInput = screen.getByRole('textbox', { name: /Enter user emails or usernames/i });
@@ -228,7 +228,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -249,14 +249,14 @@ describe('AddNewTeamMemberTrigger', () => {
     });
 
     // Modal should remain open when there are errors
-    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
   });
 
   it('displays different error toast when different errors happen', async () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -276,14 +276,14 @@ describe('AddNewTeamMemberTrigger', () => {
       expect(screen.getByText(/The user already has the role/)).toBeInTheDocument();
     });
 
-    expect(screen.getByRole('dialog', { name: 'Add New Team Member' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
   });
 
   it('resets form values after successful addition with no errors', async () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
@@ -315,7 +315,7 @@ describe('AddNewTeamMemberTrigger', () => {
     const user = userEvent.setup();
     renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -358,7 +358,7 @@ describe('AddNewTeamMemberTrigger', () => {
       </ToastManagerProvider>,
     );
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
@@ -420,7 +420,7 @@ describe('AddNewTeamMemberTrigger', () => {
       isSuccess: false,
     }));
 
-    const triggerButton = screen.getByRole('button', { name: /add new team member/i });
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
     const userInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
