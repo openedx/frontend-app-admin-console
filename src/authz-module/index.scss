@@ -57,6 +57,17 @@
       line-height: 24px;
     }
   }
+  
+  @media(--pgn-size-breakpoint-max-width-sm){
+    .flex-column-sm {
+      flex-direction: column;
+    }
+    hr {
+      border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      border-right: none;
+      width: 100%;
+    }
+  }
 }
 
 .toast-container {

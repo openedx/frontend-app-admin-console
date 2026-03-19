@@ -40,7 +40,7 @@ const LibrariesTeamManager = () => {
   }, [roles, permissions, resources, intl]);
 
   return (
-    <div className="authz-libraries">
+    <div className="authz-module">
       <AuthZLayout
         context={{ id: libraryId, title: library.title, org: library.org }}
         // Temporarily setting '/authz/libraries/:libraryId' as the URL for Manage Access breadcrumb for now as
