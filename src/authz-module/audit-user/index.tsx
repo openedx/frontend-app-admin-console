@@ -1,10 +1,9 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import debounce from 'lodash.debounce';
 import {
-  Container, DataTable,
+  Container, DataTable, TableFooter,
 } from '@openedx/paragon';
-import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
