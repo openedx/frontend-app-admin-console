@@ -167,6 +167,11 @@ const messages = defineMessages({
     defaultMessage: 'View all permissions',
     description: 'Text for the link to view all permissions in the user table',
   },
+  'authz.table.footer.items.showing.text': {
+    id: 'authz.table.footer.items.showing.text',
+    defaultMessage: 'Showing {pageSize} of {itemCount} users.',
+    description: 'Message displayed when the user reaches the applied filters limit',
+  },
 });
 
 export default messages;
