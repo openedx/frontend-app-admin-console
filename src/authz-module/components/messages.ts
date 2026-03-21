@@ -97,6 +97,11 @@ const messages = defineMessages({
     defaultMessage: 'Search to show more',
     description: 'Message displayed when there are more results available than currently shown',
   },
+  'authz.table.footer.items.showing.text': {
+    id: 'authz.table.footer.items.showing.text',
+    defaultMessage: 'Showing {pageSize} of {itemCount} users.',
+    description: 'Message displayed when the user reaches the applied filters limit',
+  },
 });
 
 export default messages;

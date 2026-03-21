@@ -8,6 +8,7 @@ import { CustomErrors } from '@src/constants';
 import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
 import { LibrariesUserManager, LibrariesLayout, LibrariesTeamManager } from './libraries-manager';
 import AuthzHome from './authz-home';
+import AuditUserPage from './audit-user';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -30,6 +31,10 @@ const AuthZModule = () => (
               </Route>
               <Route index element={<AuthzHome />} />
               <Route path="*" element={<NotFoundError />} />
+              <Route
+                path={ROUTES.AUDIT_USER_PATH}
+                element={<AuditUserPage />}
+              />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
