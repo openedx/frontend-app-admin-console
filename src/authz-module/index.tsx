@@ -35,6 +35,10 @@ const AuthZModule = () => (
                 element={<AuditUserPage />}
               />
               <Route path="*" element={<NotFoundError />} />
+              <Route
+                path={ROUTES.AUDIT_USER_PATH}
+                element={<AuditUserPage />}
+              />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
