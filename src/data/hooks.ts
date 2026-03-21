@@ -39,5 +39,4 @@ export const useUserAccount = (username?: string) => useQuery({
   queryFn: async () => getUserAccount(username),
   retry: false,
   enabled: !!username,
-  refetchOnWindowFocus: false,
 });
