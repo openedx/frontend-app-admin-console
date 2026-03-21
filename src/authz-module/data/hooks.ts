@@ -5,7 +5,8 @@ import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
-  GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
+  GetTeamMembersResponse, getUserAssignedRoles, GetUserRolesResponse, PermissionsByRole, QuerySettings,
+  revokeUserRoles, RevokeUserRolesRequest,
 } from './api';
 
 const authzQueryKeys = {
@@ -15,6 +16,7 @@ const authzQueryKeys = {
     ...authzQueryKeys.teamMembersAll(scope), querySettings] as const,
   permissionsByRole: (scope: string) => [...authzQueryKeys.all, 'permissionsByRole', scope] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
+  userRoles: (username: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
 };
 
 /**
@@ -109,4 +111,14 @@ export const useRevokeUserRoles = () => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
     },
   });
+};
+
+export const useUserAssignedRoles = (username: string, querySettings: QuerySettings) => {
+  const result = useQuery<GetUserRolesResponse, Error>({
+    queryKey: authzQueryKeys.userRoles(username, querySettings),
+    queryFn: () => getUserAssignedRoles(username, querySettings),
+    staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+    refetchOnWindowFocus: false,
+  });
+  return result;
 };
