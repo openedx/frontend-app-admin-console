@@ -11,6 +11,11 @@ const messages = defineMessages({
     defaultMessage: 'Permission denied in {roleName} role',
     description: 'Label for denied status of a permission in the permissions table',
   },
+  'authz.table.footer.items.showing.text': {
+    id: 'authz.table.footer.items.showing.text',
+    defaultMessage: 'Showing {pageSize} of {itemCount} users.',
+    description: 'Message displayed when the user reaches the applied filters limit',
+  },
 });
 
 export default messages;
