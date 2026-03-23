@@ -56,18 +56,42 @@ export const CONTENT_COURSE_PERMISSIONS = {
 };
 
 export const courseResourceTypes: ResourceMetadata[] = [
-  { key: 'course_access_content', label: 'Course Access & content', description: 'Permissions related to accessing the course and managing core course content, including creating, editing, and publishing materials.', icon: BookOpen },
-  { key: 'course_library_updates', label: 'Library updates', description: 'Permissions for reviewing and managing updates made to content libraries connected to the course.', icon: LibraryBooks },
-  { key: 'course_updates_handouts', label: 'Course updates & handouts', description: 'Permissions for viewing and managing course updates and handouts that are visible to learners.', icon: Sync },
-  { key: 'course_pages_resources', label: 'Pages & resources', description: 'Permissions for viewing and managing course pages and additional learning resources.', icon: Article },
-  { key: 'course_files', label: 'Files', description: 'Permissions for viewing and managing course pages and additional learning resources.', icon: Folder },
-  { key: 'course_schedule_details', label: 'Schedule & details', description: 'Permissions for viewing and editing the course schedule and course information.', icon: Calendar },
-  { key: 'course_grading', label: 'Grading', description: 'Permissions related to viewing and managing grading configuration and grading policies.', icon: School },
-  { key: 'course_team_group', label: 'Course team & groups', description: 'Permissions for viewing and managing the course team, learner groups, and group configurations.', icon: Group },
-  { key: 'course_tags_taxonomies', label: 'Tags & taxonomies', description: 'Permissions for managing tags and taxonomies used to organize course content.', icon: LocalOffer },
-  { key: 'course_advanced_certificates', label: 'Advanced & certificates', description: 'Permissions for managing advanced course settings and course certificates.', icon: CheckCircle },
-  { key: 'course_import_export', label: 'Import / export', description: 'Permissions for importing and exporting course content and related data.', icon: Download },
-  { key: 'course_other', label: 'Other', description: 'Additional permissions not included in other categories, such as viewing checklists and platform-level course roles.', icon: DrawShapes },
+  {
+    key: 'course_access_content', label: 'Course Access & content', description: 'Permissions related to accessing the course and managing core course content, including creating, editing, and publishing materials.', icon: BookOpen,
+  },
+  {
+    key: 'course_library_updates', label: 'Library updates', description: 'Permissions for reviewing and managing updates made to content libraries connected to the course.', icon: LibraryBooks,
+  },
+  {
+    key: 'course_updates_handouts', label: 'Course updates & handouts', description: 'Permissions for viewing and managing course updates and handouts that are visible to learners.', icon: Sync,
+  },
+  {
+    key: 'course_pages_resources', label: 'Pages & resources', description: 'Permissions for viewing and managing course pages and additional learning resources.', icon: Article,
+  },
+  {
+    key: 'course_files', label: 'Files', description: 'Permissions for viewing and managing course pages and additional learning resources.', icon: Folder,
+  },
+  {
+    key: 'course_schedule_details', label: 'Schedule & details', description: 'Permissions for viewing and editing the course schedule and course information.', icon: Calendar,
+  },
+  {
+    key: 'course_grading', label: 'Grading', description: 'Permissions related to viewing and managing grading configuration and grading policies.', icon: School,
+  },
+  {
+    key: 'course_team_group', label: 'Course team & groups', description: 'Permissions for viewing and managing the course team, learner groups, and group configurations.', icon: Group,
+  },
+  {
+    key: 'course_tags_taxonomies', label: 'Tags & taxonomies', description: 'Permissions for managing tags and taxonomies used to organize course content.', icon: LocalOffer,
+  },
+  {
+    key: 'course_advanced_certificates', label: 'Advanced & certificates', description: 'Permissions for managing advanced course settings and course certificates.', icon: CheckCircle,
+  },
+  {
+    key: 'course_import_export', label: 'Import / export', description: 'Permissions for importing and exporting course content and related data.', icon: Download,
+  },
+  {
+    key: 'course_other', label: 'Other', description: 'Additional permissions not included in other categories, such as viewing checklists and platform-level course roles.', icon: DrawShapes,
+  },
 
 ];
 
