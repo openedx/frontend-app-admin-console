@@ -119,3 +119,7 @@ export enum RoleOperationErrorStatus {
 }
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
+
+export const DJANGO_ROLES = ['Super Admin', 'Global Staff'];
+
+export const ADMIN_ROLES = ['Course Admin', 'Library Admin'];
