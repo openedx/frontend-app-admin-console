@@ -117,6 +117,46 @@ const messages = defineMessages({
     defaultMessage: 'Search to show more',
     description: 'Message displayed when there are more results available than currently shown',
   },
+  'authz.team.remove.user.modal.title': {
+    id: 'authz.team.remove.user.modal.title',
+    defaultMessage: 'Remove role?',
+    description: 'AuthZ team management remove user modal title',
+  },
+  'authz.manage.cancel.button': {
+    id: 'authz.manage.cancel.button',
+    defaultMessage: 'Cancel',
+    description: 'AuthZ cancel button title',
+  },
+  'authz.manage.remove.button': {
+    id: 'authz.manage.remove.button',
+    defaultMessage: 'Remove',
+    description: 'AuthZ remove button title',
+  },
+  'authz.manage.removing.button': {
+    id: 'authz.manage.removing.button',
+    defaultMessage: 'Removing...',
+    description: 'AuthZ removing button title',
+  },
+  'authz.team.remove.user.modal.body.1': {
+    id: 'authz.team.remove.user.modal.body.1',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” in the scope {scope}?',
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.team.remove.user.modal.body.2': {
+    id: 'authz.team.remove.user.modal.body.2',
+    defaultMessage: "This is the user's only role in this scope. Removing it will revoke their access completely, and they will no longer appear in the scope's member list.",
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.team.remove.user.modal.body.3': {
+    id: 'authz.team.remove.user.modal.body.3',
+    defaultMessage: 'Are you sure you want to proceed?',
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.user.table.delete.action.djangorole.tooltip': {
+    id: 'authz.user.table.delete.action.djangorole.tooltip',
+    defaultMessage: 'You can’t remove this role here. Please go to Django Admin to manage it.',
+    description: 'Tooltip for delete button when hovering over Django roles',
+  },
 });
 
 export default messages;

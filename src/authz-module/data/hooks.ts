@@ -111,9 +111,12 @@ export const useRevokeUserRoles = () => {
     mutationFn: async ({ data }: {
       data: RevokeUserRolesRequest
     }) => revokeUserRoles(data),
-    onSettled: (_data, _error, { data: { scope } }) => {
+    onSettled: (_data, _error, { data: { scope, users, querySettings } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
+      queryClient.invalidateQueries({
+        queryKey: authzQueryKeys.userRoles(users, querySettings),
+      });
     },
   });
 };

@@ -33,6 +33,7 @@ export type RevokeUserRolesRequest = {
   users: string;
   role: string;
   scope: string;
+  querySettings?: QuerySettings;
 };
 
 export interface DeleteRevokeUserRolesResponse {

@@ -122,8 +122,6 @@ export const MAX_TABLE_FILTERS_APPLIED = 10;
 
 export const AUTHZ_HOME_PATH = '/authz';
 
-export const AUTHZ_HOME_PATH = '/authz';
-
 export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
   library_admin: 'Library Admin',
   library_author: 'Library Author',
@@ -142,3 +140,4 @@ export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
+export const ADMIN_ROLES = ['course_admin', 'library_admin'];

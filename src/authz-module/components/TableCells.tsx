@@ -1,14 +1,19 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Icon, IconButton } from '@openedx/paragon';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
   RemoveRedEye,
   Delete, ExpandMore,
+  Info,
 } from '@openedx/paragon/icons';
-import { TableCellValue, AppContextType, UserRole } from '@src/types';
+import {
+  TableCellValue, AppContextType, UserRole, Role,
+} from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
-import { DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
+import { ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
+import {
+  Icon, IconButton, OverlayTrigger, Tooltip,
+} from '@openedx/paragon';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
@@ -21,6 +26,10 @@ type ExtendedCellProps = CellPropsWithValue & {
   cell: {
     getCellProps: (props?: Record<string, string>) => Record<string, string>;
   };
+};
+type ActionsCellProps = CellProps & {
+  onClickDeleteButton: (role: Role) => void;
+  isUserAuthenticatedPage: boolean;
 };
 
 const NameCell = ({ row }: CellProps) => {
@@ -109,19 +118,6 @@ const PermissionsCell = ({ row }: CellProps) => {
   );
 };
 
-const ActionsCell = ({ row }: CellProps) => {
-  const { formatMessage } = useIntl();
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
-    // eslint-disable-next-line no-console
-    console.log('Delete clicked for row:', row);
-  };
-
-  return (
-    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
-  );
-};
-
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   return (
@@ -135,6 +131,58 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   );
 };
 
+const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: ActionsCellProps) => {
+  const { formatMessage } = useIntl();
+  const { role } = row.original;
+
+  const handleDelete = () => {
+    const roleToDelete = {
+      role,
+      scope: row.original.scope,
+    } as Role;
+    onClickDeleteButton(roleToDelete);
+  };
+
+  if (DJANGO_MANAGED_ROLES.includes(role)) {
+    return (
+      <OverlayTrigger
+        placement="left"
+        overlay={(
+          <Tooltip variant="light" id="tooltip-left">
+            {formatMessage(messages['authz.user.table.delete.action.djangorole.tooltip'])}
+          </Tooltip>
+      )}
+      >
+        <Icon
+          className="mx-2 pl-1"
+          src={Info}
+        />
+      </OverlayTrigger>
+    );
+  }
+
+  if (ADMIN_ROLES.includes(role) && isUserAuthenticatedPage) {
+    return (
+      <IconButton
+        // @ts-ignore
+        disabled
+        isActive={false}
+        variant="light"
+        alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        src={Delete}
+      />
+    );
+  }
+
+  return (
+    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
+  );
+};
+
+const createActionsCell = (extraProps) => function customActionsCell(cellProps) {
+  return <ActionsCell {...cellProps} {...extraProps} />;
+};
+
 export {
   NameCell,
   ViewActionCell,
@@ -142,6 +190,6 @@ export {
   OrgCell,
   ScopeCell,
   PermissionsCell,
-  ActionsCell,
   ViewAllPermissionsCell,
+  createActionsCell,
 };
