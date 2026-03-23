@@ -4,7 +4,7 @@ import {
   Alert,
   Button,
   ButtonGroup,
-  Container, Hyperlink, Skeleton
+  Container, Hyperlink, Skeleton,
 } from '@openedx/paragon';
 
 import AnchorButton from 'authz-module/components/AnchorButton';

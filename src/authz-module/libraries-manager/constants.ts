@@ -33,10 +33,18 @@ export const libraryRolesMetadata: RoleMetadata[] = [
 ];
 
 export const libraryResourceTypes: ResourceMetadata[] = [
-  { key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.', icon: CollectionsBookmark },
-  { key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.', icon: Notes },
-  { key: 'library_team', label: 'Team', description: 'Permissions to manage user access and roles within the library.', icon: Group },
-  { key: 'library_collection', label: 'Collection', description: 'Permissions to create, edit, and delete content collections within the library.', icon: AutoAwesomeMosaic },
+  {
+    key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.', icon: CollectionsBookmark,
+  },
+  {
+    key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.', icon: Notes,
+  },
+  {
+    key: 'library_team', label: 'Team', description: 'Permissions to manage user access and roles within the library.', icon: Group,
+  },
+  {
+    key: 'library_collection', label: 'Collection', description: 'Permissions to create, edit, and delete content collections within the library.', icon: AutoAwesomeMosaic,
+  },
 ];
 
 export const libraryPermissions: PermissionMetadata[] = [
@@ -78,7 +86,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT,
       CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
     ],
-    user_count: 1,
+    userCount: 1,
     name: 'Library Admin',
     description: 'The Library Admin has full control over the library, including managing users, modifying content, and handling publishing workflows. They ensure content is properly maintained and accessible as needed.',
   },
@@ -98,7 +106,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
       CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
     ],
-    user_count: 1,
+    userCount: 1,
     name: 'Library Author',
     description: 'The Library Author is responsible for creating, editing, and publishing content within a library. They can manage tags and collections but cannot delete libraries or manage users.',
   },
@@ -118,7 +126,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
 
     ],
-    user_count: 1,
+    userCount: 1,
     name: 'Library Contributor',
     description: 'The Library Contributor can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.',
   },
@@ -129,7 +137,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT,
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,
     ],
-    user_count: 1,
+    userCount: 1,
     name: 'Library User',
     description: 'The Library User can view and reuse content but cannot edit or delete anything.',
   },
