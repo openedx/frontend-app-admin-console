@@ -21,6 +21,11 @@ const messages = defineMessages({
     defaultMessage: 'Scroll to top',
     description: 'Alt text for the scroll to top anchor button',
   },
+  'authz.anchor.button.alt': {
+    id: 'authz.anchor.button.alt',
+    defaultMessage: 'Scroll to top',
+    description: 'Alt text for the scroll to top anchor button',
+  },
 });
 
 export default messages;
