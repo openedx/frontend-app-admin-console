@@ -6,41 +6,37 @@ import {
   ButtonGroup,
   Container, Hyperlink, Skeleton, Tab, Tabs,
 } from '@openedx/paragon';
-import { useLibrary } from '@src/authz-module/data/hooks';
+
 import { useLocation } from 'react-router-dom';
-import { ROUTES } from '@src/authz-module/constants';
 import AnchorButton from 'authz-module/components/AnchorButton';
 import AuthZLayout from '../components/AuthZLayout';
 import PermissionTable from '../components/PermissionTable';
-import { useLibraryAuthZ } from '../libraries-manager/context';
-import { AddNewTeamMemberTrigger } from '../libraries-manager/components/AddNewTeamMemberModal';
+
 import { buildPermissionMatrixByResource } from '../libraries-manager/utils';
 
 import messages from '../libraries-manager/messages';
-import TeamTable from '../libraries-manager/components/TeamTable';
 import { coursePermissions, courseResourceTypes, rolesObject } from '../courses/constants';
+import { rolesLibraryObject, libraryRolesMetadata, libraryPermissions, libraryResourceTypes } from '../libraries-manager/constants';
 
 const RolesPermissions = () => {
   const intl = useIntl();
   const { hash } = useLocation();
-  const {
-    libraryId, canManageTeam, roles, permissions, resources,
-  } = useLibraryAuthZ();
 
-  const { data: library } = useLibrary(libraryId);
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
-  const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
   const [active, setActive] = useState('courses');
 
   const [libraryPermissionsByResource] = useMemo(() => {
-    if (!roles && !permissions && !resources) { return [null, null]; }
+    if (!rolesLibraryObject && !libraryPermissions && !libraryResourceTypes) { return [null, null]; }
     const permissionsByResource = buildPermissionMatrixByResource({
-      roles, permissions, resources, intl,
+      roles: rolesLibraryObject,
+      permissions: libraryPermissions,
+      resources: libraryResourceTypes,
+      intl,
     });
 
     return [permissionsByResource];
-  }, [roles, permissions, resources, intl]);
+  }, [intl]);
 
   const [CoursePermissionsByResource] = useMemo(() => {
     if (!rolesObject && !coursePermissions && !courseResourceTypes) { return [null, null]; }
@@ -57,17 +53,19 @@ const RolesPermissions = () => {
   return (
     <div className="authz-libraries">
       <AuthZLayout
-        context={{ id: libraryId, title: library.title, org: library.org }}
+        context={{ id: '', title: '', org: '' }}
         // Temporarily setting '/authz/libraries/:libraryId' as the URL for Manage Access breadcrumb for now as
         // currently we do not have a dedicated page. TODO: Update when such page is created.
-        navLinks={[{ label: rootBreadcrumb, to: teamMembersPath }]}
+        navLinks={[{ label: rootBreadcrumb }]}
         activeLabel={pageTitle}
         pageTitle={pageTitle}
-        pageSubtitle={libraryId}
+        pageSubtitle=""
         actions={
-          [
-            ...(canManageTeam ? [<AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />] : []),
-          ]
+          []
+          // this needs to be enable again once is refactored to be used outside of library context
+          // [
+          //   <AddNewTeamMemberTrigger libraryId="" key="add-new-member" />,
+          // ]
         }
       >
         <Tabs
@@ -76,7 +74,8 @@ const RolesPermissions = () => {
           className="bg-light-100 px-5"
         >
           <Tab eventKey="team" title={intl.formatMessage(messages['library.authz.tabs.team'])} className="p-5">
-            <TeamTable />
+            {/* TODO: once TeamTable is refactored we can call it here. For now, this tab will be empty. */}
+            {/* <TeamTable /> */}
           </Tab>
           <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles'])}>
             <Container className="p-5">
@@ -132,7 +131,7 @@ const RolesPermissions = () => {
                   : (
                     <PermissionTable
                       permissionsTable={libraryPermissionsByResource}
-                      roles={roles}
+                      roles={rolesLibraryObject}
                       title="Library Roles"
                     />
                   )
