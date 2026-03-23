@@ -1,4 +1,7 @@
 import { PermissionMetadata, ResourceMetadata, RoleMetadata } from 'types';
+import {
+  Group, CollectionsBookmark, Notes, AutoAwesomeMosaic,
+} from '@openedx/paragon/icons';
 
 export const CONTENT_LIBRARY_PERMISSIONS = {
   DELETE_LIBRARY: 'content_libraries.delete_library',
@@ -18,7 +21,6 @@ export const CONTENT_LIBRARY_PERMISSIONS = {
   CREATE_LIBRARY_COLLECTION: 'content_libraries.create_library_collection',
   EDIT_LIBRARY_COLLECTION: 'content_libraries.edit_library_collection',
   DELETE_LIBRARY_COLLECTION: 'content_libraries.delete_library_collection',
-
 };
 
 // Note: this information will eventually come from the backend API
@@ -31,10 +33,10 @@ export const libraryRolesMetadata: RoleMetadata[] = [
 ];
 
 export const libraryResourceTypes: ResourceMetadata[] = [
-  { key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.' },
-  { key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.' },
-  { key: 'library_team', label: 'Team', description: 'Permissions to manage user access and roles within the library.' },
-  { key: 'library_collection', label: 'Collection', description: 'Permissions to create, edit, and delete content collections within the library.' },
+  { key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.', icon: CollectionsBookmark },
+  { key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.', icon: Notes },
+  { key: 'library_team', label: 'Team', description: 'Permissions to manage user access and roles within the library.', icon: Group },
+  { key: 'library_collection', label: 'Collection', description: 'Permissions to create, edit, and delete content collections within the library.', icon: AutoAwesomeMosaic },
 ];
 
 export const libraryPermissions: PermissionMetadata[] = [
@@ -94,7 +96,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION,
       CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
       CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
-      CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT
+      CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
     ],
     user_count: 1,
     name: 'Library Author',
@@ -113,7 +115,7 @@ export const rolesLibraryObject = [
       CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION,
       CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
       CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
-      CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT
+      CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
 
     ],
     user_count: 1,
