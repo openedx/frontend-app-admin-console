@@ -4,7 +4,7 @@ import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
-import { CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/libraries-manager/constants';
+import { CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/constants';
 import TeamTable from './index';
 
 const mockNavigate = jest.fn();
