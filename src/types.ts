@@ -38,6 +38,7 @@ export type ResourceMetadata = {
   key: string;
   label: string;
   description: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 export type PermissionMetadata = {

@@ -32,8 +32,11 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
             <>
               <tr className="bg-info-100 text-primary">
                 <td colSpan={roles.length + 1} className="text-start py-3 px-4">
-                  <strong>{resourceGroup.label}</strong>
-                  <ResourceTooltip resourceGroup={resourceGroup} />
+                  <div className="d-flex align-items-center">
+                    {resourceGroup.icon && <Icon className="d-inline-block mr-2" size="xs" src={resourceGroup.icon} />}
+                    <strong>{resourceGroup.label}</strong>
+                    <ResourceTooltip resourceGroup={resourceGroup} />
+                  </div>
                 </td>
               </tr>
               {resourceGroup.permissions.map(permission => (

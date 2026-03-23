@@ -16,7 +16,7 @@ import { buildPermissionMatrixByResource } from '../libraries-manager/utils';
 
 import messages from '../libraries-manager/messages';
 import { coursePermissions, courseResourceTypes, rolesObject } from '../courses/constants';
-import { rolesLibraryObject, libraryRolesMetadata, libraryPermissions, libraryResourceTypes } from '../libraries-manager/constants';
+import { rolesLibraryObject, libraryPermissions, libraryResourceTypes } from '../libraries-manager/constants';
 
 const RolesPermissions = () => {
   const intl = useIntl();
