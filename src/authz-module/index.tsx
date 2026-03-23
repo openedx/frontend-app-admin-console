@@ -5,7 +5,8 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import LoadingPage from '@src/components/LoadingPage';
 import LibrariesErrorFallback from '@src/authz-module/libraries-manager/ErrorPage';
 import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
-import { LibrariesTeamManager, LibrariesUserManager, LibrariesLayout } from './libraries-manager';
+import { LibrariesUserManager, LibrariesLayout } from './libraries-manager';
+import RolesPermissions from './roles-permissions/RolesPermissions';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -18,7 +19,7 @@ const AuthZModule = () => (
           <Suspense fallback={<LoadingPage />}>
             <Routes>
               <Route element={<LibrariesLayout />}>
-                <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<LibrariesTeamManager />} />
+                <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<RolesPermissions />} />
                 <Route path={ROUTES.LIBRARIES_USER_PATH} element={<LibrariesUserManager />} />
               </Route>
             </Routes>

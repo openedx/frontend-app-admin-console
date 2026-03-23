@@ -9,18 +9,21 @@ import messages from './messages';
 type PermissionTableProps = {
   roles: Role[];
   permissionsTable: PermissionsResourceGrouped[];
+  title?: string;
 };
 
-const PermissionTable = ({ permissionsTable, roles }: PermissionTableProps) => {
+const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();
   return (
     <Card>
       <table className="permission-table w-100">
         <thead>
           <tr>
-            <th className="" aria-hidden="true" />
+            <th className="sticky-top bg-white px-4 py-3">
+              {title && title}
+            </th>
             {roles.map(role => (
-              <th key={role.name} className="text-center py-3">{role.name}</th>
+              <th key={role.name} className="text-center py-3 sticky-top bg-white">{role.name}</th>
             ))}
           </tr>
         </thead>
