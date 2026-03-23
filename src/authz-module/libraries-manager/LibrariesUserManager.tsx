@@ -131,7 +131,7 @@ const LibrariesUserManager = () => {
   };
 
   return (
-    <div className="authz-libraries">
+    <div className="authz-module">
       <ConfirmDeletionModal
         isOpen={showConfirmDeletionModal}
         close={handleCloseConfirmDeletionModal}
