@@ -42,6 +42,11 @@ const messages = defineMessages(
       defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
       description: 'Text showing the number of permissions available, with proper pluralization',
     },
+    'authz.user.table.delete.action.djangorole.tooltip': {
+      id: 'authz.user.table.delete.action.djangorole.tooltip',
+      defaultMessage: 'You can’t remove this role here. Please go to Django Admin to manage it.',
+      description: 'Tooltip for delete button when hovering over Django roles',
+    },
   },
 );
 
