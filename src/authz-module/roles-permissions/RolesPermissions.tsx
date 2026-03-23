@@ -7,7 +7,7 @@ import {
   Container, Hyperlink, Skeleton,
 } from '@openedx/paragon';
 
-import AnchorButton from 'authz-module/components/AnchorButton';
+import AnchorButton from '../components/AnchorButton';
 import PermissionTable from '../components/PermissionTable';
 
 import { buildPermissionMatrixByResource } from '../libraries-manager/utils';

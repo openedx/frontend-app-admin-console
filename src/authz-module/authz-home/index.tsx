@@ -1,7 +1,7 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation } from 'react-router-dom';
-import RolesPermissions from 'authz-module/roles-permissions/RolesPermissions';
+import RolesPermissions from '../roles-permissions/RolesPermissions';
 import AuthZLayout from '../components/AuthZLayout';
 
 import messages from '../libraries-manager/messages';
