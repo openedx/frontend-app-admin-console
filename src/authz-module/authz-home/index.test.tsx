@@ -2,6 +2,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWrapper } from '@src/setupTest';
 import AuthzHome from './index';
+
 jest.mock('../components/AuthZLayout', () => function MockAuthZLayout({ children }: { children: React.ReactNode }) {
   return <div data-testid="authz-layout">{children}</div>;
 });

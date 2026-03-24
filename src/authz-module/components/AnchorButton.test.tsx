@@ -1,4 +1,3 @@
-import React from 'react';
 import { renderWrapper } from '@src/setupTest';
 import AnchorButton from './AnchorButton';
 
