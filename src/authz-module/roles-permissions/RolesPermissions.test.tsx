@@ -1,29 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWrapper } from '@src/setupTest';
 import RolesPermissions from './RolesPermissions';
-
-// Mock i18n
-jest.mock('@edx/frontend-platform/i18n', () => ({
-  useIntl: () => ({
-    formatMessage: ({ defaultMessage }) => defaultMessage || 'translated',
-  }),
-  defineMessages: (msgs) => msgs,
-}));
-
-// Mock messages
-jest.mock('../libraries-manager/messages', () => ({
-  'library.authz.tabs.permissionsRoles.courses.alert.title': {
-    id: 'library.authz.tabs.permissionsRoles.courses.alert.title',
-    defaultMessage: 'Course Roles',
-  },
-  'library.authz.tabs.permissionsRoles.courses.alert.description': {
-    id: 'library.authz.tabs.permissionsRoles.courses.alert.description',
-    defaultMessage: 'Description text',
-  },
-  'library.authz.tabs.permissionsRoles.courses.alert.link': {
-    id: 'library.authz.tabs.permissionsRoles.courses.alert.link',
-    defaultMessage: 'Learn more',
-  },
-}));
 
 // Mock utils
 jest.mock('../libraries-manager/utils', () => ({
@@ -74,13 +52,13 @@ jest.mock('../components/AnchorButton', () => function MockAnchorButton() {
 
 describe('RolesPermissions', () => {
   it('renders without crashing', () => {
-    render(<RolesPermissions />);
+    renderWrapper(<RolesPermissions />);
     expect(screen.getByRole('button', { name: 'Courses' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Libraries' })).toBeInTheDocument();
   });
 
   it('shows Courses tab as active by default', () => {
-    render(<RolesPermissions />);
+    renderWrapper(<RolesPermissions />);
     const coursesButton = screen.getByRole('button', { name: 'Courses' });
     const librariesButton = screen.getByRole('button', { name: 'Libraries' });
     expect(coursesButton).toHaveClass('btn-primary');
@@ -89,7 +67,7 @@ describe('RolesPermissions', () => {
   });
 
   it('switches tabs when clicked', () => {
-    render(<RolesPermissions />);
+    renderWrapper(<RolesPermissions />);
     const coursesButton = screen.getByRole('button', { name: 'Courses' });
     const librariesButton = screen.getByRole('button', { name: 'Libraries' });
     fireEvent.click(librariesButton);

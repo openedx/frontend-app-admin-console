@@ -34,16 +34,16 @@ export const libraryRolesMetadata: RoleMetadata[] = [
 
 export const libraryResourceTypes: ResourceMetadata[] = [
   {
-    key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.', icon: CollectionsBookmark,
+    key: 'library', label: 'Library', description: 'Permissions related to viewing, managing, and publishing the library structure and metadata.', icon: CollectionsBookmark,
   },
   {
-    key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.', icon: Notes,
+    key: 'library_content', label: 'Content', description: 'Permissions for creating, editing, deleting, and publishing content within the library.', icon: Notes,
   },
   {
-    key: 'library_team', label: 'Team', description: 'Permissions to manage user access and roles within the library.', icon: Group,
+    key: 'library_team', label: 'Team', description: 'Permissions for viewing and managing users who have access to the library.', icon: Group,
   },
   {
-    key: 'library_collection', label: 'Collection', description: 'Permissions to create, edit, and delete content collections within the library.', icon: AutoAwesomeMosaic,
+    key: 'library_collection', label: 'Collection', description: 'Permissions for creating and managing content collections within the library.', icon: AutoAwesomeMosaic,
   },
 ];
 
