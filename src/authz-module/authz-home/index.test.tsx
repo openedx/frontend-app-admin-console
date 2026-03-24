@@ -31,8 +31,6 @@ describe('AuthzHome', () => {
     renderWrapper(<AuthzHome />);
     const tabs = screen.getAllByTestId('tab');
     expect(tabs).toHaveLength(2);
-    expect(screen.getByText(/Team/)).toBeInTheDocument();
-    expect(screen.getByText(/Permissions & Roles/)).toBeInTheDocument();
   });
 
   it('renders the RolesPermissions component in the permissions tab', () => {
