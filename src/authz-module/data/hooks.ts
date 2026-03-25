@@ -102,8 +102,8 @@ export const useAssignTeamMembersRole = () => {
  */
 export const useValidateUsers = () => useMutation({
   mutationFn: async ({ data }: {
-      data: ValidateUsersRequest
-    }) => validateUsers(data),
+    data: ValidateUsersRequest
+  }) => validateUsers(data),
 });
 
 /**

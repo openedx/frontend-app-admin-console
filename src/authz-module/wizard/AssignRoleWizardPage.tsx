@@ -13,11 +13,7 @@ const AssignRoleWizardPage = () => {
   const { data: library, isLoading, error } = useLibrary(scope);
 
   if (isLoading) {
-    return (
-      <div className="assign-role-wizard-page p-4">
-        <p>Loading...</p>
-      </div>
-    );
+    return null;
   }
 
   if (error || !library) {
@@ -48,6 +44,7 @@ const AssignRoleWizardPage = () => {
     >
       <AssignRoleWizard
         onClose={handleCancel}
+        scope={scope}
       />
     </AuthZLayout>
   );

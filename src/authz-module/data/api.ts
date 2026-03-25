@@ -50,7 +50,7 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
-// Validate Users API
+// TODO: Validate Users API
 export type ValidateUsersRequest = {
   users: string[];
 };
