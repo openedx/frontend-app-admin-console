@@ -68,7 +68,7 @@ const RolesPermissions = () => {
               <PermissionTable
                 permissionsTable={CoursePermissionsByResource}
                 roles={rolesObject}
-                title="Course Roles"
+                title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab.title'])}
               />
               <Alert
                 variant="info"
@@ -77,7 +77,10 @@ const RolesPermissions = () => {
                 <div className="row align-items-center">
                   <div className="col col-7">
                     <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.title'])}</p>
-                    <span><span className="font-weight-bold">Note:</span>{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.description'])}</span>
+                    <span>
+                      <span className="font-weight-bold">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.note'])}</span>
+                      {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.description'])}
+                    </span>
                   </div>
                   <div className="col col-5">
                     <Hyperlink className="d-block text-right h5 font-weight-normal" destination="." target="_blank" showLaunchIcon={false} isInline>
@@ -97,7 +100,7 @@ const RolesPermissions = () => {
             <PermissionTable
               permissionsTable={libraryPermissionsByResource}
               roles={rolesLibraryObject}
-              title="Library Roles"
+              title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab.title'])}
             />
           )
       )}

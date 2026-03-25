@@ -1,5 +1,6 @@
 import { renderWrapper } from '@src/setupTest';
 import { fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import AnchorButton from './AnchorButton';
 
 const mockScrollTo = jest.fn();
@@ -28,6 +29,7 @@ describe('AnchorButton', () => {
   });
 
   it('calls window.scrollTo with correct parameters when button is clicked', async () => {
+    const user = userEvent.setup();
     // Make button visible first
     Object.defineProperty(window, 'scrollY', {
       value: 400,
@@ -38,10 +40,10 @@ describe('AnchorButton', () => {
     fireEvent.scroll(window);
     rerender(<AnchorButton />);
 
-    await waitFor(() => {
+    await waitFor(async () => {
       const button = getByRole('button');
       expect(button).toBeInTheDocument();
-      fireEvent.click(button);
+      await user.click(button);
       expect(mockScrollTo).toHaveBeenCalledWith({
         top: 0,
         behavior: 'smooth',

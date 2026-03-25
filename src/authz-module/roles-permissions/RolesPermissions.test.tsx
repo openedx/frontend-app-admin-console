@@ -1,5 +1,6 @@
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import RolesPermissions from './RolesPermissions';
 
@@ -66,15 +67,16 @@ describe('RolesPermissions', () => {
     expect(screen.getByTestId('permission-table')).toHaveTextContent('Course Roles');
   });
 
-  it('switches tabs when clicked', () => {
+  it('switches tabs when clicked', async () => {
+    const user = userEvent.setup();
     renderWrapper(<RolesPermissions />);
     const coursesButton = screen.getByRole('button', { name: 'Courses' });
     const librariesButton = screen.getByRole('button', { name: 'Libraries' });
-    fireEvent.click(librariesButton);
+    await user.click(librariesButton);
     expect(librariesButton).toHaveClass('btn-primary');
     expect(coursesButton).toHaveClass('btn-outline-primary');
     expect(screen.getByTestId('permission-table')).toHaveTextContent('Library Roles');
-    fireEvent.click(coursesButton);
+    await user.click(coursesButton);
     expect(coursesButton).toHaveClass('btn-primary');
     expect(librariesButton).toHaveClass('btn-outline-primary');
     expect(screen.getByTestId('permission-table')).toHaveTextContent('Course Roles');
