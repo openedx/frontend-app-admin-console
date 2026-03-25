@@ -165,14 +165,14 @@ describe('PermissionTable', () => {
   it('renders Close icons for denied permissions', () => {
     renderWrapper(<PermissionTable roles={mockRoles} permissionsTable={mockPermissionsTable} />);
 
-    const deniedIcons = screen.getAllByLabelText(/Permission denied in/);
+    const deniedIcons = screen.getAllByLabelText(/Permission not granted in/);
     expect(deniedIcons.length).toBeGreaterThan(0);
   });
 
   it('applies text-danger class to denied permission icons', () => {
     renderWrapper(<PermissionTable roles={mockRoles} permissionsTable={mockPermissionsTable} />);
 
-    const deniedIcons = screen.getAllByLabelText(/Permission denied in/);
+    const deniedIcons = screen.getAllByLabelText(/Permission not granted in/);
     deniedIcons.forEach(icon => {
       expect(icon).toHaveClass('text-danger');
     });
@@ -208,7 +208,7 @@ describe('PermissionTable', () => {
   it('renders correct aria-labels for denied permissions', () => {
     renderWrapper(<PermissionTable roles={mockRoles} permissionsTable={mockPermissionsTable} />);
 
-    const deniedLabel = 'Permission denied in Viewer role';
+    const deniedLabel = 'Permission not granted in Viewer role';
     expect(screen.getAllByLabelText(deniedLabel)).toHaveLength(2);
   });
 

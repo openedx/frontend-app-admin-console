@@ -65,10 +65,10 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                           <Icon
                             className="text-danger d-inline-block"
                             src={Close}
-                            aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.denied'], {
+                            aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
                               roleName: role.name,
                             })}
-                            screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.denied'], {
+                            screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
                               roleName: role.name,
                             })}
                           />
