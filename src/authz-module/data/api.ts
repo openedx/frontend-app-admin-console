@@ -116,6 +116,52 @@ export const getPermissionsByRole = async (scope: string): Promise<PermissionsBy
   return camelCaseObject(data.results);
 };
 
+export interface ScopeItem {
+  id: string;
+  name: string;
+  org: string;
+  contextType: 'course' | 'library';
+  description?: string;
+}
+
+export interface GetScopesResponse {
+  results: ScopeItem[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
+export interface GetScopesParams {
+  contextType?: string;
+  search?: string;
+  org?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface OrganizationItem {
+  org: string;
+  name: string;
+}
+
+export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
+  if (params.contextType) { url.searchParams.set('context_type', params.contextType); }
+  if (params.search) { url.searchParams.set('search', params.search); }
+  if (params.org) { url.searchParams.set('org', params.org); }
+  url.searchParams.set('page', (params.page ?? 1).toString());
+  url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getOrganizations = async (contextType?: string): Promise<OrganizationItem[]> => {
+  const url = new URL(getApiUrl('/api/authz/v1/organizations/'));
+  if (contextType) { url.searchParams.set('context_type', contextType); }
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data.results ?? data);
+};
+
 export const revokeUserRoles = async (
   data: RevokeUserRolesRequest,
 ): Promise<DeleteRevokeUserRolesResponse> => {

@@ -1,12 +1,13 @@
 import {
-  useMutation, useQuery, useQueryClient, useSuspenseQuery,
+  useInfiniteQuery, useMutation, useQuery, useQueryClient, useSuspenseQuery,
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
 import {
-  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
-  GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
-  validateUsers, ValidateUsersRequest,
+  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getOrganizations,
+  getPermissionsByRole, getScopes, GetScopesParams, GetScopesResponse, getTeamMembers,
+  GetTeamMembersResponse, OrganizationItem, PermissionsByRole, QuerySettings, revokeUserRoles,
+  RevokeUserRolesRequest, validateUsers, ValidateUsersRequest,
 } from './api';
 
 const authzQueryKeys = {
@@ -104,6 +105,41 @@ export const useValidateUsers = () => useMutation({
   mutationFn: async ({ data }: {
     data: ValidateUsersRequest
   }) => validateUsers(data),
+});
+
+/**
+ * React Query hook to fetch a paginated, searchable list of scopes (courses or libraries).
+ * Uses infinite query to support infinite scroll.
+ *
+ * @param params - Filter params: contextType, search, org, pageSize
+ */
+export const useScopes = (params: Omit<GetScopesParams, 'page'>) => useInfiniteQuery<GetScopesResponse, Error>({
+  queryKey: [...authzQueryKeys.all, 'scopes', params],
+  queryFn: ({ pageParam }) => getScopes({ ...params, page: pageParam as number }),
+  getNextPageParam: (lastPage) => {
+    if (!lastPage.next) { return undefined; }
+    try {
+      const nextUrl = new URL(lastPage.next);
+      const page = nextUrl.searchParams.get('page');
+      return page ? parseInt(page, 10) : undefined;
+    } catch {
+      return undefined;
+    }
+  },
+  initialPageParam: 1,
+  staleTime: 1000 * 60 * 5,
+});
+
+/**
+ * React Query hook to fetch the list of organizations for a given context type.
+ * Used to populate the Organization filter dropdown in the scope selector.
+ *
+ * @param contextType - 'course' | 'library'
+ */
+export const useOrganizations = (contextType?: string) => useQuery<OrganizationItem[], Error>({
+  queryKey: [...authzQueryKeys.all, 'organizations', contextType],
+  queryFn: () => getOrganizations(contextType),
+  staleTime: 1000 * 60 * 30,
 });
 
 /**
