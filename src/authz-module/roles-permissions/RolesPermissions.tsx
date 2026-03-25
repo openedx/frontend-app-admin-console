@@ -21,7 +21,6 @@ const RolesPermissions = () => {
   const [active, setActive] = useState('courses');
 
   const [libraryPermissionsByResource] = useMemo(() => {
-    if (!rolesLibraryObject && !libraryPermissions && !libraryResourceTypes) { return [null, null]; }
     const permissionsByResource = buildPermissionMatrixByResource({
       roles: rolesLibraryObject,
       permissions: libraryPermissions,
@@ -33,7 +32,6 @@ const RolesPermissions = () => {
   }, [intl]);
 
   const [CoursePermissionsByResource] = useMemo(() => {
-    if (!rolesObject && !coursePermissions && !courseResourceTypes) { return [null, null]; }
     const permissionsByResource = buildPermissionMatrixByResource({
       roles: rolesObject,
       permissions: coursePermissions,
@@ -52,13 +50,13 @@ const RolesPermissions = () => {
             onClick={() => setActive('courses')}
             variant={`${active === 'courses' ? 'primary' : 'outline-primary'}`}
           >
-            Courses
+            {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab']) }
           </Button>
           <Button
             onClick={() => setActive('libraries')}
             variant={`${active === 'libraries' ? 'primary' : 'outline-primary'}`}
           >
-            Libraries
+            {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab']) }
           </Button>
         </ButtonGroup>
       </Container>
@@ -70,7 +68,7 @@ const RolesPermissions = () => {
               <PermissionTable
                 permissionsTable={CoursePermissionsByResource}
                 roles={rolesObject}
-                title="Course Roles"
+                title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab'])}
               />
               <Alert
                 variant="info"

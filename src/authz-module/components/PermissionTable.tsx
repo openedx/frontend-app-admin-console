@@ -20,7 +20,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
         <thead>
           <tr>
             <th className="sticky-top bg-white px-4 py-3">
-              {title && title}
+              {title}
             </th>
             {roles.map(role => (
               <th key={role.name} className="text-center py-3 sticky-top bg-white">{role.name}</th>

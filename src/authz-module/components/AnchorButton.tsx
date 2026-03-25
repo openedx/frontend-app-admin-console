@@ -16,7 +16,7 @@ const AnchorButton = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop = window.scrollY;
       setIsVisible(scrollTop > 300);
     };
 
