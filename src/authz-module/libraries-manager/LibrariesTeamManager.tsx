@@ -1,17 +1,17 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  Container, Skeleton, Tab, Tabs,
+  Container, Skeleton, Tab, Tabs, Button,
 } from '@openedx/paragon';
 import { useLibrary } from '@src/authz-module/data/hooks';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@src/authz-module/constants';
+import { Plus } from '@openedx/paragon/icons';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import RoleCard from '../components/RoleCard';
 import PermissionTable from '../components/PermissionTable';
 import { useLibraryAuthZ } from './context';
-import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
 import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
@@ -19,6 +19,7 @@ import messages from './messages';
 const LibrariesTeamManager = () => {
   const intl = useIntl();
   const { hash } = useLocation();
+  const navigate = useNavigate();
   const {
     libraryId, canManageTeam, roles, permissions, resources,
   } = useLibraryAuthZ();
@@ -26,6 +27,11 @@ const LibrariesTeamManager = () => {
   const rootBreadcrumb = intl.formatMessage(messages['library.authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['library.authz.manage.page.title']);
   const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', libraryId)}`;
+
+  // Handler to navigate to Assign Role Wizard
+  const handleNavigateToWizard = () => {
+    navigate(`/authz/assign-role?scope=${libraryId}`);
+  };
 
   const [libraryPermissionsByRole, libraryPermissionsByResource] = useMemo(() => {
     if (!roles && !permissions && !resources) { return [null, null]; }
@@ -50,9 +56,18 @@ const LibrariesTeamManager = () => {
         pageTitle={pageTitle}
         pageSubtitle={libraryId}
         actions={
-          [
-            ...(canManageTeam ? [<AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />] : []),
-          ]
+          canManageTeam
+            ? [
+              <Button
+                iconBefore={Plus}
+                variant="primary"
+                onClick={handleNavigateToWizard}
+                key="add-new-role"
+              >
+                {intl.formatMessage(messages['library.authz.manage.add.role.button']) || 'New Role'}
+              </Button>,
+            ]
+            : []
         }
       >
         <Tabs

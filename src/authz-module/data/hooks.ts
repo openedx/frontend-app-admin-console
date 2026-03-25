@@ -6,6 +6,7 @@ import { LibraryMetadata } from '@src/types';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
+  validateUsers, ValidateUsersRequest,
 } from './api';
 
 const authzQueryKeys = {
@@ -90,6 +91,20 @@ export const useAssignTeamMembersRole = () => {
     },
   });
 };
+
+/**
+ * React Query hook to validate users exist without assigning roles.
+ * It checks if the provided usernames/email addresses are valid.
+ *
+ * @example
+ * const { mutate: validateUsers } = useValidateUsers();
+ * validateUsers({ data: { users: ['jdoe', 'jane@example.com'] } });
+ */
+export const useValidateUsers = () => useMutation({
+  mutationFn: async ({ data }: {
+      data: ValidateUsersRequest
+    }) => validateUsers(data),
+});
 
 /**
  * React Query hook to remove roles for a specific team member within a scope.
