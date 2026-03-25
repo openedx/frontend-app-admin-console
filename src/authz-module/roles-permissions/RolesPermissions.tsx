@@ -68,7 +68,7 @@ const RolesPermissions = () => {
               <PermissionTable
                 permissionsTable={CoursePermissionsByResource}
                 roles={rolesObject}
-                title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab'])}
+                title="Course Roles"
               />
               <Alert
                 variant="info"

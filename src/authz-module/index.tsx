@@ -4,12 +4,18 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import LoadingPage from '@src/components/LoadingPage';
 import LibrariesErrorFallback from '@src/authz-module/libraries-manager/ErrorPage';
+import { CustomErrors } from '@src/constants';
 import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
 import { LibrariesUserManager, LibrariesLayout, LibrariesTeamManager } from './libraries-manager';
 import AuthzHome from './authz-home';
 import { ROUTES } from './constants';
 
 import './index.scss';
+
+const NotFoundError = () => {
+  const error = new Error(CustomErrors.NOT_FOUND);
+  throw error;
+};
 
 const AuthZModule = () => (
   <QueryErrorResetBoundary>
@@ -22,7 +28,8 @@ const AuthZModule = () => (
                 <Route path={ROUTES.LIBRARIES_USER_PATH} element={<LibrariesUserManager />} />
                 <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<LibrariesTeamManager />} />
               </Route>
-              <Route path={ROUTES.ROLES_PERMISSIONS_PATH} element={<AuthzHome />} />
+              <Route index element={<AuthzHome />} />
+              <Route path="*" element={<NotFoundError />} />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
