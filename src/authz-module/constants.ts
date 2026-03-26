@@ -119,3 +119,4 @@ export enum RoleOperationErrorStatus {
 }
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
+export const MAX_TABLE_FILTERS_APPLIED = 10;
