@@ -3,6 +3,10 @@
 .authz-module {
   --height-action-divider: 30px;
 
+  .filters .dropdown-toggle::after {
+    display: none !important;
+  }
+
   hr {
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
     height: var(--height-action-divider);

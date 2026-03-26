@@ -16,6 +16,36 @@ const messages = defineMessages({
     defaultMessage: 'Showing {pageSize} of {itemCount} users.',
     description: 'Message displayed when the user reaches the applied filters limit',
   },
+  'authz.table.controlbar.clearFilters': {
+    id: 'authz.table.controlbar.clearFilters',
+    defaultMessage: 'Clear filters',
+    description: 'Button to clear all active filters in the table',
+  },
+  'authz.table.controlbar.search': {
+    id: 'authz.table.controlbar.search',
+    defaultMessage: 'Search',
+    description: 'Search placeholder for two specific fields',
+  },
+  'authz.table.controlbar.search.by.fields': {
+    id: 'authz.table.controlbar.search.by.fields',
+    defaultMessage: 'Search by {firstField} or {secondField}',
+    description: 'Search placeholder for two specific fields',
+  },
+  'authz.table.controlbar.filterby.label': {
+    id: 'authz.table.controlbar.filterby.label',
+    defaultMessage: 'Filtered by: ',
+    description: 'Label for active filters in the table',
+  },
+  'authz.table.controlbar.filters.limit.reached': {
+    id: 'authz.table.controlbar.filters.limit.reached',
+    defaultMessage: '10 filter limit reached. Remove one of the applied filters so you can select another one.',
+    description: 'Message displayed when the user reaches the applied filters limit',
+  },
+  'authz.table.controlbar.filters.items.showing': {
+    id: 'authz.table.controlbar.filters.items.showing',
+    defaultMessage: 'Showing {current} of {total}.',
+    description: 'Message displayed when the user reaches the applied filters limit',
+  },
 });
 
 export default messages;

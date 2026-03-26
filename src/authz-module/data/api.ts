@@ -1,10 +1,14 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { LibraryMetadata, TeamMember, UserRole } from '@src/types';
+import {
+  LibraryMetadata, Org, Scope, TeamMember, UserRole,
+} from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
   roles: string | null;
+  scopes: string | null;
+  organizations: string | null;
   search: string | null;
   order: string | null;
   sortBy: string | null;
@@ -53,6 +57,14 @@ export interface AssignTeamMembersRoleRequest {
   users: string[];
   role: string;
   scope: string;
+}
+
+export interface GetOrgsResponse {
+  orgs: Array<Org>;
+}
+
+export interface GetScopesResponse {
+  scopes: Scope[];
 }
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
@@ -134,6 +146,37 @@ export const getUserAssignedRoles = async (username: string, querySettings: Quer
   url.searchParams.set('page_size', querySettings.pageSize.toString());
   url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
 
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getOrgs = async (search?: string, page?: number, pageSize?: number): Promise<GetOrgsResponse> => {
+  // TODO: verify the endpoint and response, this is expected to be used for organization filter choices
+  const url = new URL(getApiUrl('/api/authz/v1/orgs'));
+  if (search !== undefined) {
+    url.searchParams.set('search', search);
+  }
+  if (page !== undefined) {
+    url.searchParams.set('page', page.toString());
+  }
+  if (pageSize !== undefined) {
+    url.searchParams.set('page_size', pageSize.toString());
+  }
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getScopes = async (search?: string, page?: number, pageSize?: number): Promise<GetScopesResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
+  if (search !== undefined) {
+    url.searchParams.set('search', search);
+  }
+  if (page !== undefined) {
+    url.searchParams.set('page', page.toString());
+  }
+  if (pageSize !== undefined) {
+    url.searchParams.set('page_size', pageSize.toString());
+  }
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data);
 };

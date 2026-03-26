@@ -53,6 +53,18 @@ export type UserRole = {
   scope: string;
 };
 
+export type Org = {
+  id: string;
+  name: string;
+};
+
+export type Scope = {
+  key: string;
+  name: string;
+  description: string;
+  organization: Org;
+};
+
 // Permissions Matrix
 
 export type EnrichedPermission = PermissionMetadata & {
