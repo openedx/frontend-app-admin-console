@@ -1,6 +1,6 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Check, Close } from '@openedx/paragon/icons';
-import { Card, Icon } from '@openedx/paragon';
+import { Card, Icon, OverlayTrigger, Tooltip } from '@openedx/paragon';
 import { PermissionsResourceGrouped, Role } from '@src/types';
 import { actionsDictionary } from './RoleCard/constants';
 import ResourceTooltip from './ResourceTooltip';
@@ -23,7 +23,28 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
               {title}
             </th>
             {roles.map(role => (
-              <th key={role.name} className="text-center py-3 sticky-top bg-white">{role.name}</th>
+              <th
+                key={role.name}
+                className={`text-center py-3 sticky-top bg-white ${role.disable && 'text-muted opacity-50'}`}
+              >
+                {role.disable ? (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={(
+                      <Tooltip
+                        id={`tooltip-${role.name}`}
+                        variant="light"
+                      >
+                        {formatMessage(messages['authz.role.card.permission.for.role.status.disabled'])}
+                      </Tooltip>
+                    )}
+                  >
+                    <span style={{ cursor: 'help' }}>{role.name}</span>
+                  </OverlayTrigger>
+                ) : (
+                  role.name
+                )}
+              </th>
             ))}
           </tr>
         </thead>
@@ -46,12 +67,12 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                     {permission.label}
                   </td>
                   {roles.map(role => (
-                    <td key={role.name} className="text-center">
+                    <td key={role.name} className={`text-center ${role.disable && 'opacity-50'}`}>
                       {
                       permission.roles[role.name]
                         ? (
                           <Icon
-                            className="d-inline-block"
+                            className={`d-inline-block ${role.disable && 'text-muted'}`}
                             src={Check}
                             aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
                               roleName: role.name,
@@ -63,7 +84,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                         )
                         : (
                           <Icon
-                            className="text-danger d-inline-block"
+                            className={`d-inline-block ${role.disable ? 'text-muted' : 'text-danger'}`}
                             src={Close}
                             aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
                               roleName: role.name,
