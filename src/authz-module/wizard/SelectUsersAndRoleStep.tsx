@@ -85,7 +85,7 @@ const SelectUsersAndRoleStep = ({
             {contextLabels[context] || context}
           </h5>
           <Form.RadioSet
-            name="role-selection"
+            name={`role-selection-${context}`}
             value={selectedRole || ''}
             onChange={(e) => setSelectedRole(e.target.value)}
             className="pl-4"

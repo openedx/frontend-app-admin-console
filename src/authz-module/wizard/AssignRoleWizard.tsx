@@ -45,6 +45,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
+  const [validatedUsers, setValidatedUsers] = useState<string[]>([]);
 
   const validateUsersMutation = useValidateUsers();
   const assignRoleMutation = useAssignTeamMembersRole();
@@ -75,6 +76,12 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
     return allRolesMetadata.filter((r) => allowedContextTypes.has(r.contextType || ''));
   }, [permissionsData]);
 
+  useEffect(() => {
+    if (filteredRoles.length === 0) {
+      onClose();
+    }
+  }, [filteredRoles.length, onClose]);
+
   const handleClose = () => {
     setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
     setUsers('');
@@ -82,6 +89,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
     setSelectedScopes(new Set());
     setValidationError(null);
     setInvalidUsers([]);
+    setValidatedUsers([]);
     onClose();
   };
 
@@ -102,6 +110,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
       if (result.invalidUsers?.length > 0) {
         setInvalidUsers(result.invalidUsers);
       } else {
+        setValidatedUsers(usersList);
         setActiveStep(STEPS.DEFINE_APPLICATION_SCOPE);
       }
     } catch {
@@ -118,13 +127,12 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
   }, []);
 
   const handleSave = async () => {
-    if (!selectedRole || selectedScopes.size === 0) { return; }
-    const usersList = parseUsers(users);
+    if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) { return; }
 
     try {
       await Promise.all(
         Array.from(selectedScopes).map((selectedScope) => assignRoleMutation.mutateAsync({
-          data: { users: usersList, role: selectedRole, scope: selectedScope },
+          data: { users: validatedUsers, role: selectedRole, scope: selectedScope },
         })),
       );
       showToast({ message: intl.formatMessage(messages['wizard.save.success']), type: 'success', delay: 5000 });

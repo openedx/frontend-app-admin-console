@@ -98,7 +98,7 @@ describe('AssignRoleWizardPage', () => {
     expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
   });
 
-  it('calls navigate(-1) when wizard onClose is triggered', async () => {
+  it('navigates to team members path when wizard onClose is triggered', async () => {
     setupMocks();
     const mockNavigate = jest.fn();
     const { useNavigate } = jest.requireMock('react-router-dom');
@@ -108,6 +108,6 @@ describe('AssignRoleWizardPage', () => {
     renderWrapper(<AssignRoleWizardPage />);
     await user.click(screen.getByTestId('wizard-close'));
 
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
+    expect(mockNavigate).toHaveBeenCalledWith('/authz/libraries/lib:123');
   });
 });

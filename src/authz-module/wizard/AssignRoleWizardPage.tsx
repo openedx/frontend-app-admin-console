@@ -20,7 +20,7 @@ const AssignRoleWizardPage = () => {
   const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', scope)}`;
 
   const handleCancel = () => {
-    navigate(-1);
+    navigate(teamMembersPath);
   };
 
   return (

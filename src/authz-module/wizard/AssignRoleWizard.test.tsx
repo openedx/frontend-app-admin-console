@@ -37,8 +37,9 @@ jest.mock('@openedx/paragon', () => {
 jest.mock('./SelectUsersAndRoleStep', () => ({
   __esModule: true,
   default: ({
-    setUsers, setSelectedRole, invalidUsers, validationError,
+    users, setUsers, setSelectedRole, invalidUsers, validationError,
   }: {
+    users: string;
     setUsers: (v: string) => void;
     setSelectedRole: (v: string) => void;
     invalidUsers: string[];
@@ -47,6 +48,7 @@ jest.mock('./SelectUsersAndRoleStep', () => ({
     <div>
       <input
         data-testid="users-input"
+        value={users}
         onChange={(e) => setUsers(e.target.value)}
       />
       <button type="button" data-testid="select-role" onClick={() => setSelectedRole('library_admin')}>
@@ -250,11 +252,14 @@ describe('AssignRoleWizard', () => {
 
   it('calls assignRole for each scope on Save', async () => {
     const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
     mockAssignMutateAsync.mockResolvedValue({ completed: [], errors: [] });
 
     renderWizard();
     await user.type(screen.getByTestId('users-input'), 'alice');
     await user.click(screen.getByTestId('select-role'));
+    await user.click(screen.getByRole('button', { name: /Next/i }));
+    await waitFor(() => expect(mockValidateMutateAsync).toHaveBeenCalled());
     await user.click(screen.getByTestId('toggle-scope'));
     await user.click(screen.getByRole('button', { name: /Save/i }));
 
@@ -268,11 +273,14 @@ describe('AssignRoleWizard', () => {
   it('shows success toast and calls onClose after successful save', async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
     mockAssignMutateAsync.mockResolvedValue({ completed: [], errors: [] });
 
     renderWizard({ onClose });
     await user.type(screen.getByTestId('users-input'), 'alice');
     await user.click(screen.getByTestId('select-role'));
+    await user.click(screen.getByRole('button', { name: /Next/i }));
+    await waitFor(() => expect(mockValidateMutateAsync).toHaveBeenCalled());
     await user.click(screen.getByTestId('toggle-scope'));
     await user.click(screen.getByRole('button', { name: /Save/i }));
 
@@ -285,11 +293,14 @@ describe('AssignRoleWizard', () => {
   it('shows error toast when save fails', async () => {
     const user = userEvent.setup();
     const saveError = new Error('Server error');
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
     mockAssignMutateAsync.mockRejectedValue(saveError);
 
     renderWizard();
     await user.type(screen.getByTestId('users-input'), 'alice');
     await user.click(screen.getByTestId('select-role'));
+    await user.click(screen.getByRole('button', { name: /Next/i }));
+    await waitFor(() => expect(mockValidateMutateAsync).toHaveBeenCalled());
     await user.click(screen.getByTestId('toggle-scope'));
     await user.click(screen.getByRole('button', { name: /Save/i }));
 
@@ -298,11 +309,15 @@ describe('AssignRoleWizard', () => {
     });
   });
 
-  it('initialUsers prop pre-fills the users field', () => {
+  it('initialUsers prop pre-fills the users field', async () => {
+    const user = userEvent.setup();
     renderWizard({ initialUsers: 'prefilled_user' });
-    // The wizard starts with initialUsers set, but our mock input doesn't show it
-    // We verify the Next button state — it's still disabled without role
+    expect(screen.getByTestId('users-input')).toHaveValue('prefilled_user');
+    // Next is still disabled without a role selected
     expect(screen.getByRole('button', { name: /Next/i })).toBeDisabled();
+    // Selecting a role enables Next since users are already pre-filled
+    await user.click(screen.getByTestId('select-role'));
+    expect(screen.getByRole('button', { name: /Next/i })).not.toBeDisabled();
   });
 
   it('filters roles based on user permissions (library allowed, course not)', () => {
