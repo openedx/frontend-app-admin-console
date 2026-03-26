@@ -64,7 +64,7 @@ const LibrariesTeamManager = () => {
                 onClick={handleNavigateToWizard}
                 key="add-new-role"
               >
-                {intl.formatMessage(messages['library.authz.manage.add.role.button']) || 'New Role'}
+                {intl.formatMessage(messages['library.authz.manage.add.role.button'])}
               </Button>,
             ]
             : []

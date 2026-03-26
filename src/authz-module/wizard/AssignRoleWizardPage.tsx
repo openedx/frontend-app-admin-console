@@ -1,5 +1,4 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '@openedx/paragon';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibrary } from '../data/hooks';
@@ -9,23 +8,11 @@ const AssignRoleWizardPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const scope = searchParams.get('scope') || '';
+  const initialUsers = searchParams.get('users') || '';
 
-  const { data: library, isLoading, error } = useLibrary(scope);
+  const { data: library, isLoading } = useLibrary(scope);
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (error || !library) {
-    return (
-      <div className="assign-role-wizard-page p-4">
-        <p>Library not found. Please go back and try again.</p>
-        <Button variant="secondary" onClick={() => navigate(-1)}>
-          Go Back
-        </Button>
-      </div>
-    );
-  }
+  if (isLoading) { return null; }
 
   const teamMembersPath = `/authz${ROUTES.LIBRARIES_TEAM_PATH.replace(':libraryId', scope)}`;
 
@@ -45,6 +32,7 @@ const AssignRoleWizardPage = () => {
       <AssignRoleWizard
         onClose={handleCancel}
         scope={scope}
+        initialUsers={initialUsers}
       />
     </AuthZLayout>
   );

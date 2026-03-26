@@ -71,6 +71,52 @@ export const libraryPermissions = [
   { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },
 ];
 
+// Course Permission Keys
+export const COURSE_PERMISSIONS = {
+  // View permissions (Course Auditor)
+  VIEW_COURSE: 'courses.view_course',
+  VIEW_COURSE_UPDATES: 'courses.view_course_updates',
+  VIEW_PAGES_AND_RESOURCES: 'courses.view_pages_and_resources',
+  VIEW_FILES: 'courses.view_files',
+  VIEW_GRADING_SETTINGS: 'courses.view_grading_settings',
+  VIEW_CHECKLISTS: 'courses.view_checklists',
+  VIEW_COURSE_TEAM: 'courses.view_course_team',
+  VIEW_SCHEDULE_AND_DETAILS: 'courses.view_schedule_and_details',
+
+  // Edit permissions (Course Editor)
+  EDIT_COURSE_CONTENT: 'courses.edit_course_content',
+  MANAGE_LIBRARY_UPDATES: 'courses.manage_library_updates',
+  MANAGE_COURSE_UPDATES: 'courses.manage_course_updates',
+  MANAGE_PAGES_AND_RESOURCES: 'courses.manage_pages_and_resources',
+  CREATE_FILES: 'courses.create_files',
+  EDIT_FILES: 'courses.edit_files',
+  EDIT_GRADING_SETTINGS: 'courses.edit_grading_settings',
+  MANAGE_GROUP_CONFIGURATIONS: 'courses.manage_group_configurations',
+  EDIT_DETAILS: 'courses.edit_details',
+  MANAGE_TAGS: 'courses.manage_tags',
+
+  // Publish & lifecycle permissions (Course Staff)
+  PUBLISH_COURSE_CONTENT: 'courses.publish_course_content',
+  DELETE_FILES: 'courses.delete_files',
+  EDIT_SCHEDULE: 'courses.edit_schedule',
+  MANAGE_ADVANCED_SETTINGS: 'courses.manage_advanced_settings',
+  MANAGE_CERTIFICATES: 'courses.manage_certificates',
+  IMPORT_COURSE: 'courses.import_course',
+  EXPORT_COURSE: 'courses.export_course',
+  EXPORT_TAGS: 'courses.export_tags',
+
+  // Team & taxonomy permissions (Course Admin only)
+  MANAGE_COURSE_TEAM: 'courses.manage_course_team',
+  MANAGE_TAXONOMIES: 'courses.manage_taxonomies',
+
+  // Legacy role permissions
+  LEGACY_STAFF_ROLE_PERMISSIONS: 'courses.legacy_staff_role_permissions',
+  LEGACY_INSTRUCTOR_ROLE_PERMISSIONS: 'courses.legacy_instructor_role_permissions',
+  LEGACY_LIMITED_STAFF_ROLE_PERMISSIONS: 'courses.legacy_limited_staff_role_permissions',
+  LEGACY_DATA_RESEARCHER_PERMISSIONS: 'courses.legacy_data_researcher_permissions',
+  LEGACY_BETA_TESTER_PERMISSIONS: 'courses.legacy_beta_tester_permissions',
+};
+
 // Resource Type Definitions
 export const RESOURCE_TYPES = {
   LIBRARY: 'library',
@@ -94,16 +140,13 @@ export const courseRolesMetadata = [
   },
 ];
 
-// Course roles placeholder for future implementation
-export const COURSE_ROLES_METADATA = courseRolesMetadata;
-
 // Get roles metadata by resource type
 export const getRolesMetadata = (resourceType: ResourceType) => {
   switch (resourceType) {
     case RESOURCE_TYPES.LIBRARY:
       return libraryRolesMetadata;
     case RESOURCE_TYPES.COURSE:
-      return COURSE_ROLES_METADATA;
+      return courseRolesMetadata;
     default:
       return [];
   }

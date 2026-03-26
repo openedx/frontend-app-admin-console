@@ -1,38 +1,17 @@
 interface DefineApplicationScopeStepProps {
-  users: string;
   selectedRole: string | null;
-  onBack?: () => void;
+  selectedScopes: Set<string>;
+  onScopeToggle: (scopeId: string) => void;
 }
 
-const DefineApplicationScopeStep = ({ users, selectedRole }: DefineApplicationScopeStepProps) => {
+const DefineApplicationScopeStep = (
+  { selectedRole, selectedScopes, onScopeToggle }: DefineApplicationScopeStepProps,
+) => {
   // Placeholder for Step 2 - "Define Application Scope"
   // This will be implemented in future iterations
+  console.log(selectedRole, selectedScopes, onScopeToggle);
 
-  const usersList = users.split(',').map(u => u.trim()).filter(Boolean);
-
-  return (
-    <div className="assign-role-step-2">
-      <h4>Review and Confirm</h4>
-
-      <div className="mb-4">
-        <h5>Selected Role</h5>
-        <p>{selectedRole || 'No role selected'}</p>
-      </div>
-
-      <div className="mb-4">
-        <h5>Users ({usersList.length})</h5>
-        <ul>
-          {usersList.map((user, index) => (
-            <li key={index}>{user}</li>
-          ))}
-        </ul>
-      </div>
-
-      <p className="text-muted">
-        Step 2 content - "Define Application Scope" will be implemented in future iterations.
-      </p>
-    </div>
-  );
+  return <h1>Step 2</h1>;
 };
 
 export default DefineApplicationScopeStep;

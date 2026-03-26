@@ -8,15 +8,17 @@ import { SpinnerSimple } from '@openedx/paragon/icons';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
-import { courseRolesMetadata, libraryRolesMetadata } from '../constants';
+import {
+  CONTENT_LIBRARY_PERMISSIONS, COURSE_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
+} from '../constants';
 import { useToastManager } from '../libraries-manager/ToastManagerContext';
 import { useValidateUserPermissions } from '../../data/hooks';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 const CONTEXT_BY_ACTION: Record<string, string> = {
-  'content_libraries.manage_library_team': 'library',
-  'courses.manage_course_team': 'course',
+  [CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM]: 'library',
+  [COURSE_PERMISSIONS.MANAGE_COURSE_TEAM]: 'course',
 };
 
 const STEPS = {
@@ -29,11 +31,12 @@ type StepKey = typeof STEPS[keyof typeof STEPS];
 interface AssignRoleWizardProps {
   onClose: () => void;
   scope: string;
+  initialUsers?: string;
 }
 
-const AssignRoleWizard = ({ onClose, scope }: AssignRoleWizardProps) => {
+const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizardProps) => {
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
-  const [users, setUsers] = useState('');
+  const [users, setUsers] = useState(initialUsers);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
 
@@ -46,8 +49,8 @@ const AssignRoleWizard = ({ onClose, scope }: AssignRoleWizardProps) => {
 
   // Filter role groups based on what the current user is allowed to manage
   const permissionChecks = useMemo(() => [
-    { action: 'content_libraries.manage_library_team', scope },
-    { action: 'courses.manage_course_team', scope },
+    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope },
+    { action: COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope },
   ], [scope]);
 
   const { data: permissionsData } = useValidateUserPermissions(permissionChecks);
