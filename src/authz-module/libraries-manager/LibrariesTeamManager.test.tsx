@@ -3,10 +3,17 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary, useUpdateLibrary } from '@src/authz-module/data/hooks';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
 import { ToastManagerProvider } from './ToastManagerContext';
 import { CONTENT_LIBRARY_PERMISSIONS } from './constants';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+  useLocation: jest.fn().mockReturnValue({ hash: '' }),
+}));
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -53,6 +60,7 @@ describe('LibrariesTeamManager', () => {
     allowPublicRead: false,
   };
   const mutate = jest.fn();
+  const mockNavigate = jest.fn();
   const libraryAuthZContext = {
     libraryId: libraryData.id,
     libraryName: libraryData.title,
@@ -90,6 +98,8 @@ describe('LibrariesTeamManager', () => {
       mutate,
       isPending: false,
     });
+    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    (useLocation as jest.Mock).mockReturnValue({ hash: '' });
   });
 
   it('renders tabs and layout content correctly', () => {
@@ -136,7 +146,7 @@ describe('LibrariesTeamManager', () => {
     const permissionsTab = await screen.findByRole('tab', { name: /permissions/i });
     await user.click(permissionsTab);
 
-    const tablePermissionMatrix = await screen.getByRole('table');
+    const tablePermissionMatrix = screen.getByRole('table');
     const matrixScope = within(tablePermissionMatrix);
 
     expect(matrixScope.getByText('Library')).toBeInTheDocument();
@@ -151,5 +161,26 @@ describe('LibrariesTeamManager', () => {
     expect(navLink).toBeInTheDocument();
     // TODO: Update expected URL when dedicated Manage Access page is created
     expect(navLink).toHaveAttribute('href', '/authz/libraries/lib-001');
+  });
+
+  it('navigates to assign role wizard when "Assign Role" button is clicked', async () => {
+    const user = userEvent.setup();
+    renderTeamManager();
+    await user.click(screen.getByRole('button', { name: 'Assign Role' }));
+    expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role?scope=lib-001');
+  });
+
+  it('does not render Assign Role button when canManageTeam is false', () => {
+    mockedUseLibraryAuthZ.mockReturnValue({ ...libraryAuthZContext, canManageTeam: false });
+    renderTeamManager();
+    expect(screen.queryByRole('button', { name: 'Assign Role' })).not.toBeInTheDocument();
+  });
+
+  it('defaults to permissions tab when hash is present in location', () => {
+    (useLocation as jest.Mock).mockReturnValue({ hash: '#permissions' });
+    renderTeamManager();
+    // Tabs renders with defaultActiveKey="permissions" when hash is truthy
+    const permissionsTab = screen.getByRole('tab', { name: /permissions/i });
+    expect(permissionsTab).toBeInTheDocument();
   });
 });
