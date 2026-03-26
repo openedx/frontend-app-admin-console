@@ -30,6 +30,7 @@ import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
+  const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
   const { username } = useParams();
   const { authenticatedUser } = useContext(AppContext as React.Context<AppContextType>);
   const navigate = useNavigate();
@@ -90,20 +91,29 @@ const AuditUserPage = () => {
 
   const columns = useMemo(() => [
     {
-      Header: formatMessage(messages['authz.user.table.role.column.header']),
+      Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
       Cell: RoleCell,
+      filter: 'includesValue',
+      Filter: RolesFilter,
+      filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
+      filterOrder: 2,
     },
     {
-      Header: formatMessage(messages['authz.user.table.organization.column.header']),
+      Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
       Cell: OrgCell,
+      filter: 'includesValue',
+      Filter: OrgFilter,
+      filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
+      filterOrder: 1,
     },
     {
-      Header: formatMessage(messages['authz.user.table.scope.column.header']),
+      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
       accessor: 'scope',
       Cell: ScopeCell,
       disableFilters: true,
+
     },
     {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
@@ -208,8 +218,12 @@ const AuditUserPage = () => {
         <Container className="bg-light-200 p-5">
           <DataTable
             isPaginated
+            isFilterable
+            isSortable
             manualPagination
             data={userAssignments}
+            manualFilters
+            manualSortBy
             fetchData={fetchData}
             itemCount={count}
             pageCount={pageCount}
@@ -222,6 +236,7 @@ const AuditUserPage = () => {
               <UserPermissions row={row} />
             )}
           >
+            <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
             <DataTable.Table />
             <TableFooter />
           </DataTable>
