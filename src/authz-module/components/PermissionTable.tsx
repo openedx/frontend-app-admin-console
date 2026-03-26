@@ -1,6 +1,8 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Check, Close } from '@openedx/paragon/icons';
-import { Card, Icon, OverlayTrigger, Tooltip } from '@openedx/paragon';
+import {
+  Card, Icon, OverlayTrigger, Tooltip,
+} from '@openedx/paragon';
 import { PermissionsResourceGrouped, Role } from '@src/types';
 import { actionsDictionary } from './RoleCard/constants';
 import ResourceTooltip from './ResourceTooltip';

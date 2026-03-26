@@ -83,7 +83,7 @@ const RolesPermissions = () => {
                     </span>
                   </div>
                   <div className="col col-5">
-                    <Hyperlink className="d-block text-right h5 font-weight-normal" destination="." target="_blank" showLaunchIcon={false} isInline>
+                    <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
                       {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.link'])}
                     </Hyperlink>
                   </div>
