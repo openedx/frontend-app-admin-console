@@ -1,6 +1,7 @@
 import {
   useState, useCallback, useEffect, useMemo,
 } from 'react';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Stepper, Button, Container, StatefulButton, Icon,
 } from '@openedx/paragon';
@@ -13,6 +14,7 @@ import {
 } from '../constants';
 import { useToastManager } from '../libraries-manager/ToastManagerContext';
 import { useValidateUserPermissions } from '../../data/hooks';
+import messages from './messages';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
@@ -35,6 +37,7 @@ interface AssignRoleWizardProps {
 }
 
 const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizardProps) => {
+  const intl = useIntl();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -102,7 +105,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
         setActiveStep(STEPS.DEFINE_APPLICATION_SCOPE);
       }
     } catch {
-      setValidationError('An error occurred while validating users. Please try again.');
+      setValidationError(intl.formatMessage(messages['wizard.validate.error']));
     }
   };
 
@@ -124,9 +127,9 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
           data: { users: usersList, role: selectedRole, scope: selectedScope },
         })),
       );
-      showToast({ message: 'Role assigned successfully.', type: 'success', delay: 5000 });
+      showToast({ message: intl.formatMessage(messages['wizard.save.success']), type: 'success', delay: 5000 });
       handleClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       showErrorToast(error, handleSave);
     }
   };
@@ -142,7 +145,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
         <Stepper.Step
           onClick={() => setActiveStep(STEPS.SELECT_USERS_AND_ROLE)}
           eventKey={STEPS.SELECT_USERS_AND_ROLE}
-          title="Who and Role"
+          title={intl.formatMessage(messages['wizard.step.selectUsersAndRole.title'])}
         >
           <SelectUsersAndRoleStep
             users={users}
@@ -158,7 +161,7 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
         <Stepper.Step
           onClick={() => setActiveStep(STEPS.DEFINE_APPLICATION_SCOPE)}
           eventKey={STEPS.DEFINE_APPLICATION_SCOPE}
-          title="Where it applies"
+          title={intl.formatMessage(messages['wizard.step.defineScope.title'])}
         >
           <DefineApplicationScopeStep
             selectedRole={selectedRole}
@@ -171,11 +174,14 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
       <div className="p-5">
         <Stepper.ActionRow eventKey={STEPS.SELECT_USERS_AND_ROLE}>
           <Button variant="outline-primary" onClick={handleClose}>
-            Cancel
+            {intl.formatMessage(messages['wizard.button.cancel'])}
           </Button>
           <Stepper.ActionRow.Spacer />
           <StatefulButton
-            labels={{ default: 'Next', pending: 'Validating...' }}
+            labels={{
+              default: intl.formatMessage(messages['wizard.button.next']),
+              pending: intl.formatMessage(messages['wizard.button.next.pending']),
+            }}
             icons={{ pending: <Icon src={SpinnerSimple} /> }}
             state={validateUsersMutation.isPending ? 'pending' : 'default'}
             onClick={validateUsersAndProceed}
@@ -185,14 +191,17 @@ const AssignRoleWizard = ({ onClose, scope, initialUsers = '' }: AssignRoleWizar
 
         <Stepper.ActionRow eventKey={STEPS.DEFINE_APPLICATION_SCOPE}>
           <Button variant="outline-primary" onClick={handleClose}>
-            Cancel
+            {intl.formatMessage(messages['wizard.button.cancel'])}
           </Button>
           <Button variant="tertiary" onClick={() => setActiveStep(STEPS.SELECT_USERS_AND_ROLE)}>
-            Back
+            {intl.formatMessage(messages['wizard.button.back'])}
           </Button>
           <Stepper.ActionRow.Spacer />
           <StatefulButton
-            labels={{ default: 'Save', pending: 'Saving...' }}
+            labels={{
+              default: intl.formatMessage(messages['wizard.button.save']),
+              pending: intl.formatMessage(messages['wizard.button.save.pending']),
+            }}
             icons={{ pending: <Icon src={SpinnerSimple} /> }}
             state={assignRoleMutation.isPending ? 'pending' : 'default'}
             onClick={handleSave}

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 // Shared styles between overlay and textarea to keep text positions in sync
 const INPUT_STYLE: React.CSSProperties = {
@@ -24,6 +24,8 @@ interface HighlightedUsersInputProps {
 const HighlightedUsersInput = ({
   value, onChange, invalidUsers, placeholder, hasNetworkError = false,
 }: HighlightedUsersInputProps) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
   const invalidSet = useMemo(
     () => new Set(invalidUsers.map((u) => u.trim())),
     [invalidUsers],
@@ -47,11 +49,18 @@ const HighlightedUsersInput = ({
     });
   }, [value, invalidSet, hasHighlights]);
 
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    if (overlayRef.current) {
+      overlayRef.current.scrollTop = e.currentTarget.scrollTop;
+    }
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       {/* Highlight layer — sits behind the transparent textarea */}
       {hasHighlights && (
         <div
+          ref={overlayRef}
           aria-hidden="true"
           style={{
             ...INPUT_STYLE,
@@ -75,6 +84,7 @@ const HighlightedUsersInput = ({
         rows={4}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onScroll={handleScroll}
         placeholder={hasHighlights ? undefined : placeholder}
         className={`form-control${hasNetworkError ? ' is-invalid' : ''}`}
         style={{

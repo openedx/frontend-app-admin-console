@@ -29,11 +29,6 @@ jest.mock('./components/TeamTable', () => ({
   default: () => <div role="table" aria-label="Team Members Table">Team member list</div>,
 }));
 
-jest.mock('./components/AddNewTeamMemberModal', () => ({
-  __esModule: true,
-  AddNewTeamMemberTrigger: () => <button type="button">Add Team Member</button>,
-}));
-
 jest.mock('../components/RoleCard', () => ({
   __esModule: true,
   default: ({ title, description, permissionsByResource }: {
@@ -111,8 +106,8 @@ describe('LibrariesTeamManager', () => {
     // TeamTable is rendered
     expect(screen.getByRole('table', { name: 'Team Members Table' })).toBeInTheDocument();
 
-    // AddNewTeamMemberTrigger is rendered
-    expect(screen.getByRole('button', { name: 'Add Team Member' })).toBeInTheDocument();
+    // Assign Role button is rendered
+    expect(screen.getByRole('button', { name: 'Assign Role' })).toBeInTheDocument();
   });
 
   it('renders role cards when "Roles" tab is selected', async () => {

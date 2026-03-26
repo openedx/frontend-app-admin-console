@@ -1,8 +1,11 @@
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Form, Stack, OverlayTrigger,
   Tooltip,
 } from '@openedx/paragon';
+import { getConfig } from '@edx/frontend-platform';
 import HighlightedUsersInput from './HighlightedUsersInput';
+import messages from './messages';
 
 interface RoleMetadata {
   role: string;
@@ -24,11 +27,6 @@ interface SelectUsersAndRoleStepProps {
 
 const CONTEXT_ORDER = ['course', 'library'];
 
-const contextLabels: Record<string, string> = {
-  library: 'Libraries',
-  course: 'Courses',
-};
-
 const SelectUsersAndRoleStep = ({
   users,
   setUsers,
@@ -38,6 +36,13 @@ const SelectUsersAndRoleStep = ({
   validationError,
   invalidUsers,
 }: SelectUsersAndRoleStepProps) => {
+  const intl = useIntl();
+
+  const contextLabels: Record<string, string> = {
+    library: intl.formatMessage(messages['wizard.step1.roles.contextLabel.library']),
+    course: intl.formatMessage(messages['wizard.step1.roles.contextLabel.course']),
+  };
+
   const rolesByContext = roles.reduce<Record<string, RoleMetadata[]>>((acc, role) => {
     const context = role.contextType || 'library';
     if (!acc[context]) { acc[context] = []; }
@@ -47,23 +52,25 @@ const SelectUsersAndRoleStep = ({
 
   const orderedContexts = CONTEXT_ORDER.filter((ctx) => rolesByContext[ctx]);
 
+  const adminUrl = `${getConfig().LMS_BASE_URL}/admin`;
+
   return (
     <div className="select-users-and-role-step">
       {/* Users Section */}
-      <h3 className="mb-2">Users</h3>
+      <h3 className="mb-2">{intl.formatMessage(messages['wizard.step1.users.heading'])}</h3>
       <Form.Group controlId="users-input">
-        <Form.Label>Add users by username or email</Form.Label>
+        <Form.Label>{intl.formatMessage(messages['wizard.step1.users.label'])}</Form.Label>
         <HighlightedUsersInput
           value={users}
           onChange={setUsers}
           invalidUsers={invalidUsers}
-          placeholder="Enter one or more email addresses or usernames"
+          placeholder={intl.formatMessage(messages['wizard.step1.users.placeholder'])}
           hasNetworkError={!!validationError || invalidUsers.length > 0}
         />
         <Form.Text className={invalidUsers.length > 0 ? 'text-danger' : ''}>
           {invalidUsers.length > 0
-            ? 'This email is not associated with an account in this platform.'
-            : 'The user must already have an account.'}
+            ? intl.formatMessage(messages['wizard.step1.users.invalid'], { count: invalidUsers.length })
+            : intl.formatMessage(messages['wizard.step1.users.hint'])}
         </Form.Text>
         {validationError && (
           <div className="text-danger small mt-1">{validationError}</div>
@@ -71,7 +78,7 @@ const SelectUsersAndRoleStep = ({
       </Form.Group>
 
       {/* Roles Section */}
-      <h3 className="mt-4 mb-2">Roles</h3>
+      <h3 className="mt-4 mb-2">{intl.formatMessage(messages['wizard.step1.roles.heading'])}</h3>
       {orderedContexts.map((context) => (
         <div key={context} className="role-group mb-4">
           <h5 className="role-group-header mb-3 pl-4">
@@ -102,8 +109,7 @@ const SelectUsersAndRoleStep = ({
                     placement="right"
                     overlay={(
                       <Tooltip variant="light" id={`tooltip-disabled-${role.role}`}>
-                        We are expanding our permissions system. This role is currently
-                        unavailable but will be part of an upcoming update.
+                        {intl.formatMessage(messages['wizard.step1.roles.disabled.tooltip'])}
                       </Tooltip>
                     )}
                   >
@@ -120,11 +126,11 @@ const SelectUsersAndRoleStep = ({
 
       {/* Documentation Link */}
       <div className="mt-3">
-        <p className="mb-1 font-weight-bold small">Can&apos;t find the role you want to assign?</p>
+        <p className="mb-1 font-weight-bold small">{intl.formatMessage(messages['wizard.step1.docs.heading'])}</p>
         <p className="mb-0 small">
-          Some roles are managed outside this console{' '}
-          <a href="/admin" target="_blank" rel="noopener noreferrer">
-            View roles managed in LMS and Django Admin
+          {intl.formatMessage(messages['wizard.step1.docs.body'])}{' '}
+          <a href={adminUrl} target="_blank" rel="noopener noreferrer">
+            {intl.formatMessage(messages['wizard.step1.docs.link'])}
           </a>
         </p>
       </div>
