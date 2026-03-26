@@ -9,7 +9,7 @@ import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { CustomErrors } from '@src/constants';
 import {
   CONTENT_LIBRARY_PERMISSIONS, libraryPermissions, libraryResourceTypes, libraryRolesMetadata,
-} from './constants';
+} from '../constants';
 
 const LIBRARY_TEAM_PERMISSIONS = [
   CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,

@@ -23,7 +23,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   useTeamMembers: jest.fn(),
 }));
 
-jest.mock('../hooks/useQuerySettings', () => ({
+jest.mock('@src/authz-module/hooks/useQuerySettings', () => ({
   useQuerySettings: jest.fn(() => ({
     querySettings: { page: 1, limit: 10 },
   })),

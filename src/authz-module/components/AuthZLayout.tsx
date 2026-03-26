@@ -14,9 +14,10 @@ interface AuthZLayoutProps extends AuthZTitleProps {
 const AuthZLayout = ({ children, context, ...props }: AuthZLayoutProps) => (
   <>
     <StudioHeader
-      number={context.id}
-      org={context.org}
-      title={context.title}
+      number={context?.id || null}
+      org={context?.org || null}
+      title={context?.title || null}
+      isHiddenMainMenu
     />
     <AuthZTitle {...props} />
     {children}
