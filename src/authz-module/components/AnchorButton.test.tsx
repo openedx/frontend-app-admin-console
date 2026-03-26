@@ -1,5 +1,5 @@
 import { renderWrapper } from '@src/setupTest';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AnchorButton from './AnchorButton';
 
@@ -37,7 +37,9 @@ describe('AnchorButton', () => {
     });
 
     const { getByRole, rerender } = renderWrapper(<AnchorButton />);
-    fireEvent.scroll(window);
+    // Simulate scroll event by dispatching a scroll event
+    const scrollEvent = new Event('scroll');
+    window.dispatchEvent(scrollEvent);
     rerender(<AnchorButton />);
 
     await waitFor(async () => {
