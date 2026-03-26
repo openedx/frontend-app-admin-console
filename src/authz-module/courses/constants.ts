@@ -400,6 +400,7 @@ export const rolesObject = [
     userCount: 1,
     name: 'Course Editor',
     description: 'building and maintaining course content and supporting assets, without operational controls or high impact actions that can affect a live course.',
+    disable: true,
   },
   {
     role: 'course_auditor',
@@ -417,6 +418,7 @@ export const rolesObject = [
     userCount: 1,
     name: 'Course Auditor',
     description: ' QA, compliance review, content review, and general oversight, no changes in Studio.',
+    disable: true,
   },
 
 ];
