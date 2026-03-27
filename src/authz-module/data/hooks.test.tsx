@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
   useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
+  useValidateUsers, useScopes, useOrganizations, useManagedScopeOrgs,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -238,6 +239,231 @@ describe('usePermissionsByRole', () => {
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
       expect(result.current.error).toEqual(new Error('Failed to add members'));
     });
+  });
+});
+
+describe('useValidateUsers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('successfully validates users', async () => {
+    const mockResponse = {
+      validUsers: ['jdoe'],
+      invalidUsers: ['unknown_user'],
+    };
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockResolvedValue({ data: mockResponse }),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe', 'unknown_user'] } });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('handles error when validation fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockRejectedValue(new Error('Validation failed')),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe'] } });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toEqual(new Error('Validation failed'));
+  });
+});
+
+describe('useScopes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const makeScopesResponse = (next: string | null = null) => ({
+    results: [{
+      id: 'lib:123', name: 'Test Library', org: 'testorg', contextType: 'library',
+    }],
+    count: 1,
+    next,
+    previous: null,
+  });
+
+  it('returns pages data on success', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse() }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.pages).toHaveLength(1);
+    expect(result.current.data?.pages[0].results).toHaveLength(1);
+  });
+
+  it('hasNextPage is false when next is null', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse(null) }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('hasNextPage is true when next URL has page param', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/?page=2'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(true);
+  });
+
+  it('hasNextPage is false when next URL has no page param', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('hasNextPage is false when next is an invalid URL', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('not-a-valid-url'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('handles error when API call fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Network error')),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeDefined();
+  });
+});
+
+describe('useOrganizations', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns organizations on success', async () => {
+    const mockOrgs = [{ org: 'org1', name: 'Org One' }];
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { results: mockOrgs } }),
+    });
+
+    const { result } = renderHook(() => useOrganizations('library'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(mockOrgs);
+  });
+
+  it('handles error when API fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Failed')),
+    });
+
+    const { result } = renderHook(() => useOrganizations(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+});
+
+describe('useManagedScopeOrgs', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not fetch when contextType is undefined', async () => {
+    const mockGet = jest.fn();
+    getAuthenticatedHttpClient.mockReturnValue({ get: mockGet });
+
+    const { result } = renderHook(() => useManagedScopeOrgs(undefined), { wrapper: createWrapper() });
+
+    // Query is disabled, so it should not be loading or have fetched
+    expect(result.current.isFetching).toBe(false);
+    expect(mockGet).not.toHaveBeenCalled();
+  });
+
+  it('fetches and returns a Set of orgs when contextType is provided', async () => {
+    const mockScopesResponse = {
+      results: [
+        {
+          id: 'lib:123', name: 'Lib 1', org: 'org1', contextType: 'library',
+        },
+        {
+          id: 'lib:456', name: 'Lib 2', org: 'org2', contextType: 'library',
+        },
+        {
+          id: 'lib:789', name: 'Lib 3', org: '', contextType: 'library',
+        },
+      ],
+      count: 3,
+      next: null,
+      previous: null,
+    };
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockScopesResponse }),
+    });
+
+    const { result } = renderHook(() => useManagedScopeOrgs('library'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const orgs = result.current.data as Set<string>;
+    expect(orgs.has('org1')).toBe(true);
+    expect(orgs.has('org2')).toBe(true);
+    // empty string org is filtered out
+    expect(orgs.has('')).toBe(false);
+    expect(orgs.size).toBe(2);
+  });
+
+  it('handles error when API fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('API error')),
+    });
+
+    const { result } = renderHook(() => useManagedScopeOrgs('course'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });
 

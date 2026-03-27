@@ -50,6 +50,16 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
+// TODO: Validate Users API
+export type ValidateUsersRequest = {
+  users: string[];
+};
+
+export type ValidateUsersResponse = {
+  validUsers: string[];
+  invalidUsers: string[];
+};
+
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
 
@@ -77,6 +87,16 @@ export const assignTeamMembersRole = async (
   return camelCaseObject(res.data);
 };
 
+export const validateUsers = async (
+  data: ValidateUsersRequest,
+): Promise<ValidateUsersResponse> => {
+  const res = await getAuthenticatedHttpClient().post(
+    getApiUrl('/api/authz/v1/users/validate'),
+    data,
+  );
+  return camelCaseObject(res.data);
+};
+
 // TODO: this should be replaced in the future with Console API
 export const getLibrary = async (libraryId: string): Promise<LibraryMetadata> => {
   const { data } = await getAuthenticatedHttpClient().get(getStudioApiUrl(`/api/libraries/v2/${libraryId}/`));
@@ -94,6 +114,54 @@ export const getPermissionsByRole = async (scope: string): Promise<PermissionsBy
   url.searchParams.append('scope', scope);
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data.results);
+};
+
+export interface ScopeItem {
+  id: string;
+  name: string;
+  org: string;
+  contextType: 'course' | 'library';
+  description?: string;
+}
+
+export interface GetScopesResponse {
+  results: ScopeItem[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
+export interface GetScopesParams {
+  contextType?: string;
+  search?: string;
+  org?: string;
+  page?: number;
+  pageSize?: number;
+  managementPermissionOnly?: boolean;
+}
+
+export interface OrganizationItem {
+  org: string;
+  name: string;
+}
+
+export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
+  if (params.contextType) { url.searchParams.set('context_type', params.contextType); }
+  if (params.search) { url.searchParams.set('search', params.search); }
+  if (params.org) { url.searchParams.set('org', params.org); }
+  if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
+  url.searchParams.set('page', (params.page ?? 1).toString());
+  url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getOrganizations = async (contextType?: string): Promise<OrganizationItem[]> => {
+  const url = new URL(getApiUrl('/api/authz/v1/organizations/'));
+  if (contextType) { url.searchParams.set('context_type', contextType); }
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data.results ?? data);
 };
 
 export const revokeUserRoles = async (
