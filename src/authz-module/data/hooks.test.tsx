@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
   useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
+  useValidateUsers,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -238,6 +239,54 @@ describe('usePermissionsByRole', () => {
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
       expect(result.current.error).toEqual(new Error('Failed to add members'));
     });
+  });
+});
+
+describe('useValidateUsers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('successfully validates users', async () => {
+    const mockResponse = {
+      validUsers: ['jdoe'],
+      invalidUsers: ['unknown_user'],
+    };
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockResolvedValue({ data: mockResponse }),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe', 'unknown_user'] } });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('handles error when validation fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockRejectedValue(new Error('Validation failed')),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe'] } });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toEqual(new Error('Validation failed'));
   });
 });
 

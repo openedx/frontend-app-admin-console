@@ -11,6 +11,11 @@ const messages = defineMessages({
     defaultMessage: 'Manage Access',
     description: 'Libreries AuthZ root breafcrumb',
   },
+  'library.authz.manage.add.role.button': {
+    id: 'library.authz.manage.add.role.button',
+    defaultMessage: 'Assign Role',
+    description: 'Button to add a new role',
+  },
   'library.authz.tabs.team': {
     id: 'library.authz.tabs.team',
     defaultMessage: 'Team Members',
