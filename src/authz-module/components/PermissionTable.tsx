@@ -74,7 +74,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                       permission.roles[role.name]
                         ? (
                           <Icon
-                            className={`d-inline-block ${role.disable && 'text-gray-200'}`}
+                            className={`d-inline-block ${role.disable ? 'text-gray-200' : 'text-success'}`}
                             src={Check}
                             aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
                               roleName: role.name,
