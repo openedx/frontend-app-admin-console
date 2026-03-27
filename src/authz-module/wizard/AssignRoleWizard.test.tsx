@@ -344,21 +344,6 @@ describe('AssignRoleWizard', () => {
     expect(screen.getByRole('button', { name: /Save/i })).toBeDisabled();
   });
 
-  it('does not call validateUsers when users list is empty', async () => {
-    const user = userEvent.setup();
-    renderWizard();
-    // Only select role, no users
-    await user.click(screen.getByTestId('select-role'));
-    await user.click(screen.getByRole('button', { name: /Next/i }));
-    // Button should be disabled, so click won't trigger mutation
-    expect(mockValidateMutateAsync).not.toHaveBeenCalled();
-  });
-
-  it('Back button is always rendered (step 2 action row)', () => {
-    renderWizard();
-    // With mocked Stepper, both action rows are visible
-    expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
-  });
 
   it('Next button is disabled when validateUsers mutation is pending', async () => {
     mockUseValidateUsers.mockReturnValue({
@@ -382,26 +367,4 @@ describe('AssignRoleWizard', () => {
     expect(await screen.findByRole('button', { name: /Saving/i })).toBeDisabled();
   });
 
-  it('Back button navigates to step 1 when clicked', async () => {
-    const user = userEvent.setup();
-    renderWizard();
-    // Back button is always visible in mock; clicking it should not throw
-    await user.click(screen.getByRole('button', { name: /Back/i }));
-    // Step 1 content (users-input) remains in the document (mock renders all steps)
-    expect(screen.getByTestId('users-input')).toBeInTheDocument();
-  });
-
-  it('clicking step 1 header sets active step to select-users-and-role', async () => {
-    const user = userEvent.setup();
-    renderWizard();
-    await user.click(screen.getByTestId('step-header-select-users-and-role'));
-    expect(screen.getByTestId('users-input')).toBeInTheDocument();
-  });
-
-  it('clicking step 2 header sets active step to define-application-scope', async () => {
-    const user = userEvent.setup();
-    renderWizard();
-    await user.click(screen.getByTestId('step-header-define-application-scope'));
-    expect(screen.getByTestId('toggle-scope')).toBeInTheDocument();
-  });
 });

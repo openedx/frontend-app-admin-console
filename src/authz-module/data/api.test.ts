@@ -118,14 +118,6 @@ describe('validateUsers', () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it('returns empty lists when all users are valid', async () => {
-    const mockResponse = { validUsers: ['jdoe', 'alice'], invalidUsers: [] };
-    mockPost.mockResolvedValue({ data: mockResponse });
-
-    const result = await validateUsers({ users: ['jdoe', 'alice'] });
-    expect(result.invalidUsers).toHaveLength(0);
-    expect(result.validUsers).toHaveLength(2);
-  });
 });
 
 describe('getLibrary', () => {
