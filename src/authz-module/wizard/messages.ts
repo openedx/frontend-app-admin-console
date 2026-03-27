@@ -21,7 +21,7 @@ const messages = defineMessages({
   },
   'wizard.step.defineScope.title': {
     id: 'wizard.step.defineScope.title',
-    defaultMessage: 'Where it applies',
+    defaultMessage: 'Where It Applies',
     description: 'Step 2 title in the assign role wizard',
   },
 

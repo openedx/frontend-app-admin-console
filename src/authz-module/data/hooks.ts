@@ -161,3 +161,20 @@ export const useRevokeUserRoles = () => {
     },
   });
 };
+
+/**
+ * Fetches all scopes the current user has management permissions over and returns
+ * the set of orgs derived from those scopes. Used to determine which org-level and
+ * platform-wide "All..." aggregate options to show in the scope selector.
+ *
+ * @param contextType - 'course' | 'library'
+ */
+export const useManagedScopeOrgs = (contextType?: string) => useQuery({
+  queryKey: [...authzQueryKeys.all, 'managedScopeOrgs', contextType],
+  queryFn: async () => {
+    const data = await getScopes({ contextType, managementPermissionOnly: true, pageSize: 100 });
+    return new Set(data.results.map((s) => s.org).filter(Boolean));
+  },
+  enabled: !!contextType,
+  staleTime: 1000 * 60 * 30,
+});

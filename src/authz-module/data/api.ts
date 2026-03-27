@@ -137,6 +137,7 @@ export interface GetScopesParams {
   org?: string;
   page?: number;
   pageSize?: number;
+  managementPermissionOnly?: boolean;
 }
 
 export interface OrganizationItem {
@@ -146,9 +147,10 @@ export interface OrganizationItem {
 
 export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
-  if (params.contextType) { url.searchParams.set('context_type', params.contextType); }
+  //   if (params.contextType) { url.searchParams.set('context_type', params.contextType); }
   if (params.search) { url.searchParams.set('search', params.search); }
   if (params.org) { url.searchParams.set('org', params.org); }
+  if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
   url.searchParams.set('page', (params.page ?? 1).toString());
   url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
   const { data } = await getAuthenticatedHttpClient().get(url);
@@ -157,7 +159,7 @@ export const getScopes = async (params: GetScopesParams): Promise<GetScopesRespo
 
 export const getOrganizations = async (contextType?: string): Promise<OrganizationItem[]> => {
   const url = new URL(getApiUrl('/api/authz/v1/organizations/'));
-  if (contextType) { url.searchParams.set('context_type', contextType); }
+  //   if (contextType) { url.searchParams.set('context_type', contextType); }
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data.results ?? data);
 };

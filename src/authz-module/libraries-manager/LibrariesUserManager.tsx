@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Container, Skeleton } from '@openedx/paragon';
+import { Button, Container, Skeleton } from '@openedx/paragon';
+import { Plus } from '@openedx/paragon/icons';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
 import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
-import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
 import ConfirmDeletionModal from './components/ConfirmDeletionModal';
 import { useLibrary, useRevokeUserRoles, useTeamMembers } from '../data/hooks';
 import { buildPermissionMatrixByRole } from './utils';
@@ -154,11 +154,16 @@ const LibrariesUserManager = () => {
         pageTitle={user?.username || ''}
         pageSubtitle={user?.email || ''}
         actions={user && canManageTeam
-          ? [<AssignNewRoleTrigger
-              username={user.username}
-              libraryId={libraryId}
-              currentUserRoles={userRoles.map(role => role.role)}
-          />]
+          ? [
+            <Button
+              key="assign-role-wizard-trigger"
+              iconBefore={Plus}
+              variant="primary"
+              onClick={() => navigate(`/authz/assign-role?scope=${libraryId}&users=${encodeURIComponent(user.username)}`)}
+            >
+              {intl.formatMessage(messages['library.authz.manage.add.role.button'])}
+            </Button>,
+          ]
           : []}
       >
         <Container className="bg-light-200 p-5">

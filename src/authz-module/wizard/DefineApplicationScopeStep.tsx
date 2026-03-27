@@ -1,15 +1,18 @@
 import {
   useState, useEffect, useRef, useMemo,
 } from 'react';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Form, Spinner, Dropdown, Icon, Badge,
+  Stack,
 } from '@openedx/paragon';
 import {
   Search, FilterList, ExpandLess, ExpandMore,
 } from '@openedx/paragon/icons';
-import { useScopes, useOrganizations } from '../data/hooks';
+import { useScopes, useOrganizations, useManagedScopeOrgs } from '../data/hooks';
 import { courseRolesMetadata, libraryRolesMetadata } from '../constants';
 import { ScopeItem } from '../data/api';
+import messages from './messages';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
@@ -51,15 +54,15 @@ const ScopeCheckboxItem = ({ scope, checked, onToggle }: ScopeCheckboxItemProps)
 );
 
 interface OrgSectionProps {
-  org: string;
   orgName: string;
   scopes: ScopeItem[];
   selectedScopes: Set<string>;
   onScopeToggle: (scopeId: string) => void;
+  aggregateScopeItem?: ScopeItem;
 }
 
 const OrgSection = ({
-  orgName, scopes, selectedScopes, onScopeToggle,
+  orgName, scopes, selectedScopes, onScopeToggle, aggregateScopeItem,
 }: OrgSectionProps) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -77,6 +80,13 @@ const OrgSection = ({
 
       {!collapsed && (
         <div className="pl-2">
+          {aggregateScopeItem && (
+            <ScopeCheckboxItem
+              scope={aggregateScopeItem}
+              checked={selectedScopes.has(aggregateScopeItem.id)}
+              onToggle={onScopeToggle}
+            />
+          )}
           {scopes.map((scope) => (
             <ScopeCheckboxItem
               key={scope.id}
@@ -102,6 +112,7 @@ const DefineApplicationScopeStep = ({
   selectedScopes,
   onScopeToggle,
 }: DefineApplicationScopeStepProps) => {
+  const intl = useIntl();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
@@ -121,6 +132,7 @@ const DefineApplicationScopeStep = ({
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
   } = useScopes({
     contextType,
     search: debouncedSearch || undefined,
@@ -128,6 +140,13 @@ const DefineApplicationScopeStep = ({
   });
 
   const { data: organizations } = useOrganizations(contextType);
+  const { data: managedOrgs } = useManagedScopeOrgs(contextType);
+
+  const allowedOrgAggregates = managedOrgs ?? new Set<string>();
+
+  const hasPlatformPermission = !!organizations?.length
+    && !!managedOrgs
+    && organizations.every((o) => managedOrgs.has(o.org));
 
   const allScopes = useMemo(
     () => scopesData?.pages.flatMap((page) => page.results) ?? [],
@@ -143,11 +162,20 @@ const DefineApplicationScopeStep = ({
 
   const scopesByOrg = useMemo(() => {
     const orgScopes = allScopes.filter((s) => !!s.org);
-    return orgScopes.reduce<Record<string, ScopeItem[]>>((acc, scope) => {
+    const grouped = orgScopes.reduce<Record<string, ScopeItem[]>>((acc, scope) => {
       if (!acc[scope.org]) { acc[scope.org] = []; }
       acc[scope.org].push(scope);
       return acc;
     }, {});
+
+    Object.keys(grouped).forEach((org) => {
+      grouped[org].sort((a, b) => {
+        const aIsAll = a.name.startsWith('All ') ? 0 : 1;
+        const bIsAll = b.name.startsWith('All ') ? 0 : 1;
+        return aIsAll - bIsAll;
+      });
+    });
+    return grouped;
   }, [allScopes]);
 
   const orderedOrgs = useMemo(() => Object.keys(scopesByOrg), [scopesByOrg]);
@@ -157,7 +185,7 @@ const DefineApplicationScopeStep = ({
     if (!el) { return undefined; }
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isError) {
           fetchNextPage();
         }
       },
@@ -165,15 +193,37 @@ const DefineApplicationScopeStep = ({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
   const selectedOrgLabel = organizations?.find((o) => o.org === selectedOrg)?.name
     || organizations?.find((o) => o.org === selectedOrg)?.org
     || 'Organization';
 
+  const aggregateLabel = contextType === 'course'
+    ? 'All courses in this organization'
+    : 'All libraries in this organization';
+
+  const aggregateDescription = contextType === 'course'
+    ? 'Includes current and future courses'
+    : 'Includes current and future libraries';
+
+  const platformAggregateLabel = contextType === 'course'
+    ? 'All courses in Platform'
+    : 'All libraries in Platform';
+
+  const platformAggregateScopeItem: ScopeItem | null = (hasPlatformPermission && contextType)
+    ? {
+      id: '*',
+      name: platformAggregateLabel,
+      description: aggregateDescription,
+      org: '',
+      contextType: contextType as 'course' | 'library',
+    }
+    : null;
+
   return (
     <div className="define-application-scope-step">
-      <h3 className="mb-4">Applies to</h3>
+      <h3 className="mb-4">{intl.formatMessage(messages['wizard.step.defineScope.title'])}</h3>
 
       {/* Search + Organization filter + count */}
       <div className="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap">
@@ -219,13 +269,15 @@ const DefineApplicationScopeStep = ({
 
       {/* Active filter chip */}
       {contextType && (
-        <div className="mb-3 d-flex align-items-center gap-2">
+        <Stack direction="horizontal" gap={2} className="align-items-center">
           <span className="text-muted small">Filter applied:</span>
-          <Badge className="py-1 px-2" style={{ background: '#e8e8e8', color: '#333', fontWeight: 'normal' }}>
+          <Badge className="py-1 px-2" variant="light">
             {contextLabel}
           </Badge>
-        </div>
+        </Stack>
       )}
+
+      <hr className="my-4" />
 
       {/* Scopes list */}
       <div
@@ -238,6 +290,15 @@ const DefineApplicationScopeStep = ({
           </div>
         ) : (
           <>
+            {/* Platform-wide aggregate option (permission-gated) */}
+            {platformAggregateScopeItem && (
+              <ScopeCheckboxItem
+                scope={platformAggregateScopeItem}
+                checked={selectedScopes.has(platformAggregateScopeItem.id)}
+                onToggle={onScopeToggle}
+              />
+            )}
+
             {platformScopes.map((scope) => (
               <ScopeCheckboxItem
                 key={scope.id}
@@ -247,16 +308,28 @@ const DefineApplicationScopeStep = ({
               />
             ))}
 
-            {orderedOrgs.map((org) => (
-              <OrgSection
-                key={org}
-                org={org}
-                orgName={organizations?.find((o) => o.org === org)?.name || org}
-                scopes={scopesByOrg[org]}
-                selectedScopes={selectedScopes}
-                onScopeToggle={onScopeToggle}
-              />
-            ))}
+            {orderedOrgs.map((org) => {
+              const aggregateScopeItem: ScopeItem | undefined = (allowedOrgAggregates.has(org) && contextType)
+                ? {
+                  id: `org:${org}`,
+                  name: aggregateLabel,
+                  description: aggregateDescription,
+                  org,
+                  contextType: contextType as 'course' | 'library',
+                }
+                : undefined;
+
+              return (
+                <OrgSection
+                  key={org}
+                  orgName={organizations?.find((o) => o.org === org)?.name || org}
+                  scopes={scopesByOrg[org]}
+                  selectedScopes={selectedScopes}
+                  onScopeToggle={onScopeToggle}
+                  aggregateScopeItem={aggregateScopeItem}
+                />
+              );
+            })}
 
             {allScopes.length === 0 && (
               <p className="text-muted text-center py-3">No scopes found.</p>
