@@ -6,6 +6,8 @@ import {
   getLibrary,
   getPermissionsByRole,
   revokeUserRoles,
+  getScopes,
+  getOrganizations,
 } from './api';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -178,5 +180,109 @@ describe('revokeUserRoles', () => {
     expect(calledUrl.searchParams.get('role')).toBe('admin');
     expect(calledUrl.searchParams.get('scope')).toBe('lib:123');
     expect(result).toEqual(mockResponse);
+  });
+});
+
+describe('getScopes', () => {
+  const mockScopesData = {
+    results: [{
+      id: 'lib:123', name: 'Test Library', org: 'testorg', contextType: 'library',
+    }],
+    count: 1,
+    next: null,
+    previous: null,
+  };
+
+  it('builds URL with default page and pageSize when no optional params', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    const result = await getScopes({});
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('page')).toBe('1');
+    expect(calledUrl.searchParams.get('page_size')).toBe('10');
+    expect(calledUrl.searchParams.get('search')).toBeNull();
+    expect(calledUrl.searchParams.get('org')).toBeNull();
+    expect(calledUrl.searchParams.get('management_permission_only')).toBeNull();
+    expect(result).toEqual(mockScopesData);
+  });
+
+  it('appends search param when provided', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    await getScopes({ search: 'mylib' });
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('search')).toBe('mylib');
+  });
+
+  it('appends org param when provided', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    await getScopes({ org: 'testorg' });
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('org')).toBe('testorg');
+  });
+
+  it('appends management_permission_only when set to true', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    await getScopes({ managementPermissionOnly: true });
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('management_permission_only')).toBe('true');
+  });
+
+  it('uses provided page and pageSize', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    await getScopes({ page: 3, pageSize: 25 });
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('page')).toBe('3');
+    expect(calledUrl.searchParams.get('page_size')).toBe('25');
+  });
+
+  it('does not append managementPermissionOnly when false', async () => {
+    mockGet.mockResolvedValue({ data: mockScopesData });
+
+    await getScopes({ managementPermissionOnly: false });
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('management_permission_only')).toBeNull();
+  });
+});
+
+describe('getOrganizations', () => {
+  it('returns organizations from data.results when present', async () => {
+    const mockData = {
+      results: [{ org: 'org1', name: 'Org One' }, { org: 'org2', name: 'Org Two' }],
+    };
+    mockGet.mockResolvedValue({ data: mockData });
+
+    const result = await getOrganizations();
+
+    const calledUrl = new URL(mockGet.mock.calls[0][0]);
+    expect(calledUrl.pathname).toBe('/api/authz/v1/organizations/');
+    expect(result).toEqual(mockData.results);
+  });
+
+  it('falls back to data directly when results is not present', async () => {
+    const mockData = [{ org: 'org1', name: 'Org One' }];
+    mockGet.mockResolvedValue({ data: mockData });
+
+    const result = await getOrganizations();
+
+    expect(result).toEqual(mockData);
+  });
+
+  it('accepts contextType param (currently unused in URL but accepted)', async () => {
+    mockGet.mockResolvedValue({ data: { results: [] } });
+
+    const result = await getOrganizations('course');
+
+    expect(result).toEqual([]);
+    expect(mockGet).toHaveBeenCalled();
   });
 });
