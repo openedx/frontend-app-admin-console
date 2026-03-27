@@ -10,11 +10,11 @@ import {
 import AnchorButton from '../components/AnchorButton';
 import PermissionTable from '../components/PermissionTable';
 
-import { buildPermissionMatrixByResource } from '../libraries-manager/utils';
+import { buildPermissionMatrixByResource } from '../libraries/utils';
 
-import messages from '../libraries-manager/messages';
+import messages from '../libraries/messages';
 import { coursePermissions, courseResourceTypes, rolesObject } from '../courses/constants';
-import { rolesLibraryObject, libraryPermissions, libraryResourceTypes } from '../libraries-manager/constants';
+import { rolesLibraryObject, libraryPermissions, libraryResourceTypes } from '../libraries/constants';
 
 const RolesPermissions = () => {
   const intl = useIntl();

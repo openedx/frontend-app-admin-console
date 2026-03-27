@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import RolesPermissions from '../roles-permissions/RolesPermissions';
 import AuthZLayout from '../components/AuthZLayout';
 
-import messages from '../libraries-manager/messages';
+import messages from '../libraries/messages';
 
 const AuthzHome = () => {
   const { hash } = useLocation();

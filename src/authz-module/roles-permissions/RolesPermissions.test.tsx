@@ -5,7 +5,7 @@ import { renderWrapper } from '@src/setupTest';
 import RolesPermissions from './RolesPermissions';
 
 // Mock utils
-jest.mock('../libraries-manager/utils', () => ({
+jest.mock('../libraries/utils', () => ({
   buildPermissionMatrixByResource: jest.fn(() => [
     {
       key: 'test-resource',
@@ -27,7 +27,7 @@ jest.mock('../courses/constants', () => ({
   courseResourceTypes: [],
 }));
 
-jest.mock('../libraries-manager/constants', () => ({
+jest.mock('../libraries/constants', () => ({
   rolesLibraryObject: [
     {
       name: 'Library Admin', role: 'admin', permissions: [], userCount: 1,
