@@ -27,7 +27,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
             {roles.map(role => (
               <th
                 key={role.name}
-                className={`text-center py-3 sticky-top bg-white ${role.disable && 'text-muted opacity-50'}`}
+                className={`text-center py-3 sticky-top bg-white ${role.disable && 'text-gray-200'}`}
               >
                 {role.disable ? (
                   <OverlayTrigger
@@ -69,12 +69,12 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                     {permission.label}
                   </td>
                   {roles.map(role => (
-                    <td key={role.name} className={`text-center ${role.disable && 'opacity-50'}`}>
+                    <td key={role.name} className={`text-center ${role.disable && 'text-gray-200'}`}>
                       {
                       permission.roles[role.name]
                         ? (
                           <Icon
-                            className={`d-inline-block ${role.disable && 'text-muted'}`}
+                            className={`d-inline-block ${role.disable && 'text-gray-200'}`}
                             src={Check}
                             aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
                               roleName: role.name,
@@ -86,7 +86,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                         )
                         : (
                           <Icon
-                            className={`d-inline-block ${role.disable ? 'text-muted' : 'text-danger'}`}
+                            className={`d-inline-block ${role.disable ? 'text-gray-200' : 'text-danger'}`}
                             src={Close}
                             aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
                               roleName: role.name,
