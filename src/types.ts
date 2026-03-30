@@ -12,8 +12,12 @@ export interface TeamMember {
   username: string;
   fullName: string;
   email: string;
+  // TODO: remove when library team members get removed
   roles: string[];
   createdAt: string;
+  scope: { resource: string, type: 'COURSE' | 'LIBRARY' | 'GLOBAL' };
+  organization: string;
+  role: string;
 }
 
 export interface LibraryMetadata {
@@ -47,6 +51,18 @@ export type PermissionMetadata = {
   resource: string;
   label?: string;
   description?: string;
+};
+
+export type Org = {
+  id: string;
+  name: string;
+};
+
+export type Scope = {
+  key: string;
+  name: string;
+  description: string;
+  organization: Org;
 };
 
 // Permissions Matrix
@@ -84,3 +100,10 @@ export interface TableCellValue<T> {
     original: T;
   };
 }
+
+export type AppContextType = {
+  authenticatedUser: {
+    username: string;
+    email: string;
+  };
+};

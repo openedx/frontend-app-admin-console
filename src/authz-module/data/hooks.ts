@@ -4,7 +4,8 @@ import {
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
 import {
-  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getPermissionsByRole, getTeamMembers,
+  assignTeamMembersRole, AssignTeamMembersRoleRequest, getLibrary, getOrgs, GetOrgsResponse,
+  getPermissionsByRole, getScopes, GetScopesResponse, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles, RevokeUserRolesRequest,
 } from './api';
 
@@ -15,6 +16,8 @@ const authzQueryKeys = {
     ...authzQueryKeys.teamMembersAll(scope), querySettings] as const,
   permissionsByRole: (scope: string) => [...authzQueryKeys.all, 'permissionsByRole', scope] as const,
   library: (libraryId: string) => [...authzQueryKeys.all, 'library', libraryId] as const,
+  orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
+  scopes: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'scopes', search, page, pageSize] as const,
 };
 
 /**
@@ -109,4 +112,29 @@ export const useRevokeUserRoles = () => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
     },
   });
+};
+
+/**
+ * React query hook to fetch the list of organizations for the organization filter component.
+ * @param search - The search term to filter organizations.
+ * @returns The list of organizations matching the search term.
+ */
+export const useOrgs = (search?: string, page?: number, pageSize?: number) => {
+  const result = useQuery<GetOrgsResponse, Error>({
+    queryKey: authzQueryKeys.orgs(search, page, pageSize),
+    queryFn: () => getOrgs(search, page, pageSize),
+    staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+    refetchOnWindowFocus: false,
+  });
+  return result;
+};
+
+export const useScopes = (search?: string, page?: number, pageSize?: number) => {
+  const result = useQuery<GetScopesResponse, Error>({
+    queryKey: authzQueryKeys.scopes(search, page, pageSize),
+    queryFn: () => getScopes(search, page, pageSize),
+    staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+    refetchOnWindowFocus: false,
+  });
+  return result;
 };
