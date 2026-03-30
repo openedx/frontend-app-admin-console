@@ -1,4 +1,4 @@
-import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from '../roles-permissions/libraries/utils';
+import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
 const intl = { formatMessage: jest.fn((msg: any) => msg) };
 

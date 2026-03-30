@@ -4,7 +4,7 @@ import {
   EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,
   PermissionsRoleGrouped, ResourceMetadata, Role, RoleResourceGroup,
 } from '@src/types';
-import actionMessages from '../components/RoleCard/messages';
+import actionMessages from '../../components/RoleCard/messages';
 
 /**
  * Derives the localized label and action key for a given permission.
