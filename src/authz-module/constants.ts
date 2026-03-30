@@ -11,3 +11,5 @@ export enum RoleOperationErrorStatus {
   ROLE_ASSIGNMENT_ERROR = 'role_assignment_error',
   ROLE_REMOVAL_ERROR = 'role_removal_error',
 }
+
+export const MAX_TABLE_FILTERS_APPLIED = 10;

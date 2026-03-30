@@ -1,6 +1,8 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Tab, Tabs } from '@openedx/paragon';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import TeamMembersTable from 'authz-module/team-members/TeamMembersTable';
+import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import RolesPermissions from '../roles-permissions/RolesPermissions';
 import AuthZLayout from '../components/AuthZLayout';
 
@@ -9,6 +11,8 @@ import messages from './messages';
 const AuthzHome = () => {
   const { hash } = useLocation();
   const intl = useIntl();
+  const [searchParams] = useSearchParams();
+  const presetScope = searchParams.get('scope') || undefined;
 
   const rootBreadcrumb = intl.formatMessage(messages['authz.breadcrumb.root']) || '';
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
@@ -22,11 +26,7 @@ const AuthzHome = () => {
         pageTitle={pageTitle}
         pageSubtitle=""
         actions={
-          []
-          // this needs to be enable again once is refactored to be used outside of library context
-          // [
-          //   <AddNewTeamMemberTrigger libraryId="" key="add-new-member" />,
-          // ]
+          [<AddRoleButton key="add-role-button" />]
         }
       >
         <Tabs
@@ -34,9 +34,8 @@ const AuthzHome = () => {
           defaultActiveKey={hash ? 'permissionsRoles' : 'team'}
           className="bg-light-100 px-5"
         >
-          <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="p-5">
-            {/* TODO: once TeamTable is refactored we can call it here. For now, this tab will be empty. */}
-            {/* <TeamTable /> */}
+          <Tab eventKey="team" title={intl.formatMessage(messages['library.authz.tabs.team'])} className="p-5">
+            <TeamMembersTable presetScope={presetScope} />
           </Tab>
           <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])}>
             <RolesPermissions />
