@@ -1,6 +1,6 @@
 import { PermissionMetadata, ResourceMetadata } from 'types';
 import {
-  School, LibraryBooks, Article, Group, LocalOffer,
+  LibraryBooks, Article, Group, LocalOffer,
   BookOpen,
   Sync,
   Folder,
@@ -8,6 +8,7 @@ import {
   Download,
   DrawShapes,
   CheckCircle,
+  Award,
 } from '@openedx/paragon/icons';
 
 export const CONTENT_COURSE_PERMISSIONS = {
@@ -75,7 +76,7 @@ export const courseResourceTypes: ResourceMetadata[] = [
     key: 'course_schedule_details', label: 'Schedule & details', description: 'Permissions for viewing and editing the course schedule and course information.', icon: Calendar,
   },
   {
-    key: 'course_grading', label: 'Grading', description: 'Permissions related to viewing and managing grading configuration and grading policies.', icon: School,
+    key: 'course_grading', label: 'Grading', description: 'Permissions related to viewing and managing grading configuration and grading policies.', icon: Award,
   },
   {
     key: 'course_team_group', label: 'Course team & groups', description: 'Permissions for viewing and managing the course team, learner groups, and group configurations.', icon: Group,
