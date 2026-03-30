@@ -18,7 +18,7 @@ const messages = defineMessages({
   },
   'authz.tabs.permissionsRoles': {
     id: 'authz.tabs.permissionsRoles',
-    defaultMessage: 'Roles',
+    defaultMessage: 'Roles and Permissions',
     description: 'Libraries AuthZ title for the roles tab',
   },
 });
