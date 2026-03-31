@@ -26,6 +26,7 @@ import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
+import UserPermissions from './UserPermissions';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
@@ -216,6 +217,12 @@ const AuditUserPage = () => {
             additionalColumns={additionalColumns}
             columns={columns}
             isLoading={isLoadingUserAssignments}
+            isExpandable
+            renderRowSubComponent={({ row }) => (
+              <div>
+                <UserPermissions row={row} />
+              </div>
+            )}
           >
             <DataTable.Table />
             <TableFooter />
