@@ -89,7 +89,6 @@ const RolesPermissions = () => {
                   </div>
                 </div>
               </Alert>
-              <AnchorButton />
             </div>
           )
       )}
@@ -104,6 +103,7 @@ const RolesPermissions = () => {
             />
           )
       )}
+      <AnchorButton />
     </Container>
   );
 };

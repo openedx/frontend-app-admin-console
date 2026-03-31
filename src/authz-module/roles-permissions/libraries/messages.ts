@@ -43,7 +43,7 @@ const messages = defineMessages({
   },
   'library.authz.tabs.permissionsRoles.courses.alert.description': {
     id: 'library.authz.tabs.permissionsRoles.courses.alert.description',
-    defaultMessage: 'This list shows the permissions currently available in Authoring Studio. Some roles may grant additional permissions manages outside this interface.',
+    defaultMessage: 'This list shows the permissions currently available in Authoring Studio. Some roles may grant additional permissions managed outside this interface.',
     description: 'Libraries AuthZ description for the course roles alert',
   },
   'library.authz.tabs.permissionsRoles.courses.alert.link': {

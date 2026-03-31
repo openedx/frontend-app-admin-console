@@ -32,7 +32,7 @@ export interface RoleMetadata {
 export interface Role extends RoleMetadata {
   userCount: number;
   permissions: string[];
-  disable?: boolean;
+  disabled?: boolean;
 }
 
 export type ResourceMetadata = {
