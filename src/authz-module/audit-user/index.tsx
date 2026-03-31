@@ -14,10 +14,35 @@ import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import messages from './messages';
 import { ViewAllPermissionsCell, ActionsCell, PermissionsCell } from './CustomCells';
+import UserPermissions from './UserPermissions';
 
 const dummyData = [
   {
+    role: 'Super Admin',
+    organization: 'All organizations',
+    scope: 'Global',
+    permissions: ['Total access'],
+  },
+  {
+    role: 'Global Staff',
+    organization: 'All organizations',
+    scope: 'Global',
+    permissions: ['Partial access'],
+  },
+  {
     role: 'Course Admin',
+    organization: 'edX',
+    scope: 'Course: Demo Course',
+    permissions: ['View', 'Edit', 'Delete'],
+  },
+  {
+    role: 'Course Staff',
+    organization: 'edX',
+    scope: 'Course: Demo Course',
+    permissions: ['View', 'Edit', 'Delete'],
+  },
+  {
+    role: 'Course Editor',
     organization: 'edX',
     scope: 'Course: Demo Course',
     permissions: ['View', 'Edit', 'Delete'],
@@ -28,74 +53,26 @@ const dummyData = [
     scope: 'Course: Demo Course 2',
     permissions: ['View', 'Edit'],
   },
-  {
-    role: 'Course Admin',
+  { 
+    role: 'Library Admin',
     organization: 'edX',
     scope: 'Course: Demo Course',
     permissions: ['View', 'Edit', 'Delete'],
   },
   {
-    role: 'Course Auditor',
+    role: 'Library Author',
     organization: 'edX',
     scope: 'Course: Demo Course 2',
     permissions: ['View', 'Edit'],
   },
   {
-    role: 'Course Admin',
+    role: 'Library Contributor',
     organization: 'edX',
     scope: 'Course: Demo Course',
     permissions: ['View', 'Edit', 'Delete'],
   },
   {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
+    role: 'Library User',
     organization: 'edX',
     scope: 'Course: Demo Course 2',
     permissions: ['View', 'Edit'],
@@ -129,7 +106,7 @@ const AuditUserPage = () => {
     {
       id: 'action',
       Header: formatMessage(messages['authz.user.table.action.column.header']),
-      Cell: ActionsCell,
+      Cell: ActionsCell, // call the new component from other PR to show the Info Icon when is required
     },
   ];
   const columns = [
@@ -186,6 +163,12 @@ const AuditUserPage = () => {
             initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
             additionalColumns={additionalColumns}
             columns={columns}
+            isExpandable
+            renderRowSubComponent={({ row }) => (
+              <div>
+                <UserPermissions row={row} />
+              </div>
+            )}
           >
             <DataTable.Table />
             <TableFooter />

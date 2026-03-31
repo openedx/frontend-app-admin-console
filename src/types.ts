@@ -51,6 +51,7 @@ export type UserRole = {
   role: string;
   organization: string;
   scope: string;
+  permissions: string[];
 };
 
 // Permissions Matrix

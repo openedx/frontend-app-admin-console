@@ -6,15 +6,26 @@ import { TableCellValue, UserRole } from 'types';
 import messages from './messages';
 import { getPermissionsCountByRole } from './utils';
 
-type CellProps = TableCellValue<UserRole>;
+interface ExpandableTableRow<T> extends TableCellValue<T> {
+  row: TableCellValue<T>['row'] & {
+    isExpanded: boolean;
+    toggleRowExpanded: () => void;
+    values: T;
+  };
+}
+
+type CellProps = ExpandableTableRow<UserRole>;
 
 export const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   return (
     <ViewMoreLink
-      label={formatMessage(messages['authz.user.table.view_all_permissions.link.text'])}
-      // TODO: Implement view more functionality
-      onClick={() => console.log('View more clicked for row:', row)}
+      label={formatMessage(
+        row.isExpanded
+          ? messages['authz.user.table.view_all_permissions.link.text.close']
+          : messages['authz.user.table.view_all_permissions.link.text.open'],
+      )}
+      onClick={() => row.toggleRowExpanded()}
       iconSrc={ExpandMore}
     />
   );
@@ -35,6 +46,9 @@ export const ActionsCell = ({ row }: CellProps) => {
 export const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   // TODO handle permissions length per role
+  if (row.original.permissions.length === 1) {
+    return <span>{row.original.permissions[0]}</span>;
+  }
   const count = getPermissionsCountByRole(row.original.role);
   return (
     <span>
