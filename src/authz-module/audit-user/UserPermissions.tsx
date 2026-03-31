@@ -70,7 +70,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     ? [resources]
     : [resources.slice(0, mid), resources.slice(mid)];
   return (
-    <div className="d-flex flex-wrap bg-white px-4 py-4 border border-info-200">
+    <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light-200">
       {isSingleRow
         ? <RenderPermissionInLine items={resources} />
         : columns.map((col, index) => (
