@@ -1,11 +1,6 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 
 const messages = defineMessages({
-  'authz.manage.assign.role.title': {
-    id: 'authz.manage.assign.role.title',
-    defaultMessage: 'Assign Role',
-    description: 'Text for the assign role button',
-  },
   'libraries.authz.manage.add.member.title': {
     id: 'libraries.authz.manage.add.member.title',
     defaultMessage: 'Add New Team Member',

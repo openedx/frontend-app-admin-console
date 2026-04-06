@@ -1,5 +1,5 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { LibraryMetadata, TeamMember } from '@src/types';
+import { LibraryMetadata, TeamMember, UserRole } from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
@@ -14,6 +14,11 @@ export interface QuerySettings {
 
 export interface GetTeamMembersResponse {
   results: TeamMember[];
+  count: number;
+}
+
+export interface GetUserRolesResponse {
+  results: UserRole[];
   count: number;
 }
 
@@ -107,4 +112,28 @@ export const revokeUserRoles = async (
   // If this is not transformed to string, it shows a 404 with the token CSRF acquisition request
   const res = await getAuthenticatedHttpClient().delete(url.toString());
   return camelCaseObject(res.data);
+};
+
+export const getUserAssignedRoles = async (username: string, querySettings: QuerySettings)
+: Promise<GetUserRolesResponse> => {
+  // TODO: this endpoint is expected to retrieve the roles assigned to a user
+  // corroborate the endpoint is correct
+  // /api/authz/v1/users/(user_id)/assignments/
+  const url = new URL(getApiUrl(`/api/authz/v1/roles/users/${username}/assignments/`));
+
+  if (querySettings.roles) {
+    url.searchParams.set('roles', querySettings.roles);
+  }
+  if (querySettings.search) {
+    url.searchParams.set('search', querySettings.search);
+  }
+  if (querySettings.sortBy && querySettings.order) {
+    url.searchParams.set('sort_by', querySettings.sortBy);
+    url.searchParams.set('order', querySettings.order);
+  }
+  url.searchParams.set('page_size', querySettings.pageSize.toString());
+  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
 };
