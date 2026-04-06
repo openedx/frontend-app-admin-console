@@ -5,8 +5,8 @@ import { TableCellValue, TeamMember } from '@src/types';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useNavigate } from 'react-router-dom';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
-import { SKELETON_ROWS } from '@src/authz-module/libraries-manager/constants';
-import { useQuerySettings } from '../hooks/useQuerySettings';
+import { SKELETON_ROWS } from '@src/authz-module/constants';
+import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import messages from '../messages';
 
 type CellProps = TableCellValue<TeamMember>;

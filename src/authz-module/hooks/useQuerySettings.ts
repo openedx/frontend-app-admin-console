@@ -29,6 +29,8 @@ enum SortOrderKeys {
 export const useQuerySettings = (
   initialQuerySettings: QuerySettings = {
     roles: null,
+    scopes: null,
+    organizations: null,
     search: null,
     pageSize: 10,
     pageIndex: 0,
@@ -41,8 +43,10 @@ export const useQuerySettings = (
   const handleTableFetch = useCallback((tableFilters: DataTableFilters) => {
     setQuerySettings((prevSettings) => {
       // Extract filters
-      const rolesFilter = tableFilters.filters.find((filter) => filter.id === 'roles')?.value?.join(',') ?? '';
-      const searchFilter = tableFilters.filters.find((filter) => filter.id === 'username')?.value ?? '';
+      const rolesFilter = tableFilters.filters?.find((filter) => filter.id === 'role')?.value?.join(',') ?? '';
+      const searchFilter = tableFilters.filters?.find((filter) => filter.id === 'username')?.value ?? '';
+      const organizationsFilter = tableFilters.filters?.find((filter) => filter.id === 'organization')?.value?.join(',') ?? '';
+      const scopesFilter = tableFilters.filters?.find((filter) => filter.id === 'scope')?.value?.join(',') ?? '';
 
       // Extract pagination
       const { pageSize = 10, pageIndex = 0 } = tableFilters;
@@ -50,13 +54,15 @@ export const useQuerySettings = (
       // Extract and convert sorting
       let sortByOption = '';
       let sortByOrder = '';
-      if (tableFilters.sortBy.length) {
-        sortByOption = tableFilters.sortBy[0].id.replace(/([A-Z])/g, '_$1').toLowerCase();
-        sortByOrder = tableFilters.sortBy[0].desc ? SortOrderKeys.DESC : SortOrderKeys.ASC;
+      if (tableFilters.sortBy?.length) {
+        sortByOption = tableFilters.sortBy[0]?.id.replace(/([A-Z])/g, '_$1').toLowerCase();
+        sortByOrder = tableFilters.sortBy[0]?.desc ? SortOrderKeys.DESC : SortOrderKeys.ASC;
       }
 
       const newQuerySettings: QuerySettings = {
         roles: rolesFilter || null,
+        scopes: scopesFilter || null,
+        organizations: organizationsFilter || null,
         search: searchFilter || null,
         sortBy: sortByOption || null,
         order: sortByOrder || null,
@@ -66,6 +72,8 @@ export const useQuerySettings = (
 
       const hasChanged = (
         prevSettings.roles !== newQuerySettings.roles
+        || prevSettings.scopes !== newQuerySettings.scopes
+        || prevSettings.organizations !== newQuerySettings.organizations
         || prevSettings.search !== newQuerySettings.search
         || prevSettings.pageSize !== newQuerySettings.pageSize
         || prevSettings.pageIndex !== newQuerySettings.pageIndex

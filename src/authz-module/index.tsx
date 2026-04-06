@@ -6,6 +6,7 @@ import LoadingPage from '@src/components/LoadingPage';
 import LibrariesErrorFallback from '@src/authz-module/libraries-manager/ErrorPage';
 import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
 import { LibrariesTeamManager, LibrariesUserManager, LibrariesLayout } from './libraries-manager';
+import AuditUserPage from './audit-user';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -21,6 +22,10 @@ const AuthZModule = () => (
                 <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<LibrariesTeamManager />} />
                 <Route path={ROUTES.LIBRARIES_USER_PATH} element={<LibrariesUserManager />} />
               </Route>
+              <Route
+                path={ROUTES.AUDIT_USER_PATH}
+                element={<AuditUserPage />}
+              />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
