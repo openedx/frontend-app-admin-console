@@ -5,7 +5,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Toast } from '@openedx/paragon';
 import messages from './messages';
-import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from './constants';
+import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '../constants';
 
 type ToastType = 'success' | 'error' | 'error-retry';
 

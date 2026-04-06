@@ -41,8 +41,8 @@ export const useQuerySettings = (
   const handleTableFetch = useCallback((tableFilters: DataTableFilters) => {
     setQuerySettings((prevSettings) => {
       // Extract filters
-      const rolesFilter = tableFilters.filters.find((filter) => filter.id === 'roles')?.value?.join(',') ?? '';
-      const searchFilter = tableFilters.filters.find((filter) => filter.id === 'username')?.value ?? '';
+      const rolesFilter = tableFilters.filters?.find((filter) => filter.id === 'roles')?.value?.join(',') ?? '';
+      const searchFilter = tableFilters.filters?.find((filter) => filter.id === 'username')?.value ?? '';
 
       // Extract pagination
       const { pageSize = 10, pageIndex = 0 } = tableFilters;
@@ -50,9 +50,9 @@ export const useQuerySettings = (
       // Extract and convert sorting
       let sortByOption = '';
       let sortByOrder = '';
-      if (tableFilters.sortBy.length) {
-        sortByOption = tableFilters.sortBy[0].id.replace(/([A-Z])/g, '_$1').toLowerCase();
-        sortByOrder = tableFilters.sortBy[0].desc ? SortOrderKeys.DESC : SortOrderKeys.ASC;
+      if (tableFilters.sortBy?.length) {
+        sortByOption = tableFilters.sortBy[0]?.id.replace(/([A-Z])/g, '_$1').toLowerCase();
+        sortByOrder = tableFilters.sortBy[0]?.desc ? SortOrderKeys.DESC : SortOrderKeys.ASC;
       }
 
       const newQuerySettings: QuerySettings = {
