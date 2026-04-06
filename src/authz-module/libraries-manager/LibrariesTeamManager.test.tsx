@@ -2,11 +2,11 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { useLibrary, useUpdateLibrary } from '@src/authz-module/data/hooks';
+import { useLibrary } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
 import { ToastManagerProvider } from './ToastManagerContext';
-import { CONTENT_LIBRARY_PERMISSIONS } from './constants';
+import { CONTENT_LIBRARY_PERMISSIONS } from '../constants';
 
 jest.mock('./context', () => {
   const actual = jest.requireActual('./context');
@@ -21,7 +21,6 @@ const mockedUseLibraryAuthZ = useLibraryAuthZ as jest.Mock;
 
 jest.mock('@src/authz-module/data/hooks', () => ({
   useLibrary: jest.fn(),
-  useUpdateLibrary: jest.fn(),
 }));
 
 jest.mock('./components/TeamTable', () => ({
@@ -57,7 +56,6 @@ describe('LibrariesTeamManager', () => {
     org: 'Test Org',
     allowPublicRead: false,
   };
-  const mutate = jest.fn();
   const libraryAuthZContext = {
     libraryId: libraryData.id,
     libraryName: libraryData.title,
@@ -90,10 +88,6 @@ describe('LibrariesTeamManager', () => {
 
     (useLibrary as jest.Mock).mockReturnValue({
       data: libraryData,
-    });
-    (useUpdateLibrary as jest.Mock).mockReturnValue({
-      mutate,
-      isPending: false,
     });
   });
 

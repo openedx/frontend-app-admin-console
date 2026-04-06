@@ -47,6 +47,13 @@ export type PermissionMetadata = {
   description?: string;
 };
 
+export type UserRole = {
+  role: string;
+  organization: string;
+  scope: string;
+  permissions: string[];
+};
+
 // Permissions Matrix
 
 export type EnrichedPermission = PermissionMetadata & {

@@ -5,7 +5,7 @@ import { useValidateUserPermissions } from '@src/data/hooks';
 import { renderWrapper } from '@src/setupTest';
 import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { CustomErrors } from '@src/constants';
-import { CONTENT_LIBRARY_PERMISSIONS } from './constants';
+import { CONTENT_LIBRARY_PERMISSIONS } from '../constants';
 import { LibraryAuthZProvider, useLibraryAuthZ } from './context';
 
 jest.mock('react-router-dom', () => ({
