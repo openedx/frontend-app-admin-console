@@ -6,6 +6,7 @@ import LoadingPage from '@src/components/LoadingPage';
 import LibrariesErrorFallback from '@src/authz-module/libraries-manager/ErrorPage';
 import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
 import { LibrariesTeamManager, LibrariesUserManager, LibrariesLayout } from './libraries-manager';
+import AssignRoleWizardPage from './wizard/AssignRoleWizardPage';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -21,6 +22,7 @@ const AuthZModule = () => (
                 <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<LibrariesTeamManager />} />
                 <Route path={ROUTES.LIBRARIES_USER_PATH} element={<LibrariesUserManager />} />
               </Route>
+              <Route path={ROUTES.ASSIGN_ROLE_WIZARD_PATH} element={<AssignRoleWizardPage />} />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
