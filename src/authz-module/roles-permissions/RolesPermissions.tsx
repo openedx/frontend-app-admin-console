@@ -4,7 +4,7 @@ import {
   Alert,
   Button,
   ButtonGroup,
-  Container, Hyperlink, Skeleton,
+  Container, Hyperlink,
 } from '@openedx/paragon';
 
 import AnchorButton from '../components/AnchorButton';
@@ -62,46 +62,40 @@ const RolesPermissions = () => {
       </Container>
       {/* Courses */}
       { active === 'courses' && (
-        !CoursePermissionsByResource ? <Skeleton count={2} height={200} />
-          : (
-            <div className="position-relative">
-              <PermissionTable
-                permissionsTable={CoursePermissionsByResource}
-                roles={rolesObject}
-                title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab.title'])}
-              />
-              <Alert
-                variant="info"
-                className="mt-5"
-              >
-                <div className="row align-items-center">
-                  <div className="col col-7">
-                    <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.title'])}</p>
-                    <span>
-                      <span className="font-weight-bold">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.note'])}</span>
-                      {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.description'])}
-                    </span>
-                  </div>
-                  <div className="col col-5">
-                    <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
-                      {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.link'])}
-                    </Hyperlink>
-                  </div>
-                </div>
-              </Alert>
+        <div className="position-relative">
+          <PermissionTable
+            permissionsTable={CoursePermissionsByResource}
+            roles={rolesObject}
+            title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab.title'])}
+          />
+          <Alert
+            variant="info"
+            className="mt-5"
+          >
+            <div className="row align-items-center">
+              <div className="col col-7">
+                <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.title'])}</p>
+                <span>
+                  <span className="font-weight-bold">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.note'])}</span>
+                  {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.description'])}
+                </span>
+              </div>
+              <div className="col col-5">
+                <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
+                  {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.link'])}
+                </Hyperlink>
+              </div>
             </div>
-          )
+          </Alert>
+        </div>
       )}
       {/*  Libraries */}
       { active === 'libraries' && (
-        !libraryPermissionsByResource ? <Skeleton count={2} height={200} />
-          : (
-            <PermissionTable
-              permissionsTable={libraryPermissionsByResource}
-              roles={rolesLibraryObject}
-              title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab.title'])}
-            />
-          )
+        <PermissionTable
+          permissionsTable={libraryPermissionsByResource}
+          roles={rolesLibraryObject}
+          title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab.title'])}
+        />
       )}
       <AnchorButton />
     </Container>
