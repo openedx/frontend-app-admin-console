@@ -32,12 +32,14 @@ export interface RoleMetadata {
 export interface Role extends RoleMetadata {
   userCount: number;
   permissions: string[];
+  disabled?: boolean;
 }
 
 export type ResourceMetadata = {
   key: string;
   label: string;
   description: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 export type PermissionMetadata = {
