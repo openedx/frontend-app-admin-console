@@ -91,7 +91,7 @@ export const validateUsers = async (
   data: ValidateUsersRequest,
 ): Promise<ValidateUsersResponse> => {
   const res = await getAuthenticatedHttpClient().post(
-    getApiUrl('/api/authz/v1/users/validate'),
+    getApiUrl('/api/authz/v1/users/validate/'),
     data,
   );
   return camelCaseObject(res.data);

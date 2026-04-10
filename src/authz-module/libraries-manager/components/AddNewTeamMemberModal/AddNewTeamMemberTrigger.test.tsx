@@ -1,18 +1,20 @@
-import React, { act } from 'react';
+import { act } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
-import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { useAssignTeamMembersRole, useValidateUsers } from '@src/authz-module/data/hooks';
 import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
 
 jest.mock('@edx/frontend-platform/logging');
 
 const mockMutate = jest.fn();
+const mockMutateAsync = jest.fn();
 
 // Mock the hooks module
 jest.mock('@src/authz-module/data/hooks', () => ({
   useAssignTeamMembersRole: jest.fn(),
+  useValidateUsers: jest.fn(),
 }));
 
 jest.mock('./AddNewTeamMemberModal', () => {
@@ -54,11 +56,16 @@ describe('AddNewTeamMemberTrigger', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMutateAsync.mockResolvedValue({ validUsers: [], invalidUsers: [] });
     (useAssignTeamMembersRole as jest.Mock).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
       isError: false,
       isSuccess: false,
+    } as any);
+    (useValidateUsers as jest.Mock).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
     } as any);
   });
 
@@ -109,7 +116,7 @@ describe('AddNewTeamMemberTrigger', () => {
     await user.selectOptions(roleSelect, 'editor');
     await user.click(saveButton);
 
-    expect(mockMutate).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledWith(
       {
         data: {
           users: ['alice@example.com', 'bob@example.com'],
@@ -120,7 +127,7 @@ describe('AddNewTeamMemberTrigger', () => {
       expect.objectContaining({
         onSuccess: expect.any(Function),
       }),
-    );
+    ));
   });
 
   it('displays success toast and closes modal on successful addition with no errors', async () => {
@@ -130,10 +137,14 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'alice@example.com, bob@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
-    // Simulate successful response with no errors
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
+
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [
@@ -157,10 +168,14 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'alice@example.com, unknown@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
-    // Simulate partial success response
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
+
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [
@@ -231,10 +246,14 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'unknown1@example.com, unknown2@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
-    // Simulate all failed response
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
+
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [],
@@ -259,8 +278,13 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'unknown@example.com, already@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
+
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
 
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
@@ -294,7 +318,8 @@ describe('AddNewTeamMemberTrigger', () => {
     await user.selectOptions(roleSelect, 'editor');
     await user.click(saveButton);
 
-    // Simulate successful response with no errors
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
+
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [{ userIdentifier: 'alice@example.com', status: 'role_added' }],
@@ -318,10 +343,14 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'alice@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
-    // Simulate successful response
+    await waitFor(() => expect(mockMutate).toHaveBeenCalled());
+
     const [, { onSuccess }] = mockMutate.mock.calls[0];
     onSuccess({
       completed: [{ userIdentifier: 'alice@example.com', status: 'role_added' }],
@@ -361,6 +390,9 @@ describe('AddNewTeamMemberTrigger', () => {
     const triggerButton = screen.getByRole('button', { name: /assign role/i });
     await user.click(triggerButton);
 
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    await user.type(usersInput, 'alice@example.com');
+
     const saveButton = screen.getByRole('button', { name: 'Save team member' });
     await user.click(saveButton);
 
@@ -382,6 +414,38 @@ describe('AddNewTeamMemberTrigger', () => {
 
     // Ensure mutate was called twice (original + retry)
     expect(mockMutate).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows error toast and highlights invalid users when validation finds unknown users', async () => {
+    const user = userEvent.setup();
+
+    mockMutateAsync.mockResolvedValue({ validUsers: [], invalidUsers: ['unknown@example.com'] });
+
+    renderWrapper(<ToastManagerProvider><AddNewTeamMemberTrigger libraryId={mockLibraryId} /></ToastManagerProvider>);
+
+    const triggerButton = screen.getByRole('button', { name: /assign role/i });
+    await user.click(triggerButton);
+
+    const usersInput = screen.getByRole('textbox', { name: 'Enter user emails or usernames' });
+    const roleSelect = screen.getByRole('combobox', { name: 'Select role' });
+    const saveButton = screen.getByRole('button', { name: 'Save team member' });
+
+    await user.type(usersInput, 'unknown@example.com');
+    await user.selectOptions(roleSelect, 'editor');
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/We couldn't find a user for 1 email address or username/)).toBeInTheDocument();
+    });
+
+    // assignTeamMembersRole should NOT have been called
+    expect(mockMutate).not.toHaveBeenCalled();
+
+    // Modal should remain open
+    expect(screen.getByRole('dialog', { name: 'assign role' })).toBeInTheDocument();
+
+    // Input should be updated to show only invalid users
+    expect(usersInput).toHaveValue('unknown@example.com');
   });
 
   it('displays loading state when adding team member', async () => {
@@ -438,7 +502,7 @@ describe('AddNewTeamMemberTrigger', () => {
       expect(loadingIndicator).toHaveTextContent('Loading...');
     });
 
-    expect(mutateMock).toHaveBeenCalledWith(
+    await waitFor(() => expect(mutateMock).toHaveBeenCalledWith(
       {
         data: {
           users: ['alice@example.com'],
@@ -447,6 +511,6 @@ describe('AddNewTeamMemberTrigger', () => {
         },
       },
       expect.any(Object),
-    );
+    ));
   });
 });

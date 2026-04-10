@@ -4,7 +4,7 @@ import { Button, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
 import { PutAssignTeamMembersRoleResponse } from 'authz-module/data/api';
-import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
+import { useAssignTeamMembersRole, useValidateUsers } from '@src/authz-module/data/hooks';
 import { RoleOperationErrorStatus } from '@src/authz-module/constants';
 import { AppToast, useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import { DEFAULT_TOAST_DELAY } from '@src/authz-module/libraries-manager/constants';
@@ -28,7 +28,9 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
   const [isError, setIsError] = useState(false);
   const [errorUsers, setErrorUsers] = useState<string[]>([]);
 
-  const { mutate: assignTeamMembersRole, isPending } = useAssignTeamMembersRole();
+  const { mutate: assignTeamMembersRole, isPending: isAssigning } = useAssignTeamMembersRole();
+  const { mutateAsync: validateUsersAsync, isPending: isValidating } = useValidateUsers();
+  const isPending = isAssigning || isValidating;
   const {
     showToast, showErrorToast, Bold, Br,
   } = useToastManager();
@@ -128,7 +130,7 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
     };
   };
 
-  const handleAddTeamMember = () => {
+  const handleAddTeamMember = async () => {
     const normalizedUsers = [...new Set(
       formValues.users
         .split(',')
@@ -136,8 +138,37 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
         .filter(Boolean),
     )];
 
+    let usersToAssign = normalizedUsers;
+
+    try {
+      const { invalidUsers } = await validateUsersAsync({ data: { users: normalizedUsers } });
+
+      if (invalidUsers.length > 0) {
+        const notFoundMessage = intl.formatMessage(
+          messages['libraries.authz.manage.add.member.failure.not.found'],
+          {
+            count: invalidUsers.length,
+            userIds: invalidUsers.join(', '),
+            Bold,
+            Br,
+          },
+        );
+        showToast({ message: notFoundMessage, type: 'error', delay: DEFAULT_TOAST_DELAY });
+        setErrorUsers(invalidUsers);
+        setIsError(true);
+        setFormValues((prev) => ({ ...prev, users: invalidUsers.join(', ') }));
+        return;
+      }
+
+      usersToAssign = normalizedUsers.filter((u) => !invalidUsers.includes(u));
+    } catch (validationError) {
+      // If validation endpoint fails, fall through and let assignTeamMembersRole handle errors
+    }
+
+    if (usersToAssign.length === 0) { return; }
+
     const payload = {
-      users: normalizedUsers,
+      users: usersToAssign,
       role: formValues.role,
       scope: libraryId,
     };
@@ -167,7 +198,7 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
               ...roleAlreadyAssignedUsers.map(r => r.userIdentifier),
             ];
 
-            const errorUserIds = normalizedUsers.filter((user) => !successUserIds.includes(user));
+            const errorUserIds = usersToAssign.filter((user) => !successUserIds.includes(user));
             setErrorUsers(errorUserIds);
             setIsError(true);
             setFormValues((prev) => ({

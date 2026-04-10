@@ -112,7 +112,7 @@ describe('validateUsers', () => {
     const result = await validateUsers({ users: ['jdoe', 'unknown'] });
 
     expect(mockPost).toHaveBeenCalledWith(
-      'http://localhost:8000/api/authz/v1/users/validate',
+      'http://localhost:8000/api/authz/v1/users/validate/',
       { users: ['jdoe', 'unknown'] },
     );
     expect(result).toEqual(mockResponse);
