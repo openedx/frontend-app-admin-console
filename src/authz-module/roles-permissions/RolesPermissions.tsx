@@ -20,7 +20,7 @@ const RolesPermissions = () => {
   const intl = useIntl();
   const [active, setActive] = useState('courses');
 
-  const [libraryPermissionsByResource] = useMemo(() => {
+  const libraryPermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
       roles: rolesLibraryObject,
       permissions: libraryPermissions,
@@ -28,10 +28,10 @@ const RolesPermissions = () => {
       intl,
     });
 
-    return [permissionsByResource];
+    return permissionsByResource;
   }, [intl]);
 
-  const [CoursePermissionsByResource] = useMemo(() => {
+  const coursePermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
       roles: rolesObject,
       permissions: coursePermissions,
@@ -39,7 +39,7 @@ const RolesPermissions = () => {
       intl,
     });
 
-    return [permissionsByResource];
+    return permissionsByResource;
   }, [intl]);
 
   return (
@@ -64,7 +64,7 @@ const RolesPermissions = () => {
       { active === 'courses' && (
         <div className="position-relative">
           <PermissionTable
-            permissionsTable={CoursePermissionsByResource}
+            permissionsTable={coursePermissionsByResource}
             roles={rolesObject}
             title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab.title'])}
           />

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Check, Close } from '@openedx/paragon/icons';
 import {
@@ -27,7 +28,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
             {roles.map(role => (
               <th
                 key={role.name}
-                className={`text-center py-3 sticky-top bg-white ${role.disabled && 'text-gray-200'}`}
+                className={`text-center py-3 sticky-top bg-white ${role.disabled ? 'text-gray-200' : ''}`}
               >
                 {role.disabled ? (
                   <OverlayTrigger
@@ -52,7 +53,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
         </thead>
         <tbody>
           {permissionsTable.map(resourceGroup => (
-            <>
+            <React.Fragment key={resourceGroup.key}>
               <tr className="bg-info-100 text-primary">
                 <td colSpan={roles.length + 1} className="text-start py-3 px-4">
                   <div className="d-flex align-items-center">
@@ -69,7 +70,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                     {permission.label}
                   </td>
                   {roles.map(role => (
-                    <td key={role.name} className={`text-center ${role.disabled && 'text-gray-200'}`}>
+                    <td key={role.name} className={`text-center ${role.disabled ? 'text-gray-200' : ''}`}>
                       {
                       permission.roles[role.name]
                         ? (
@@ -101,7 +102,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                   ))}
                 </tr>
               ))}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>

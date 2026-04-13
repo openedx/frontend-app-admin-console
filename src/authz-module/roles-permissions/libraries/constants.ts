@@ -49,15 +49,19 @@ export const libraryResourceTypes: ResourceMetadata[] = [
 
 export const libraryPermissions: PermissionMetadata[] = [
   { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY, resource: 'library', description: 'View content, search, filter, and sort within the library.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS, resource: 'library', description: 'Add or remove tags from content.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY, resource: 'library', description: 'Allows the user to delete the library and all its contents.' },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS, resource: 'library', description: 'Add or remove tags from content.', label: 'Manage Tags',
+  },
+  { key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT, resource: 'library', description: 'Allows the user to publish the library and all its contents.' },
 
   { key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT, resource: 'library_content', description: 'Create content within the library.' },
   { key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT, resource: 'library_content', description: 'Edit content in draft mode' },
   { key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT, resource: 'library_content', description: 'Delete content within the library.' },
   { key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT, resource: 'library_content', description: 'Publish content, making it available for reuse' },
   { key: CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT, resource: 'library_content', description: 'Reuse published content within a course.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT, resource: 'library_content', description: 'Import content from courses.' },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT, resource: 'library_content', description: 'Import content from courses.', label: 'Import Content from Course',
+  },
 
   { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, resource: 'library_team', description: 'View the list of users who have access to the library.' },
   { key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },

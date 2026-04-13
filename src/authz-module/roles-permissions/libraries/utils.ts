@@ -26,16 +26,14 @@ import actionMessages from '../../components/RoleCard/messages';
 const getPermissionMetadata = (permission: PermissionMetadata, intl: IntlShape): EnrichedPermission => {
   const actionKey = actionKeys.find(action => permission.key.includes(action)) || '';
   let messageKey = `authz.permissions.actions.${actionKey}`;
-  let messageResource = '';
 
-  if (actionKey === 'tag' || actionKey === 'team') {
+  if (actionKey === 'team') {
     messageKey = 'authz.permissions.actions.manage';
-    messageResource = actionKey === 'tag' ? 'Tags' : '';
   }
 
   const messageDescriptor = actionMessages[messageKey];
   const label = permission.label || (messageDescriptor
-    ? intl.formatMessage(messageDescriptor, { resource: messageResource })
+    ? intl.formatMessage(messageDescriptor, { resource: '' })
     : permission.key);
 
   return { ...permission, label, actionKey };
