@@ -11,98 +11,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount } from '@src/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
-import { RoleCell } from '@src/authz-module/components/TableCells';
+import {
+  OrgCell, RoleCell, ScopeCell, PermissionsCell, ViewAllPermissionsCell, ActionsCell,
+} from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import messages from './messages';
-import { ViewAllPermissionsCell, ActionsCell, PermissionsCell } from './CustomCells';
-
-const dummyData = [
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Super Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Global Staff',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-  {
-    role: 'Course Admin',
-    organization: 'edX',
-    scope: 'Course: Demo Course',
-    permissions: ['View', 'Edit', 'Delete'],
-  },
-  {
-    role: 'Course Auditor',
-    organization: 'edX',
-    scope: 'Course: Demo Course 2',
-    permissions: ['View', 'Edit'],
-  },
-];
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
@@ -111,7 +25,7 @@ const AuditUserPage = () => {
   const { isLoading: isLoadingUser, data: user } = useUserAccount(username ?? '');
   const { querySettings, handleTableFetch } = useQuerySettings();
   // TODO: use actual assigned roles data when API is ready, currently using dummy data for development purpose
-  const { data: _userAssignedRoles } = useUserAssignedRoles(username ?? '', querySettings);
+  const { data: { results: userAssignments } = { results: [] } } = useUserAssignedRoles(username ?? '', querySettings);
   const authzHomePath = '/authz';
   if (!user && !isLoadingUser) {
     navigate(authzHomePath);
@@ -142,11 +56,13 @@ const AuditUserPage = () => {
     },
     {
       Header: formatMessage(messages['authz.user.table.organization.column.header']),
-      accessor: 'organization',
+      accessor: 'org',
+      Cell: OrgCell,
     },
     {
       Header: formatMessage(messages['authz.user.table.scope.column.header']),
       accessor: 'scope',
+      Cell: ScopeCell,
       disableFilters: true,
     },
     {
@@ -156,7 +72,7 @@ const AuditUserPage = () => {
       disableSortBy: true,
     },
   ];
-  const pageCount = dummyData?.length ? Math.ceil(dummyData.length / TABLE_DEFAULT_PAGE_SIZE) : 1;
+  const pageCount = userAssignments?.length ? Math.ceil(userAssignments.length / TABLE_DEFAULT_PAGE_SIZE) : 1;
 
   const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
 
@@ -182,9 +98,9 @@ const AuditUserPage = () => {
           <DataTable
             isPaginated
             manualPagination
-            data={dummyData}
+            data={userAssignments}
             fetchData={fetchData}
-            itemCount={dummyData?.length || 0}
+            itemCount={userAssignments?.length || 0}
             pageCount={pageCount}
             initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
             additionalColumns={additionalColumns}

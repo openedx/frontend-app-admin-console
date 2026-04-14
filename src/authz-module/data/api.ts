@@ -22,9 +22,11 @@ export interface GetTeamMembersResponse {
   count: number;
 }
 
-export interface GetUserRolesResponse {
+export interface GetUserAssignmentsResponse {
   results: UserRole[];
   count: number;
+  next: string | null;
+  previous: string | null;
 }
 
 export type RevokeUserRolesRequest = {
@@ -79,13 +81,6 @@ export interface GetScopesResponse {
   next: string | null;
   previous: string | null;
   results:Array<Scope>;
-}
-
-export interface GetUserAssignmentsResponse {
-  results: UserRole[];
-  count: number;
-  next: string | null;
-  previous: string | null;
 }
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
