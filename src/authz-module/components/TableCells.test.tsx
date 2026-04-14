@@ -9,8 +9,8 @@ import {
   OrgCell,
   ScopeCell,
   PermissionsCell,
-  ActionsCell,
   ViewAllPermissionsCell,
+  createActionsCell,
 } from './TableCells';
 
 // TODO: remove console.log mocks and implement actual logic for these cells, then update tests accordingly
@@ -481,56 +481,75 @@ describe('TableCells Components', () => {
     });
   });
 
-  describe('ActionsCell', () => {
-    const mockRow = {
+  describe('createActionsCell', () => {
+    const mockOnClickDeleteButton = jest.fn();
+    const baseRow = {
       original: {
-        role: 'library_admin', id: '123', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+        role: 'library_admin',
+        org: 'Test Org',
+        scope: 'Test Scope',
+        permissionCount: 1,
       },
     };
 
-    it('renders a delete button', () => {
-      const props = {
-        row: mockRow,
-        column: { id: 'actions' },
-      };
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-      renderWrapper(<ActionsCell {...props} />);
+    it('renders a delete button and calls onClickDeleteButton when clicked', async () => {
+      const user = userEvent.setup();
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: false,
+      });
+      renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
 
       const deleteButton = screen.getByRole('button', { name: /delete role action/i });
       expect(deleteButton).toBeInTheDocument();
-    });
 
-    it('calls handleDelete when delete button is clicked', async () => {
-      const user = userEvent.setup();
-      const props = {
-        row: mockRow,
-        column: { id: 'actions' },
-      };
-
-      renderWrapper(<ActionsCell {...props} />);
-
-      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
       await user.click(deleteButton);
-      // TODO: replace console.log with actual delete logic and update this test accordingly
-      // eslint-disable-next-line no-console
-      expect(console.log).toHaveBeenCalledWith('Delete clicked for row:', mockRow);
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ role: 'library_admin', scope: 'Test Scope' });
     });
 
-    it('handles keyboard interaction for delete button', async () => {
-      const user = userEvent.setup();
-      const props = {
-        row: mockRow,
-        column: { id: 'actions' },
+    it('renders a disabled button for admin roles when isUserAuthenticatedPage is true', () => {
+      const adminRow = {
+        original: {
+          role: 'course_admin',
+          org: 'Test Org',
+          scope: 'Test Scope',
+          permissionCount: 1,
+        },
       };
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: true,
+      });
+      renderWrapper(<CustomActionsCell row={adminRow} column={{ id: 'actions' }} />);
 
-      renderWrapper(<ActionsCell {...props} />);
+      const button = screen.getByRole('button', { name: /delete role action/i });
+      expect(button).toBeDisabled();
+    });
 
-      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
-      deleteButton.focus();
-      await user.keyboard('{Enter}');
-      // TODO: replace console.log with actual delete logic and update this test accordingly
-      // eslint-disable-next-line no-console
-      expect(console.log).toHaveBeenCalledWith('Delete clicked for row:', mockRow);
+    it('renders info icon with tooltip for Django managed roles', async () => {
+      const djangoRow = {
+        original: {
+          role: 'django.superuser',
+          org: 'Test Org',
+          scope: 'Test Scope',
+          permissionCount: 1,
+        },
+      };
+      const user = userEvent.setup();
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: true,
+      });
+      renderWrapper(<CustomActionsCell row={djangoRow} column={{ id: 'actions' }} />);
+
+      const infoIcon = screen.getByRole('img', { hidden: true });
+      expect(infoIcon).toBeInTheDocument();
+      await user.hover(infoIcon);
+      expect(screen.getByText(/Please go to Django Admin to manage it/i)).toBeInTheDocument();
     });
   });
 

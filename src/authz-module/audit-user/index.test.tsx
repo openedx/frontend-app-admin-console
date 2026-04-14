@@ -1,9 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { AppContext } from '@edx/frontend-platform/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
 import AuditUserPage from './index';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -40,23 +42,43 @@ const renderWithRouter = (route = '/audit/johndoe') => {
     },
   });
 
+  const mockAppContext = {
+    authenticatedUser: {
+      username: 'testuser',
+      email: 'testuser@example.com',
+    },
+    config: {
+      // @ts-ignore
+      ...process.env,
+    },
+  };
+
   return render(
-    <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en">
-        <MemoryRouter initialEntries={[route]}>
-          <Routes>
-            <Route path="/audit/:username" element={<AuditUserPage />} />
-            <Route path="/authz" element={<div>Home Page</div>} />
-          </Routes>
-        </MemoryRouter>
-      </IntlProvider>
-    </QueryClientProvider>,
+    <AppContext.Provider value={mockAppContext}>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <ToastManagerProvider>
+            <MemoryRouter initialEntries={[route]}>
+              <Routes>
+                <Route path="/audit/:username" element={<AuditUserPage />} />
+                <Route path="/authz" element={<div>Home Page</div>} />
+              </Routes>
+            </MemoryRouter>
+          </ToastManagerProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    </AppContext.Provider>,
   );
 };
 
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+  // @ts-ignore
+    global.logError = jest.fn();
   });
 
   it('renders user info and table when data is loaded', async () => {
@@ -183,6 +205,109 @@ describe('AuditUserPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /roles and permissions management/i })).toBeInTheDocument();
       expect(screen.getByText(mockUser.username, { selector: 'li[aria-current="page"]' })).toBeInTheDocument();
+    });
+  });
+
+  it('opens and closes the ConfirmDeletionModal when delete is clicked and cancel is pressed', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText(/remove role\?/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    });
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls onSave when confirming deletion in ConfirmDeletionModal', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+      delete: jest.fn().mockResolvedValue({ data: { errors: [] } }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+    });
+
+    const removeButton = screen.getByRole('button', { name: /remove/i });
+    await user.click(removeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(screen.getByText(/role has been successfully removed/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows the extra warning when rolesCount is 1', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({
+          data: {
+            count: 1,
+            results: [
+              {
+                id: '1',
+                role: 'library_admin',
+                org: 'Test Org',
+                scope: 'lib:test',
+                permissionCount: 5,
+              },
+            ],
+            next: null,
+            previous: null,
+          },
+        }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/this is the user's only role/i)).toBeInTheDocument();
     });
   });
 });
