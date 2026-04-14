@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
-import { ToastManagerProvider } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { ToastManagerProvider } from 'authz-module/data/context/ToastManagerContext';
 import { CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/constants';
 import TeamTable from './index';
 

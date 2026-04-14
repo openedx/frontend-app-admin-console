@@ -81,28 +81,28 @@ const messages = defineMessages({
     defaultMessage: '<Bold>Something went wrong on our end.</Bold> <Br></Br>Please try again later.',
     description: 'Libraries default error message',
   },
-  'library.authz.team.toast.500.error.message': {
-    id: 'library.authz.team.toast.500.error.message',
+  'authz.team.toast.500.error.message': {
+    id: 'authz.team.toast.500.error.message',
     defaultMessage: '<Bold>We\'re experiencing technical difficulties.</Bold> <Br></Br>Please try again later.',
-    description: 'Libraries internal server error message',
+    description: 'Internal server error message',
   },
-  'library.authz.team.toast.502.error.message': {
-    id: 'library.authz.team.toast.502.error.message',
+  'authz.team.toast.502.error.message': {
+    id: 'authz.team.toast.502.error.message',
     defaultMessage: '<Bold>We\'re having trouble connecting to our services.</Bold> <Br></Br>Please try again later.',
-    description: 'Libraries bad gateway error message',
+    description: 'Bad gateway error message',
   },
-  'library.authz.team.toast.503.error.message': {
-    id: 'library.authz.team.toast.503.error.message',
+  'authz.team.toast.503.error.message': {
+    id: 'authz.team.toast.503.error.message',
     defaultMessage: '<Bold>The service is temporarily unavailable.</Bold> <Br></Br>Please try again in a few moments.',
-    description: 'Libraries service temporary unavailable message',
+    description: 'Service temporarily unavailable message',
   },
-  'library.authz.team.toast.408.error.message': {
-    id: 'library.authz.team.toast.408.error.message',
+  'authz.team.toast.408.error.message': {
+    id: 'authz.team.toast.408.error.message',
     defaultMessage: '<Bold>The request took too long.</Bold> <Br></Br>Please check your connection and try again.',
-    description: 'Libraries request timeout message',
+    description: 'Request timeout message',
   },
-  'library.authz.team.toast.retry.label': {
-    id: 'library.authz.team.toast.retry.label',
+  'authz.team.toast.retry.label': {
+    id: 'authz.team.toast.retry.label',
     defaultMessage: 'Retry',
     description: 'Label for retry button.',
   },

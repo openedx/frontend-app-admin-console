@@ -23,7 +23,7 @@ import {
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { Role } from 'types';
-import { useToastManager } from 'authz-module/libraries-manager/ToastManagerContext';
+import { useToastManager } from '@src/authz-module/data/context/ToastManagerContext';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
 

@@ -5,7 +5,7 @@ import { renderWrapper } from '@src/setupTest';
 import LibrariesUserManager from './LibrariesUserManager';
 import { useLibraryAuthZ } from './context';
 import { useLibrary, useTeamMembers, useRevokeUserRoles } from '../data/hooks';
-import { ToastManagerProvider } from './ToastManagerContext';
+import { ToastManagerProvider } from '../data/context/ToastManagerContext';
 
 jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),

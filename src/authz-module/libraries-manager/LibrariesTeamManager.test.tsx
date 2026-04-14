@@ -5,7 +5,7 @@ import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
-import { ToastManagerProvider } from './ToastManagerContext';
+import { ToastManagerProvider } from '../data/context/ToastManagerContext';
 import { CONTENT_LIBRARY_PERMISSIONS } from '../constants';
 
 jest.mock('./context', () => {

@@ -15,12 +15,37 @@ const messages = defineMessages(
     'authz.team.toast.default.error.message': {
       id: 'authz.team.toast.default.error.message',
       defaultMessage: '<Bold>Something went wrong on our end.</Bold> <Br></Br>Please try again later.',
-      description: 'Libraries default error message',
+      description: 'Default error message',
     },
     'authz.team.remove.user.toast.success.description': {
       id: 'authz.team.remove.user.toast.success.description',
       defaultMessage: 'The {role} role has been successfully removed.{rolesCount, plural, =0 { The user no longer has access to this library and has been removed from the member list.} other {}}',
-      description: 'Libraries team management remove user toast success',
+      description: 'Team management remove user toast success',
+    },
+    'authz.team.toast.500.error.message': {
+      id: 'authz.team.toast.500.error.message',
+      defaultMessage: '<Bold>We\'re experiencing technical difficulties.</Bold> <Br></Br>Please try again later.',
+      description: 'Internal server error message',
+    },
+    'authz.team.toast.502.error.message': {
+      id: 'authz.team.toast.502.error.message',
+      defaultMessage: '<Bold>We\'re having trouble connecting to our services.</Bold> <Br></Br>Please try again later.',
+      description: 'Bad gateway error message',
+    },
+    'authz.team.toast.503.error.message': {
+      id: 'authz.team.toast.503.error.message',
+      defaultMessage: '<Bold>The service is temporarily unavailable.</Bold> <Br></Br>Please try again in a few moments.',
+      description: 'Service temporarily unavailable message',
+    },
+    'authz.team.toast.408.error.message': {
+      id: 'authz.team.toast.408.error.message',
+      defaultMessage: '<Bold>The request took too long.</Bold> <Br></Br>Please check your connection and try again.',
+      description: 'Request timeout message',
+    },
+    'authz.team.toast.retry.label': {
+      id: 'authz.team.toast.retry.label',
+      defaultMessage: 'Retry',
+      description: 'Label for retry button.',
     },
   },
 );
