@@ -1,0 +1,188 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AuditUserPage from './index';
+
+jest.mock('@edx/frontend-platform/auth', () => ({
+  getAuthenticatedHttpClient: jest.fn(),
+  configure: jest.fn(), // Add this line
+}));
+
+const mockUser = {
+  username: 'johndoe',
+  email: 'john@example.com',
+  profile_image: { has_image: false },
+};
+const mockAssignments = {
+  count: 1,
+  results: [
+    {
+      id: '1',
+      role: 'library_admin',
+      org: 'Test Org',
+      scope: 'lib:test',
+      permissionCount: 5,
+    },
+  ],
+  next: null,
+  previous: null,
+};
+
+const renderWithRouter = (route = '/audit/johndoe') => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">
+        <MemoryRouter initialEntries={[route]}>
+          <Routes>
+            <Route path="/audit/:username" element={<AuditUserPage />} />
+            <Route path="/authz" element={<div>Home Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </IntlProvider>
+    </QueryClientProvider>,
+  );
+};
+
+describe('AuditUserPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders user info and table when data is loaded', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'johndoe' })).toBeInTheDocument();
+      expect(screen.getByText('john@example.com')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /assign role/i })).toBeInTheDocument();
+      expect(screen.getByText('Library Admin')).toBeInTheDocument();
+      expect(screen.getByText('Test Org')).toBeInTheDocument();
+      expect(screen.getByText('lib:test')).toBeInTheDocument();
+      expect(screen.getByText('5 permissions available')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to home if user is not found', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: null })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Home Page')).toBeInTheDocument();
+    });
+  });
+
+  it('allows user to interact with Assign Role button', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /assign role/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const button = screen.getByRole('button', { name: /assign role/i });
+    await user.click(button);
+    expect(button).not.toBeInTheDocument();
+  });
+
+  it('renders empty state when user has no assignments', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({
+          data: {
+            count: 0, results: [], next: null, previous: null,
+          },
+        }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'johndoe' })).toBeInTheDocument();
+      expect(screen.queryByText('5 permissions available')).not.toBeInTheDocument();
+      expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+  });
+
+  it('renders correct table headers', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Role')).toBeInTheDocument();
+      expect(screen.getByText('Organization')).toBeInTheDocument();
+      expect(screen.getByText('Scope')).toBeInTheDocument();
+      expect(screen.getByText('Permissions')).toBeInTheDocument();
+      expect(screen.getByText('Actions')).toBeInTheDocument();
+    });
+  });
+
+  it('renders the pagination controls when assignments are present', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Showing 1 of 1.')).toBeInTheDocument();
+    });
+  });
+
+  it('renders the breadcrumb navigation with home link', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /roles and permissions management/i })).toBeInTheDocument();
+      expect(screen.getByText(mockUser.username, { selector: 'li[aria-current="page"]' })).toBeInTheDocument();
+    });
+  });
+});

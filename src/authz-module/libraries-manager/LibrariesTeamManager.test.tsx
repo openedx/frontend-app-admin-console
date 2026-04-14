@@ -56,7 +56,6 @@ describe('LibrariesTeamManager', () => {
     org: 'Test Org',
     allowPublicRead: false,
   };
-  const mutate = jest.fn();
   const libraryAuthZContext = {
     libraryId: libraryData.id,
     libraryName: libraryData.title,

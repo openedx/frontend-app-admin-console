@@ -5,7 +5,7 @@ import {
   Container, DataTable,
 } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
-import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount } from '@src/data/hooks';
@@ -24,16 +24,15 @@ const AuditUserPage = () => {
   const navigate = useNavigate();
   const { isLoading: isLoadingUser, data: user } = useUserAccount(username ?? '');
   const { querySettings, handleTableFetch } = useQuerySettings();
-  // TODO: use actual assigned roles data when API is ready, currently using dummy data for development purpose
   const { data: { results: userAssignments } = { results: [] } } = useUserAssignedRoles(username ?? '', querySettings);
-  const authzHomePath = '/authz';
+
   if (!user && !isLoadingUser) {
-    navigate(authzHomePath);
+    navigate(AUTHZ_HOME_PATH);
   }
   const navLinks = [
     {
       label: formatMessage(baseMessages['authz.management.home.nav.link']),
-      to: authzHomePath,
+      to: AUTHZ_HOME_PATH,
     },
   ];
   const additionalColumns = [
