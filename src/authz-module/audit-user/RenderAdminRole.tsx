@@ -14,7 +14,7 @@ const RenderAdminRole = ({ role }: RenderAdminRoleProps) => {
 
   return (
     <div className="mb-4">
-      <p className="mb-0 text-gray-700">
+      <p className="mb-0 text-primary-300 font-weight-light">
         {intl.formatMessage(messages[messageKey])}
       </p>
     </div>

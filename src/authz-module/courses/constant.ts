@@ -221,7 +221,7 @@ export const coursePermissions: PermissionMetadata[] = [
     key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_DETAILS,
     resource: 'course_schedule_details',
     description: 'See course information including the course summary, pacing, and prerequisites..',
-    label: 'View course details',
+    label: 'View details',
     icon: RemoveRedEye,
   },
   {
@@ -236,7 +236,7 @@ export const coursePermissions: PermissionMetadata[] = [
     key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GRADING_SETTINGS,
     resource: 'course_grading',
     description: 'See the grading configuration for the course, including assignment types and grading scale.',
-    label: 'View grading settings',
+    label: 'View grading',
     icon: RemoveRedEye,
   },
   {

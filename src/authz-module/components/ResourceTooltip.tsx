@@ -24,7 +24,7 @@ const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
       </Popover>
     )}
   >
-    <Icon className="d-inline-block text-gray ml-2 my-auto" size="inline" src={Info} />
+    <Icon className="d-inline-block text-gray-300 ml-2 my-auto" size="inline" src={Info} />
   </OverlayTrigger>
 );
 
