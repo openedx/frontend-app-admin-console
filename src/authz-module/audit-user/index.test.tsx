@@ -9,6 +9,9 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import AuditUserPage from './index';
+import UserPermissions from './UserPermissions';
+import {DataTable} from '@openedx/paragon';
+
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
