@@ -1,17 +1,18 @@
 import {
-  Add, Delete, DownloadDone, Edit, ManageAccounts, Sync, Tag, Visibility,
+  Add, Delete, DownloadDone, Edit, ManageAccounts, Sync, FileUpload, Visibility, FileDownload, Settings,
 } from '@openedx/paragon/icons';
 
 export const actionsDictionary = {
   create: Add,
   edit: Edit,
   delete: Delete,
-  import: Sync,
+  import: FileDownload,
   publish: DownloadDone,
   view: Visibility,
   reuse: Sync,
-  tag: Tag,
   team: ManageAccounts,
+  export: FileUpload,
+  manage: Settings,
 };
 
 export type ActionKey = keyof typeof actionsDictionary;
