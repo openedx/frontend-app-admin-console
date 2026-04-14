@@ -122,6 +122,8 @@ export const MAX_TABLE_FILTERS_APPLIED = 10;
 
 export const AUTHZ_HOME_PATH = '/authz';
 
+export const AUTHZ_HOME_PATH = '/authz';
+
 export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
   library_admin: 'Library Admin',
   library_author: 'Library Author',
