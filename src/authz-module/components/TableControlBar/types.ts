@@ -1,8 +1,3 @@
-export type FilterApplied = {
-  id: string;
-  value: string[];
-};
-
 export type FilterChoice = {
   groupName?: string;
   groupIcon?: React.ComponentType<{}>;

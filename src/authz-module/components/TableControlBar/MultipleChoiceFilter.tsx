@@ -20,19 +20,20 @@ const MultipleChoiceFilter = ({
 }: MultipleChoiceFilterProps) => {
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const { formatMessage } = useIntl();
+
   const checkedBoxes = filterValue || [];
-  const handleClickCheckbox = (value) => {
+  const handleClickCheckbox = (value, displayName) => {
     const newValue = {
       groupName: filterButtonText?.toLocaleLowerCase() || '',
       value,
-      displayName: value,
+      displayName,
     };
     if (checkedBoxes.includes(value)) {
       const newCheckedBoxes = checkedBoxes.filter((val) => val !== value);
       return setFilter(newCheckedBoxes, newValue);
     }
-    checkedBoxes.push(value);
-    return setFilter(checkedBoxes, newValue);
+    const newCheckedBoxes = [...checkedBoxes, value];
+    return setFilter(newCheckedBoxes, newValue);
   };
 
   const getGroupedChoices = () => {
@@ -81,17 +82,18 @@ const MultipleChoiceFilter = ({
           aria-label={filterButtonText}
           value={checkedBoxes}
         >
-          {/** TODO: Change for actual values  */}
-          <span className="small text-info-700 mt-2">{formatMessage(messages['authz.table.controlbar.filters.items.showing'], { current: filterChoices.length, total: filterChoices.length })}</span>
+          <span className="small text-info-700 mt-2">
+            {formatMessage(messages['authz.table.controlbar.filters.items.showing'], { current: filterChoices.length, total: filterChoices.length })}
+          </span>
           {!isGrouped ? filterChoices.map(({
             displayName, value,
           }) => (
             <Form.Checkbox
-              className="m-2"
+              className="m-2 w-100"
               key={displayName}
               checked={checkedBoxes.includes(value)}
               value={value}
-              onChange={() => handleClickCheckbox(value)}
+              onChange={() => handleClickCheckbox(value, displayName)}
               aria-label={displayName}
               disabled={checkedBoxes.includes(value) ? false : disabled}
             >
@@ -106,10 +108,10 @@ const MultipleChoiceFilter = ({
                 </div>
                 {options.map(({ displayName, value }) => (
                   <Form.Checkbox
-                    className="m-2"
+                    className="m-2 w-100"
                     key={displayName}
                     value={value}
-                    onChange={() => handleClickCheckbox(value)}
+                    onChange={() => handleClickCheckbox(value, displayName)}
                     disabled={checkedBoxes.includes(value) ? false : disabled}
                     aria-label={displayName}
                   >

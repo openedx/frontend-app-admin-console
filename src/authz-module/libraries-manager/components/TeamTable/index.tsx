@@ -12,14 +12,13 @@ import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
 import { SKELETON_ROWS } from '@src/authz-module/libraries-manager/constants';
+import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { useQuerySettings } from './hooks/useQuerySettings';
 import TableControlBar from './components/TableControlBar';
 import messages from './messages';
 import {
   ActionCell, EmailCell, NameCell, RolesCell,
 } from './components/Cells';
-
-const DEFAULT_PAGE_SIZE = 10;
 
 const TeamTable = () => {
   const intl = useIntl();
@@ -39,7 +38,7 @@ const TeamTable = () => {
   }
 
   const rows = isError ? [] : (teamMembers?.results || SKELETON_ROWS);
-  const pageCount = teamMembers?.count ? Math.ceil(teamMembers.count / DEFAULT_PAGE_SIZE) : 1;
+  const pageCount = teamMembers?.count ? Math.ceil(teamMembers.count / TABLE_DEFAULT_PAGE_SIZE) : 1;
 
   const adaptedFilterChoices = useMemo(
     () => roles.map((role) => ({
@@ -68,7 +67,7 @@ const TeamTable = () => {
       data={rows}
       itemCount={teamMembers?.count || 0}
       pageCount={pageCount}
-      initialState={{ pageSize: DEFAULT_PAGE_SIZE }}
+      initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
       additionalColumns={[
         {
           id: 'action',

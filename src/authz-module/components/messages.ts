@@ -26,10 +26,20 @@ const messages = defineMessages({
     defaultMessage: 'Clear filters',
     description: 'Button to clear all active filters in the table',
   },
+  'authz.user.table.org.all.organizations.label': {
+    id: 'authz.user.table.org.all.organizations.label',
+    defaultMessage: 'All Organizations',
+    description: 'Label for the "All Organizations" message on the user assignments table when a user has a django managed role assigned.',
+  },
   'authz.table.controlbar.search': {
     id: 'authz.table.controlbar.search',
     defaultMessage: 'Search',
     description: 'Search placeholder for two specific fields',
+  },
+  'authz.user.table.scope.global.label': {
+    id: 'authz.user.table.scope.global.label',
+    defaultMessage: 'Global',
+    description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
   },
   'authz.table.controlbar.search.by.fields': {
     id: 'authz.table.controlbar.search.by.fields',
@@ -66,6 +76,21 @@ const messages = defineMessages({
     id: 'authz.table.column.actions.view.title',
     defaultMessage: 'View',
     description: 'Team members table view action text',
+  },
+  'authz.team.members.table.group.courses': {
+    id: 'authz.team.members.table.group.courses',
+    defaultMessage: 'Courses',
+    description: 'Label for the "Courses" group in the team members table filters',
+  },
+  'authz.team.members.table.group.libraries': {
+    id: 'authz.team.members.table.group.libraries',
+    defaultMessage: 'Libraries',
+    description: 'Label for the "Libraries" group in the team members table filters',
+  },
+  'authz.team.members.table.group.global': {
+    id: 'authz.team.members.table.group.global',
+    defaultMessage: 'Global',
+    description: 'Label for the "Global" group in the team members table filters',
   },
 });
 

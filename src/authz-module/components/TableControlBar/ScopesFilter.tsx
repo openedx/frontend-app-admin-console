@@ -1,22 +1,34 @@
 import React, { useMemo } from 'react';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
+import { RESOURCE_ICONS } from '../constants';
+import messages from '../messages';
 
 type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
 
 const ScopesFilter = ({
   filterButtonText, filterValue, setFilter, disabled,
 }: ScopesFilterProps) => {
+  const { formatMessage } = useIntl();
   const [searchValue, setSearchValue] = React.useState<string | undefined>(undefined);
-  const { data: scopesData = { scopes: [] } } = useScopes(searchValue);
+  const { data: scopesData = { results: [] } } = useScopes(searchValue);
 
-  const filterChoices = useMemo(() => scopesData.scopes.map((scope) => ({
-    displayName: scope.name,
-    value: scope.key,
-    groupName: scope.organization.name,
-  })), [scopesData]);
+  const filterChoices = useMemo(() => scopesData.results.map((scope) => {
+    const scopeIcon = scope.externalKey.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
+    if (scope.externalKey.startsWith('lib')) {
+      groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
+    }
+    return {
+      displayName: scope.displayName,
+      value: scope.externalKey,
+      groupName,
+      groupIcon: scopeIcon,
+    };
+  }), [scopesData, formatMessage]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

@@ -44,8 +44,8 @@ export const useQuerySettings = (
     setQuerySettings((prevSettings) => {
       // Extract filters
       const rolesFilter = tableFilters.filters?.find((filter) => filter.id === 'role')?.value?.join(',') ?? '';
-      const searchFilter = tableFilters.filters?.find((filter) => filter.id === 'username')?.value ?? '';
-      const organizationsFilter = tableFilters.filters?.find((filter) => filter.id === 'organization')?.value?.join(',') ?? '';
+      const searchFilter = tableFilters.filters?.find((filter) => filter.id === 'name')?.value ?? '';
+      const organizationsFilter = tableFilters.filters?.find((filter) => filter.id === 'org')?.value?.join(',') ?? '';
       const scopesFilter = tableFilters.filters?.find((filter) => filter.id === 'scope')?.value?.join(',') ?? '';
 
       // Extract pagination

@@ -1,6 +1,7 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
   LibraryMetadata, Org, Scope, TeamMember,
+  UserRole,
 } from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
@@ -54,12 +55,25 @@ export interface AssignTeamMembersRoleRequest {
   scope: string;
 }
 
+export interface GetAllRoleAssignmentsResponse {
+  results: UserRole[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
 export interface GetOrgsResponse {
-  orgs: Array<Org>;
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results:Array<Org>;
 }
 
 export interface GetScopesResponse {
-  scopes: Scope[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results:Array<Scope>;
 }
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
@@ -121,9 +135,35 @@ export const revokeUserRoles = async (
   return camelCaseObject(res.data);
 };
 
+export const getAllRoleAssignments = async (querySettings: QuerySettings)
+: Promise<GetAllRoleAssignmentsResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/assignments/'));
+
+  if (querySettings.roles) {
+    url.searchParams.set('roles', querySettings.roles);
+  }
+  if (querySettings.scopes) {
+    url.searchParams.set('scopes', querySettings.scopes);
+  }
+  if (querySettings.organizations) {
+    url.searchParams.set('orgs', querySettings.organizations);
+  }
+  if (querySettings.search) {
+    url.searchParams.set('search', querySettings.search);
+  }
+  if (querySettings.sortBy && querySettings.order) {
+    url.searchParams.set('sort_by', querySettings.sortBy);
+    url.searchParams.set('order', querySettings.order);
+  }
+  url.searchParams.set('page_size', querySettings.pageSize.toString());
+  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
 export const getOrgs = async (search?: string, page?: number, pageSize?: number): Promise<GetOrgsResponse> => {
-  // TODO: verify the endpoint and response, this is expected to be used for organization filter choices
-  const url = new URL(getApiUrl('/api/authz/v1/orgs'));
+  const url = new URL(getApiUrl('/api/authz/v1/orgs/'));
   if (search !== undefined) {
     url.searchParams.set('search', search);
   }

@@ -10,12 +10,15 @@ const OrgFilter = ({
   filterButtonText, filterValue, setFilter, disabled,
 }: OrgFilterProps) => {
   const [searchValue, setSearchValue] = React.useState<string | undefined>(undefined);
-  const { data: orgsData = { orgs: [] } } = useOrgs(searchValue);
-
-  const filterChoices = useMemo(() => orgsData.orgs.map((org) => ({
+  const {
+    data: orgsData = {
+      count: 0, next: null, previous: null, results: [],
+    },
+  } = useOrgs(searchValue);
+  const filterChoices = useMemo(() => orgsData?.results?.map((org) => ({
     displayName: org.name,
-    value: org.id,
-  })), [orgsData]);
+    value: org.shortName,
+  })) || [], [orgsData]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

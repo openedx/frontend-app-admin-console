@@ -12,7 +12,6 @@ export interface TeamMember {
   username: string;
   fullName: string;
   email: string;
-  // TODO: remove when library team members get removed
   roles: string[];
   createdAt: string;
   scope: { resource: string, type: 'COURSE' | 'LIBRARY' | 'GLOBAL' };
@@ -56,13 +55,13 @@ export type PermissionMetadata = {
 export type Org = {
   id: string;
   name: string;
+  shortName: string;
 };
 
 export type Scope = {
-  key: string;
-  name: string;
-  description: string;
-  organization: Org;
+  externalKey: string;
+  displayName: string;
+  org: Org;
 };
 
 // Permissions Matrix
@@ -107,3 +106,14 @@ export type AppContextType = {
     email: string;
   };
 };
+
+export interface UserRole {
+  isSuperadmin?: boolean;
+  role: string;
+  org: string;
+  scope: string;
+  permissionCount: number;
+  fullName?: string;
+  username?: string;
+  email?: string;
+}

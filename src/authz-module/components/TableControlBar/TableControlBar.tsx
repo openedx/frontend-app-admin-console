@@ -21,7 +21,7 @@ import messages from '../messages';
 import RolesFilter from './RolesFilter';
 import OrgFilter from './OrgFilter';
 import ScopesFilter from './ScopesFilter';
-import { FilterApplied, FilterChoice } from './types';
+import { FilterChoice } from './types';
 
 const FILTER_CHIPS_ICONS = {
   role: Person,
@@ -29,12 +29,17 @@ const FILTER_CHIPS_ICONS = {
   scope: LocationOn,
 };
 
+const FILTER_GROUP_TO_ID = {
+  role: 'role',
+  organization: 'org',
+  scope: 'scope',
+};
+
 interface TableControlBarProps {
   onFilterChange?: (filters: string[]) => void;
-  initialFilters?: FilterApplied[];
 }
 
-const TableControlBar = ({ onFilterChange, initialFilters }: TableControlBarProps) => {
+const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
   const intl = useIntl();
   // applied filters in the order they were selected by the user, to display on the control bar as chips
   const [chronologicalFilters, setChronologicalFilters] = useState<FilterChoice[]>([]);
@@ -47,13 +52,12 @@ const TableControlBar = ({ onFilterChange, initialFilters }: TableControlBarProp
   } = useContext<DataTableContext>(DataTableContext);
 
   useEffect(() => {
-    if (initialFilters) {
-      const formattedInitialFilters = initialFilters.map((filter) => ({
+    if (state.filters.length > 0) {
+      const formattedInitialFilters = state.filters.map((filter) => ({
         groupName: filter.id,
         value: filter.value[0] || '',
         displayName: filter.value[0] || '',
       }));
-      setAllFilters(initialFilters);
       setChronologicalFilters(formattedInitialFilters);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,9 +83,11 @@ const TableControlBar = ({ onFilterChange, initialFilters }: TableControlBarProp
   });
 
   const handleCloseFilter = (filterName, filterValue) => {
-    const fiterGroup = state.filters.find((filter) => filter.id === filterName);
-    const newFilterValue = fiterGroup?.value.filter(item => item !== filterValue) || [];
-    setAllFilters(state.filters.map(item => (item.id !== filterName ? item : { id: item.id, value: newFilterValue })));
+    const actualFilterId = FILTER_GROUP_TO_ID[filterName] || filterName;
+    const filterGroup = state.filters.find((filter) => filter.id === actualFilterId);
+    const newFilterValue = filterGroup?.value.filter(item => item !== filterValue) || [];
+    setAllFilters(state.filters.map(item => (
+      item.id !== actualFilterId ? item : { id: item.id, value: newFilterValue })));
     setChronologicalFilters((prevFilters) => prevFilters.filter((filter) => filter.value !== filterValue));
   };
 
@@ -137,6 +143,7 @@ const TableControlBar = ({ onFilterChange, initialFilters }: TableControlBarProp
                 {...column}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
+                filterValue={state.filters.find(filter => filter.id === 'scope')?.value || null}
               />
             );
           }
@@ -159,21 +166,18 @@ const TableControlBar = ({ onFilterChange, initialFilters }: TableControlBarProp
         <Stack gap={1} direction="horizontal" className="flex-wrap mb-2">
           <span>{intl.formatMessage(messages['authz.table.controlbar.filterby.label'])}</span>
 
-            {chronologicalFilters.map((filter) => {
-              const filterValue = typeof filter.value === 'string' ? filter.value : filter.value[0] || '';
-              return (
-                <Chip
-                  key={filter.value}
-                  iconBefore={FILTER_CHIPS_ICONS[filter.groupName || '']}
-                  iconAfter={Close}
-                  onIconAfterClick={() => handleCloseFilter(filter.groupName, filter.value)}
-                >
-                  {filterValue}
-                </Chip>
-              );
-            })}
+            {chronologicalFilters.map((filter) => (
+              <Chip
+                key={filter.value}
+                iconBefore={FILTER_CHIPS_ICONS[filter.groupName || '']}
+                iconAfter={Close}
+                onIconAfterClick={() => handleCloseFilter(filter.groupName, filter.value)}
+              >
+                {filter.displayName}
+              </Chip>
+            ))}
             {chronologicalFilters.length > 1 && (
-              <Button variant="link" onClick={clearAllFilters}>
+              <Button className="py-0" variant="link" onClick={clearAllFilters}>
                 {intl.formatMessage(messages['authz.table.controlbar.clearFilters'])}
               </Button>
             )}
