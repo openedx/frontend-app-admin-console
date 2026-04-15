@@ -63,17 +63,6 @@ export type Org = {
 };
 
 export type Scope = {
-  externalKey: string;
-  displayName: string;
-  org: Org;
-};
-
-export type Org = {
-  id: string;
-  name: string;
-};
-
-export type Scope = {
   key: string;
   name: string;
   description: string;
