@@ -30,11 +30,11 @@ const AuthZModule = () => (
                 <Route path={ROUTES.LIBRARIES_TEAM_PATH} element={<LibrariesTeamManager />} />
               </Route>
               <Route index element={<AuthzHome />} />
-              <Route path="*" element={<NotFoundError />} />
               <Route
                 path={ROUTES.AUDIT_USER_PATH}
                 element={<AuditUserPage />}
               />
+              <Route path="*" element={<NotFoundError />} />
             </Routes>
           </Suspense>
         </ToastManagerProvider>

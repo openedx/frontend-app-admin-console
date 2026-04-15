@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import debounce from 'lodash.debounce';
 import {
@@ -24,11 +24,14 @@ const AuditUserPage = () => {
   const navigate = useNavigate();
   const { isLoading: isLoadingUser, data: user } = useUserAccount(username ?? '');
   const { querySettings, handleTableFetch } = useQuerySettings();
-  const { data: { results: userAssignments } = { results: [] } } = useUserAssignedRoles(username ?? '', querySettings);
+  const { isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 } } = useUserAssignedRoles(username ?? '', querySettings);
 
-  if (!user && !isLoadingUser) {
-    navigate(AUTHZ_HOME_PATH);
-  }
+  useEffect(() => {
+    if (!user && !isLoadingUser) {
+      navigate(AUTHZ_HOME_PATH);
+    }
+  }, [user, isLoadingUser, navigate]);
+
   const navLinks = [
     {
       label: formatMessage(baseMessages['authz.management.home.nav.link']),
@@ -71,7 +74,7 @@ const AuditUserPage = () => {
       disableSortBy: true,
     },
   ];
-  const pageCount = userAssignments?.length ? Math.ceil(userAssignments.length / TABLE_DEFAULT_PAGE_SIZE) : 1;
+  const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
 
   const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
 
@@ -99,11 +102,12 @@ const AuditUserPage = () => {
             manualPagination
             data={userAssignments}
             fetchData={fetchData}
-            itemCount={userAssignments?.length || 0}
+            itemCount={count}
             pageCount={pageCount}
             initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
             additionalColumns={additionalColumns}
             columns={columns}
+            isLoading={isLoadingUserAssignments}
           >
             <DataTable.Table />
             <TableFooter />

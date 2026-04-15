@@ -8,7 +8,7 @@ import AuditUserPage from './index';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
-  configure: jest.fn(), // Add this line
+  configure: jest.fn(),
 }));
 
 const mockUser = {
