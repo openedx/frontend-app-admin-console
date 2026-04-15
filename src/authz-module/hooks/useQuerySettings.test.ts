@@ -5,6 +5,8 @@ import { useQuerySettings } from './useQuerySettings';
 describe('useQuerySettings', () => {
   const defaultQuerySettings: QuerySettings = {
     roles: null,
+    scopes: null,
+    organizations: null,
     search: null,
     pageSize: 10,
     pageIndex: 0,
@@ -24,6 +26,8 @@ describe('useQuerySettings', () => {
   it('should initialize with custom initial query settings', () => {
     const customInitialSettings: QuerySettings = {
       roles: 'admin,editor',
+      scopes: null,
+      organizations: null,
       search: 'test-user',
       pageSize: 20,
       pageIndex: 2,
@@ -57,6 +61,8 @@ describe('useQuerySettings', () => {
 
     expect(result.current.querySettings).toEqual({
       roles: 'admin,editor',
+      scopes: null,
+      organizations: null,
       search: 'john',
       pageSize: 15,
       pageIndex: 1,
@@ -134,6 +140,8 @@ describe('useQuerySettings', () => {
 
     expect(result.current.querySettings).toEqual({
       roles: null,
+      scopes: null,
+      organizations: null,
       search: null,
       pageSize: 10,
       pageIndex: 0,
@@ -152,7 +160,7 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       sortBy: [],
       filters: [
-        { id: 'roles', value: [] },
+        { id: 'role', value: [] },
         { id: 'username', value: '' },
       ],
     };
@@ -163,6 +171,8 @@ describe('useQuerySettings', () => {
 
     expect(result.current.querySettings).toEqual({
       roles: null,
+      scopes: null,
+      organizations: null,
       search: null,
       pageSize: 10,
       pageIndex: 0,
@@ -181,7 +191,7 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       sortBy: [],
       filters: [
-        { id: 'roles', value: undefined },
+        { id: 'role', value: undefined },
         { id: 'username', value: undefined },
       ],
     };
@@ -192,6 +202,8 @@ describe('useQuerySettings', () => {
 
     expect(result.current.querySettings).toEqual({
       roles: null,
+      scopes: null,
+      organizations: null,
       search: null,
       pageSize: 10,
       pageIndex: 0,
@@ -281,6 +293,8 @@ describe('useQuerySettings', () => {
 
     expect(result.current.querySettings).toEqual({
       roles: 'admin,editor,viewer',
+      scopes: null,
+      organizations: null,
       search: 'test@example.com',
       pageSize: 25,
       pageIndex: 3,

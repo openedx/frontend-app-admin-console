@@ -19,6 +19,7 @@ const Footer = () => {
         variant="reduced"
         currentPage={pageIndex + 1}
         pageCount={pageCount}
+        paginationLabel="Table pagination"
         onPageSelect={(pageNum) => gotoPage(pageNum - 1)}
       />
     </TableFooter>

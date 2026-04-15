@@ -113,6 +113,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           if (Filter === RolesFilter) {
             return (
               <RolesFilter
+                key={column.id || column.accessor}
                 {...column}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
@@ -122,6 +123,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           if (Filter === OrgFilter) {
             return (
               <OrgFilter
+                key={column.id || column.accessor}
                 {...column}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
@@ -131,6 +133,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           if (Filter === MultipleChoiceFilter) {
             return (
               <MultipleChoiceFilter
+                key={column.id || column.accessor}
                 {...column}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
@@ -140,6 +143,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           if (Filter === ScopesFilter) {
             return (
               <ScopesFilter
+                key={column.id || column.accessor}
                 {...column}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
