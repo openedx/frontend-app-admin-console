@@ -1,9 +1,11 @@
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { DataTableContext, TextFilter } from '@openedx/paragon';
 import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
 import RolesFilter from './RolesFilter';
+import OrgFilter from './OrgFilter';
 
 const mockSetAllFilters = jest.fn();
 const mockOnFilterChange = jest.fn();
@@ -173,11 +175,79 @@ describe('TableControlBar', () => {
     expect(container).toBeInTheDocument();
     expect(screen.queryByText('Filter by')).not.toBeInTheDocument();
   });
-  it('handles empty columns gracefully', () => {
-    renderWithContext(<TableControlBar />);
-    const container = document.querySelector('.authz-table-control-bar');
-    expect(container).toBeInTheDocument();
-    expect(screen.queryByText('Filter by')).not.toBeInTheDocument();
+
+  it('handles closing filter chips with FILTER_GROUP_TO_ID mapping', async () => {
+    const user = userEvent.setup();
+    const mockSetAllFilters = jest.fn();
+    const contextWithOrgFilter = {
+      setAllFilters: mockSetAllFilters,
+      state: {
+        filters: [
+          { id: 'org', value: ['edx', 'mit'] },
+        ],
+      },
+      columns: [
+        {
+          id: 'org',
+          Header: 'Organization',
+          Filter: OrgFilter,
+          canFilter: true,
+          filterButtonText: 'Organization',
+          setFilter: jest.fn(),
+        },
+      ],
+    };
+
+    const initialFilters = [
+      { id: 'org', value: ['edx'] },
+    ];
+
+    renderWithContext(
+      <TableControlBar initialFilters={initialFilters} />,
+      contextWithOrgFilter,
+    );
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    await user.click(closeButton);
+
+    expect(mockSetAllFilters).toHaveBeenCalled();
+  });
+
+  it('handles closing filter chips without mapping', async () => {
+    const user = userEvent.setup();
+    const mockSetAllFilters = jest.fn();
+    const contextWithRoleFilter = {
+      setAllFilters: mockSetAllFilters,
+      state: {
+        filters: [
+          { id: 'role', value: ['admin', 'editor'] },
+        ],
+      },
+      columns: [
+        {
+          id: 'role',
+          Header: 'Role',
+          Filter: RolesFilter,
+          canFilter: true,
+          filterButtonText: 'Role',
+          setFilter: jest.fn(),
+        },
+      ],
+    };
+
+    const initialFilters = [
+      { id: 'role', value: ['admin'] },
+    ];
+
+    renderWithContext(
+      <TableControlBar initialFilters={initialFilters} />,
+      contextWithRoleFilter,
+    );
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    await user.click(closeButton);
+
+    expect(mockSetAllFilters).toHaveBeenCalled();
   });
 
   it('generates keys using column id when available', () => {
@@ -233,7 +303,6 @@ describe('TableControlBar', () => {
     };
 
     renderWithContext(<TableControlBar />, contextWithFilter);
-
     const handleSetFilters = mockSetFilter.mock.calls[0]?.[0];
     if (handleSetFilters) {
       const newFilter = { groupName: 'roles', value: 'admin', displayName: 'Admin' };
