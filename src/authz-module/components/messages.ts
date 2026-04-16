@@ -92,6 +92,11 @@ const messages = defineMessages({
     defaultMessage: 'Global',
     description: 'Label for the "Global" group in the team members table filters',
   },
+  'authz.table.controlbar.filters.more.results': {
+    id: 'authz.table.controlbar.filters.more.results',
+    defaultMessage: 'Search to show more',
+    description: 'Message displayed when there are more results available than currently shown',
+  },
 });
 
 export default messages;

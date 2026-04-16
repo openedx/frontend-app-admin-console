@@ -30,3 +30,5 @@ export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
 export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
+
+export const DEFAULT_FILTER_PAGE_SIZE = 5;

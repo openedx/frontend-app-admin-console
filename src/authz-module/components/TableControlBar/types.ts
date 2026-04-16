@@ -3,6 +3,7 @@ export type FilterChoice = {
   groupIcon?: React.ComponentType<{}>;
   displayName: string;
   value: string;
+  description?: string;
 };
 
 export interface MultipleChoiceFilterProps {

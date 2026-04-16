@@ -2,10 +2,10 @@ import {
   Dropdown, Form, Icon, Stack,
 } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { FilterList, Search } from '@openedx/paragon/icons';
+import { FilterList, Info, Search } from '@openedx/paragon/icons';
 import { useState } from 'react';
 import messages from '../messages';
-import { MultipleChoiceFilterProps } from './types';
+import { FilterChoice, MultipleChoiceFilterProps } from './types';
 
 const MultipleChoiceFilter = ({
   filterButtonText,
@@ -46,11 +46,13 @@ const MultipleChoiceFilter = ({
       groups.get(groupName)!.options.push({
         displayName: choice.displayName,
         value: choice.value,
+        description: choice.description,
       });
       return groups;
-    }, new Map<string, { groupName: string; options: Array<{ displayName: string; value: string }>; icon?: any }>());
+    }, new Map<string, { groupName: string; options: Array<FilterChoice>; icon?: any }>());
     return Array.from(groupedFilterChoices.values());
   };
+
   return (
     <Dropdown className="no-caret-dropdown filters">
       <Dropdown.Toggle variant={checkedBoxes.length > 0 ? 'primary' : 'outline-primary'}>
@@ -86,7 +88,7 @@ const MultipleChoiceFilter = ({
             {formatMessage(messages['authz.table.controlbar.filters.items.showing'], { current: filterChoices.length, total: filterChoices.length })}
           </span>
           {!isGrouped ? filterChoices.map(({
-            displayName, value,
+            displayName, value, description,
           }) => (
             <Form.Checkbox
               className="m-2 w-100"
@@ -97,7 +99,10 @@ const MultipleChoiceFilter = ({
               aria-label={displayName}
               disabled={checkedBoxes.includes(value) ? false : disabled}
             >
-              <span className="small">{displayName}</span>
+              <div className="d-flex flex-column">
+                <span className="small">{displayName}</span>
+                { description && <span className="small text-muted d-block">{description}</span> }
+              </div>
             </Form.Checkbox>
           ))
             : getGroupedChoices().map(({ groupName, icon, options }) => (
@@ -106,7 +111,7 @@ const MultipleChoiceFilter = ({
                   {icon && <Icon color="primary" src={icon} className="mr-2" size="xs" />}
                   <span>{groupName}</span>
                 </div>
-                {options.map(({ displayName, value }) => (
+                {options.map(({ displayName, value, description }) => (
                   <Form.Checkbox
                     className="m-2 w-100"
                     key={displayName}
@@ -115,13 +120,23 @@ const MultipleChoiceFilter = ({
                     disabled={checkedBoxes.includes(value) ? false : disabled}
                     aria-label={displayName}
                   >
-                    <span className="small">{displayName}</span>
+                    <div className="d-flex flex-column">
+                      <span className="small">{displayName}</span>
+                      { description && <span className="small text-muted d-block">{description}</span> }
+                    </div>
                   </Form.Checkbox>
                 ))}
               </div>
             ))}
+          { isSearchable && (
+            <div className="d-flex align-items-center justify-content-between p-2">
+              <span className="text-muted small">{formatMessage(messages['authz.table.controlbar.filters.more.results'])}</span>
+              <Icon className="text-gray-300 ml-1" src={Info} size="xs" />
+            </div>
+          )}
         </Form.CheckboxSet>
       </Dropdown.Menu>
+
     </Dropdown>
   );
 };

@@ -8,7 +8,7 @@ describe('MultipleChoiceFilter', () => {
     filterButtonText: 'Test Filter',
     filterChoices: [
       { displayName: 'Option 1', value: 'option1' },
-      { displayName: 'Option 2', value: 'option2' },
+      { displayName: 'Option 2', value: 'option2', description: 'desc' },
     ],
     filterValue: [],
     setFilter: jest.fn(),
