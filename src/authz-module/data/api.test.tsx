@@ -51,6 +51,34 @@ describe('API functions', () => {
       expect(result.count).toBe(1);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     });
+
+    it('should handle all query parameters', async () => {
+      const mockResponse = { data: { results: [], count: 0 } };
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      getAuthenticatedHttpClient.mockReturnValue({
+        get: mockGet,
+      });
+
+      const queryWithAllParams = {
+        roles: 'admin,editor',
+        search: 'test user',
+        sortBy: 'username',
+        order: 'desc' as const,
+        scopes: null,
+        organizations: null,
+        pageSize: 20,
+        pageIndex: 2,
+      };
+
+      await getTeamMembers('lib:123', queryWithAllParams);
+
+      expect(mockGet).toHaveBeenCalled();
+      const calledUrl = mockGet.mock.calls[0][0];
+      expect(calledUrl.toString()).toContain('roles=admin%2Ceditor');
+      expect(calledUrl.toString()).toContain('search=test+user');
+      expect(calledUrl.toString()).toContain('sort_by=username');
+      expect(calledUrl.toString()).toContain('order=desc');
+    });
   });
 
   describe('getUserAssignedRoles', () => {
@@ -73,6 +101,35 @@ describe('API functions', () => {
       expect(result.results).toHaveLength(1);
       expect(result.count).toBe(1);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    });
+
+    it('should handle all query parameters including organizations', async () => {
+      const mockResponse = { data: { results: [], count: 0 } };
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      getAuthenticatedHttpClient.mockReturnValue({
+        get: mockGet,
+      });
+
+      const queryWithAllParams = {
+        roles: 'admin',
+        organizations: 'edx,mit',
+        search: 'library',
+        sortBy: 'role',
+        order: 'asc' as const,
+        scopes: null,
+        pageSize: 15,
+        pageIndex: 1,
+      };
+
+      await getUserAssignedRoles('testuser', queryWithAllParams);
+
+      expect(mockGet).toHaveBeenCalled();
+      const calledUrl = mockGet.mock.calls[0][0];
+      expect(calledUrl.toString()).toContain('roles=admin');
+      expect(calledUrl.toString()).toContain('orgs=edx%2Cmit');
+      expect(calledUrl.toString()).toContain('search=library');
+      expect(calledUrl.toString()).toContain('sort_by=role');
+      expect(calledUrl.toString()).toContain('order=asc');
     });
   });
 
@@ -198,6 +255,22 @@ describe('API functions', () => {
       expect(result.count).toBe(1);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     });
+
+    it('should handle search, page, and pageSize parameters', async () => {
+      const mockResponse = { data: { results: [], count: 0 } };
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      getAuthenticatedHttpClient.mockReturnValue({
+        get: mockGet,
+      });
+
+      await getOrgs('test org', 2, 25);
+
+      expect(mockGet).toHaveBeenCalled();
+      const calledUrl = mockGet.mock.calls[0][0];
+      expect(calledUrl.toString()).toContain('search=test+org');
+      expect(calledUrl.toString()).toContain('page=2');
+      expect(calledUrl.toString()).toContain('page_size=25');
+    });
   });
 
   describe('getScopes', () => {
@@ -218,6 +291,22 @@ describe('API functions', () => {
 
       expect(result.scopes).toHaveLength(1);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    });
+
+    it('should handle search, page, and pageSize parameters', async () => {
+      const mockResponse = { data: { scopes: [] } };
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      getAuthenticatedHttpClient.mockReturnValue({
+        get: mockGet,
+      });
+
+      await getScopes('library', 3, 50);
+
+      expect(mockGet).toHaveBeenCalled();
+      const calledUrl = mockGet.mock.calls[0][0];
+      expect(calledUrl.toString()).toContain('search=library');
+      expect(calledUrl.toString()).toContain('page=3');
+      expect(calledUrl.toString()).toContain('page_size=50');
     });
   });
 });
