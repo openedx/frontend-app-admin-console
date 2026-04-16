@@ -16,6 +16,10 @@ jest.mock('@openedx/paragon', () => ({
   Tabs: ({ children }: { children: React.ReactNode }) => <div data-testid="tabs">{children}</div>,
 }));
 
+jest.mock('@src/authz-module/team-members/TeamMembersTable', () => function MockTeamMembersTable() {
+  return <div>Team Members Table Content</div>;
+});
+
 describe('AuthzHome', () => {
   it('renders without crashing', () => {
     renderWrapper(<AuthzHome />);
@@ -36,5 +40,10 @@ describe('AuthzHome', () => {
   it('renders the RolesPermissions component in the permissions tab', () => {
     renderWrapper(<AuthzHome />);
     expect(screen.getByTestId('roles-permissions')).toBeInTheDocument();
+  });
+
+  it('renders the TeamMembersTable component in the team members tab', () => {
+    renderWrapper(<AuthzHome />);
+    expect(screen.getByText('Team Members Table Content')).toBeInTheDocument();
   });
 });

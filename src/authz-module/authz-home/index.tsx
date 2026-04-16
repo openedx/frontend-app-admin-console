@@ -14,7 +14,7 @@ const AuthzHome = () => {
   const [searchParams] = useSearchParams();
   const presetScope = searchParams.get('scope') || undefined;
 
-  const rootBreadcrumb = intl.formatMessage(messages['authz.breadcrumb.root']) || '';
+  const rootBreadcrumb = intl.formatMessage(messages['authz.breadcrumb.root']);
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
 
   return (

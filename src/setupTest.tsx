@@ -5,6 +5,7 @@ import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockAppContext = {
   authenticatedUser: {
@@ -19,6 +20,29 @@ const mockAppContext = {
 interface WrapperProps {
   children: ReactNode;
 }
+
+export const renderWithAllProviders = (ui, options = {}) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  const Wrapper = ({ children }: WrapperProps) => (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppContext.Provider value={mockAppContext}>
+          <IntlProvider locale="en">
+            {children}
+          </IntlProvider>
+        </AppContext.Provider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+
+  return render(ui, { wrapper: Wrapper, ...options });
+};
 
 export const renderWrapper = (ui, options = {}) => {
   const Wrapper = ({ children }: WrapperProps) => (

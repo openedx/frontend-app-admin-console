@@ -10,6 +10,8 @@ describe('useQuerySettings', () => {
     pageIndex: 0,
     sortBy: null,
     order: null,
+    scopes: null,
+    organizations: null,
   };
 
   it('should initialize with default query settings when no initial settings provided', () => {
@@ -27,6 +29,8 @@ describe('useQuerySettings', () => {
       pageIndex: 2,
       sortBy: 'username',
       order: 'asc',
+      scopes: null,
+      organizations: null,
     };
 
     const { result } = renderHook(() => useQuerySettings(customInitialSettings));
@@ -42,8 +46,8 @@ describe('useQuerySettings', () => {
       pageIndex: 1,
       sortBy: [{ id: 'username', desc: false }],
       filters: [
-        { id: 'roles', value: ['admin', 'editor'] },
-        { id: 'username', value: 'john' },
+        { id: 'role', value: ['admin', 'editor'] },
+        { id: 'name', value: 'john' },
       ],
     };
 
@@ -58,6 +62,8 @@ describe('useQuerySettings', () => {
       pageIndex: 1,
       sortBy: 'username',
       order: 'asc',
+      scopes: null,
+      organizations: null,
     });
   });
 
@@ -133,6 +139,8 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       order: null,
       sortBy: null,
+      organizations: null,
+      scopes: null,
     });
   });
 
@@ -160,6 +168,8 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       order: null,
       sortBy: null,
+      organizations: null,
+      scopes: null,
     });
   });
 
@@ -187,6 +197,8 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       order: null,
       sortBy: null,
+      organizations: null,
+      scopes: null,
     });
   });
 
@@ -255,9 +267,11 @@ describe('useQuerySettings', () => {
       pageIndex: 3,
       sortBy: [{ id: 'userRole', desc: true }],
       filters: [
-        { id: 'roles', value: ['admin', 'editor', 'viewer'] },
-        { id: 'username', value: 'test@example.com' },
+        { id: 'role', value: ['admin', 'editor', 'viewer'] },
+        { id: 'name', value: 'test@example.com' },
         { id: 'otherFilter', value: 'ignored' }, // Should be ignored
+        { id: 'org', value: ['org1', 'org2'] },
+        { id: 'scope', value: ['scope1', 'scope2'] },
       ],
     };
 
@@ -272,6 +286,9 @@ describe('useQuerySettings', () => {
       pageIndex: 3,
       order: 'desc',
       sortBy: 'user_role',
+      organizations: 'org1,org2',
+      scopes: 'scope1,scope2',
+
     });
   });
 
@@ -310,7 +327,7 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       sortBy: [],
       filters: [
-        { id: 'username', value: '   ' }, // Whitespace only
+        { id: 'name', value: '   ' }, // Whitespace only
       ],
     };
 
@@ -330,7 +347,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'roles', value: ['admin'] }],
+        filters: [{ id: 'role', value: ['admin'] }],
       });
     });
 
@@ -342,7 +359,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'roles', value: ['editor'] }],
+        filters: [{ id: 'role', value: ['editor'] }],
       });
     });
 
@@ -359,7 +376,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'username', value: 'john' }],
+        filters: [{ id: 'name', value: 'john' }],
       });
     });
 
@@ -371,7 +388,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'username', value: 'jane' }],
+        filters: [{ id: 'name', value: 'jane' }],
       });
     });
 

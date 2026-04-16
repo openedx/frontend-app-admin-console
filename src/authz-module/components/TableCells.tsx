@@ -37,7 +37,7 @@ const NameCell = ({ row }: CellProps) => {
   return row.original.fullName || row.original.username;
 };
 
-const ActionCell = ({ row }: CellProps) => {
+const ViewActionCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const viewPath = `/authz/user/${row.original.username}`;
@@ -70,7 +70,7 @@ const ScopeCell = ({ row }: CellProps) => {
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
       scopeText: row.original.scope,
       iconSrc: scopeIcon,
@@ -92,5 +92,5 @@ const RoleCell = ({ value, cell }: ExtendedCellProps) => (
 );
 
 export {
-  NameCell, ActionCell, ScopeCell, RoleCell, OrgCell,
+  NameCell, ViewActionCell, ScopeCell, RoleCell, OrgCell,
 };

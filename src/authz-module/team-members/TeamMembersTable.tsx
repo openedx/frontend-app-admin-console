@@ -14,7 +14,7 @@ import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFil
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import { getCellHeader } from '@src/authz-module/components/utils';
 import {
-  ActionCell, NameCell, OrgCell, RoleCell, ScopeCell,
+  ViewActionCell, NameCell, OrgCell, RoleCell, ScopeCell,
 } from '@src/authz-module/components/TableCells';
 import { useAllRoleAssignments } from '@src/authz-module/data/hooks';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
@@ -30,11 +30,10 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   const { showErrorToast } = useToastManager();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
 
-  const initialQuerySettings = presetScope ? { 
-    scopes: presetScope, 
+  const initialQuerySettings = presetScope ? {
+    scopes: presetScope,
     pageSize: TABLE_DEFAULT_PAGE_SIZE,
     pageIndex: 0,
-    // Add other required QuerySettings properties with default values
     roles: null,
     organizations: null,
     search: null,
@@ -53,7 +52,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
-   useEffect(() => {
+  useEffect(() => {
     if (error) {
       showErrorToast(error, refetch);
     }
@@ -79,13 +78,13 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
         data={roleAssignments}
         itemCount={count}
         pageCount={pageCount}
-        initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE, filters: initialFilters  }}
+        initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE, filters: initialFilters }}
         isLoading={isLoadingAllRoleAssignments}
         additionalColumns={[
           {
             id: 'action',
             Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
-            Cell: ActionCell,
+            Cell: ViewActionCell,
           },
         ]}
         columns={

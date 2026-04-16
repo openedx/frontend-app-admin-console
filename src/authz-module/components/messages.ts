@@ -63,7 +63,7 @@ const messages = defineMessages({
   },
   'authz.table.footer.items.showing.text': {
     id: 'authz.table.footer.items.showing.text',
-    defaultMessage: 'Showing {pageSize} of {itemCount} users.',
+    defaultMessage: 'Showing {pageSize} of {itemCount}.',
     description: 'Message displayed when the user reaches the applied filters limit',
   },
   'authz.table.username.current': {

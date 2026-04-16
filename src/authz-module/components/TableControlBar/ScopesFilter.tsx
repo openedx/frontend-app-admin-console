@@ -17,9 +17,9 @@ const ScopesFilter = ({
   const { data: scopesData = { results: [] } } = useScopes(searchValue);
 
   const filterChoices = useMemo(() => scopesData.results.map((scope) => {
-    const scopeIcon = scope.externalKey.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
-    if (scope.externalKey.startsWith('lib')) {
+    if (scope.externalKey?.startsWith('lib')) {
       groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
     }
     return {

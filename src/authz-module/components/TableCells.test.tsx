@@ -1,0 +1,420 @@
+import { screen } from '@testing-library/react';
+import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { renderWrapper } from '@src/setupTest';
+import userEvent from '@testing-library/user-event';
+import {
+  NameCell,
+  ViewActionCell,
+  RoleCell,
+  OrgCell,
+  ScopeCell,
+} from './TableCells';
+
+const mockNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
+describe('TableCells Components', () => {
+  beforeAll(() => {
+    initializeMockApp({
+      authenticatedUser: {
+        userId: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+      },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('NameCell', () => {
+    const mockUserRole = {
+      isSuperadmin: false,
+      role: 'course_staff',
+      org: 'OpenedX',
+      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      permissionCount: 27,
+      fullName: 'John Doe',
+      username: 'johndoe',
+      email: 'johndoe@example.com',
+    };
+    const mockCellProps = {
+      row: {
+        original: mockUserRole,
+      },
+    };
+    beforeEach(() => {
+      initializeMockApp({
+        authenticatedUser: {
+          userId: 1,
+          username: 'testuser',
+          email: 'testuser@example.com',
+        },
+      });
+    });
+
+    it('displays the full name when available', () => {
+      renderWrapper(<NameCell {...mockCellProps} />);
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    it('displays username when full name is not available', () => {
+      const propsWithoutFullName = {
+        row: {
+          original: {
+            ...mockUserRole,
+            fullName: undefined,
+          },
+        },
+      };
+
+      renderWrapper(<NameCell {...propsWithoutFullName} />);
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
+    });
+
+    it('displays username when full name is empty string', () => {
+      const propsWithEmptyFullName = {
+        row: {
+          original: {
+            ...mockUserRole,
+            fullName: '',
+          },
+        },
+      };
+
+      renderWrapper(<NameCell {...propsWithEmptyFullName} />);
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
+    });
+
+    it('shows current user indicator when username matches authenticated user', () => {
+      const currentUserProps = {
+        row: {
+          original: {
+            ...mockUserRole,
+            username: 'testuser',
+            fullName: 'Test User',
+          },
+        },
+      };
+
+      renderWrapper(<NameCell {...currentUserProps} />);
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
+    });
+
+    it('does not show current user indicator when username does not match authenticated user', () => {
+      renderWrapper(<NameCell {...mockCellProps} />);
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
+    });
+
+    it('shows current user indicator with username fallback when no full name is provided', () => {
+      const currentUserPropsNoFullName = {
+        row: {
+          original: {
+            ...mockUserRole,
+            username: 'testuser',
+            fullName: undefined,
+          },
+        },
+      };
+
+      renderWrapper(<NameCell {...currentUserPropsNoFullName} />);
+      expect(screen.getByText('testuser')).toBeInTheDocument();
+      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
+    });
+
+    it('handles missing username in authenticated user gracefully', () => {
+      const contextWithoutUsername = {
+        authenticatedUser: {
+          username: undefined,
+          email: 'testuser@example.com',
+        },
+      };
+
+      renderWrapper(<NameCell {...mockCellProps} />, contextWithoutUsername);
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ViewActionCell', () => {
+    const mockUserRole = {
+      isSuperadmin: false,
+      role: 'course_staff',
+      org: 'OpenedX',
+      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      permissionCount: 27,
+      fullName: 'John Doe',
+      username: 'johndoe',
+      email: 'johndoe@example.com',
+    };
+
+    const mockCellProps = {
+      row: {
+        original: mockUserRole,
+      },
+    };
+    beforeEach(() => {
+      initializeMockApp({
+        authenticatedUser: {
+          userId: 1,
+          username: 'testuser',
+          email: 'testuser@example.com',
+        },
+      });
+      mockNavigate.mockClear();
+    });
+
+    it('renders view action button', () => {
+      renderWrapper(<ViewActionCell {...mockCellProps} />);
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      expect(viewButton).toBeInTheDocument();
+    });
+
+    it('has correct accessibility attributes', () => {
+      renderWrapper(<ViewActionCell {...mockCellProps} />);
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      expect(viewButton).toHaveAttribute('aria-label');
+    });
+
+    it('navigates to user profile when clicked', async () => {
+      const user = userEvent.setup();
+      renderWrapper(<ViewActionCell {...mockCellProps} />);
+
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      await user.click(viewButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
+    });
+
+    it('navigates with correct username for different user', async () => {
+      const user = userEvent.setup();
+      const differentUserProps = {
+        row: {
+          original: {
+            ...mockUserRole,
+            username: 'janedoe',
+          },
+        },
+      };
+
+      renderWrapper(<ViewActionCell {...differentUserProps} />);
+
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      await user.click(viewButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/janedoe');
+    });
+
+    it('handles empty username gracefully', async () => {
+      const user = userEvent.setup();
+      const emptyUsernameProps = {
+        row: {
+          original: {
+            ...mockUserRole,
+            username: '',
+          },
+        },
+      };
+
+      renderWrapper(<ViewActionCell {...emptyUsernameProps} />);
+
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      await user.click(viewButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/');
+    });
+
+    it('handles special characters in username', async () => {
+      const user = userEvent.setup();
+      const specialUsernameProps = {
+        row: {
+          original: {
+            ...mockUserRole,
+            username: 'user+with@special.chars',
+          },
+        },
+      };
+
+      renderWrapper(<ViewActionCell {...specialUsernameProps} />);
+
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      await user.click(viewButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
+    });
+  });
+
+  describe('RoleCell', () => {
+    const mockCell = {
+      getCellProps: jest.fn(() => ({ 'data-testid': 'role-cell' })),
+    };
+
+    it('renders the role label for a mapped role', () => {
+      const props = {
+        value: 'library_admin',
+        cell: mockCell,
+        row: {
+          original: {
+            role: 'library_admin', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'role' },
+      };
+
+      renderWrapper(<RoleCell {...props} />);
+
+      expect(screen.getByText('Library Admin')).toBeInTheDocument();
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'Library Admin' });
+    });
+
+    it('renders empty string for unmapped role', () => {
+      const props = {
+        value: 'unknown_role',
+        cell: mockCell,
+        row: {
+          original: {
+            role: 'unknown_role', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'role' },
+      };
+
+      renderWrapper(<RoleCell {...props} />);
+
+      const cellElement = screen.getByTestId('role-cell');
+      expect(cellElement).toHaveTextContent('');
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': '' });
+    });
+
+    it('applies cell props correctly', () => {
+      const props = {
+        value: 'course_staff',
+        cell: mockCell,
+        row: {
+          original: {
+            role: 'course_staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'role' },
+      };
+
+      renderWrapper(<RoleCell {...props} />);
+
+      expect(screen.getByText('Course Staff')).toBeInTheDocument();
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'Course Staff' });
+    });
+  });
+
+  describe('OrgCell', () => {
+    it('displays "All Organizations" for Django superuser role', () => {
+      const props = {
+        value: 'Test Org',
+        row: {
+          original: {
+            role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'org' },
+      };
+
+      renderWrapper(<OrgCell {...props} />);
+
+      expect(screen.getByText('All Organizations')).toBeInTheDocument();
+      expect(screen.queryByText('Test Org')).not.toBeInTheDocument();
+    });
+
+    it('displays "All Organizations" for Django global staff role', () => {
+      const props = {
+        value: 'Test Org',
+        row: {
+          original: {
+            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'org' },
+      };
+
+      renderWrapper(<OrgCell {...props} />);
+
+      expect(screen.getByText('All Organizations')).toBeInTheDocument();
+      expect(screen.queryByText('Test Org')).not.toBeInTheDocument();
+    });
+
+    it('displays the actual org value for non-Django roles', () => {
+      const props = {
+        value: 'Test Organization',
+        row: {
+          original: {
+            role: 'library_admin', org: 'Test Organization', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'org' },
+      };
+
+      renderWrapper(<OrgCell {...props} />);
+
+      expect(screen.getByText('Test Organization')).toBeInTheDocument();
+      expect(screen.queryByText('All Organizations')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ScopeCell', () => {
+    it('displays "Global" for Django superuser role', () => {
+      const props = {
+        value: 'library',
+        row: {
+          original: {
+            role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('Global')).toBeInTheDocument();
+      expect(screen.queryByText('library')).not.toBeInTheDocument();
+    });
+
+    it('displays "Global" for Django global staff role', () => {
+      const props = {
+        value: 'course',
+        row: {
+          original: {
+            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('Global')).toBeInTheDocument();
+      expect(screen.queryByText('course')).not.toBeInTheDocument();
+    });
+
+    it('displays the actual scope value for non-Django roles', () => {
+      const props = {
+        value: 'Course Scope',
+        row: {
+          original: {
+            role: 'course_admin', org: 'Test Org', scope: 'Course Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('Course Scope')).toBeInTheDocument();
+      expect(screen.queryByText('Global')).not.toBeInTheDocument();
+    });
+  });
+});
