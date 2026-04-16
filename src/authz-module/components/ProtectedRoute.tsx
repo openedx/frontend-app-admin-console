@@ -1,9 +1,9 @@
 // src/components/ProtectedRoute.tsx
 import { ReactElement } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import LoadingPage from 'components/LoadingPage';
-import { CustomErrors } from 'constants';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from 'authz-module/constants';
+import LoadingPage from '@src/components/LoadingPage';
+import { CustomErrors } from '@src/constants';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/constants';
 
 const REQUIRED_USER_PERMISSIONS = [
   CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,

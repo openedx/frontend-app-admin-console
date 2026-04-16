@@ -4,6 +4,8 @@ import { DataTableContext, TextFilter } from '@openedx/paragon';
 import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
 import RolesFilter from './RolesFilter';
+import ScopesFilter from './ScopesFilter';
+import MultipleChoiceFilter from './MultipleChoiceFilter';
 
 const mockSetAllFilters = jest.fn();
 const mockOnFilterChange = jest.fn();
@@ -110,6 +112,47 @@ describe('TableControlBar', () => {
 
     renderWithContext(<TableControlBar />, contextWithTextFilter);
     expect(screen.getByRole('textbox')).toBeInTheDocument();
+  });
+
+  it('renders scopes filter when configured', () => {
+    const contextWithScopesFilter = {
+      columns: [
+        {
+          id: 'scopes',
+          Header: 'Scopes',
+          Filter: ScopesFilter,
+          canFilter: true,
+          filterButtonText: 'Select Scopes',
+          setFilter: jest.fn(),
+        },
+      ],
+    };
+
+    renderWithContext(<TableControlBar />, contextWithScopesFilter);
+    expect(screen.getByText('Select Scopes')).toBeInTheDocument();
+  });
+
+  it('renders multiple choice filter when configured', () => {
+    const contextWithMultipleChoiceFilter = {
+      columns: [
+        {
+          id: 'status',
+          Header: 'Status',
+          Filter: MultipleChoiceFilter,
+          canFilter: true,
+          filterButtonText: 'Select Status',
+          setFilter: jest.fn(),
+          filterChoices: [
+            { displayName: 'Active', value: 'active' },
+            { displayName: 'Inactive', value: 'inactive' },
+          ],
+          filterValue: [],
+        },
+      ],
+    };
+
+    renderWithContext(<TableControlBar />, contextWithMultipleChoiceFilter);
+    expect(screen.getByText('Select Status')).toBeInTheDocument();
   });
 
   it('displays filter chips when filters are applied', () => {
