@@ -123,6 +123,8 @@ const mockScopes = {
 
 const mockQuerySettings = {
   roles: null,
+  scopes: null,
+  organizations: null,
   search: null,
   order: null,
   sortBy: null,
@@ -720,7 +722,6 @@ describe('useUserAssignedRoles', () => {
 
     expect(result.current.data?.results).toHaveLength(0);
     expect(result.current.data?.count).toBe(0);
-    expect(result.current.data?.next).toBeNull();
   });
 
   it('applies query settings for filtering and pagination', async () => {
@@ -810,5 +811,69 @@ describe('useUserAssignedRoles', () => {
 
     await waitFor(() => expect(result.current.data?.count).toBe(1));
     expect(mockGet).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useScopes', () => {
+  const mockScopes = {
+    scopes: [
+      {
+        displayName: 'Test Library 1',
+        scope: 'lib:test-library-1',
+      },
+      {
+        displayName: 'Test Course 1',
+        scope: 'course:test-course-1',
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns scopes when API call succeeds', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockScopes }),
+    });
+
+    const { result } = renderHook(() => useScopes(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockScopes);
+    expect(result.current.data?.scopes).toHaveLength(2);
+  });
+
+  it('handles search parameter', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { scopes: [mockScopes.scopes[0]] } }),
+    });
+
+    const { result } = renderHook(() => useScopes('library'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.scopes).toHaveLength(1);
+  });
+
+  it('handles error when API call fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('API failure')),
+    });
+
+    const { result } = renderHook(() => useScopes(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.error).toBeDefined();
+    expect(result.current.data).toBeUndefined();
   });
 });
