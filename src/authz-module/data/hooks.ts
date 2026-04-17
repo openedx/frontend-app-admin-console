@@ -187,4 +187,5 @@ export const useUserAssignedRoles = (
   queryKey: authzQueryKeys.userRoles(username, querySettings),
   queryFn: () => getUserAssignedRoles(username, querySettings),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+  refetchOnWindowFocus: false,
 });
