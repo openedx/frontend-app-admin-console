@@ -54,9 +54,9 @@ const ViewActionCell = ({ row }: CellProps) => {
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
   return (
-    <td>
+    <span>
       {DJANGO_MANAGED_ROLES.includes(row.original.role) ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
-    </td>
+    </span>
   );
 };
 
@@ -86,9 +86,9 @@ const ScopeCell = ({ row }: CellProps) => {
 };
 
 const RoleCell = ({ value, cell }: ExtendedCellProps) => (
-  <td {...cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' })}>
+  <span {...cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' })}>
     {MAP_ROLE_KEY_TO_LABEL[value] || ''}
-  </td>
+  </span>
 );
 
 export {

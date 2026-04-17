@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
 import { useScopes } from '@src/authz-module/data/hooks';
@@ -14,7 +14,7 @@ const ScopesFilter = ({
   filterButtonText, filterValue, setFilter, disabled,
 }: ScopesFilterProps) => {
   const { formatMessage } = useIntl();
-  const [searchValue, setSearchValue] = React.useState<string | undefined>(undefined);
+  const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const { data: scopesData = { results: [] } } = useScopes(searchValue, 1, DEFAULT_FILTER_PAGE_SIZE);
 
   const filterChoices = useMemo(() => scopesData.results.map((scope) => {

@@ -14,15 +14,12 @@ const AuthzHome = () => {
   const [searchParams] = useSearchParams();
   const presetScope = searchParams.get('scope') || undefined;
 
-  const rootBreadcrumb = intl.formatMessage(messages['authz.breadcrumb.root']);
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
 
   return (
-    <div className="authz-libraries">
+    <div className="authz-module">
       <AuthZLayout
         context={{ id: '', title: '', org: '' }}
-        navLinks={[{ label: rootBreadcrumb }]}
-        activeLabel={pageTitle}
         pageTitle={pageTitle}
         pageSubtitle=""
         actions={
@@ -34,7 +31,7 @@ const AuthzHome = () => {
           defaultActiveKey={hash ? 'permissionsRoles' : 'team'}
           className="bg-light-100 px-5"
         >
-          <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="p-5">
+          <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="p-5 bg-light-200">
             <TeamMembersTable presetScope={presetScope} />
           </Tab>
           <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])}>

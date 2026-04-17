@@ -3,6 +3,10 @@
 .authz-module {
   --height-action-divider: 30px;
 
+  .pgn__data-table-wrapper {
+    padding: 1rem;
+  }
+
   .filters .dropdown-toggle::after {
     display: none !important;
   }
