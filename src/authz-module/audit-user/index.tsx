@@ -22,23 +22,32 @@ const AuditUserPage = () => {
   const { formatMessage } = useIntl();
   const { username } = useParams();
   const navigate = useNavigate();
-  const { isLoading: isLoadingUser, data: user } = useUserAccount(username ?? '');
+  const {
+    isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
+  } = useUserAccount(username);
   const { querySettings, handleTableFetch } = useQuerySettings();
   const { isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 } } = useUserAssignedRoles(username ?? '', querySettings);
 
+  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
+
   useEffect(() => {
     if (!user && !isLoadingUser) {
-      navigate(AUTHZ_HOME_PATH);
+      // @ts-ignore
+      if (!isErrorUser || errorUser?.customAttributes?.httpErrorStatus === 404) {
+        navigate(AUTHZ_HOME_PATH);
+      }
     }
-  }, [user, isLoadingUser, navigate]);
+  }, [user, isLoadingUser, navigate, isErrorUser, errorUser]);
 
-  const navLinks = [
+  useEffect(() => () => fetchData.cancel(), [fetchData]);
+
+  const navLinks = useMemo(() => [
     {
       label: formatMessage(baseMessages['authz.management.home.nav.link']),
       to: AUTHZ_HOME_PATH,
     },
-  ];
-  const additionalColumns = [
+  ], [formatMessage]);
+  const additionalColumns = useMemo(() => [
     {
       id: 'view_permissions',
       Header: '',
@@ -49,8 +58,8 @@ const AuditUserPage = () => {
       Header: formatMessage(messages['authz.user.table.action.column.header']),
       Cell: ActionsCell,
     },
-  ];
-  const columns = [
+  ], [formatMessage]);
+  const columns = useMemo(() => [
     {
       Header: formatMessage(messages['authz.user.table.role.column.header']),
       accessor: 'role',
@@ -73,10 +82,8 @@ const AuditUserPage = () => {
       disableFilters: true,
       disableSortBy: true,
     },
-  ];
+  ], [formatMessage]);
   const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
-
-  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
 
   return (
     <div className="authz-module">

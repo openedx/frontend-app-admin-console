@@ -6,7 +6,7 @@ import { getUserAccount, validateUserPermissions } from './api';
 const adminConsoleQueryKeys = {
   all: [appId] as const,
   permissions: (permissions: PermissionValidationRequest[]) => [...adminConsoleQueryKeys.all, 'validatePermissions', permissions] as const,
-  userAccount: (username: string) => [...adminConsoleQueryKeys.all, 'userAccount', username] as const,
+  userAccount: (username?: string) => [...adminConsoleQueryKeys.all, 'userAccount', username] as const,
 };
 
 /**
@@ -34,7 +34,7 @@ export const useValidateUserPermissions = (
   retry: false,
 });
 
-export const useUserAccount = (username: string) => useQuery({
+export const useUserAccount = (username?: string) => useQuery({
   queryKey: adminConsoleQueryKeys.userAccount(username),
   queryFn: async () => getUserAccount(username),
   retry: false,

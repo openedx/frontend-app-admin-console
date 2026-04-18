@@ -11,7 +11,7 @@ export const validateUserPermissions = async (
   return data;
 };
 
-export const getUserAccount = async (username: string): Promise<UserAccount> => {
+export const getUserAccount = async (username?: string): Promise<UserAccount> => {
   const url = new URL(getApiUrl(`/api/user/v1/accounts/${username}`));
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data);
