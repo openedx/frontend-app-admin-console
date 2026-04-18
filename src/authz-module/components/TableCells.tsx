@@ -3,13 +3,15 @@ import { Icon, IconButton } from '@openedx/paragon';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
   RemoveRedEye,
+  Delete, ExpandMore,
 } from '@openedx/paragon/icons';
 import { TableCellValue, AppContextType, UserRole } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
 import { DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
-import messages from './messages';
 import { RESOURCE_ICONS } from './constants';
+import messages from './messages';
+import ViewMoreLink from './ViewMoreLink';
 
 type CellProps = TableCellValue<UserRole>;
 type CellPropsWithValue = CellProps & {
@@ -91,6 +93,55 @@ const RoleCell = ({ value, cell }: ExtendedCellProps) => (
   </span>
 );
 
+const PermissionsCell = ({ row }: CellProps) => {
+  const { formatMessage } = useIntl();
+  const { role, permissionCount: count } = row.original;
+  const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
+  return (
+    <span>
+      { isDjangoRole
+        ? formatMessage(
+          messages['authz.user.table.permissions.access.label'],
+          { accessType: role === 'django.superuser' ? 'total' : 'partial' },
+        )
+        : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
+    </span>
+  );
+};
+
+const ActionsCell = ({ row }: CellProps) => {
+  const { formatMessage } = useIntl();
+  const handleDelete = () => {
+    // TODO: Implement delete functionality
+    // eslint-disable-next-line no-console
+    console.log('Delete clicked for row:', row);
+  };
+
+  return (
+    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
+  );
+};
+
+const ViewAllPermissionsCell = ({ row }: CellProps) => {
+  const { formatMessage } = useIntl();
+  return (
+    <ViewMoreLink
+      label={formatMessage(messages['authz.user.table.view_all_permissions.link.text'])}
+      // TODO: Implement view more functionality
+      // eslint-disable-next-line no-console
+      onClick={() => console.log('View more clicked for row:', row)}
+      iconSrc={ExpandMore}
+    />
+  );
+};
+
 export {
-  NameCell, ViewActionCell, ScopeCell, RoleCell, OrgCell,
+  NameCell,
+  ViewActionCell,
+  RoleCell,
+  OrgCell,
+  ScopeCell,
+  PermissionsCell,
+  ActionsCell,
+  ViewAllPermissionsCell,
 };

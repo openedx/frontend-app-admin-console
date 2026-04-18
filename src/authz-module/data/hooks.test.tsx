@@ -3,10 +3,15 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
-  useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
+  useLibrary,
+  usePermissionsByRole,
+  useTeamMembers,
+  useAssignTeamMembersRole,
+  useRevokeUserRoles,
   useAllRoleAssignments,
   useOrgs,
   useScopes,
+  useUserAssignedRoles,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -109,6 +114,53 @@ const mockQuerySettings = {
   sortBy: null,
   pageSize: 10,
   pageIndex: 0,
+};
+
+const mockUserAssignments = {
+  count: 3,
+  results: [
+    {
+      id: '1',
+      role: 'library_admin',
+      scope: 'lib:test-library-1',
+      permissionCount: 15,
+    },
+    {
+      id: '2',
+      role: 'course_staff',
+      scope: 'course:test-course-1',
+      permissionCount: 8,
+    },
+    {
+      id: '3',
+      role: 'django.superuser',
+      scope: 'global',
+      permissionCount: 50,
+    },
+  ],
+  next: 'http://api.example.com/userAssignments?page=2',
+  previous: null,
+};
+
+const mockEmptyUserAssignments = {
+  count: 0,
+  results: [],
+  next: null,
+  previous: null,
+};
+
+const mockFilteredUserAssignments = {
+  count: 1,
+  results: [
+    {
+      id: '1',
+      role: 'library_admin',
+      scope: 'lib:test-library-1',
+      permissionCount: 15,
+    },
+  ],
+  next: null,
+  previous: null,
 };
 
 const createWrapper = () => {
@@ -525,5 +577,133 @@ describe('useScopes', () => {
       expect(result.current.data?.results).toEqual([]);
       expect(result.current.data?.count).toBe(0);
     });
+  });
+});
+
+describe('useUserAssignedRoles', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns user role assignments when API call succeeds', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockUserAssignments }),
+    });
+
+    const { result } = renderHook(() => useUserAssignedRoles('john.doe', mockQuerySettings), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockUserAssignments);
+    expect(result.current.data?.results).toHaveLength(3);
+    expect(result.current.data?.count).toBe(3);
+  });
+
+  it('returns empty results when user has no role assignments', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockEmptyUserAssignments }),
+    });
+
+    const { result } = renderHook(() => useUserAssignedRoles('newuser', mockQuerySettings), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.results).toHaveLength(0);
+    expect(result.current.data?.count).toBe(0);
+    expect(result.current.data?.next).toBeNull();
+  });
+
+  it('applies query settings for filtering and pagination', async () => {
+    const filteredQuerySettings = {
+      ...mockQuerySettings,
+      roles: 'library_admin',
+      search: 'library',
+      pageSize: 5,
+      pageIndex: 1,
+    };
+
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockFilteredUserAssignments }),
+    });
+
+    const { result } = renderHook(() => useUserAssignedRoles('john.doe', filteredQuerySettings), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.results).toHaveLength(1);
+    expect(result.current.data?.results[0].role).toBe('library_admin');
+  });
+
+  it('handles API error when fetching user assignments fails', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('User not found')),
+    });
+
+    const { result } = renderHook(() => useUserAssignedRoles('nonexistent.user', mockQuerySettings), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error?.message).toBe('User not found');
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('does not refetch on window focus', async () => {
+    const mockGet = jest.fn().mockResolvedValue({ data: mockUserAssignments });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: mockGet,
+    });
+
+    const { result } = renderHook(() => useUserAssignedRoles('john.doe', mockQuerySettings), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+
+    expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates when query settings change', async () => {
+    const mockGet = jest.fn()
+      .mockResolvedValueOnce({ data: mockUserAssignments })
+      .mockResolvedValueOnce({ data: mockFilteredUserAssignments });
+
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: mockGet,
+    });
+
+    const { result, rerender } = renderHook(
+      ({ querySettings }) => useUserAssignedRoles('john.doe', querySettings),
+      {
+        wrapper: createWrapper(),
+        initialProps: { querySettings: mockQuerySettings },
+      },
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.count).toBe(3);
+
+    rerender({
+      querySettings: {
+        ...mockQuerySettings,
+        roles: 'library_admin',
+        pageSize: 1,
+      },
+    });
+
+    await waitFor(() => expect(result.current.data?.count).toBe(1));
+    expect(mockGet).toHaveBeenCalledTimes(2);
   });
 });

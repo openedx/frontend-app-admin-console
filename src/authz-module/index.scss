@@ -21,6 +21,11 @@
     width: 0;
   }
 
+  .pgn__data-table tr:has(td[data-role="Super Admin"]),
+  .pgn__data-table tr:has(td[data-role="Global Staff"]) {
+    background-color: var(--pgn-color-primary-200);
+  }
+
   .tab-content {
     background-color: var(--pgn-color-light-200);
   }
@@ -55,6 +60,17 @@
   .permission-table {
     td {
       line-height: 24px;
+    }
+  }
+  
+  @media(--pgn-size-breakpoint-max-width-sm){
+    .flex-column-sm {
+      flex-direction: column;
+    }
+    hr {
+      border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      border-right: none;
+      width: 100%;
     }
   }
 }

@@ -8,7 +8,7 @@ import {
   GetAllRoleAssignmentsResponse, getLibrary, getOrgs, GetOrgsResponse,
   getPermissionsByRole, getScopes, GetScopesResponse, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles,
-  RevokeUserRolesRequest,
+  RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
 } from './api';
 
 const authzQueryKeys = {
@@ -21,6 +21,7 @@ const authzQueryKeys = {
   allRoleAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'allRoleAssignments', querySettings] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'scopes', search, page, pageSize] as const,
+  userRoles: (username: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
 };
 
 /**
@@ -167,3 +168,23 @@ export const useScopes = (search?: string, page?: number, pageSize?: number) => 
   });
   return result;
 };
+
+/*
+  * React Query hook to fetch all the roles assigned to a specific user.
+  * It retrieves the full list of roles with the corresponding permissions.
+  * @param username - The username of the user
+  * @param querySettings - Optional query parameters for filtering, sorting, and pagination
+  *
+  * @example
+  * ```tsx
+  * const { data: userRoles } = useUserAssignedRoles('jdoe', querySettings);
+  * ```
+*/
+export const useUserAssignedRoles = (
+  username: string,
+  querySettings: QuerySettings,
+) => useQuery<GetUserAssignmentsResponse, Error>({
+  queryKey: authzQueryKeys.userRoles(username, querySettings),
+  queryFn: () => getUserAssignedRoles(username, querySettings),
+  staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+});

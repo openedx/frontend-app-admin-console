@@ -97,6 +97,41 @@ const messages = defineMessages({
     defaultMessage: 'Search to show more',
     description: 'Message displayed when there are more results available than currently shown',
   },
+  'authz.table.footer.items.showing.text': {
+    id: 'authz.table.footer.items.showing.text',
+    defaultMessage: 'Showing {pageSize} of {itemCount}.',
+    description: 'Text in the table footer indicating how many items are being shown out of the total count.',
+  },
+  'authz.user.table.org.all.organizations.label': {
+    id: 'authz.user.table.org.all.organizations.label',
+    defaultMessage: 'All Organizations',
+    description: 'Label for the "All Organizations" message on the user assignments table when a user has a django managed role assigned.',
+  },
+  'authz.user.table.scope.global.label': {
+    id: 'authz.user.table.scope.global.label',
+    defaultMessage: 'Global',
+    description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
+  },
+  'authz.user.table.permissions.access.label': {
+    id: 'authz.user.table.permissions.access.label',
+    defaultMessage: '{accessType, select, total {Total Access} partial {Partial Access} other {No Access}}',
+    description: 'Label for the permissions access level in the user assignments table, can be Total or Partial.',
+  },
+  'authz.user.table.permissions.available.count': {
+    id: 'authz.user.table.permissions.available.count',
+    defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
+    description: 'Text showing the number of permissions available, with proper pluralization',
+  },
+  'authz.user.table.delete.action.alt': {
+    id: 'authz.user.table.delete.action.alt',
+    defaultMessage: 'Delete role action',
+    description: 'Alt description for delete button',
+  },
+  'authz.user.table.view_all_permissions.link.text': {
+    id: 'authz.user.table.view_all_permissions.link.text',
+    defaultMessage: 'View all permissions',
+    description: 'Text for the link to view all permissions in the user table',
+  },
 });
 
 export default messages;

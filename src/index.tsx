@@ -6,7 +6,7 @@ import { AppProvider, ErrorPage } from '@edx/frontend-platform/react';
 import {
   APP_INIT_ERROR, APP_READY, subscribe, initialize, mergeConfig,
 } from '@edx/frontend-platform';
-import AuthZModule from 'authz-module';
+import AuthZModule from '@src/authz-module';
 
 import messages from './i18n';
 

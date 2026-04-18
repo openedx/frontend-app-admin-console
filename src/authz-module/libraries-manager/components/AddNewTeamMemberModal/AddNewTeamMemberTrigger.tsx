@@ -5,9 +5,9 @@ import { Plus } from '@openedx/paragon/icons';
 
 import { PutAssignTeamMembersRoleResponse } from '@src/authz-module/data/api';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
-import { RoleOperationErrorStatus } from '@src/authz-module/constants';
+import { RoleOperationErrorStatus, DEFAULT_TOAST_DELAY } from '@src/authz-module/constants';
 import { AppToast, useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
-import { DEFAULT_TOAST_DELAY } from '@src/authz-module/libraries-manager/constants';
+import baseMessages from '@src/authz-module/messages';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';
 
@@ -201,7 +201,7 @@ const AddNewTeamMemberTrigger = ({ libraryId }: AddNewTeamMemberTriggerProps) =>
         onClick={open}
         disabled={isPending}
       >
-        {intl.formatMessage(messages['authz.manage.assign.role.title'])}
+        {intl.formatMessage(baseMessages['authz.management.assign.role.title'])}
       </Button>
 
       {isOpen && (

@@ -8,7 +8,14 @@ import {
   RoleCell,
   OrgCell,
   ScopeCell,
+  PermissionsCell,
+  ActionsCell,
+  ViewAllPermissionsCell,
 } from './TableCells';
+
+// TODO: remove console.log mocks and implement actual logic for these cells, then update tests accordingly
+// Mock console.log for TODO functions
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 const mockNavigate = jest.fn();
 
@@ -415,6 +422,151 @@ describe('TableCells Components', () => {
 
       expect(screen.getByText('Course Scope')).toBeInTheDocument();
       expect(screen.queryByText('Global')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('PermissionsCell', () => {
+    it('displays "Total Access" for Django superuser role', () => {
+      const props = {
+        row: {
+          original: {
+            role: 'django.superuser',
+            org: 'Test Org',
+            scope: 'Test Scope',
+            permissionCount: 10,
+          },
+        },
+        column: { id: 'permissions' },
+      };
+
+      renderWrapper(<PermissionsCell {...props} />);
+
+      expect(screen.getByText('Total Access')).toBeInTheDocument();
+    });
+
+    it('displays "Partial Access" for Django global staff role', () => {
+      const props = {
+        row: {
+          original: {
+            role: 'django.globalstaff',
+            permissionCount: 5,
+            org: 'Test Org',
+            scope: 'Test Scope',
+          },
+        },
+        column: { id: 'permissions' },
+      };
+
+      renderWrapper(<PermissionsCell {...props} />);
+
+      expect(screen.getByText('Partial Access')).toBeInTheDocument();
+    });
+
+    it('displays permission count for non-Django roles', () => {
+      const props = {
+        row: {
+          original: {
+            role: 'library_admin',
+            permissionCount: 3,
+            org: 'Test Org',
+            scope: 'Test Scope',
+          },
+        },
+        column: { id: 'permissions' },
+      };
+
+      renderWrapper(<PermissionsCell {...props} />);
+
+      expect(screen.getByText('3 permissions available')).toBeInTheDocument();
+    });
+  });
+
+  describe('ActionsCell', () => {
+    const mockRow = {
+      original: {
+        role: 'library_admin', id: '123', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+      },
+    };
+
+    it('renders a delete button', () => {
+      const props = {
+        row: mockRow,
+        column: { id: 'actions' },
+      };
+
+      renderWrapper(<ActionsCell {...props} />);
+
+      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+      expect(deleteButton).toBeInTheDocument();
+    });
+
+    it('calls handleDelete when delete button is clicked', async () => {
+      const user = userEvent.setup();
+      const props = {
+        row: mockRow,
+        column: { id: 'actions' },
+      };
+
+      renderWrapper(<ActionsCell {...props} />);
+
+      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+      await user.click(deleteButton);
+      // TODO: replace console.log with actual delete logic and update this test accordingly
+      // eslint-disable-next-line no-console
+      expect(console.log).toHaveBeenCalledWith('Delete clicked for row:', mockRow);
+    });
+
+    it('handles keyboard interaction for delete button', async () => {
+      const user = userEvent.setup();
+      const props = {
+        row: mockRow,
+        column: { id: 'actions' },
+      };
+
+      renderWrapper(<ActionsCell {...props} />);
+
+      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+      deleteButton.focus();
+      await user.keyboard('{Enter}');
+      // TODO: replace console.log with actual delete logic and update this test accordingly
+      // eslint-disable-next-line no-console
+      expect(console.log).toHaveBeenCalledWith('Delete clicked for row:', mockRow);
+    });
+  });
+
+  describe('ViewAllPermissionsCell', () => {
+    const mockRow = {
+      original: {
+        role: 'library_admin', id: '123', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+      },
+    };
+
+    it('renders a view more link', () => {
+      const props = {
+        row: mockRow,
+        column: { id: 'viewMore' },
+      };
+
+      renderWrapper(<ViewAllPermissionsCell {...props} />);
+
+      expect(screen.getByText('View all permissions')).toBeInTheDocument();
+    });
+
+    it('calls onClick handler when view more link is clicked', async () => {
+      const user = userEvent.setup();
+      const props = {
+        row: mockRow,
+        column: { id: 'viewMore' },
+      };
+
+      renderWrapper(<ViewAllPermissionsCell {...props} />);
+
+      const viewMoreButton = screen.getByText('View all permissions');
+      await user.click(viewMoreButton);
+
+      // TODO: replace console.log with actual view more logic and update this test accordingly
+      // eslint-disable-next-line no-console
+      expect(console.log).toHaveBeenCalledWith('View more clicked for row:', mockRow);
     });
   });
 });
