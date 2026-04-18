@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import {
   useLibrary, usePermissionsByRole, useTeamMembers, useAssignTeamMembersRole, useRevokeUserRoles,
+  useAllRoleAssignments,
+  useOrgs,
+  useScopes,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -33,6 +36,70 @@ const mockLibrary = {
   org: 'demo-org',
   title: 'Test Library',
   slug: 'test-library',
+};
+
+const mockAssignments = {
+  results: [
+    {
+      isSuperadmin: false,
+      role: 'course_staff',
+      org: 'OpenedX',
+      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      permissionCount: 27,
+      fullName: 'John Doe',
+      username: 'johndoe',
+      email: 'johndoe@example.com',
+    },
+  ],
+  count: 1,
+  next: null,
+  previous: null,
+};
+
+const mockOrgs = {
+  count: 2,
+  next: null,
+  previous: null,
+  results: [
+    { id: 'org1', name: 'Organization 1' },
+    { id: 'org2', name: 'Organization 2' },
+  ],
+};
+
+const mockScopes = {
+  count: 2,
+  next: null,
+  previous: null,
+  results: [
+    {
+      externalKey: 'course-v1:OpenedX+DemoX+DemoCourse',
+      displayName: 'Open edX Demo Course',
+      org: {
+        id: 1,
+        created: '2026-04-02T19:30:36.779095Z',
+        modified: '2026-04-02T19:30:36.779095Z',
+        name: 'OpenedX',
+        shortName: 'OpenedX',
+        description: '',
+        logo: null,
+        active: true,
+      },
+    },
+    {
+      externalKey: 'lib:WGU:CSPROB',
+      displayName: 'Computer Science Problems',
+      org: {
+        id: 2,
+        created: '2026-04-02T19:31:21.196446Z',
+        modified: '2026-04-02T19:31:21.196446Z',
+        name: 'WGU',
+        shortName: 'WGU',
+        description: '',
+        logo: null,
+        active: true,
+      },
+    },
+  ],
 };
 
 const mockQuerySettings = {
@@ -338,5 +405,125 @@ describe('useRevokeUserRoles', () => {
     expect(calledUrl.searchParams.get('users')).toBe(revokeRoleData.users);
     expect(calledUrl.searchParams.get('role')).toBe(revokeRoleData.role);
     expect(calledUrl.searchParams.get('scope')).toBe(revokeRoleData.scope);
+  });
+});
+
+describe('useAllRoleAssignments', () => {
+  beforeEach(() => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn(() => Promise.resolve({ data: mockAssignments })),
+    });
+  });
+
+  it('fetches and returns role assignments', async () => {
+    const { result } = renderHook(
+      () => useAllRoleAssignments({
+        roles: null,
+        scopes: null,
+        organizations: null,
+        search: null,
+        order: null,
+        sortBy: null,
+        pageSize: 10,
+        pageIndex: 0,
+      }),
+      { wrapper: createWrapper() },
+    );
+    await waitFor(() => {
+      expect(result.current.data?.results).toHaveLength(1);
+      expect(result.current.data?.results[0].username).toBe('johndoe');
+      expect(result.current.data?.count).toBe(1);
+    });
+  });
+
+  it('handles empty results', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
+      get: jest.fn(() => Promise.resolve({
+        data: {
+          results: [], count: 0, next: null, previous: null,
+        },
+      })),
+    });
+    const { result } = renderHook(
+      () => useAllRoleAssignments({
+        roles: null,
+        scopes: null,
+        organizations: null,
+        search: null,
+        order: null,
+        sortBy: null,
+        pageSize: 10,
+        pageIndex: 0,
+      }),
+      { wrapper: createWrapper() },
+    );
+    await waitFor(() => {
+      expect(result.current.data?.results).toEqual([]);
+      expect(result.current.data?.count).toBe(0);
+    });
+  });
+});
+
+describe('useOrgs', () => {
+  beforeEach(() => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn(() => Promise.resolve({ data: mockOrgs })),
+    });
+  });
+
+  it('fetches and returns organizations', async () => {
+    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(result.current.data?.results).toHaveLength(2);
+      expect(result.current.data?.results[0].name).toBe('Organization 1');
+      expect(result.current.data?.count).toBe(2);
+    });
+  });
+
+  it('handles empty results', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
+      get: jest.fn(() => Promise.resolve({
+        data: {
+          count: 0, next: null, previous: null, results: [],
+        },
+      })),
+    });
+    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(result.current.data?.results).toEqual([]);
+      expect(result.current.data?.count).toBe(0);
+    });
+  });
+});
+
+describe('useScopes', () => {
+  beforeEach(() => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest.fn(() => Promise.resolve({ data: mockScopes })),
+    });
+  });
+
+  it('fetches and returns scopes', async () => {
+    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(result.current.data?.results).toHaveLength(2);
+      expect(result.current.data?.results[0].displayName).toBe('Open edX Demo Course');
+      expect(result.current.data?.count).toBe(2);
+    });
+  });
+
+  it('handles empty results', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
+      get: jest.fn(() => Promise.resolve({
+        data: {
+          count: 0, next: null, previous: null, results: [],
+        },
+      })),
+    });
+    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(result.current.data?.results).toEqual([]);
+      expect(result.current.data?.count).toBe(0);
+    });
   });
 });

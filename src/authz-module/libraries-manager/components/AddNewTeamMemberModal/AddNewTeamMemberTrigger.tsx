@@ -3,7 +3,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Button, useToggle } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
-import { PutAssignTeamMembersRoleResponse } from 'authz-module/data/api';
+import { PutAssignTeamMembersRoleResponse } from '@src/authz-module/data/api';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import { RoleOperationErrorStatus } from '@src/authz-module/constants';
 import { AppToast, useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';

@@ -1,10 +1,15 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { LibraryMetadata, TeamMember } from '@src/types';
+import {
+  LibraryMetadata, Org, Scope, TeamMember,
+  UserRole,
+} from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
   roles: string | null;
+  scopes: string | null;
+  organizations: string | null;
   search: string | null;
   order: string | null;
   sortBy: string | null;
@@ -48,6 +53,27 @@ export interface AssignTeamMembersRoleRequest {
   users: string[];
   role: string;
   scope: string;
+}
+
+export interface GetAllRoleAssignmentsResponse {
+  results: UserRole[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
+export interface GetOrgsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results:Array<Org>;
+}
+
+export interface GetScopesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results:Array<Scope>;
 }
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
@@ -107,4 +133,61 @@ export const revokeUserRoles = async (
   // If this is not transformed to string, it shows a 404 with the token CSRF acquisition request
   const res = await getAuthenticatedHttpClient().delete(url.toString());
   return camelCaseObject(res.data);
+};
+
+export const getAllRoleAssignments = async (querySettings: QuerySettings)
+: Promise<GetAllRoleAssignmentsResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/assignments/'));
+
+  if (querySettings.roles) {
+    url.searchParams.set('roles', querySettings.roles);
+  }
+  if (querySettings.scopes) {
+    url.searchParams.set('scopes', querySettings.scopes);
+  }
+  if (querySettings.organizations) {
+    url.searchParams.set('orgs', querySettings.organizations);
+  }
+  if (querySettings.search) {
+    url.searchParams.set('search', querySettings.search);
+  }
+  if (querySettings.sortBy && querySettings.order) {
+    url.searchParams.set('sort_by', querySettings.sortBy);
+    url.searchParams.set('order', querySettings.order);
+  }
+  url.searchParams.set('page_size', querySettings.pageSize.toString());
+  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getOrgs = async (search?: string, page?: number, pageSize?: number): Promise<GetOrgsResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/orgs/'));
+  if (search !== undefined) {
+    url.searchParams.set('search', search);
+  }
+  if (page !== undefined) {
+    url.searchParams.set('page', page.toString());
+  }
+  if (pageSize !== undefined) {
+    url.searchParams.set('page_size', pageSize.toString());
+  }
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getScopes = async (search?: string, page?: number, pageSize?: number): Promise<GetScopesResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
+  if (search !== undefined) {
+    url.searchParams.set('search', search);
+  }
+  if (page !== undefined) {
+    url.searchParams.set('page', page.toString());
+  }
+  if (pageSize !== undefined) {
+    url.searchParams.set('page_size', pageSize.toString());
+  }
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
 };

@@ -21,7 +21,7 @@ interface Action {
 }
 
 export interface AuthZTitleProps {
-  activeLabel: string;
+  activeLabel?: string;
   pageTitle: string;
   pageSubtitle: string | ReactNode;
   navLinks?: BreadcrumbLink[];
@@ -53,8 +53,8 @@ const AuthZTitle = ({
           <div className="d-flex align-items-center">
             <h2 className="text-primary mb-0">{pageTitle}</h2>
             {typeof pageSubtitle === 'string'
-              ? <><hr className="mx-lg-3" /><h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
-              : <><hr className="mx-lg-3" /> <div className="mb-0">{pageSubtitle}</div></>}
+              ? <> { pageSubtitle !== '' && <hr className="mx-lg-3" /> }<h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
+              : <>{ pageSubtitle !== '' && <hr className="mx-lg-3" /> } <div className="mb-0">{pageSubtitle}</div></>}
 
           </div>
         </Col>

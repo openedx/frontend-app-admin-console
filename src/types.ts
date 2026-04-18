@@ -14,6 +14,9 @@ export interface TeamMember {
   email: string;
   roles: string[];
   createdAt: string;
+  scope: { resource: string, type: 'COURSE' | 'LIBRARY' | 'GLOBAL' };
+  organization: string;
+  role: string;
 }
 
 export interface LibraryMetadata {
@@ -47,6 +50,18 @@ export type PermissionMetadata = {
   resource: string;
   label?: string;
   description?: string;
+};
+
+export type Org = {
+  id: string;
+  name: string;
+  shortName: string;
+};
+
+export type Scope = {
+  externalKey: string;
+  displayName: string;
+  org: Org;
 };
 
 // Permissions Matrix
@@ -83,4 +98,22 @@ export interface TableCellValue<T> {
   row: {
     original: T;
   };
+}
+
+export type AppContextType = {
+  authenticatedUser: {
+    username: string;
+    email: string;
+  };
+};
+
+export interface UserRole {
+  isSuperadmin?: boolean;
+  role: string;
+  org: string;
+  scope: string;
+  permissionCount: number;
+  fullName?: string;
+  username?: string;
+  email?: string;
 }
