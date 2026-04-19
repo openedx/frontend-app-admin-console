@@ -4,7 +4,6 @@ import { Delete, ExpandMore } from '@openedx/paragon/icons';
 import { IconButton } from '@openedx/paragon';
 import { TableCellValue, UserRole } from 'types';
 import messages from './messages';
-import { getPermissionsCountByRole } from './utils';
 
 interface ExpandableTableRow<T> extends TableCellValue<T> {
   row: TableCellValue<T>['row'] & {
@@ -45,14 +44,10 @@ export const ActionsCell = ({ row }: CellProps) => {
 
 export const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
-  // TODO handle permissions length per role
-  if (row.original.permissions.length === 1) {
-    return <span>{row.original.permissions[0]}</span>;
-  }
-  const count = getPermissionsCountByRole(row.original.role);
+  const permissionCount = row.original.permissionCount || 0;
   return (
     <span>
-      {formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
+      {formatMessage(messages['authz.user.table.permissions.available.count'], { count: permissionCount })}
     </span>
   );
 };

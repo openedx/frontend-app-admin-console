@@ -1,3 +1,4 @@
+import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
@@ -24,10 +25,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
   let roleKey = row?.original?.role;
   if (!roleKey) { return null; }
 
-  // validation to show django roles
-  const normalizedRole = roleKey.trim().toLowerCase();
-  if (!normalizedRole.includes('library') && !normalizedRole.includes('course')
-    && (normalizedRole.includes('admin') || normalizedRole.includes('staff'))) {
+  if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
     return (
       <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light">
         <RenderAdminRole role={roleKey} />
