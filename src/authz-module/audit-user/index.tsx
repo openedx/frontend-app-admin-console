@@ -219,9 +219,7 @@ const AuditUserPage = () => {
             isLoading={isLoadingUserAssignments}
             isExpandable
             renderRowSubComponent={({ row }) => (
-              <div>
                 <UserPermissions row={row} />
-              </div>
             )}
           >
             <DataTable.Table />
