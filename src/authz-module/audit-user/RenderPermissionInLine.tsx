@@ -1,5 +1,5 @@
 import { Icon } from '@openedx/paragon';
-import ResourceTooltip from 'authz-module/components/ResourceTooltip';
+import ResourceTooltip from '../components/ResourceTooltip';
 import { RolePermission } from 'types';
 
 interface ExtendedRolePermission extends RolePermission {
