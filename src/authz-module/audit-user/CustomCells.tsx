@@ -51,6 +51,7 @@ export const ActionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const handleDelete = () => {
     // TODO: Implement delete functionality
+    // eslint-disable-next-line no-console
     console.log('Delete clicked for row:', row);
   };
 
