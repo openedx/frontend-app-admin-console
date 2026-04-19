@@ -1,6 +1,15 @@
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import UserPermissions from './UserPermissions';
+import * as coursesConstants from '../courses/constant';
+
+jest.mock('./RenderPermissionInLine', () => (
+  jest.fn(({ items }) => (
+    <div data-testid="render-permission-inline" data-items-count={items?.length || 0}>
+      Mocked RenderPermissionInLine
+    </div>
+  ))
+));
 
 describe('UserPermissions', () => {
   beforeAll(() => {
@@ -11,6 +20,10 @@ describe('UserPermissions', () => {
         email: 'test@example.com',
       },
     });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders Django managed roles', () => {
@@ -56,6 +69,46 @@ describe('UserPermissions', () => {
     const props = {
       row: {
         original: undefined as any,
+      },
+    };
+
+    const { container } = renderWrapper(<UserPermissions {...props} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders RenderPermissionInLine for single row layout', () => {
+    const mockRoleObject = [
+      {
+        role: 'test_viewer',
+        permissions: [1, 50, 100],
+        userCount: 1,
+        name: 'Test Viewer',
+        description: 'Test role with limited permissions',
+      },
+    ];
+
+    const originalRolesObject = coursesConstants.rolesObject;
+    (coursesConstants as any).rolesObject = [...originalRolesObject, ...mockRoleObject];
+
+    const props = {
+      row: {
+        original: {
+          role: 'test_viewer',
+        },
+      },
+    };
+
+    const { getByTestId } = renderWrapper(<UserPermissions {...props} />);
+    expect(getByTestId('render-permission-inline')).toBeInTheDocument();
+    (coursesConstants as any).rolesObject = originalRolesObject;
+  });
+
+  it('returns null when role is not found in rolesObject (line 52 coverage)', () => {
+    const props = {
+      row: {
+        original: {
+          role: 'unknown_role',
+        },
       },
     };
 
