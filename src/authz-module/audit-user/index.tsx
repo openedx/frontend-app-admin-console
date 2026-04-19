@@ -195,7 +195,7 @@ const AuditUserPage = () => {
           title: '',
         }}
         navLinks={navLinks}
-        activeLabel={username || ''}
+        activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={user?.email || ''}
         actions={

@@ -13,6 +13,10 @@ jest.mock('@edx/frontend-platform/auth', () => ({
   configure: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
+
 const mockUser = {
   username: 'johndoe',
   email: 'john@example.com',
@@ -270,6 +274,76 @@ describe('AuditUserPage', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(screen.getByText(/role has been successfully removed/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error toast when role revocation succeeds but returns errors', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+      delete: jest.fn().mockResolvedValue({
+        data: {
+          errors: ['Failed to revoke user role'],
+          completed: [],
+        },
+      }),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+    });
+
+    const removeButton = screen.getByRole('button', { name: /remove/i });
+    await user.click(removeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error toast with retry when role revocation fails', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+      delete: jest.fn().mockRejectedValue(new Error('Network error')),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /delete role action/i })).toBeInTheDocument();
+    });
+
+    const user = userEvent.setup();
+    const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+    });
+
+    const removeButton = screen.getByRole('button', { name: /remove/i });
+    await user.click(removeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong on our end/i)).toBeInTheDocument();
+      expect(screen.getByText(/try again later/i)).toBeInTheDocument();
     });
   });
 
