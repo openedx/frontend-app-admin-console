@@ -74,7 +74,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
         : columns.map((col, index) => (
           <div
             key={`column-${index === 0 ? 'left' : 'right'}`}
-            className={`w-100 w-md-50 py-3 ${
+            className={`w-100 col-md-12 col-xl-6 py-3 ${
               index === 0 ? 'pr-md-3 border-right' : 'pl-md-4'
             }`}
           >
