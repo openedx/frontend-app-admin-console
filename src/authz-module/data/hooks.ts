@@ -21,7 +21,7 @@ const authzQueryKeys = {
   allRoleAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'allRoleAssignments', querySettings] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'scopes', search, page, pageSize] as const,
-  userRoles: (username: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
+  userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
 };
 
 /**
@@ -184,10 +184,12 @@ export const useScopes = (search?: string, page?: number, pageSize?: number) => 
   * ```
 */
 export const useUserAssignedRoles = (
-  username: string,
-  querySettings: QuerySettings,
+  username?: string,
+  querySettings?: QuerySettings,
 ) => useQuery<GetUserAssignmentsResponse, Error>({
   queryKey: authzQueryKeys.userRoles(username, querySettings),
   queryFn: () => getUserAssignedRoles(username, querySettings),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+  enabled: !!username,
+  refetchOnWindowFocus: false,
 });

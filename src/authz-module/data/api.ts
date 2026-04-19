@@ -200,22 +200,22 @@ export const getScopes = async (search?: string, page?: number, pageSize?: numbe
   return camelCaseObject(data);
 };
 
-export const getUserAssignedRoles = async (username: string, querySettings: QuerySettings)
+export const getUserAssignedRoles = async (username?: string, querySettings?: QuerySettings)
 : Promise<GetUserAssignmentsResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/users/${username}/assignments/`));
 
-  if (querySettings.roles) {
+  if (querySettings?.roles) {
     url.searchParams.set('roles', querySettings.roles);
   }
-  if (querySettings.search) {
+  if (querySettings?.search) {
     url.searchParams.set('search', querySettings.search);
   }
-  if (querySettings.sortBy && querySettings.order) {
+  if (querySettings?.sortBy && querySettings?.order) {
     url.searchParams.set('sort_by', querySettings.sortBy);
-    url.searchParams.set('order', querySettings.order);
+    url.searchParams.set('order', querySettings?.order || '');
   }
-  url.searchParams.set('page_size', querySettings.pageSize.toString());
-  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+  url.searchParams.set('page_size', querySettings?.pageSize?.toString() || '');
+  url.searchParams.set('page', ((querySettings?.pageIndex ?? 0) + 1).toString());
 
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data);
