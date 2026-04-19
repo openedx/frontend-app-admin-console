@@ -21,7 +21,7 @@ interface RenderPermissionColumnProps {
 const RenderPermissionColumn = ({ items }: RenderPermissionColumnProps) => items.map(({
   key, icon, label, description, perms,
 }) => (
-  <div key={key} className="mb-4">
+  <div key={key} className="mb-4 col-12">
     <div className="d-flex align-items-center mb-2">
       <Icon src={icon} className="mr-2 text-primary" size="xs" />
       <h5 className="text-primary m-0">{label}</h5>
@@ -31,7 +31,7 @@ const RenderPermissionColumn = ({ items }: RenderPermissionColumnProps) => items
         }}
       />
     </div>
-    <ul className="mb-0 list-unstyled d-flex">
+    <ul className="mb-0 list-unstyled d-flex align-items-center">
       {perms.map((perm, index) => (
         <li
           key={perm.key}

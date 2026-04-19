@@ -71,16 +71,23 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light-200">
       {isSingleRow
         ? <RenderPermissionInLine items={resources} />
-        : columns.map((col, index) => (
-          <div
-            key={`column-${index === 0 ? 'left' : 'right'}`}
-            className={`w-100 col-md-12 col-xl-6 py-3 ${
-              index === 0 ? 'pr-md-3 border-right' : 'pl-md-4'
-            }`}
-          >
-            <RenderPermissionColumn items={col} />
+        : (
+          <div className="d-flex flex-wrap w-100">
+            {columns.map((col, index) => (
+              <div
+                key={`column-${index === 0 ? 'left' : 'right'}`}
+                className={`position-relative w-100 col-md-12 col-xl-6 py-3 ${
+                  index === 0 ? 'pr-md-3' : 'pl-md-4'
+                }`}
+              >
+                <RenderPermissionColumn items={col} />
+                {index === 0 && (
+                  <div className="d-none d-xl-block position-absolute border-right h-100" style={{ right: 0, top: 0 }} />
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
     </div>
   );
 };
