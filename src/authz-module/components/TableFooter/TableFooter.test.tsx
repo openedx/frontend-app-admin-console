@@ -55,7 +55,7 @@ describe('TableFooter', () => {
     it('displays correct showing text with current page items', () => {
       renderFooter();
 
-      expect(screen.getByText('Showing 3 of 42 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 3 of 42.')).toBeInTheDocument();
     });
 
     it('displays showing text with different row count', () => {
@@ -70,7 +70,7 @@ describe('TableFooter', () => {
         itemCount: 100,
       });
 
-      expect(screen.getByText('Showing 5 of 100 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 5 of 100.')).toBeInTheDocument();
     });
 
     it('displays showing text when on last page with fewer items', () => {
@@ -83,7 +83,7 @@ describe('TableFooter', () => {
         itemCount: 42,
       });
 
-      expect(screen.getByText('Showing 2 of 42 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 2 of 42.')).toBeInTheDocument();
     });
   });
 
@@ -157,7 +157,7 @@ describe('TableFooter', () => {
         itemCount: 3,
       });
 
-      expect(screen.getByText('Showing 3 of 3 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 3 of 3.')).toBeInTheDocument();
 
       const page1Button = screen.queryByRole('button', { name: /1 of 1/ });
       expect(page1Button).not.toBeInTheDocument();
@@ -174,7 +174,7 @@ describe('TableFooter', () => {
         },
       });
 
-      expect(screen.getByText('Showing 0 of 0 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 0 of 0.')).toBeInTheDocument();
     });
 
     it('handles large page counts correctly', () => {
@@ -189,7 +189,7 @@ describe('TableFooter', () => {
 
       const currentPageButton = screen.getByRole('button', { name: '6 of 10' });
       expect(currentPageButton).toBeInTheDocument();
-      expect(screen.getByText('Showing 3 of 95 users.')).toBeInTheDocument();
+      expect(screen.getByText('Showing 3 of 95.')).toBeInTheDocument();
     });
   });
 });

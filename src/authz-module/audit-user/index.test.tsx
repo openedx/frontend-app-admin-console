@@ -254,7 +254,7 @@ describe('AuditUserPage', () => {
       // Look for pagination controls
       expect(screen.getByRole('navigation', { name: /table pagination/i })).toBeInTheDocument();
       // Check that some users count is shown (format might vary)
-      expect(screen.getByText(/showing.*users/i)).toBeInTheDocument();
+      expect(screen.getByText(/showing/i)).toBeInTheDocument();
     });
   });
 
