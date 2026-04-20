@@ -230,6 +230,9 @@ export const getUserAssignedRoles = async (username?: string, querySettings?: Qu
   if (querySettings?.roles) {
     url.searchParams.set('roles', querySettings.roles);
   }
+  if (querySettings?.organizations) {
+    url.searchParams.set('orgs', querySettings.organizations);
+  }
   if (querySettings?.search) {
     url.searchParams.set('search', querySettings.search);
   }

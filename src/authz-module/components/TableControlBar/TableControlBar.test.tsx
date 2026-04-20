@@ -40,7 +40,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
       count: 0, next: null, previous: null, results: [],
     },
   }),
-  useScopes: () => ({ data: { scopes: [] } }),
+  useScopes: () => ({ data: { results: [] } }),
 }));
 
 describe('TableControlBar', () => {
