@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
-import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import AssignNewRoleTrigger from './AssignNewRoleTrigger';
 
 jest.mock('@edx/frontend-platform/logging');

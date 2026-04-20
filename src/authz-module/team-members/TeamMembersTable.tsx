@@ -6,7 +6,7 @@ import {
   TextFilter,
 } from '@openedx/paragon';
 
-import { useToastManager } from '@src/authz-module/data/context/ToastManagerContext';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';

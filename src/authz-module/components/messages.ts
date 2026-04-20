@@ -134,7 +134,7 @@ const messages = defineMessages({
   },
   'authz.manage.removing.button': {
     id: 'authz.manage.removing.button',
-    defaultMessage: 'Removing...',
+    defaultMessage: 'Removing',
     description: 'AuthZ removing button title',
   },
   'authz.team.remove.user.modal.body.1': {

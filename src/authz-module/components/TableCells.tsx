@@ -6,7 +6,7 @@ import {
   Info,
 } from '@openedx/paragon/icons';
 import {
-  TableCellValue, AppContextType, UserRole, Role,
+  TableCellValue, AppContextType, UserRole, RoleToDelete,
 } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
@@ -27,10 +27,13 @@ type ExtendedCellProps = CellPropsWithValue & {
     getCellProps: (props?: Record<string, string>) => Record<string, string>;
   };
 };
-type ActionsCellProps = CellProps & {
-  onClickDeleteButton: (role: Role) => void;
+
+type ActionsCellExtraProps = {
+  onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
 };
+
+type ActionsCellProps = CellProps & ActionsCellExtraProps;
 
 const NameCell = ({ row }: CellProps) => {
   const intl = useIntl();
@@ -139,7 +142,8 @@ const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: Acti
     const roleToDelete = {
       role,
       scope: row.original.scope,
-    } as Role;
+      name: MAP_ROLE_KEY_TO_LABEL[role] || '',
+    } as RoleToDelete;
     onClickDeleteButton(roleToDelete);
   };
 
@@ -179,7 +183,7 @@ const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: Acti
   );
 };
 
-const createActionsCell = (extraProps) => function customActionsCell(cellProps) {
+const createActionsCell = (extraProps: ActionsCellExtraProps) => function customActionsCell(cellProps) {
   return <ActionsCell {...cellProps} {...extraProps} />;
 };
 

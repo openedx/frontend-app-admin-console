@@ -3,6 +3,7 @@ import {
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
+import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getAllRoleAssignments,
   GetAllRoleAssignmentsResponse, getLibrary, getOrgs, GetOrgsResponse,
@@ -107,6 +108,7 @@ export const useAssignTeamMembersRole = () => {
  */
 export const useRevokeUserRoles = () => {
   const queryClient = useQueryClient();
+  const { querySettings: defaultQuerySettings } = useQuerySettings();
   return useMutation({
     mutationFn: async ({ data }: {
       data: RevokeUserRolesRequest
@@ -117,6 +119,7 @@ export const useRevokeUserRoles = () => {
       queryClient.invalidateQueries({
         queryKey: authzQueryKeys.userRoles(users, querySettings),
       });
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.allRoleAssignments(defaultQuerySettings) });
     },
   });
 };

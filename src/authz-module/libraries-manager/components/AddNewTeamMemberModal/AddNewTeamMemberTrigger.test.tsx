@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
-import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import AddNewTeamMemberTrigger from './AddNewTeamMemberTrigger';
 
 jest.mock('@edx/frontend-platform/logging');

@@ -11,7 +11,7 @@ import {
 import { useTeamMembers } from '@src/authz-module/data/hooks';
 import { useLibraryAuthZ } from '@src/authz-module/libraries-manager/context';
 import { SKELETON_ROWS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
-import { useToastManager } from '@src/authz-module/data/context/ToastManagerContext';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import TableControlBar from './components/TableControlBar';
 import messages from './messages';

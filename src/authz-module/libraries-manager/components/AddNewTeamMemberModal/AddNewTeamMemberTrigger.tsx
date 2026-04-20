@@ -6,7 +6,7 @@ import { Plus } from '@openedx/paragon/icons';
 import { PutAssignTeamMembersRoleResponse } from '@src/authz-module/data/api';
 import { useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import { RoleOperationErrorStatus, DEFAULT_TOAST_DELAY } from '@src/authz-module/constants';
-import { AppToast, useToastManager } from '@src/authz-module/data/context/ToastManagerContext';
+import { AppToast, useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import baseMessages from '@src/authz-module/messages';
 import AddNewTeamMemberModal from './AddNewTeamMemberModal';
 import messages from './messages';

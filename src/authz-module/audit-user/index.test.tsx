@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import AuditUserPage from './index';
 
 jest.mock('@edx/frontend-platform/auth', () => ({

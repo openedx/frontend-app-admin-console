@@ -508,7 +508,7 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ role: 'library_admin', scope: 'Test Scope' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
     });
 
     it('renders a disabled button for admin roles when isUserAuthenticatedPage is true', () => {

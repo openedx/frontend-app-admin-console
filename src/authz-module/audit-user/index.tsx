@@ -22,22 +22,22 @@ import {
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
-import { Role } from 'types';
-import { useToastManager } from '@src/authz-module/data/context/ToastManagerContext';
+import { RoleToDelete } from 'types';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
   const { username } = useParams();
-  const { authenticatedUser } = useContext(AppContext) as AppContextType;
+  const { authenticatedUser } = useContext(AppContext as React.Context<AppContextType>);
   const navigate = useNavigate();
   const {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
   } = useUserAccount(username);
   const { querySettings, handleTableFetch } = useQuerySettings();
   const { isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 } } = useUserAssignedRoles(username ?? '', querySettings);
-  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [roleToDelete, setRoleToDelete] = useState<RoleToDelete | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const {
     showToast, showErrorToast, Bold, Br,
@@ -57,7 +57,7 @@ const AuditUserPage = () => {
 
   useEffect(() => () => fetchData.cancel(), [fetchData]);
 
-  const handleShowConfirmDeletionModal = useCallback((role: Role) => {
+  const handleShowConfirmDeletionModal = useCallback((role: RoleToDelete) => {
     if (isRevokingUserRolePending) { return; }
 
     setRoleToDelete(role);
@@ -148,7 +148,6 @@ const AuditUserPage = () => {
                 { Bold, Br },
               ),
             });
-            // authzQueryKeys.userRoles(username, querySettings),
             return;
           }
 
@@ -157,7 +156,7 @@ const AuditUserPage = () => {
             message: formatMessage(
               baseMessages['authz.team.remove.user.toast.success.description'],
               {
-                role: roleToDelete.name,
+                role: roleToDelete.name ?? roleToDelete.role,
                 rolesCount: remainingRolesCount,
               },
             ),
@@ -184,7 +183,8 @@ const AuditUserPage = () => {
         context={{
           userName: user?.username || '',
           scope: roleToDelete?.scope || '',
-          role: roleToDelete?.name || '',
+          role: roleToDelete?.role || '',
+          name: roleToDelete?.name || '',
           rolesCount: count || 0,
         }}
       />

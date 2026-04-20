@@ -16,6 +16,7 @@ interface ConfirmDeletionModalProps {
     userName: string;
     scope: string;
     role: string;
+    name?: string;
     rolesCount: number;
   }
 }
@@ -57,7 +58,7 @@ const ConfirmDeletionModal = ({
         <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.1'], {
           userName: context.userName,
           scope: context.scope,
-          role: context.role,
+          role: context.name ?? context.role,
         })}
         </p>
         {context.rolesCount === 1 && (

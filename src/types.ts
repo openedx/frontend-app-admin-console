@@ -119,3 +119,9 @@ export interface UserRole {
   username?: string;
   email?: string;
 }
+
+export type RoleToDelete = {
+  role: string;
+  name?: string;
+  scope: string;
+};

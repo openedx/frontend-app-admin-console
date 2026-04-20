@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
-import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { renderWithAllProviders } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import AuthzHome from './index';

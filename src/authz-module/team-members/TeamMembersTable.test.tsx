@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
-import { ToastManagerProvider } from '@src/authz-module/data/context/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
 
 const mockedAllRoleAssignments = {
