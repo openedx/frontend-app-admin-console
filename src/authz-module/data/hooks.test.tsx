@@ -815,8 +815,8 @@ describe('useUserAssignedRoles', () => {
 });
 
 describe('useScopes', () => {
-  const mockScopes = {
-    scopes: [
+  const mockScopesData = {
+    results: [
       {
         displayName: 'Test Library 1',
         scope: 'lib:test-library-1',
@@ -834,7 +834,7 @@ describe('useScopes', () => {
 
   it('returns scopes when API call succeeds', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: mockScopes }),
+      get: jest.fn().mockResolvedValue({ data: mockScopesData }),
     });
 
     const { result } = renderHook(() => useScopes(), {
@@ -844,13 +844,13 @@ describe('useScopes', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data).toEqual(mockScopes);
-    expect(result.current.data?.scopes).toHaveLength(2);
+    expect(result.current.data).toEqual(mockScopesData);
+    expect(result.current.data?.results).toHaveLength(2);
   });
 
   it('handles search parameter', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { scopes: [mockScopes.scopes[0]] } }),
+      get: jest.fn().mockResolvedValue({ data: { results: [mockScopesData.results[0]] } }),
     });
 
     const { result } = renderHook(() => useScopes('library'), {
@@ -858,7 +858,7 @@ describe('useScopes', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.scopes).toHaveLength(1);
+    expect(result.current.data?.results).toHaveLength(1);
   });
 
   it('handles error when API call fails', async () => {
