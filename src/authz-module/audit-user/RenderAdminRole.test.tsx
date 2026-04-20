@@ -9,6 +9,8 @@ describe('RenderAdminRole', () => {
   const staffRole = 'django.globalstaff';
   const instructorRole = 'instructor';
   const emptyRole = '';
+  const mixedCaseAdminRole = 'Library_Admin';
+  const regularRole = 'course_staff';
 
   beforeAll(() => {
     initializeMockApp({
@@ -22,7 +24,7 @@ describe('RenderAdminRole', () => {
 
   it('renders without crashing', () => {
     const { container } = renderWrapper(<RenderAdminRole role={adminRole} />);
-    expect(container.querySelector('.mb-4')).toBeInTheDocument();
+    expect(container.querySelector('.mb-0')).toBeInTheDocument();
   });
 
   it('displays admin message for roles containing admin', () => {
@@ -35,7 +37,7 @@ describe('RenderAdminRole', () => {
     expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
 
-  it('displays staff message for roles not containing admin', () => {
+  it('displays staff message for globalstaff role', () => {
     renderWrapper(<RenderAdminRole role={staffRole} />);
     expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
@@ -52,6 +54,16 @@ describe('RenderAdminRole', () => {
 
   it('handles empty role string', () => {
     renderWrapper(<RenderAdminRole role={emptyRole} />);
+    expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
+  });
+
+  it('displays admin message for mixed case admin role', () => {
+    renderWrapper(<RenderAdminRole role={mixedCaseAdminRole} />);
+    expect(screen.getByText(/super admins have full access/i)).toBeInTheDocument();
+  });
+
+  it('displays staff message for regular role without admin', () => {
+    renderWrapper(<RenderAdminRole role={regularRole} />);
     expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
 

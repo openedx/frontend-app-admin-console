@@ -63,6 +63,21 @@ export const ActionsCell = ({ row }: CellProps) => {
 export const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const permissionCount = row.original.permissionCount || 0;
+  const role = row.original.role || '';
+  if (role === 'django.superuser') {
+    return (
+      <span>
+        {formatMessage(messages['authz.user.table.permissions.total.access'])}
+      </span>
+    );
+  }
+  if (role === 'django.globalstaff') {
+    return (
+      <span>
+        {formatMessage(messages['authz.user.table.permissions.partial.access'])}
+      </span>
+    );
+  }
   return (
     <span>
       {formatMessage(messages['authz.user.table.permissions.available.count'], { count: permissionCount })}

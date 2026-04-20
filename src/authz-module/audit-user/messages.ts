@@ -47,6 +47,16 @@ const messages = defineMessages(
       defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
       description: 'Text showing the number of permissions available, with proper pluralization',
     },
+    'authz.user.table.permissions.total.access': {
+      id: 'authz.user.table.permissions.total.access',
+      defaultMessage: 'Total access',
+      description: 'Label indicating Super Admin has total access to all permissions',
+    },
+    'authz.user.table.permissions.partial.access': {
+      id: 'authz.user.table.permissions.partial.access',
+      defaultMessage: 'Partial access',
+      description: 'Label indicating Global Staff has partial access to permissions',
+    },
     'authz.user.table.permissions.role.admin': {
       id: 'authz.user.table.permissions.role.admin',
       defaultMessage: 'Super Admins have full access to all areas of the platform, including content, settings, and user management. This role is managed at the platform level and cannot be changed from here. To modify it, go to Django Admin.',

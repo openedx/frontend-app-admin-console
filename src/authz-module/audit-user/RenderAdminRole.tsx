@@ -13,11 +13,9 @@ const RenderAdminRole = ({ role }: RenderAdminRoleProps) => {
     : 'authz.user.table.permissions.role.staff';
 
   return (
-    <div className="mb-4">
-      <p className="mb-0 text-primary-300 font-weight-light">
-        {intl.formatMessage(messages[messageKey])}
-      </p>
-    </div>
+    <p className="mb-0 text-primary-300 font-weight-light">
+      {intl.formatMessage(messages[messageKey])}
+    </p>
   );
 };
 
