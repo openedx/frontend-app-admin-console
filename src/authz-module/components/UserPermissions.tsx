@@ -9,9 +9,9 @@ import {
   libraryPermissions,
   rolesLibraryObject,
 } from '../libraries/constants';
-import RenderPermissionColumn from '../components/RenderPermissionColumn';
-import RenderPermissionInLine from '../components/RenderPermissionInLine';
-import RenderAdminRole from '../components/RenderAdminRole';
+import RenderPermissionColumn from './RenderPermissionColumn';
+import RenderPermissionInLine from './RenderPermissionInLine';
+import RenderAdminRole from './RenderAdminRole';
 
 interface UserPermissionsProps {
   row: {
