@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import ViewMoreLink from '@src/authz-module/components/ViewMoreLink';
-import { Delete, ExpandMore } from '@openedx/paragon/icons';
-import { IconButton, DataTableContext } from '@openedx/paragon';
+import { ExpandMore } from '@openedx/paragon/icons';
+import { DataTableContext } from '@openedx/paragon';
 import { TableCellValue, UserRole } from 'types';
 import messages from './messages';
 
@@ -44,43 +44,5 @@ export const ViewAllPermissionsCell = ({ row }: CellProps) => {
       onClick={handleToggleExpanded}
       iconSrc={ExpandMore}
     />
-  );
-};
-
-export const ActionsCell = ({ row }: CellProps) => {
-  const { formatMessage } = useIntl();
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
-    // eslint-disable-next-line no-console
-    console.log('Delete clicked for row:', row);
-  };
-
-  return (
-    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
-  );
-};
-
-export const PermissionsCell = ({ row }: CellProps) => {
-  const { formatMessage } = useIntl();
-  const permissionCount = row.original.permissionCount || 0;
-  const role = row.original.role || '';
-  if (role === 'django.superuser') {
-    return (
-      <span>
-        {formatMessage(messages['authz.user.table.permissions.total.access'])}
-      </span>
-    );
-  }
-  if (role === 'django.globalstaff') {
-    return (
-      <span>
-        {formatMessage(messages['authz.user.table.permissions.partial.access'])}
-      </span>
-    );
-  }
-  return (
-    <span>
-      {formatMessage(messages['authz.user.table.permissions.available.count'], { count: permissionCount })}
-    </span>
   );
 };

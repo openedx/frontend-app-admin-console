@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import { DataTableContext } from '@openedx/paragon';
-import { ViewAllPermissionsCell, ActionsCell, PermissionsCell } from './CustomCells';
+import { ViewAllPermissionsCell } from './CustomCells';
 
 describe('CustomCells', () => {
   const mockUserRole = {
@@ -116,43 +116,6 @@ describe('CustomCells', () => {
       expect(mockToggleRowExpanded).not.toHaveBeenCalled();
       // Should still toggle the current row
       expect(propsWithExpandedRow.row.toggleRowExpanded).toHaveBeenCalled();
-    });
-  });
-
-  describe('ActionsCell', () => {
-    it('renders delete button', () => {
-      renderWrapper(<ActionsCell {...mockCellProps} />);
-      expect(screen.getByRole('button')).toBeInTheDocument();
-    });
-  });
-
-  describe('PermissionsCell', () => {
-    it('renders permission count', () => {
-      renderWrapper(<PermissionsCell {...mockCellProps} />);
-      expect(screen.getByText(/5/)).toBeInTheDocument();
-    });
-
-    it('handles zero permission count', () => {
-      const propsWithZero = {
-        row: {
-          ...mockCellProps.row,
-          original: { ...mockUserRole, permissionCount: 0 },
-        },
-      };
-      renderWrapper(<PermissionsCell {...propsWithZero} />);
-      expect(screen.getByText(/0/)).toBeInTheDocument();
-    });
-
-    it('handles missing permission count', () => {
-      const { permissionCount, ...userRoleWithoutCount } = mockUserRole;
-      const propsWithoutCount = {
-        row: {
-          ...mockCellProps.row,
-          original: userRoleWithoutCount as any,
-        },
-      };
-      renderWrapper(<PermissionsCell {...propsWithoutCount} />);
-      expect(screen.getByText(/0/)).toBeInTheDocument();
     });
   });
 });
