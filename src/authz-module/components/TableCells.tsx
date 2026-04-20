@@ -18,7 +18,17 @@ import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
 
+interface ExpandableTableRow<T> extends TableCellValue<T> {
+  row: TableCellValue<T>['row'] & {
+    id: string;
+    isExpanded: boolean;
+    toggleRowExpanded: () => void;
+    values: T;
+  };
+}
+
 type CellProps = TableCellValue<UserRole>;
+type ExpandableCellProps = ExpandableTableRow<UserRole>;
 type CellPropsWithValue = CellProps & {
   value: string;
 };
@@ -123,12 +133,29 @@ const PermissionsCell = ({ row }: CellProps) => {
 
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
+  const instance = useContext(DataTableContext);
+  const handleToggleExpanded = () => {
+    if (!row.isExpanded && instance) {
+      // Close all other expanded rows first
+      const expanded = (instance as any)?.state?.expanded || {};
+      Object.keys(expanded).forEach(rowId => {
+        if (rowId !== row.id && expanded[rowId]) {
+          (instance as any).toggleRowExpanded?.(rowId, false);
+        }
+      });
+    }
+    // Toggle the current row
+    row.toggleRowExpanded();
+  };
+
   return (
     <ViewMoreLink
-      label={formatMessage(messages['authz.user.table.view_all_permissions.link.text'])}
-      // TODO: Implement view more functionality
-      // eslint-disable-next-line no-console
-      onClick={() => console.log('View more clicked for row:', row)}
+      label={formatMessage(
+        row.isExpanded
+          ? messages['authz.user.table.view_all_permissions.link.text.close']
+          : messages['authz.user.table.view_all_permissions.link.text.open'],
+      )}
+      onClick={handleToggleExpanded}
       iconSrc={ExpandMore}
     />
   );
