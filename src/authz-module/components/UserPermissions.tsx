@@ -1,9 +1,9 @@
-import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
   rolesObject,
-} from '@src/authz-module/courses/constant';
+  DJANGO_MANAGED_ROLES,
+} from '@src/authz-module/constants';
 import {
   libraryResourceTypes,
   libraryPermissions,

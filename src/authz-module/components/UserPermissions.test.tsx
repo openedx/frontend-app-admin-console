@@ -1,6 +1,6 @@
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
-import * as coursesConstants from '@src/authz-module/courses/constant';
+import * as coursesConstants from '@src/authz-module/constants';
 import UserPermissions from './UserPermissions';
 
 jest.mock('./RenderPermissionInLine', () => (

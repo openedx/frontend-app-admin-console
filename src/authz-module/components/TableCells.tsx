@@ -156,15 +156,17 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   };
 
   return (
-    <ViewMoreLink
-      label={formatMessage(
-        row.isExpanded
-          ? messages['authz.user.table.view_all_permissions.link.text.close']
-          : messages['authz.user.table.view_all_permissions.link.text.open'],
-      )}
-      onClick={handleToggleExpanded}
-      iconSrc={ExpandMore}
-    />
+    <div role="button">
+      <ViewMoreLink
+        label={formatMessage(
+          row.isExpanded
+            ? messages['authz.user.table.view_all_permissions.link.text.close']
+            : messages['authz.user.table.view_all_permissions.link.text.open'],
+        )}
+        onClick={handleToggleExpanded}
+        iconSrc={ExpandMore}
+      />
+    </div>
   );
 };
 
