@@ -27,6 +27,13 @@ interface ExpandableTableRow<T> extends TableCellValue<T> {
   };
 }
 
+interface DataTableInstance {
+  state?: {
+    expanded?: Record<string, boolean>;
+  };
+  toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
+}
+
 type CellProps = TableCellValue<UserRole>;
 type ExpandableCellProps = ExpandableTableRow<UserRole>;
 type CellPropsWithValue = CellProps & {
@@ -133,14 +140,14 @@ const PermissionsCell = ({ row }: CellProps) => {
 
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
-  const instance = useContext(DataTableContext);
+  const instance = useContext(DataTableContext) as DataTableInstance;
   const handleToggleExpanded = () => {
     if (!row.isExpanded && instance) {
       // Close all other expanded rows first
-      const expanded = (instance as any)?.state?.expanded || {};
+      const expanded = instance.state?.expanded || {};
       Object.keys(expanded).forEach(rowId => {
         if (rowId !== row.id && expanded[rowId]) {
-          (instance as any).toggleRowExpanded?.(rowId, false);
+          instance.toggleRowExpanded?.(rowId, false);
         }
       });
     }

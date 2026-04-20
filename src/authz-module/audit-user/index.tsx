@@ -26,7 +26,7 @@ import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
-import UserPermissions from '../components/UserPermissions';
+import UserPermissions from '@src/authz-module/components/UserPermissions';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();

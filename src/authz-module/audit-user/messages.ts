@@ -53,7 +53,7 @@ const messages = defineMessages(
       description: 'Description for the permissions of the Super Admin role',
     },
     'authz.user.table.permissions.role.staff': {
-      id: 'authz.user.table.permissions.role.staff ',
+      id: 'authz.user.table.permissions.role.staff',
       defaultMessage: 'Global Staff have access to all areas of the platform, similar to Super Admin, but cannot grant or revoke Super Admin or Global Staff roles to other users. This role is managed at the platform level and cannot be changed from here. To modify it, go to Django Admin.',
       description: 'Description for the permissions of the Global Staff role',
     },

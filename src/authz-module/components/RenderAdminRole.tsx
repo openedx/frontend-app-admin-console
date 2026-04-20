@@ -1,5 +1,5 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import messages from '../audit-user/messages';
+import messages from '@src/authz-module/audit-user/messages';
 
 interface RenderAdminRoleProps {
   role: string;

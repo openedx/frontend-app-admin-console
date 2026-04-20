@@ -3,12 +3,12 @@ import {
   courseResourceTypes,
   coursePermissions,
   rolesObject,
-} from '../courses/constant';
+} from '@src/authz-module/courses/constant';
 import {
   libraryResourceTypes,
   libraryPermissions,
   rolesLibraryObject,
-} from '../libraries/constants';
+} from '@src/authz-module/libraries/constants';
 import RenderPermissionColumn from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';
