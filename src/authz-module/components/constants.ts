@@ -50,14 +50,14 @@ export const getRolesFiltersOptions = (intl: IntlShape) => [
   {
     groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
     groupIcon: LibraryBooks,
-    displayName: 'Library Contributor',
-    value: 'library_contributor',
+    displayName: 'Library Author',
+    value: 'library_author',
   },
   {
     groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
     groupIcon: LibraryBooks,
-    displayName: 'Library Collaborator',
-    value: 'library_collaborator',
+    displayName: 'Library Contributor',
+    value: 'library_contributor',
   },
   {
     groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
