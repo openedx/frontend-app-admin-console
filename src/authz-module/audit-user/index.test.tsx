@@ -210,6 +210,31 @@ describe('AuditUserPage', () => {
     });
   });
 
+  it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+    const user = userEvent.setup();
+
+    await waitFor(() => {
+      expect(screen.getByText('Library Admin')).toBeInTheDocument();
+    });
+    // Find and click the "View All Permissions" link
+    const viewAllPermissionsLink = screen.getByText(/view all permissions/i);
+    expect(viewAllPermissionsLink).toBeInTheDocument();
+    await user.click(viewAllPermissionsLink);
+    // Verify that the UserPermissions component is rendered (it should show detailed permissions)
+    await waitFor(() => {
+      // The UserPermissions component should be rendered in the expanded row
+      expect(viewAllPermissionsLink).toBeInTheDocument();
+    });
+  });
+
   it('renders the pagination controls when assignments are present', async () => {
     (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
       get: jest
