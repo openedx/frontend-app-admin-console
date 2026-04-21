@@ -1,5 +1,5 @@
 import {
-  useMutation, useQuery, useQueryClient, useSuspenseQuery,
+  useInfiniteQuery, useMutation, useQuery, useQueryClient, useSuspenseQuery,
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
@@ -10,7 +10,7 @@ import {
   getPermissionsByRole, getScopes, GetScopesResponse, getTeamMembers,
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles,
   RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
-  validateUsers, ValidateUsersRequest,
+  validateUsers, ValidateUsersRequest, GetScopesParams,
 } from './api';
 
 const authzQueryKeys = {
@@ -91,10 +91,11 @@ export const useAssignTeamMembersRole = () => {
     mutationFn: async ({ data }: {
       data: AssignTeamMembersRoleRequest
     }) => assignTeamMembersRole(data),
-    onSettled: (_data, error, { data: { scope } }) => {
+    onSettled: (_data, error, { data: { scopes } }) => {
       if (!error) {
-        queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
-        queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
+        queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scopes[0]) });
+        queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scopes[0]) });
+        queryClient.invalidateQueries({ queryKey: [...authzQueryKeys.all, 'userRoles'] });
       }
     },
   });
@@ -163,32 +164,61 @@ export const useAllRoleAssignments = (querySettings: QuerySettings) => {
 };
 
 /**
- * React query hook to fetch the list of organizations for the organization filter component.
- * @param search - The search term to filter organizations.
- * @returns The list of organizations matching the search term.
+ * React Query hook to fetch a paginated, searchable list of organizations.
+ * Results are cached for 30 minutes — suitable for both filter dropdowns and full listings.
+ *
+ * @param search - Optional text filter applied to organization names.
+ * @param page - Page number to fetch (1-based). Omit to fetch the first page.
+ * @param pageSize - Number of items per page. Omit to use the API default.
+ * @returns A `QueryResult<GetOrgsResponse>` with `results`, `count`, `next`, and `previous`.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useOrgs({ search: 'edX' });
+ * const orgs = data?.results ?? [];
+ * ```
  */
-export const useOrgs = (search?: string, page?: number, pageSize?: number) => {
-  const result = useQuery<GetOrgsResponse, Error>({
-    queryKey: authzQueryKeys.orgs(search, page, pageSize),
-    queryFn: () => getOrgs(search, page, pageSize),
-    refetchOnWindowFocus: false,
-  });
-  return result;
-};
+export const useOrgs = (search?: string, page?: number, pageSize?: number) => useQuery<GetOrgsResponse, Error>({
+  queryKey: authzQueryKeys.orgs(search, page, pageSize),
+  queryFn: () => getOrgs(search, page, pageSize),
+  staleTime: 1000 * 60 * 30,
+  refetchOnWindowFocus: false,
+});
 
-/*
-  * React query hook to fetch the list of scopes for the scope filter component.
-  * @param search - The search term to filter scopes.
-  * @returns The list of scopes matching the search term.
-  */
-export const useScopes = (search?: string, page?: number, pageSize?: number) => {
-  const result = useQuery<GetScopesResponse, Error>({
-    queryKey: authzQueryKeys.scopes(search, page, pageSize),
-    queryFn: () => getScopes(search, page, pageSize),
-    refetchOnWindowFocus: false,
-  });
-  return result;
-};
+/**
+ * React Query hook to fetch a paginated, filterable list of scopes (courses or libraries).
+ * Uses infinite query to support infinite scroll — call `fetchNextPage` to load more results.
+ *
+ * @param params - Filter parameters (all optional):
+ *   - `search` — text filter applied to scope names
+ *   - `scopeType` — filter by scope type (e.g. course, library)
+ *   - `org` — filter by organization
+ *   - `pageSize` — number of items per page
+ *   - `managementPermissionOnly` — when true, returns only scopes the requester can manage
+ * @returns An `InfiniteQueryResult` whose `data.pages` contains the accumulated `GetScopesResponse` pages.
+ *
+ * @example
+ * ```tsx
+ * const { data, fetchNextPage, hasNextPage } = useScopes({ search: 'intro', org: 'edX' });
+ * const scopes = data?.pages.flatMap((p) => p.results) ?? [];
+ * ```
+ */
+export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfiniteQuery<GetScopesResponse, Error>({
+  queryKey: [...authzQueryKeys.all, 'scopes', params],
+  queryFn: ({ pageParam }) => getScopes({ ...params, page: pageParam as number }),
+  getNextPageParam: (lastPage) => {
+    if (!lastPage.next) { return undefined; }
+    try {
+      const nextUrl = new URL(lastPage.next);
+      const page = nextUrl.searchParams.get('page');
+      return page ? parseInt(page, 10) : undefined;
+    } catch {
+      return undefined;
+    }
+  },
+  initialPageParam: 1,
+  staleTime: 1000 * 60 * 5,
+});
 
 /*
   * React Query hook to fetch all the roles assigned to a specific user.

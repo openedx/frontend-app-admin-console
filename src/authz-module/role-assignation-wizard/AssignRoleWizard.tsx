@@ -10,13 +10,11 @@ import { RoleMetadata } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { useValidateUsers } from '../data/hooks';
 import { libraryRolesMetadata } from '../roles-permissions/library/constants';
 import { courseRolesMetadata } from '../roles-permissions/course/constants';
+import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
 import messages from './messages';
 
-// Default: all roles. Callers may pass a filtered subset once a permission-
-// lookup API is available (e.g. only library roles when user lacks course scope).
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 const STEPS = {
@@ -50,7 +48,7 @@ const getInitialState = (initialUsers: string) => ({
 
 const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata }: AssignRoleWizardProps) => {
   const intl = useIntl();
-  const { showErrorToast } = useToastManager();
+  const { showToast, showErrorToast } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -62,6 +60,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
   const usersInputRef = useRef<HTMLTextAreaElement>(null);
 
   const validateUsersMutation = useValidateUsers();
+  const assignRoleMutation = useAssignTeamMembersRole();
 
   const handleUsersChange = useCallback((value: string) => {
     setInvalidUsers((prev) => (prev.length > 0 ? [] : prev));
@@ -107,10 +106,33 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     });
   }, []);
 
-  // TODO: replace with real assignment API call using validatedUsers, selectedRole, selectedScopes
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) { return; }
-    handleClose();
+
+    try {
+      const result = await assignRoleMutation.mutateAsync({
+        data: {
+          users: validatedUsers,
+          role: selectedRole,
+          scopes: Array.from(selectedScopes),
+        },
+      });
+
+      if (result.errors?.length > 0) {
+        const msg = result.errors
+          .map((e) => `${e.userIdentifier} (${e.scope}): ${e.error}`)
+          .join(', ');
+        showErrorToast(new Error(msg), handleSave);
+      } else {
+        showToast({
+          message: intl.formatMessage(messages['wizard.save.success']),
+          type: 'success',
+        });
+        handleClose();
+      }
+    } catch (error) {
+      showErrorToast(error, handleSave);
+    }
   };
 
   useEffect(() => {
@@ -182,7 +204,13 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
           <Button variant="outline-primary" onClick={handleClose}>
             {intl.formatMessage(messages['wizard.button.cancel'])}
           </Button>
-          <Button variant="tertiary" onClick={() => setActiveStep(STEPS.SELECT_USERS_AND_ROLE)}>
+          <Button
+            variant="tertiary"
+            onClick={() => {
+              setSelectedScopes(new Set());
+              setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
+            }}
+          >
             {intl.formatMessage(messages['wizard.button.back'])}
           </Button>
           <Stepper.ActionRow.Spacer />
@@ -192,9 +220,9 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
               pending: intl.formatMessage(messages['wizard.button.save.pending']),
             }}
             icons={{ pending: <Icon src={SpinnerSimple} /> }}
-            state="default"
+            state={assignRoleMutation.isPending ? 'pending' : 'default'}
             onClick={handleSave}
-            disabled={!canSave}
+            disabled={!canSave || assignRoleMutation.isPending}
           />
         </Stepper.ActionRow>
       </div>

@@ -6,16 +6,20 @@ import ScopesFilter from './ScopesFilter';
 jest.mock('@src/authz-module/data/hooks', () => ({
   useScopes: () => ({
     data: {
-      results: [
+      pages: [
         {
-          externalKey: 'course:123',
-          name: 'Test Course',
-          organization: { name: 'Test Org' },
-        },
-        {
-          externalKey: 'library:456',
-          name: 'Test Library',
-          organization: { name: 'Another Org' },
+          results: [
+            {
+              externalKey: 'course:123',
+              name: 'Test Course',
+              organization: { name: 'Test Org' },
+            },
+            {
+              externalKey: 'library:456',
+              name: 'Test Library',
+              organization: { name: 'Another Org' },
+            },
+          ],
         },
       ],
     },

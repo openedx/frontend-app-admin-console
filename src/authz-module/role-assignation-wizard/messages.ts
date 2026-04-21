@@ -26,7 +26,7 @@ const messages = defineMessages({
   },
   'wizard.step.defineScope.title': {
     id: 'wizard.step.defineScope.title',
-    defaultMessage: 'Where it applies',
+    defaultMessage: 'Where It Applies',
     description: 'Step 2 title in the assign role wizard',
   },
 
@@ -67,6 +67,33 @@ const messages = defineMessages({
     id: 'wizard.save.success',
     defaultMessage: 'Role assigned successfully.',
     description: 'Toast message shown when a role is successfully assigned',
+  },
+
+  // DefineApplicationScopeStep — filter bar
+  'wizard.step2.search.placeholder': {
+    id: 'wizard.step2.search.placeholder',
+    defaultMessage: 'Search',
+    description: 'Placeholder text for the scope search input in step 2',
+  },
+  'wizard.step2.filter.org.label': {
+    id: 'wizard.step2.filter.org.label',
+    defaultMessage: 'Organization',
+    description: 'Default label for the organization filter dropdown in step 2',
+  },
+  'wizard.step2.filter.org.all': {
+    id: 'wizard.step2.filter.org.all',
+    defaultMessage: 'All Organizations',
+    description: 'Option to clear the organization filter in step 2',
+  },
+  'wizard.step2.filter.applied': {
+    id: 'wizard.step2.filter.applied',
+    defaultMessage: 'Filter applied:',
+    description: 'Label prefix shown before the active context-type filter badge in step 2',
+  },
+  'wizard.step2.count': {
+    id: 'wizard.step2.count',
+    defaultMessage: 'Showing {shown} of {total}.',
+    description: 'Count of visible scopes vs total in step 2',
   },
 
   // SelectUsersAndRoleStep — users section

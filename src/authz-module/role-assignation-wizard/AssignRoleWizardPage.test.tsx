@@ -14,6 +14,13 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../data/hooks', () => ({
   useValidateUsers: jest.fn(),
+  useAssignTeamMembersRole: jest.fn(() => ({
+    mutate: jest.fn(),
+    mutateAsync: jest.fn(),
+    isPending: false,
+    isError: false,
+    isSuccess: false,
+  })),
 }));
 
 jest.mock('@edx/frontend-component-header', () => ({

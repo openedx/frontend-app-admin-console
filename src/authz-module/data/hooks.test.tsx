@@ -390,7 +390,7 @@ describe('useAssignTeamMembersRole', () => {
     });
 
     await act(async () => {
-      result.current.mutate({ data: { scope: 'lib:123', users: ['jdoe'], role: 'author' } });
+      result.current.mutate({ data: { scopes: ['lib:123'], users: ['jdoe'], role: 'author' } });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -409,7 +409,7 @@ describe('useAssignTeamMembersRole', () => {
     });
 
     await act(async () => {
-      result.current.mutate({ data: { scope: 'lib:123', users: ['jdoe'], role: 'author' } });
+      result.current.mutate({ data: { scopes: ['lib:123'], users: ['jdoe'], role: 'author' } });
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -464,6 +464,128 @@ describe('useValidateUsers', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error).toEqual(new Error('Validation failed'));
+  });
+});
+
+describe('useScopes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const makeScopesResponse = (next: string | null = null) => ({
+    results: [{
+      externalKey: 'lib:testorg:testlib',
+      displayName: 'Test Library',
+      org: { id: 1, name: 'Test Org', slug: 'testorg' },
+    }],
+    count: 1,
+    next,
+    previous: null,
+  });
+
+  it('returns pages data on success', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse() }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.pages).toHaveLength(1);
+    expect(result.current.data?.pages[0].results).toHaveLength(1);
+  });
+
+  it('hasNextPage is false when next is null', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse(null) }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('hasNextPage is true when next URL has page param', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/?page=2'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(true);
+  });
+
+  it('hasNextPage is false when next URL has no page param', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('hasNextPage is false when next is an invalid URL', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        data: makeScopesResponse('not-a-valid-url'),
+      }),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('handles error when API call fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Network error')),
+    });
+
+    const { result } = renderHook(() => useScopes({}), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeDefined();
+  });
+});
+
+describe('useOrgs', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockOrgs = [{
+    id: 1, name: 'Org One', shortName: 'org1', description: '', logo: null, active: true,
+  }];
+
+  it('returns organizations on success', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { results: mockOrgs } }),
+    });
+
+    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.results).toEqual(mockOrgs);
+  });
+
+  it('handles error when API fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Failed')),
+    });
+
+    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });
 
@@ -665,9 +787,9 @@ describe('useScopes', () => {
   it('fetches and returns scopes', async () => {
     const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(result.current.data?.results).toHaveLength(2);
-      expect(result.current.data?.results[0].displayName).toBe('Open edX Demo Course');
-      expect(result.current.data?.count).toBe(2);
+      expect(result.current.data?.pages[0].results).toHaveLength(2);
+      expect(result.current.data?.pages[0].results[0].displayName).toBe('Open edX Demo Course');
+      expect(result.current.data?.pages[0].count).toBe(2);
     });
   });
 
@@ -681,8 +803,8 @@ describe('useScopes', () => {
     });
     const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
     await waitFor(() => {
-      expect(result.current.data?.results).toEqual([]);
-      expect(result.current.data?.count).toBe(0);
+      expect(result.current.data?.pages[0].results).toEqual([]);
+      expect(result.current.data?.pages[0].count).toBe(0);
     });
   });
 });

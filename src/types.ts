@@ -63,10 +63,10 @@ export type Org = {
 };
 
 export type Scope = {
-  key: string;
-  name: string;
-  description: string;
-  organization: Org;
+  externalKey: string;
+  displayName: string;
+  description?: string;
+  org: Org | null;
 };
 
 // Permissions Matrix

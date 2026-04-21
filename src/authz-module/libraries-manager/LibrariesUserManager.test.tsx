@@ -182,6 +182,80 @@ describe('LibrariesUserManager', () => {
     expect(navLinkLibraryTeamManagement).toHaveAttribute('href', '/authz/libraries/lib:123');
   });
 
+  describe('Navigation guards', () => {
+    it('redirects to team path when canManageTeam is false', () => {
+      (useLibraryAuthZ as jest.Mock).mockReturnValue({
+        ...defaultMockData,
+        canManageTeam: false,
+      });
+
+      renderComponent();
+
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/libraries/lib:123');
+    });
+
+    it('redirects to team path when user is not found after loading completes', async () => {
+      (useTeamMembers as jest.Mock).mockReturnValue({
+        data: { results: [] },
+        isLoading: false,
+        isFetching: false,
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/authz/libraries/lib:123');
+      });
+    });
+
+    it('does not redirect while member data is still fetching', () => {
+      (useTeamMembers as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isFetching: true,
+      });
+
+      renderComponent();
+
+      // navigate should only be called for canManageTeam=true case (not at all here)
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Loading state', () => {
+    it('renders skeleton while loading team member data', () => {
+      (useTeamMembers as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isFetching: true,
+      });
+
+      renderComponent();
+
+      // Just verify the component renders without crashing in loading state
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Assign role button', () => {
+    it('navigates to assign-role wizard when Assign Role button is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      // There are two "Assign Role" elements: the mocked AssignNewRoleTrigger and the real Button
+      // The real Button navigates; use getAllByText and click the one that is a <button>
+      const assignRoleButtons = screen.getAllByText('Assign Role');
+      const realButton = assignRoleButtons.find(
+        (el) => el.tagName === 'BUTTON' || el.closest('button[class*="btn-primary"]') !== null,
+      );
+      await user.click(realButton || assignRoleButtons[0]);
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/authz/assign-role?users=testuser&from=%2Fauthz%2Flibraries%2Flib%3A123%2Ftestuser',
+      );
+    });
+  });
+
   describe('Revoking User Role Flow', () => {
     it('opens confirmation modal when delete role button is clicked', async () => {
       const user = userEvent.setup();
