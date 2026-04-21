@@ -1,93 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { Icon, Spinner } from '@openedx/paragon';
-import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
+import { useEffect, useRef } from 'react';
+import { Spinner } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Org, Scope } from 'types';
+import OrgSection, { ScopeCheckboxItem } from './OrgSection';
 import messages from '../messages';
-
-// --- ScopeCheckboxItem ---
-
-interface ScopeCheckboxItemProps {
-  scope: Scope;
-  checked: boolean;
-  onToggle: (scopeId: string) => void;
-}
-
-const ScopeCheckboxItem = ({ scope, checked, onToggle }: ScopeCheckboxItemProps) => (
-  <div className="mb-2">
-    <div className="pgn__form-checkbox">
-      <input
-        type="checkbox"
-        id={`scope-${scope.externalKey}`}
-        className="pgn__form-checkbox-input"
-        checked={checked}
-        onChange={() => onToggle(scope.externalKey)}
-      />
-      <label
-        className="pgn__form-label"
-        htmlFor={`scope-${scope.externalKey}`}
-        data-testid="toggle-scope"
-      >
-        {scope.displayName}
-      </label>
-    </div>
-    {scope.description && (
-      <small className="d-block text-muted pl-4">{scope.description}</small>
-    )}
-  </div>
-);
-
-// --- OrgSection ---
-
-interface OrgSectionProps {
-  orgName: string;
-  scopes: Scope[];
-  selectedScopes: Set<string>;
-  onScopeToggle: (scopeId: string) => void;
-  aggregateScopeItem?: Scope;
-}
-
-const OrgSection = ({
-  orgName, scopes, selectedScopes, onScopeToggle, aggregateScopeItem,
-}: OrgSectionProps) => {
-  const intl = useIntl();
-  const [collapsed, setCollapsed] = useState(false);
-
-  return (
-    <div className="scope-org-group mb-3">
-      <button
-        type="button"
-        className="d-flex align-items-center gap-1 bg-transparent border-0 p-0 mb-2 text-primary font-weight-bold"
-        onClick={() => setCollapsed((prev) => !prev)}
-      >
-        <span>{intl.formatMessage(messages['wizard.step2.scopeList.orgLabel'], { orgName })}</span>
-        <Icon src={collapsed ? ExpandMore : ExpandLess} className="text-primary" />
-      </button>
-
-      {!collapsed && (
-        <div className="pl-2">
-          {aggregateScopeItem && (
-            <ScopeCheckboxItem
-              scope={aggregateScopeItem}
-              checked={selectedScopes.has(aggregateScopeItem.externalKey)}
-              onToggle={onScopeToggle}
-            />
-          )}
-          {scopes.map((scope) => (
-            <ScopeCheckboxItem
-              key={scope.externalKey}
-              scope={scope}
-              checked={selectedScopes.has(scope.externalKey)}
-              onToggle={onScopeToggle}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// --- ScopeList ---
 
 interface ScopeListQueryState {
   isLoading: boolean;
@@ -132,12 +48,11 @@ const ScopeList = ({
     course: messages['wizard.step2.scope.aggregate.description.course'],
     library: messages['wizard.step2.scope.aggregate.description.library'],
   };
-  type ContextKey = keyof typeof aggregateLabelMessages;
-  const aggregateLabel = contextType && contextType in aggregateLabelMessages
-    ? intl.formatMessage(aggregateLabelMessages[contextType as ContextKey])
+  const aggregateLabel = contextType && aggregateLabelMessages[contextType]
+    ? intl.formatMessage(aggregateLabelMessages[contextType])
     : '';
-  const aggregateDescription = contextType && contextType in aggregateDescriptionMessages
-    ? intl.formatMessage(aggregateDescriptionMessages[contextType as ContextKey])
+  const aggregateDescription = contextType && aggregateDescriptionMessages[contextType]
+    ? intl.formatMessage(aggregateDescriptionMessages[contextType])
     : '';
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -157,7 +72,7 @@ const ScopeList = ({
   }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
   return (
-    <div className="scope-list border rounded p-3 bg-light-100">
+    <div className="scope-list border rounded p-3 bg-light-100 overflow-auto">
       {isLoading ? (
         <div className="d-flex justify-content-center p-4">
           <Spinner animation="border" screenReaderText={intl.formatMessage(messages['wizard.step2.scopeList.loading'])} />

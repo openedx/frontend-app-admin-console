@@ -1,17 +1,16 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  Form, Dropdown, Icon, Badge, Stack,
+  Form, Icon, Badge, Stack,
 } from '@openedx/paragon';
-import { Search, FilterList } from '@openedx/paragon/icons';
-import { Org } from 'types';
+import { Search } from '@openedx/paragon/icons';
+import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import messages from '../messages';
 
 interface ScopeFilterBarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  selectedOrg: string;
-  onOrgChange: (org: string) => void;
-  organizations: Org[] | undefined;
+  selectedOrgs: string[];
+  onOrgsChange: (value: string[]) => void;
   contextType: string | undefined;
   contextLabel: string;
   allScopesCount: number;
@@ -21,18 +20,14 @@ interface ScopeFilterBarProps {
 const ScopeFilterBar = ({
   search,
   onSearchChange,
-  selectedOrg,
-  onOrgChange,
-  organizations,
+  selectedOrgs,
+  onOrgsChange,
   contextType,
   contextLabel,
   allScopesCount,
   totalCount,
 }: ScopeFilterBarProps) => {
   const intl = useIntl();
-  const selectedOrgLabel = organizations?.find((o) => o.shortName === selectedOrg)?.name
-    || selectedOrg
-    || intl.formatMessage(messages['wizard.step2.filter.org.label']);
 
   return (
     <>
@@ -50,26 +45,11 @@ const ScopeFilterBar = ({
             </Form.Group>
           </div>
 
-          <Dropdown>
-            <Dropdown.Toggle variant="outline-primary" id="org-filter-toggle">
-              <Icon src={FilterList} className="mr-2" />
-              {selectedOrg ? selectedOrgLabel : intl.formatMessage(messages['wizard.step2.filter.org.label'])}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => onOrgChange('')} active={!selectedOrg}>
-                {intl.formatMessage(messages['wizard.step2.filter.org.all'])}
-              </Dropdown.Item>
-              {organizations?.map((org) => (
-                <Dropdown.Item
-                  key={org.shortName}
-                  onClick={() => onOrgChange(org.shortName)}
-                  active={selectedOrg === org.shortName}
-                >
-                  {org.name || org.shortName}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
+          <OrgFilter
+            filterButtonText={intl.formatMessage(messages['wizard.step2.filter.org.label'])}
+            filterValue={selectedOrgs}
+            setFilter={(value) => onOrgsChange(value)}
+          />
         </div>
 
         <span className="text-muted small text-nowrap">

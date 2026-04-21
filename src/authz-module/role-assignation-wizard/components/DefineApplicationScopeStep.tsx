@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Alert } from '@openedx/paragon';
 import { courseRolesMetadata } from '@src/authz-module/roles-permissions/course/constants';
@@ -31,22 +31,24 @@ const DefineApplicationScopeStep = ({
   const intl = useIntl();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
 
-  const contextType = getContextType(selectedRole);
+  const contextType = useMemo(
+    () => getContextType(selectedRole),
+    [selectedRole],
+  );
   const contextLabelMessages = {
     course: messages['wizard.step2.contextLabel.course'],
     library: messages['wizard.step2.contextLabel.library'],
   };
-  const contextLabel = intl.formatMessage(
-    contextLabelMessages[contextType as keyof typeof contextLabelMessages]
-      ?? messages['wizard.step2.contextLabel.default'],
-  );
+  const contextLabel = contextType && contextLabelMessages[contextType]
+    ? intl.formatMessage(contextLabelMessages[contextType])
+    : intl.formatMessage(messages['wizard.step2.contextLabel.default']);
 
   const {
     organizations,
@@ -57,7 +59,7 @@ const DefineApplicationScopeStep = ({
     queryState,
     platformAggregateScopeItem,
     showOrgAggregates,
-  } = useScopeListData({ contextType, search: debouncedSearch, org: selectedOrg });
+  } = useScopeListData({ contextType, search: debouncedSearch, org: selectedOrgs[0] || '' });
 
   return (
     <div className="define-application-scope-step">
@@ -66,9 +68,8 @@ const DefineApplicationScopeStep = ({
       <ScopeFilterBar
         search={search}
         onSearchChange={setSearch}
-        selectedOrg={selectedOrg}
-        onOrgChange={setSelectedOrg}
-        organizations={organizations}
+        selectedOrgs={selectedOrgs}
+        onOrgsChange={setSelectedOrgs}
         contextType={contextType}
         contextLabel={contextLabel}
         allScopesCount={allScopes.length}

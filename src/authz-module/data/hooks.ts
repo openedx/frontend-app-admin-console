@@ -87,13 +87,14 @@ export const useLibrary = (libraryId: string) => useSuspenseQuery<LibraryMetadat
  */
 export const useAssignTeamMembersRole = () => {
   const queryClient = useQueryClient();
+  const { querySettings: defaultQuerySettings } = useQuerySettings();
   return useMutation({
     mutationFn: async ({ data }: {
       data: AssignTeamMembersRoleRequest
     }) => assignTeamMembersRole(data),
     onSettled: (_data, error, { data: { scopes } }) => {
       if (!error) {
-        queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scopes[0]) });
+        queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembers(scopes[0], defaultQuerySettings) });
         queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scopes[0]) });
         queryClient.invalidateQueries({ queryKey: [...authzQueryKeys.all, 'userRoles'] });
       }

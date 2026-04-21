@@ -327,7 +327,6 @@ describe('DefineApplicationScopeStep', () => {
       await waitFor(() => {
         expect(screen.getByText('Organization One')).toBeInTheDocument();
         expect(screen.getByText('Organization Two')).toBeInTheDocument();
-        expect(screen.getByText('All Organizations')).toBeInTheDocument();
       });
     });
 
@@ -337,16 +336,16 @@ describe('DefineApplicationScopeStep', () => {
       await userEvent.click(toggle);
       await waitFor(() => screen.getByText('Organization One'));
       await userEvent.click(screen.getByText('Organization One'));
-      // After selecting org1, useScopes is called with org: 'org1'
       expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ org: 'org1' }));
     });
 
-    it('clears org filter when "All Organizations" is selected', async () => {
+    it('clears org filter when selected organization is deselected', async () => {
       renderComponent();
       const toggle = screen.getByText('Organization');
       await userEvent.click(toggle);
-      await waitFor(() => screen.getByText('All Organizations'));
-      await userEvent.click(screen.getByText('All Organizations'));
+      await waitFor(() => screen.getByText('Organization One'));
+      await userEvent.click(screen.getByText('Organization One'));
+      await userEvent.click(screen.getByText('Organization One'));
       expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ org: undefined }));
     });
   });
