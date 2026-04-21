@@ -220,6 +220,7 @@ export const getOrgs = async (search?: string, page?: number, pageSize?: number)
 export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
   if (params.search) { url.searchParams.set('search', params.search); }
+  if (params.scopeType) { url.searchParams.set('scope_type', params.scopeType); }
   if (params.org) { url.searchParams.set('org', params.org); }
   if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
   url.searchParams.set('page', (params.page ?? 1).toString());

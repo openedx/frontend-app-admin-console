@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { QuerySettings } from '@src/authz-module/data/types';
+import { QuerySettings } from '@src/authz-module/data/api';
 
 interface DataTableFilters {
   pageSize: number;

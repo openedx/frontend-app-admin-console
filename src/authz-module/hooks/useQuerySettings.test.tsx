@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { QuerySettings } from '@src/authz-module/data/types';
+import { QuerySettings } from '@src/authz-module/data/api';
 import { useQuerySettings } from './useQuerySettings';
 
 describe('useQuerySettings', () => {

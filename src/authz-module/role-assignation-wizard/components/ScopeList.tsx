@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Form, Icon, Spinner } from '@openedx/paragon';
+import { Icon, Spinner } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
 import { Org, Scope } from 'types';
 

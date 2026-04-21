@@ -563,19 +563,19 @@ describe('useOrgs', () => {
     jest.clearAllMocks();
   });
 
-  const mockOrgs = [{
+  const mockOrgsResult = [{
     id: 1, name: 'Org One', shortName: 'org1', description: '', logo: null, active: true,
   }];
 
   it('returns organizations on success', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { results: mockOrgs } }),
+      get: jest.fn().mockResolvedValue({ data: { results: mockOrgsResult } }),
     });
 
     const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.results).toEqual(mockOrgs);
+    expect(result.current.data?.results).toEqual(mockOrgsResult);
   });
 
   it('handles error when API fails', async () => {
