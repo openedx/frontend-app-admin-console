@@ -36,11 +36,14 @@ const DefineApplicationScopeStep = ({
   }, [search]);
 
   const contextType = getContextType(selectedRole);
-  const contextLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.contextLabel.course'])
-    : contextType === 'library'
-      ? intl.formatMessage(messages['wizard.step2.contextLabel.library'])
-      : intl.formatMessage(messages['wizard.step2.contextLabel.default']);
+  const contextLabelMessages = {
+    course: messages['wizard.step2.contextLabel.course'],
+    library: messages['wizard.step2.contextLabel.library'],
+  };
+  const contextLabel = intl.formatMessage(
+    contextLabelMessages[contextType as keyof typeof contextLabelMessages]
+      ?? messages['wizard.step2.contextLabel.default'],
+  );
 
   const {
     organizations,

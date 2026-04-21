@@ -39,11 +39,11 @@ const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) 
   const scopesByOrg = useMemo(() => allScopes
     .filter((s: Scope) => !!s.org)
     .reduce<Record<string, Scope[]>>((acc, scope: Scope) => {
-      const orgSlug = scope.org!.shortName;
-      if (!acc[orgSlug]) { acc[orgSlug] = []; }
-      acc[orgSlug].push(scope);
-      return acc;
-    }, {}), [allScopes]);
+    const orgSlug = scope.org!.shortName;
+    if (!acc[orgSlug]) { acc[orgSlug] = []; }
+    acc[orgSlug].push(scope);
+    return acc;
+  }, {}), [allScopes]);
 
   const orderedOrgs = useMemo(() => Object.keys(scopesByOrg), [scopesByOrg]);
 

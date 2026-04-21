@@ -124,16 +124,21 @@ const ScopeList = ({
   const {
     isLoading, isFetchingNextPage, hasNextPage, isError, fetchNextPage,
   } = queryState;
-  const aggregateLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
-    : contextType === 'library'
-      ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library'])
-      : '';
-  const aggregateDescription = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
-    : contextType === 'library'
-      ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library'])
-      : '';
+  const aggregateLabelMessages = {
+    course: messages['wizard.step2.scopeList.aggregate.label.course'],
+    library: messages['wizard.step2.scopeList.aggregate.label.library'],
+  };
+  const aggregateDescriptionMessages = {
+    course: messages['wizard.step2.scope.aggregate.description.course'],
+    library: messages['wizard.step2.scope.aggregate.description.library'],
+  };
+  type ContextKey = keyof typeof aggregateLabelMessages;
+  const aggregateLabel = contextType && contextType in aggregateLabelMessages
+    ? intl.formatMessage(aggregateLabelMessages[contextType as ContextKey])
+    : '';
+  const aggregateDescription = contextType && contextType in aggregateDescriptionMessages
+    ? intl.formatMessage(aggregateDescriptionMessages[contextType as ContextKey])
+    : '';
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
