@@ -133,7 +133,6 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
               },
             ]
         }
-        className="vh-100"
       >
         <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
         <DataTable.Table />
