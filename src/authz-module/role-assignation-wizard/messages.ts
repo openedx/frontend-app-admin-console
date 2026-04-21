@@ -68,6 +68,16 @@ const messages = defineMessages({
     defaultMessage: 'Role assigned successfully.',
     description: 'Toast message shown when a role is successfully assigned',
   },
+  'wizard.save.errors.summary': {
+    id: 'wizard.save.errors.summary',
+    defaultMessage: 'Some assignments could not be completed. See details below.',
+    description: 'Short toast message shown when one or more role assignments fail',
+  },
+  'wizard.step2.errors.alert.title': {
+    id: 'wizard.step2.errors.alert.title',
+    defaultMessage: 'The following errors occurred:',
+    description: 'Heading of the inline error alert shown in step 2 when role assignments partially fail',
+  },
   'wizard.save.error.user_already_has_role': {
     id: 'wizard.save.error.user_already_has_role',
     defaultMessage: '{userIdentifier} already has this role in {scope}',

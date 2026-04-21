@@ -57,6 +57,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
   const [validatedUsers, setValidatedUsers] = useState<string[]>([]);
+  const [assignmentErrors, setAssignmentErrors] = useState<string[]>([]);
 
   const usersInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -76,6 +77,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     setSelectedScopes(initialState.selectedScopes);
     setInvalidUsers(initialState.invalidUsers);
     setValidatedUsers(initialState.validatedUsers);
+    setAssignmentErrors([]);
     onClose();
   };
 
@@ -109,6 +111,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
 
   const handleSave = async () => {
     if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) { return; }
+    setAssignmentErrors([]);
 
     try {
       const result = await assignRoleMutation.mutateAsync({
@@ -120,8 +123,11 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
       });
 
       if (result.errors?.length > 0) {
-        const lines = result.errors.map((e) => formatRoleAssignmentError(intl, e));
-        showToast({ message: lines.join(' · '), type: 'error' });
+        setAssignmentErrors(result.errors.map((e) => formatRoleAssignmentError(intl, e)));
+        showToast({
+          message: intl.formatMessage(messages['wizard.save.errors.summary']),
+          type: 'error',
+        });
       } else {
         showToast({
           message: intl.formatMessage(messages['wizard.save.success']),
@@ -176,6 +182,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
             selectedRole={selectedRole}
             selectedScopes={selectedScopes}
             onScopeToggle={handleScopeToggle}
+            assignmentErrors={assignmentErrors}
           />
         </Stepper.Step>
       </div>
@@ -207,6 +214,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
             variant="tertiary"
             onClick={() => {
               setSelectedScopes(new Set());
+              setAssignmentErrors([]);
               setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
             }}
           >

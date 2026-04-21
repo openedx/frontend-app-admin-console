@@ -217,18 +217,20 @@ describe('AssignRoleWizard — Step 2', () => {
     });
   });
 
-  it('shows error toast when the API returns assignment errors', async () => {
+  it('shows error toast and inline alert when the API returns assignment errors', async () => {
     const user = userEvent.setup();
     mockAssignMutateAsync.mockResolvedValue({
       completed: [],
-      errors: [{ userIdentifier: 'alice', scope: 'lib:test:123', error: 'already has role' }],
+      errors: [{ userIdentifier: 'alice', scope: 'lib:test:123', error: 'user_already_has_role' }],
     });
     renderWizard();
     await advanceToStep2(user);
     await user.click(screen.getByTestId('toggle-scope'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
+      expect(screen.getByText(/alice already has this role in lib:test:123/i)).toBeInTheDocument();
     });
   });
 
