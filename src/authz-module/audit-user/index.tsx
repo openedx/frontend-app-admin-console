@@ -24,9 +24,9 @@ import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import UserPermissions from '@src/authz-module/components/UserPermissions';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
-import UserPermissions from '@src/authz-module/components/UserPermissions';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();

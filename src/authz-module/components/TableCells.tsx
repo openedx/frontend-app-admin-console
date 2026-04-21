@@ -12,20 +12,11 @@ import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
 import { ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
 import {
-  Icon, IconButton, OverlayTrigger, Tooltip,
+  Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
-
-interface ExpandableTableRow<T> extends TableCellValue<T> {
-  row: TableCellValue<T>['row'] & {
-    id: string;
-    isExpanded: boolean;
-    toggleRowExpanded: () => void;
-    values: T;
-  };
-}
 
 interface DataTableInstance {
   state?: {
@@ -35,7 +26,6 @@ interface DataTableInstance {
 }
 
 type CellProps = TableCellValue<UserRole>;
-type ExpandableCellProps = ExpandableTableRow<UserRole>;
 type CellPropsWithValue = CellProps & {
   value: string;
 };
