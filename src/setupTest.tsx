@@ -44,6 +44,10 @@ export const renderWithAllProviders = (ui, options = {}) => {
   return render(ui, { wrapper: Wrapper, ...options });
 };
 
+export const intlWrapper = ({ children }: WrapperProps) => (
+  <IntlProvider locale="en">{children}</IntlProvider>
+);
+
 export const renderWrapper = (ui, options = {}) => {
   const Wrapper = ({ children }: WrapperProps) => (
     <BrowserRouter>

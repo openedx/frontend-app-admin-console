@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { intlWrapper as wrapper } from '@src/setupTest';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '../../data/hooks';
 
@@ -56,7 +57,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current).toMatchObject({
         organizations: defaultOrgs,
@@ -90,7 +91,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toMatchObject({
         externalKey: '*',
@@ -109,7 +110,7 @@ describe('useScopeListData', () => {
         contextType: undefined,
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
     });
@@ -138,7 +139,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(Object.keys(result.current.scopesByOrg)).toEqual(['org1', 'org2']);
       expect(result.current.scopesByOrg.org1).toHaveLength(2);
@@ -166,7 +167,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(Object.keys(result.current.scopesByOrg)).toEqual(['org1']);
     });
@@ -192,7 +193,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       const org1Scopes = result.current.scopesByOrg.org1;
       // Note: API returns scopes in whatever order - no sorting applied by this hook
@@ -222,7 +223,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       // Object.keys preserves insertion order from the reduce operation (org2 first, then org1, then org3)
       expect(result.current.orderedOrgs).toEqual(['org2', 'org1', 'org3']);
@@ -239,7 +240,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).not.toBeNull();
       expect(result.current.platformAggregateScopeItem?.displayName).toBe('All libraries in Platform');
@@ -255,7 +256,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).not.toBeNull();
       expect(result.current.platformAggregateScopeItem?.displayName).toBe('All courses in Platform');
@@ -270,7 +271,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
       expect(result.current.showOrgAggregates).toBe(false);
@@ -285,7 +286,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
       expect(result.current.showOrgAggregates).toBe(false);
@@ -299,7 +300,7 @@ describe('useScopeListData', () => {
         contextType: undefined,
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
     });
@@ -314,7 +315,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.queryState.isLoading).toBe(true);
     });
@@ -327,7 +328,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.queryState.isError).toBe(true);
     });
@@ -341,7 +342,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       result.current.queryState.fetchNextPage();
       expect(fetchNextPageFn).toHaveBeenCalled();
@@ -357,7 +358,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
         scopeType: 'library',
@@ -372,7 +373,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: 'mylib',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
         search: 'mylib',
@@ -387,7 +388,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: 'org1',
-      }));
+      }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
         org: 'org1',
@@ -402,7 +403,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
         search: undefined,
@@ -417,7 +418,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
         org: undefined,
@@ -444,7 +445,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.totalCount).toBe(42);
     });
@@ -457,7 +458,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.totalCount).toBe(0);
     });
@@ -480,7 +481,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.queryState.isLoading).toBe(true);
     });
@@ -496,7 +497,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.queryState.isError).toBe(true);
     });
@@ -513,7 +514,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       result.current.queryState.fetchNextPage();
       expect(mockFetchNextPage).toHaveBeenCalled();
@@ -527,7 +528,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.organizations).toBeUndefined();
     });
@@ -549,7 +550,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       // undefined user should not crash - should handle gracefully
       expect(result.current.platformAggregateScopeItem).toBeNull();
@@ -564,7 +565,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       // null user should not crash - should handle gracefully
       expect(result.current.platformAggregateScopeItem).toBeNull();
@@ -579,7 +580,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).not.toBeNull();
       expect(result.current.platformAggregateScopeItem?.displayName).toBe('All courses in Platform');
@@ -595,7 +596,7 @@ describe('useScopeListData', () => {
         contextType: 'library',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).not.toBeNull();
       expect(result.current.platformAggregateScopeItem?.displayName).toBe('All libraries in Platform');
@@ -617,7 +618,7 @@ describe('useScopeListData', () => {
         contextType: 'course',
         search: '',
         org: '',
-      }));
+      }), { wrapper });
 
       expect(result.current.orderedOrgs).toEqual([]);
       expect(result.current.scopesByOrg).toEqual({});
