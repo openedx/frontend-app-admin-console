@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Spinner } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Org, Scope } from 'types';
-import OrgSection, { ScopeCheckboxItem } from './OrgSection';
+import OrgSection from './OrgSection';
+import ScopeCheckboxItem from './ScopeCheckboxItem';
 import messages from '../messages';
 
 interface ScopeListQueryState {
@@ -93,7 +94,7 @@ const ScopeList = ({
                 externalKey: contextType === 'course' ? `course-v1:${org}+*` : `lib:${org}:*`,
                 displayName: aggregateLabel,
                 description: aggregateDescription,
-                org: { id: 0, name: org, shortName: org },
+                org: { id: '', name: org, shortName: org },
               }
               : undefined;
 

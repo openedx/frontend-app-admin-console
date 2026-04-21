@@ -938,6 +938,9 @@ describe('useUserAssignedRoles', () => {
 
 describe('useScopes', () => {
   const mockScopesData = {
+    count: 2,
+    next: null,
+    previous: null,
     results: [
       {
         displayName: 'Test Library 1',
@@ -966,21 +969,25 @@ describe('useScopes', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data).toEqual(mockScopesData);
-    expect(result.current.data?.results).toHaveLength(2);
+    expect(result.current.data?.pages[0]).toEqual(mockScopesData);
+    expect(result.current.data?.pages[0].results).toHaveLength(2);
   });
 
   it('handles search parameter', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { results: [mockScopesData.results[0]] } }),
+      get: jest.fn().mockResolvedValue({
+        data: {
+          count: 1, next: null, previous: null, results: [mockScopesData.results[0]],
+        },
+      }),
     });
 
-    const { result } = renderHook(() => useScopes('library'), {
+    const { result } = renderHook(() => useScopes({ search: 'library' }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.results).toHaveLength(1);
+    expect(result.current.data?.pages[0].results).toHaveLength(1);
   });
 
   it('handles error when API call fails', async () => {

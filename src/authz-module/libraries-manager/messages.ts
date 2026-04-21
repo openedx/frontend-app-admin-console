@@ -71,11 +71,6 @@ const messages = defineMessages({
     defaultMessage: 'See full documentation',
     description: 'Libraries AuthZ link for the course roles alert',
   },
-  'library.authz.manage.add.role.button': {
-    id: 'library.authz.manage.add.role.button',
-    defaultMessage: 'Assign Role',
-    description: 'Button label to add a role to a user in libraries management',
-  },
   'library.authz.team.remove.user.toast.success.description': {
     id: 'library.authz.team.remove.user.toast.success.description',
     defaultMessage: 'The {role} role has been successfully removed.{rolesCount, plural, =0 { The user no longer has access to this library and has been removed from the member list.} other {}}',

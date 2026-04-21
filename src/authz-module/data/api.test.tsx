@@ -277,9 +277,12 @@ describe('API functions', () => {
     it('should fetch scopes successfully', async () => {
       const mockResponse = {
         data: {
-          scopes: [
+          results: [
             { displayName: 'Library 1', scope: 'lib:test1' },
           ],
+          count: 1,
+          next: null,
+          previous: null,
         },
       };
 
@@ -287,20 +290,24 @@ describe('API functions', () => {
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
-      const result = await getScopes();
+      const result = await getScopes({});
 
-      expect(result.scopes).toHaveLength(1);
+      expect(result.results).toHaveLength(1);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     });
 
     it('should handle search, page, and pageSize parameters', async () => {
-      const mockResponse = { data: { scopes: [] } };
+      const mockResponse = {
+        data: {
+          results: [], count: 0, next: null, previous: null,
+        },
+      };
       const mockGet = jest.fn().mockResolvedValue(mockResponse);
       getAuthenticatedHttpClient.mockReturnValue({
         get: mockGet,
       });
 
-      await getScopes('library', 3, 50);
+      await getScopes({ search: 'library', page: 3, pageSize: 50 });
 
       expect(mockGet).toHaveBeenCalled();
       const calledUrl = mockGet.mock.calls[0][0];

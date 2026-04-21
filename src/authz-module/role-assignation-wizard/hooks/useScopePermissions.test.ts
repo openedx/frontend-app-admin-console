@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { CONTENT_LIBRARY_PERMISSIONS, CONTENT_COURSE_PERMISSIONS } from '../../constants';
-import { useOrgs } from '../../data/hooks';
+import { CONTENT_LIBRARY_PERMISSIONS, CONTENT_COURSE_PERMISSIONS } from '@src/authz-module/constants';
+import { useOrgs } from '@src/authz-module/data/hooks';
 import useScopePermissions from './useScopePermissions';
 
 jest.mock('@src/data/hooks', () => ({

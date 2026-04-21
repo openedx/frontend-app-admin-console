@@ -70,7 +70,7 @@ const messages = defineMessages({
   },
   'wizard.save.errors.summary': {
     id: 'wizard.save.errors.summary',
-    defaultMessage: 'Some assignments could not be completed. See details below.',
+    defaultMessage: 'Some assignments could not be completed. See details above.',
     description: 'Short toast message shown when one or more role assignments fail',
   },
   'wizard.step2.errors.alert.title': {
