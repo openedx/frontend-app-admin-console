@@ -26,20 +26,10 @@ const messages = defineMessages({
     defaultMessage: 'Clear filters',
     description: 'Button to clear all active filters in the table',
   },
-  'authz.user.table.org.all.organizations.label': {
-    id: 'authz.user.table.org.all.organizations.label',
-    defaultMessage: 'All Organizations',
-    description: 'Label for the "All Organizations" message on the user assignments table when a user has a django managed role assigned.',
-  },
   'authz.table.controlbar.search': {
     id: 'authz.table.controlbar.search',
     defaultMessage: 'Search',
     description: 'Search placeholder for two specific fields',
-  },
-  'authz.user.table.scope.global.label': {
-    id: 'authz.user.table.scope.global.label',
-    defaultMessage: 'Global',
-    description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
   },
   'authz.table.controlbar.search.by.fields': {
     id: 'authz.table.controlbar.search.by.fields',
@@ -60,42 +50,6 @@ const messages = defineMessages({
     id: 'authz.table.controlbar.filters.limit.reached',
     defaultMessage: 'Showing {current} of {total}.',
     description: 'Message displayed when the user reaches the applied filters limit',
-  },
-  'authz.table.footer.items.showing.text': {
-    id: 'authz.table.footer.items.showing.text',
-    defaultMessage: 'Showing {pageSize} of {itemCount}.',
-    description: 'Message displayed when the user reaches the applied filters limit',
-  },
-  'authz.table.username.current': {
-    id: 'authz.table.username.current',
-    defaultMessage: '(Me)',
-    description: 'Indicates the current user in the team members table',
-  },
-
-  'authz.table.column.actions.view.title': {
-    id: 'authz.table.column.actions.view.title',
-    defaultMessage: 'View',
-    description: 'Team members table view action text',
-  },
-  'authz.team.members.table.group.courses': {
-    id: 'authz.team.members.table.group.courses',
-    defaultMessage: 'Courses',
-    description: 'Label for the "Courses" group in the team members table filters',
-  },
-  'authz.team.members.table.group.libraries': {
-    id: 'authz.team.members.table.group.libraries',
-    defaultMessage: 'Libraries',
-    description: 'Label for the "Libraries" group in the team members table filters',
-  },
-  'authz.team.members.table.group.global': {
-    id: 'authz.team.members.table.group.global',
-    defaultMessage: 'Global',
-    description: 'Label for the "Global" group in the team members table filters',
-  },
-  'authz.table.controlbar.filters.more.results': {
-    id: 'authz.table.controlbar.filters.more.results',
-    defaultMessage: 'Search to show more',
-    description: 'Message displayed when there are more results available than currently shown',
   },
   'authz.table.footer.items.showing.text': {
     id: 'authz.table.footer.items.showing.text',
@@ -131,6 +85,77 @@ const messages = defineMessages({
     id: 'authz.user.table.view_all_permissions.link.text',
     defaultMessage: 'View all permissions',
     description: 'Text for the link to view all permissions in the user table',
+  },
+  'authz.table.username.current': {
+    id: 'authz.table.username.current',
+    defaultMessage: '(Me)',
+    description: 'Indicates the current user in the team members table',
+  },
+
+  'authz.table.column.actions.view.title': {
+    id: 'authz.table.column.actions.view.title',
+    defaultMessage: 'View',
+    description: 'Team members table view action text',
+  },
+  'authz.team.members.table.group.courses': {
+    id: 'authz.team.members.table.group.courses',
+    defaultMessage: 'Courses',
+    description: 'Label for the "Courses" group in the team members table filters',
+  },
+  'authz.team.members.table.group.libraries': {
+    id: 'authz.team.members.table.group.libraries',
+    defaultMessage: 'Libraries',
+    description: 'Label for the "Libraries" group in the team members table filters',
+  },
+  'authz.team.members.table.group.global': {
+    id: 'authz.team.members.table.group.global',
+    defaultMessage: 'Global',
+    description: 'Label for the "Global" group in the team members table filters',
+  },
+  'authz.table.controlbar.filters.more.results': {
+    id: 'authz.table.controlbar.filters.more.results',
+    defaultMessage: 'Search to show more',
+    description: 'Message displayed when there are more results available than currently shown',
+  },
+  'authz.team.remove.user.modal.title': {
+    id: 'authz.team.remove.user.modal.title',
+    defaultMessage: 'Remove role?',
+    description: 'AuthZ team management remove user modal title',
+  },
+  'authz.manage.cancel.button': {
+    id: 'authz.manage.cancel.button',
+    defaultMessage: 'Cancel',
+    description: 'AuthZ cancel button title',
+  },
+  'authz.manage.remove.button': {
+    id: 'authz.manage.remove.button',
+    defaultMessage: 'Remove',
+    description: 'AuthZ remove button title',
+  },
+  'authz.manage.removing.button': {
+    id: 'authz.manage.removing.button',
+    defaultMessage: 'Removing',
+    description: 'AuthZ removing button title',
+  },
+  'authz.team.remove.user.modal.body.1': {
+    id: 'authz.team.remove.user.modal.body.1',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” in the scope {scope}?',
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.team.remove.user.modal.body.2': {
+    id: 'authz.team.remove.user.modal.body.2',
+    defaultMessage: "This is the user's only role in this scope. Removing it will revoke their access completely, and they will no longer appear in the scope's member list.",
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.team.remove.user.modal.body.3': {
+    id: 'authz.team.remove.user.modal.body.3',
+    defaultMessage: 'Are you sure you want to proceed?',
+    description: 'AuthZ team management remove user modal body',
+  },
+  'authz.user.table.delete.action.djangorole.tooltip': {
+    id: 'authz.user.table.delete.action.djangorole.tooltip',
+    defaultMessage: 'You can’t remove this role here. Please go to Django Admin to manage it.',
+    description: 'Tooltip for delete button when hovering over Django roles',
   },
 });
 

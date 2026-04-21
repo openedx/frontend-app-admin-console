@@ -27,6 +27,21 @@ const messages = defineMessages(
       defaultMessage: 'Actions',
       description: 'Header for the actions column in the user table',
     },
+    'authz.user.table.view_all_permissions.link.text': {
+      id: 'authz.user.table.view_all_permissions.link.text',
+      defaultMessage: 'View all permissions',
+      description: 'Text for the link to view all permissions in the user table',
+    },
+    'authz.user.table.delete.action.alt': {
+      id: 'authz.user.table.delete.action.alt',
+      defaultMessage: 'Delete role action',
+      description: 'Alt description for delete button',
+    },
+    'authz.user.table.permissions.available.count': {
+      id: 'authz.user.table.permissions.available.count',
+      defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
+      description: 'Text showing the number of permissions available, with proper pluralization',
+    },
   },
 );
 

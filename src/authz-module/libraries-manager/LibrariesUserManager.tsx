@@ -4,7 +4,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
-import { useToastManager } from '@src/authz-module/libraries-manager/ToastManagerContext';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';

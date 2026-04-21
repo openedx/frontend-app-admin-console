@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { useLibrary } from '@src/authz-module/data/hooks';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useLibraryAuthZ } from './context';
 import LibrariesTeamManager from './LibrariesTeamManager';
-import { ToastManagerProvider } from './ToastManagerContext';
 import { CONTENT_LIBRARY_PERMISSIONS } from '../constants';
 
 jest.mock('./context', () => {

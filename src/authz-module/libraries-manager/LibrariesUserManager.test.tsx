@@ -2,10 +2,10 @@ import { useParams } from 'react-router-dom';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import LibrariesUserManager from './LibrariesUserManager';
 import { useLibraryAuthZ } from './context';
 import { useLibrary, useTeamMembers, useRevokeUserRoles } from '../data/hooks';
-import { ToastManagerProvider } from './ToastManagerContext';
 
 jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),

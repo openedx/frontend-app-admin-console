@@ -3,6 +3,7 @@ import {
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
+import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getAllRoleAssignments,
   GetAllRoleAssignmentsResponse, getLibrary, getOrgs, GetOrgsResponse,
@@ -21,7 +22,7 @@ const authzQueryKeys = {
   allRoleAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'allRoleAssignments', querySettings] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'scopes', search, page, pageSize] as const,
-  userRoles: (username: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
+  userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
 };
 
 /**
@@ -107,13 +108,18 @@ export const useAssignTeamMembersRole = () => {
  */
 export const useRevokeUserRoles = () => {
   const queryClient = useQueryClient();
+  const { querySettings: defaultQuerySettings } = useQuerySettings();
   return useMutation({
     mutationFn: async ({ data }: {
       data: RevokeUserRolesRequest
     }) => revokeUserRoles(data),
-    onSettled: (_data, _error, { data: { scope } }) => {
+    onSettled: (_data, _error, { data: { scope, users, querySettings } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
+      queryClient.invalidateQueries({
+        queryKey: authzQueryKeys.userRoles(users, querySettings),
+      });
+      queryClient.invalidateQueries({ queryKey: authzQueryKeys.allRoleAssignments(defaultQuerySettings) });
     },
   });
 };
@@ -181,10 +187,12 @@ export const useScopes = (search?: string, page?: number, pageSize?: number) => 
   * ```
 */
 export const useUserAssignedRoles = (
-  username: string,
-  querySettings: QuerySettings,
+  username?: string,
+  querySettings?: QuerySettings,
 ) => useQuery<GetUserAssignmentsResponse, Error>({
   queryKey: authzQueryKeys.userRoles(username, querySettings),
   queryFn: () => getUserAssignedRoles(username, querySettings),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+  enabled: !!username,
+  refetchOnWindowFocus: false,
 });

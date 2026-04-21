@@ -4,20 +4,20 @@ import {
 import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Toast } from '@openedx/paragon';
-import messages from './messages';
-import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '../constants';
+import messages from '@src/authz-module/messages';
+import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '@src/authz-module/constants';
 
 type ToastType = 'success' | 'error' | 'error-retry';
 
 export const ERROR_TOAST_MAP: Record<number | string, { type: ToastType; messageId: string }> = {
   // Transient (retryable) server errors
-  500: { type: 'error-retry', messageId: 'library.authz.team.toast.500.error.message' },
-  502: { type: 'error-retry', messageId: 'library.authz.team.toast.502.error.message' },
-  503: { type: 'error-retry', messageId: 'library.authz.team.toast.503.error.message' },
-  408: { type: 'error-retry', messageId: 'library.authz.team.toast.408.error.message' },
+  500: { type: 'error-retry', messageId: 'authz.team.toast.500.error.message' },
+  502: { type: 'error-retry', messageId: 'authz.team.toast.502.error.message' },
+  503: { type: 'error-retry', messageId: 'authz.team.toast.503.error.message' },
+  408: { type: 'error-retry', messageId: 'authz.team.toast.408.error.message' },
 
   // Generic fallback error
-  DEFAULT: { type: 'error-retry', messageId: 'library.authz.team.toast.default.error.message' },
+  DEFAULT: { type: 'error-retry', messageId: 'authz.team.toast.default.error.message' },
 };
 
 export interface AppToast {
@@ -108,7 +108,7 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
                 discardToast(toast.id);
                 toast.onRetry?.();
               },
-              label: intl.formatMessage(messages['library.authz.team.toast.retry.label']),
+              label: intl.formatMessage(messages['authz.team.toast.retry.label']),
             } : undefined}
           >
             {toast.message}

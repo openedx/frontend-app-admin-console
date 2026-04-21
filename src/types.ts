@@ -32,7 +32,9 @@ export interface RoleMetadata {
   name: string;
   description: string;
 }
+// TODO: remove unnecessary fields when libraries gets removed
 export interface Role extends RoleMetadata {
+  scope: string;
   userCount: number;
   permissions: string[];
   disabled?: boolean;
@@ -117,3 +119,9 @@ export interface UserRole {
   username?: string;
   email?: string;
 }
+
+export type RoleToDelete = {
+  role: string;
+  name?: string;
+  scope: string;
+};

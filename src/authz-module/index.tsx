@@ -5,7 +5,7 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import LoadingPage from '@src/components/LoadingPage';
 import LibrariesErrorFallback from '@src/authz-module/libraries-manager/ErrorPage';
 import { CustomErrors } from '@src/constants';
-import { ToastManagerProvider } from './libraries-manager/ToastManagerContext';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { LibrariesUserManager, LibrariesLayout, LibrariesTeamManager } from './libraries-manager';
 import AuthzHome from './authz-home';
 import AuditUserPage from './audit-user';
@@ -35,6 +35,10 @@ const AuthZModule = () => (
                 element={<AuditUserPage />}
               />
               <Route path="*" element={<NotFoundError />} />
+              <Route
+                path={ROUTES.AUDIT_USER_PATH}
+                element={<AuditUserPage />}
+              />
             </Routes>
           </Suspense>
         </ToastManagerProvider>
