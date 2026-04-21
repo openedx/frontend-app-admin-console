@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon, Spinner } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { Org, Scope } from 'types';
+import messages from '../messages';
 
 // --- ScopeCheckboxItem ---
 
@@ -48,6 +50,7 @@ interface OrgSectionProps {
 const OrgSection = ({
   orgName, scopes, selectedScopes, onScopeToggle, aggregateScopeItem,
 }: OrgSectionProps) => {
+  const intl = useIntl();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -57,7 +60,7 @@ const OrgSection = ({
         className="d-flex align-items-center gap-1 bg-transparent border-0 p-0 mb-2 text-primary font-weight-bold"
         onClick={() => setCollapsed((prev) => !prev)}
       >
-        <span>Org: {orgName}</span>
+        <span>{intl.formatMessage(messages['wizard.step2.scopeList.orgLabel'], { orgName })}</span>
         <Icon src={collapsed ? ExpandMore : ExpandLess} className="text-primary" />
       </button>
 
@@ -85,16 +88,6 @@ const OrgSection = ({
 };
 
 // --- ScopeList ---
-
-function getAggregateTexts(contextType: string | undefined): { label: string; description: string } {
-  if (contextType === 'course') {
-    return { label: 'All courses in this organization', description: 'Includes current and future courses' };
-  }
-  if (contextType === 'library') {
-    return { label: 'All libraries in this organization', description: 'Includes current and future libraries' };
-  }
-  return { label: '', description: '' };
-}
 
 interface ScopeListQueryState {
   isLoading: boolean;
@@ -127,10 +120,20 @@ const ScopeList = ({
   showOrgAggregates,
   contextType,
 }: ScopeListProps) => {
+  const intl = useIntl();
   const {
     isLoading, isFetchingNextPage, hasNextPage, isError, fetchNextPage,
   } = queryState;
-  const { label: aggregateLabel, description: aggregateDescription } = getAggregateTexts(contextType);
+  const aggregateLabel = contextType === 'course'
+    ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
+    : contextType === 'library'
+      ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library'])
+      : '';
+  const aggregateDescription = contextType === 'course'
+    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
+    : contextType === 'library'
+      ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library'])
+      : '';
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -152,7 +155,7 @@ const ScopeList = ({
     <div className="scope-list border rounded p-3 bg-light-100">
       {isLoading ? (
         <div className="d-flex justify-content-center p-4">
-          <Spinner animation="border" screenReaderText="Loading scopes..." />
+          <Spinner animation="border" screenReaderText={intl.formatMessage(messages['wizard.step2.scopeList.loading'])} />
         </div>
       ) : (
         <>
@@ -187,14 +190,14 @@ const ScopeList = ({
           })}
 
           {orderedOrgs.length === 0 && (
-            <p className="text-muted text-center py-3">No scopes found.</p>
+            <p className="text-muted text-center py-3">{intl.formatMessage(messages['wizard.step2.scopeList.empty'])}</p>
           )}
 
           <div ref={loadMoreRef} />
 
           {isFetchingNextPage && (
             <div className="d-flex justify-content-center py-2">
-              <Spinner animation="border" size="sm" screenReaderText="Loading more..." />
+              <Spinner animation="border" size="sm" screenReaderText={intl.formatMessage(messages['wizard.step2.scopeList.loadingMore'])} />
             </div>
           )}
         </>

@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import messages from '../messages';
 
 interface UseScopeListDataParams {
   contextType: string | undefined;
@@ -10,6 +12,7 @@ interface UseScopeListDataParams {
 }
 
 const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) => {
+  const intl = useIntl();
   const {
     data: scopesData,
     fetchNextPage,
@@ -45,12 +48,12 @@ const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) 
   const orderedOrgs = useMemo(() => Object.keys(scopesByOrg), [scopesByOrg]);
 
   const aggregateDescription = contextType === 'course'
-    ? 'Includes current and future courses'
-    : 'Includes current and future libraries';
+    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
+    : intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library']);
 
   const platformAggregateLabel = contextType === 'course'
-    ? 'All courses in Platform'
-    : 'All libraries in Platform';
+    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.course'])
+    : intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.library']);
 
   // Only show platform aggregate and org aggregates for administrators
   const user = getAuthenticatedUser();

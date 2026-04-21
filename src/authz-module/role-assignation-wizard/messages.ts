@@ -145,6 +145,81 @@ const messages = defineMessages({
     description: 'Tooltip shown on disabled role options',
   },
 
+  // DefineApplicationScopeStep — context labels
+  'wizard.step2.contextLabel.course': {
+    id: 'wizard.step2.contextLabel.course',
+    defaultMessage: 'Courses',
+    description: 'Context label shown in the scope filter bar when the selected role applies to courses',
+  },
+  'wizard.step2.contextLabel.library': {
+    id: 'wizard.step2.contextLabel.library',
+    defaultMessage: 'Libraries',
+    description: 'Context label shown in the scope filter bar when the selected role applies to libraries',
+  },
+  'wizard.step2.contextLabel.default': {
+    id: 'wizard.step2.contextLabel.default',
+    defaultMessage: 'Items',
+    description: 'Fallback context label shown in the scope filter bar when no specific context type is matched',
+  },
+
+  // useScopeListData — platform/org aggregate scope items
+  'wizard.step2.scope.aggregate.description.course': {
+    id: 'wizard.step2.scope.aggregate.description.course',
+    defaultMessage: 'Includes current and future courses',
+    description: 'Description for the platform-wide aggregate scope item when context type is course',
+  },
+  'wizard.step2.scope.aggregate.description.library': {
+    id: 'wizard.step2.scope.aggregate.description.library',
+    defaultMessage: 'Includes current and future libraries',
+    description: 'Description for the platform-wide aggregate scope item when context type is library',
+  },
+  'wizard.step2.scope.aggregate.platform.label.course': {
+    id: 'wizard.step2.scope.aggregate.platform.label.course',
+    defaultMessage: 'All courses in Platform',
+    description: 'Display name for the platform-wide aggregate scope item when context type is course',
+  },
+  'wizard.step2.scope.aggregate.platform.label.library': {
+    id: 'wizard.step2.scope.aggregate.platform.label.library',
+    defaultMessage: 'All libraries in Platform',
+    description: 'Display name for the platform-wide aggregate scope item when context type is library',
+  },
+
+  // ScopeList — org section header
+  'wizard.step2.scopeList.orgLabel': {
+    id: 'wizard.step2.scopeList.orgLabel',
+    defaultMessage: 'Org: {orgName}',
+    description: 'Label for the collapsible org section header in the scope list',
+  },
+
+  // ScopeList — org-level aggregate scope items
+  'wizard.step2.scopeList.aggregate.label.course': {
+    id: 'wizard.step2.scopeList.aggregate.label.course',
+    defaultMessage: 'All courses in this organization',
+    description: 'Display name for the org-wide aggregate scope item when context type is course',
+  },
+  'wizard.step2.scopeList.aggregate.label.library': {
+    id: 'wizard.step2.scopeList.aggregate.label.library',
+    defaultMessage: 'All libraries in this organization',
+    description: 'Display name for the org-wide aggregate scope item when context type is library',
+  },
+
+  // ScopeList — loading / empty states
+  'wizard.step2.scopeList.loading': {
+    id: 'wizard.step2.scopeList.loading',
+    defaultMessage: 'Loading scopes...',
+    description: 'Screen reader text for the loading spinner while scopes are being fetched',
+  },
+  'wizard.step2.scopeList.loadingMore': {
+    id: 'wizard.step2.scopeList.loadingMore',
+    defaultMessage: 'Loading more...',
+    description: 'Screen reader text for the spinner shown while fetching the next page of scopes',
+  },
+  'wizard.step2.scopeList.empty': {
+    id: 'wizard.step2.scopeList.empty',
+    defaultMessage: 'No scopes found.',
+    description: 'Message shown when no scopes match the current filters',
+  },
+
   // SelectUsersAndRoleStep — documentation link
   'wizard.step1.docs.heading': {
     id: 'wizard.step1.docs.heading',

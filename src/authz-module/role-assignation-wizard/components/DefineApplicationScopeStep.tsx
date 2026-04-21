@@ -14,12 +14,6 @@ function getContextType(role: string | null): string | undefined {
   return allRolesMetadata.find((r) => r.role === role)?.contextType;
 }
 
-function getContextLabel(contextType: string | undefined): string {
-  if (contextType === 'course') { return 'Courses'; }
-  if (contextType === 'library') { return 'Libraries'; }
-  return 'Items';
-}
-
 interface DefineApplicationScopeStepProps {
   selectedRole: string | null;
   selectedScopes: Set<string>;
@@ -42,7 +36,11 @@ const DefineApplicationScopeStep = ({
   }, [search]);
 
   const contextType = getContextType(selectedRole);
-  const contextLabel = getContextLabel(contextType);
+  const contextLabel = contextType === 'course'
+    ? intl.formatMessage(messages['wizard.step2.contextLabel.course'])
+    : contextType === 'library'
+      ? intl.formatMessage(messages['wizard.step2.contextLabel.library'])
+      : intl.formatMessage(messages['wizard.step2.contextLabel.default']);
 
   const {
     organizations,
