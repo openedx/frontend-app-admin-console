@@ -14,6 +14,15 @@
   .pgn__data-table tr:has(span[data-role="Global Staff"]) {
     background-color: var(--pgn-color-primary-200);
   }
+/*
+  This is a workaround to fix the height of the table when the dropdown menu is open,
+  to prevent the table from collapsing and hiding the dropdown menu.
+  The min-height value is set to 700px based on the height of the table and the dropdown menu,
+  but it can be adjusted if needed.
+*/
+  .pgn__data-table-layout-wrapper:has(.dropdown-menu.show) {
+    min-height: 700px;
+  }
 
   hr {
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
