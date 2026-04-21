@@ -9,6 +9,7 @@ import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerC
 import { LibrariesUserManager, LibrariesLayout, LibrariesTeamManager } from './libraries-manager';
 import AuthzHome from './authz-home';
 import AuditUserPage from './audit-user';
+import AssignRoleWizardPage from './role-assignation-wizard/AssignRoleWizardPage';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -34,6 +35,7 @@ const AuthZModule = () => (
                 path={ROUTES.AUDIT_USER_PATH}
                 element={<AuditUserPage />}
               />
+              <Route path={ROUTES.ASSIGN_ROLE_WIZARD_PATH} element={<AssignRoleWizardPage />} />
               <Route path="*" element={<NotFoundError />} />
               <Route
                 path={ROUTES.AUDIT_USER_PATH}

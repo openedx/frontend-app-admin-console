@@ -1,4 +1,4 @@
-import { PermissionMetadata, ResourceMetadata, RoleMetadata } from 'types';
+import { PermissionMetadata, ResourceMetadata } from 'types';
 
 export const CONTENT_LIBRARY_PERMISSIONS = {
   DELETE_LIBRARY: 'content_libraries.delete_library',
@@ -62,15 +62,6 @@ export const CONTENT_COURSE_PERMISSIONS = {
   VIEW_COURSE_GLOBAL_STAFF_SUPER_ADMINS: 'courses.view_global_staff_and_superadmins',
 };
 
-// Note: this information will eventually come from the backend API
-// but for the MVP we decided to manage it in the frontend
-export const libraryRolesMetadata: RoleMetadata[] = [
-  { role: 'library_admin', name: 'Library Admin', description: 'The Library Admin has full control over the library, including managing users, modifying content, and handling publishing workflows. They ensure content is properly maintained and accessible as needed.' },
-  { role: 'library_author', name: 'Library Author', description: 'The Library Author is responsible for creating, editing, and publishing content within a library. They can manage tags and collections but cannot delete libraries or manage users.' },
-  { role: 'library_contributor', name: 'Library Contributor', description: 'The Library Contributor can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.' },
-  { role: 'library_user', name: 'Library User', description: 'The Library User can view and reuse content but cannot edit or delete any resource.' },
-];
-
 export const libraryResourceTypes: ResourceMetadata[] = [
   { key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.' },
   { key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.' },
@@ -105,9 +96,21 @@ export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
 }));
 
 export const ROUTES = {
+  HOME_PATH: '/authz',
   LIBRARIES_TEAM_PATH: '/libraries/:libraryId',
   LIBRARIES_USER_PATH: '/libraries/:libraryId/:username',
   AUDIT_USER_PATH: '/user/:username',
+  ASSIGN_ROLE_WIZARD_PATH: '/assign-role',
+};
+
+export const buildWizardPath = (options?: { users?: string; from?: string }) => {
+  const base = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
+  if (!options) { return base; }
+  const params = new URLSearchParams();
+  if (options.users) { params.set('users', options.users); }
+  if (options.from) { params.set('from', options.from); }
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
 };
 
 export enum RoleOperationErrorStatus {
@@ -141,3 +144,11 @@ export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
+
+// Resource Type Definitions
+export const RESOURCE_TYPES = {
+  LIBRARY: 'library',
+  COURSE: 'course',
+} as const;
+
+export type ResourceType = typeof RESOURCE_TYPES[keyof typeof RESOURCE_TYPES];

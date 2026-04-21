@@ -75,6 +75,43 @@
   }
 }
 
+.highlighted-users-input {
+  &__layer {
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__textarea {
+    position: relative;
+    z-index: 1;
+    min-height: 100px;
+    resize: vertical;
+    caret-color: #212529;
+
+    &--highlighted {
+      color: transparent;
+      background: transparent;
+    }
+  }
+}
+
 .toast-container {
   // Ensure toast appears above modal
   z-index: 1000;

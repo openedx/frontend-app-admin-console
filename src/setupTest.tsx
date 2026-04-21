@@ -65,3 +65,6 @@ class ResizeObserver {
 }
 
 global.ResizeObserver = ResizeObserver;
+
+// jsdom does not implement scrollIntoView
+window.HTMLElement.prototype.scrollIntoView = jest.fn();

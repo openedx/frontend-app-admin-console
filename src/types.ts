@@ -31,13 +31,14 @@ export interface RoleMetadata {
   role: string;
   name: string;
   description: string;
+  contextType: string;
+  disabled?: boolean;
 }
 // TODO: remove unnecessary fields when libraries gets removed
 export interface Role extends RoleMetadata {
   scope: string;
   userCount: number;
   permissions: string[];
-  disabled?: boolean;
 }
 
 export type ResourceMetadata = {

@@ -3,6 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import { buildWizardPath } from '@src/authz-module/constants';
 import LibrariesUserManager from './LibrariesUserManager';
 import { useLibraryAuthZ } from './context';
 import { useLibrary, useTeamMembers, useRevokeUserRoles } from '../data/hooks';
@@ -11,9 +12,13 @@ jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
 }));
 
+const mockNavigate = jest.fn();
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useNavigate: jest.fn(),
+  useLocation: jest.fn(),
 }));
 
 jest.mock('./context', () => ({
@@ -84,6 +89,10 @@ describe('LibrariesUserManager', () => {
     // Mock route params
     (useParams as jest.Mock).mockReturnValue({ username: 'testuser' });
 
+    const { useNavigate, useLocation } = jest.requireMock('react-router-dom');
+    useNavigate.mockReturnValue(mockNavigate);
+    useLocation.mockReturnValue({ pathname: '/authz/libraries/lib:123/testuser' });
+
     // Mock library authz context
     (useLibraryAuthZ as jest.Mock).mockReturnValue(defaultMockData);
 
@@ -149,6 +158,17 @@ describe('LibrariesUserManager', () => {
     renderComponent();
 
     expect(screen.getByText('Assign Role')).toBeInTheDocument();
+  });
+
+  it('navigates to the wizard with the current user and return path when Assign Role is clicked', async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.click(screen.getByRole('button', { name: /Assign Role/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      buildWizardPath({ users: 'testuser', from: '/authz/libraries/lib:123/testuser' }),
+    );
   });
 
   it('renders correct navigation link label and URL on breadcrumb', () => {

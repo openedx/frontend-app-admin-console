@@ -15,13 +15,13 @@ const resources = [
 ];
 const roles = [
   {
-    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '',
+    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '', contextType: '',
   },
   {
-    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '',
+    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '', contextType: '',
   },
   {
-    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '',
+    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '', contextType: '',
   },
 ];
 
@@ -36,6 +36,7 @@ describe('buildPermissionsMatrix', () => {
       userCount: 2,
       role: 'editor',
       description: '',
+      contextType: '',
       permissions: ['edit_library'],
       resources: [
         {
