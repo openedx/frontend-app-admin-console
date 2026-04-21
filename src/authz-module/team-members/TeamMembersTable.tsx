@@ -90,8 +90,9 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
         columns={
             [
               {
+                id: 'fullName',
                 Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
-                accessor: 'name',
+                accessor: 'fullName',
                 Cell: NameCell,
                 filter: 'text',
                 Filter: TextFilter,
