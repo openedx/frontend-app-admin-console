@@ -25,8 +25,12 @@ import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import UserPermissions from '@src/authz-module/components/UserPermissions';
+import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
+import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
+import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
+import { getCellHeader } from '../components/utils';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
@@ -121,7 +125,7 @@ const AuditUserPage = () => {
       disableFilters: true,
       disableSortBy: true,
     },
-  ], [formatMessage]);
+  ], [formatMessage, columnsWithFiltersApplied]);
 
   const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
 
