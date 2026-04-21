@@ -157,6 +157,16 @@ const messages = defineMessages({
     defaultMessage: 'You can’t remove this role here. Please go to Django Admin to manage it.',
     description: 'Tooltip for delete button when hovering over Django roles',
   },
+  'authz.user.table.view_all_permissions.link.text.close': {
+    id: 'authz.user.table.view_all_permissions.link.text.close',
+    defaultMessage: 'Hide all permissions',
+    description: 'Text for the link to hide all permissions in the user table',
+  },
+  'authz.user.table.view_all_permissions.link.text.open': {
+    id: 'authz.user.table.view_all_permissions.link.text.open',
+    defaultMessage: 'View all permissions',
+    description: 'Text for the link to view all permissions in the user table',
+  },
 });
 
 export default messages;

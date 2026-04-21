@@ -12,11 +12,18 @@ import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
 import { ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
 import {
-  Icon, IconButton, OverlayTrigger, Tooltip,
+  Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
+
+interface DataTableInstance {
+  state?: {
+    expanded?: Record<string, boolean>;
+  };
+  toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
+}
 
 type CellProps = TableCellValue<UserRole>;
 type CellPropsWithValue = CellProps & {
@@ -123,14 +130,33 @@ const PermissionsCell = ({ row }: CellProps) => {
 
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
+  const instance = useContext(DataTableContext) as DataTableInstance;
+  const handleToggleExpanded = () => {
+    if (!row.isExpanded && instance) {
+      // Close all other expanded rows first
+      const expanded = instance.state?.expanded || {};
+      Object.keys(expanded).forEach(rowId => {
+        if (rowId !== row.id && expanded[rowId]) {
+          instance.toggleRowExpanded?.(rowId, false);
+        }
+      });
+    }
+    // Toggle the current row
+    row.toggleRowExpanded();
+  };
+
   return (
-    <ViewMoreLink
-      label={formatMessage(messages['authz.user.table.view_all_permissions.link.text'])}
-      // TODO: Implement view more functionality
-      // eslint-disable-next-line no-console
-      onClick={() => console.log('View more clicked for row:', row)}
-      iconSrc={ExpandMore}
-    />
+    <div role="button">
+      <ViewMoreLink
+        label={formatMessage(
+          row.isExpanded
+            ? messages['authz.user.table.view_all_permissions.link.text.close']
+            : messages['authz.user.table.view_all_permissions.link.text.open'],
+        )}
+        onClick={handleToggleExpanded}
+        iconSrc={ExpandMore}
+      />
+    </div>
   );
 };
 

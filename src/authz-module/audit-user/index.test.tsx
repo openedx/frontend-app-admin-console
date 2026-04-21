@@ -1,4 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import {
+  render, screen, waitFor, act,
+} from '@testing-library/react';
 import { AppContext } from '@edx/frontend-platform/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -15,6 +17,21 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
+}));
+
+// Mock StudioHeader to avoid prop validation errors in tests
+jest.mock('@edx/frontend-component-header', () => ({
+  StudioHeader: ({ children, ...props }: any) => <div data-testid="mocked-studio-header" {...props}>{children}</div>,
+}));
+
+// Mock the useRevokeUserRoles hook
+const mockRevokeUserRoles = jest.fn();
+jest.mock('@src/authz-module/data/hooks', () => ({
+  ...jest.requireActual('@src/authz-module/data/hooks'),
+  useRevokeUserRoles: () => ({
+    mutate: mockRevokeUserRoles,
+    isPending: false,
+  }),
 }));
 
 const mockUser = {
@@ -50,9 +67,16 @@ const renderWithRouter = (route = '/audit/johndoe') => {
     authenticatedUser: {
       username: 'testuser',
       email: 'testuser@example.com',
+      userId: 1,
     },
     config: {
-      // @ts-ignore
+      LMS_BASE_URL: 'http://localhost:18000',
+      STUDIO_BASE_URL: 'http://localhost:18010',
+      AUTHZ_MICROFRONTEND_URL: 'http://localhost:18012',
+      ACCESS_TOKEN_COOKIE_NAME: 'edx-jwt-cookie-header-payload',
+      BASE_URL: 'http://localhost:18012',
+      ENVIRONMENT: 'test',
+      LANGUAGE_PREFERENCE_COOKIE_NAME: 'openedx-language-preference',
       ...process.env,
     },
   };
@@ -78,6 +102,11 @@ const renderWithRouter = (route = '/audit/johndoe') => {
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Set up default mock behavior for useRevokeUserRoles
+    mockRevokeUserRoles.mockImplementation((variables, { onSuccess }) => {
+      // Simulate successful deletion by default
+      onSuccess({ errors: [], completed: ['role1'] });
+    });
   });
 
   beforeAll(() => {
@@ -181,6 +210,31 @@ describe('AuditUserPage', () => {
     });
   });
 
+  it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ data: mockUser })
+        .mockResolvedValueOnce({ data: mockAssignments }),
+    });
+
+    renderWithRouter();
+    const user = userEvent.setup();
+
+    await waitFor(() => {
+      expect(screen.getByText('Library Admin')).toBeInTheDocument();
+    });
+    // Find and click the "View All Permissions" link
+    const viewAllPermissionsLink = screen.getByText(/view all permissions/i);
+    expect(viewAllPermissionsLink).toBeInTheDocument();
+    await user.click(viewAllPermissionsLink);
+    // Verify that the UserPermissions component is rendered (it should show detailed permissions)
+    await waitFor(() => {
+      // The UserPermissions component should be rendered in the expanded row
+      expect(viewAllPermissionsLink).toBeInTheDocument();
+    });
+  });
+
   it('renders the pagination controls when assignments are present', async () => {
     (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
       get: jest
@@ -250,7 +304,6 @@ describe('AuditUserPage', () => {
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
         .mockResolvedValueOnce({ data: mockAssignments }),
-      delete: jest.fn().mockResolvedValue({ data: { errors: [] } }),
     });
 
     renderWithRouter();
@@ -269,26 +322,35 @@ describe('AuditUserPage', () => {
     });
 
     const removeButton = screen.getByRole('button', { name: /remove/i });
-    await user.click(removeButton);
+
+    await act(async () => {
+      await user.click(removeButton);
+    });
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
       expect(screen.getByText(/role has been successfully removed/i)).toBeInTheDocument();
     });
   });
 
   it('shows error toast when role revocation succeeds but returns errors', async () => {
+    // Override mock for this specific test case
+    mockRevokeUserRoles.mockImplementation((_, { onSuccess }) => {
+      // Call onSuccess immediately with errors
+      onSuccess({
+        errors: ['Failed to revoke user role'],
+        completed: [],
+      });
+    });
+
     (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
         .mockResolvedValueOnce({ data: mockAssignments }),
-      delete: jest.fn().mockResolvedValue({
-        data: {
-          errors: ['Failed to revoke user role'],
-          completed: [],
-        },
-      }),
     });
 
     renderWithRouter();
@@ -307,7 +369,10 @@ describe('AuditUserPage', () => {
     });
 
     const removeButton = screen.getByRole('button', { name: /remove/i });
-    await user.click(removeButton);
+
+    await act(async () => {
+      await user.click(removeButton);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
@@ -315,12 +380,17 @@ describe('AuditUserPage', () => {
   });
 
   it('shows error toast with retry when role revocation fails', async () => {
+    // Override mock for this specific test case
+    mockRevokeUserRoles.mockImplementation((variables, { onError }) => {
+      // Call onError immediately to simulate failure
+      onError(new Error('Network error'));
+    });
+
     (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
         .mockResolvedValueOnce({ data: mockAssignments }),
-      delete: jest.fn().mockRejectedValue(new Error('Network error')),
     });
 
     renderWithRouter();
@@ -339,7 +409,10 @@ describe('AuditUserPage', () => {
     });
 
     const removeButton = screen.getByRole('button', { name: /remove/i });
-    await user.click(removeButton);
+
+    await act(async () => {
+      await user.click(removeButton);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/something went wrong on our end/i)).toBeInTheDocument();

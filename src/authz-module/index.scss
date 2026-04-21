@@ -10,8 +10,8 @@
   .filters .dropdown-toggle::after {
     display: none !important;
   }
-  .pgn__data-table tr:has(td[data-role="Super Admin"]),
-  .pgn__data-table tr:has(td[data-role="Global Staff"]) {
+  .pgn__data-table tr:has(span[data-role="Super Admin"]),
+  .pgn__data-table tr:has(span[data-role="Global Staff"]) {
     background-color: var(--pgn-color-primary-200);
   }
 
@@ -19,11 +19,6 @@
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
     height: var(--height-action-divider);
     width: 0;
-  }
-
-  .pgn__data-table tr:has(td[data-role="Super Admin"]),
-  .pgn__data-table tr:has(td[data-role="Global Staff"]) {
-    background-color: var(--pgn-color-primary-200);
   }
 
   .tab-content {

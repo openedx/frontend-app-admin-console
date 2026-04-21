@@ -24,6 +24,7 @@ import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import UserPermissions from '@src/authz-module/components/UserPermissions';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
 
@@ -216,6 +217,10 @@ const AuditUserPage = () => {
             additionalColumns={additionalColumns}
             columns={columns}
             isLoading={isLoadingUserAssignments}
+            isExpandable
+            renderRowSubComponent={({ row }) => (
+              <UserPermissions row={row} />
+            )}
           >
             <DataTable.Table />
             <TableFooter />

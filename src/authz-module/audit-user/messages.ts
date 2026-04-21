@@ -27,11 +27,6 @@ const messages = defineMessages(
       defaultMessage: 'Actions',
       description: 'Header for the actions column in the user table',
     },
-    'authz.user.table.view_all_permissions.link.text': {
-      id: 'authz.user.table.view_all_permissions.link.text',
-      defaultMessage: 'View all permissions',
-      description: 'Text for the link to view all permissions in the user table',
-    },
     'authz.user.table.delete.action.alt': {
       id: 'authz.user.table.delete.action.alt',
       defaultMessage: 'Delete role action',
@@ -41,6 +36,26 @@ const messages = defineMessages(
       id: 'authz.user.table.permissions.available.count',
       defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
       description: 'Text showing the number of permissions available, with proper pluralization',
+    },
+    'authz.user.table.permissions.total.access': {
+      id: 'authz.user.table.permissions.total.access',
+      defaultMessage: 'Total access',
+      description: 'Label indicating Super Admin has total access to all permissions',
+    },
+    'authz.user.table.permissions.partial.access': {
+      id: 'authz.user.table.permissions.partial.access',
+      defaultMessage: 'Partial access',
+      description: 'Label indicating Global Staff has partial access to permissions',
+    },
+    'authz.user.table.permissions.role.admin': {
+      id: 'authz.user.table.permissions.role.admin',
+      defaultMessage: 'Super Admins have full access to all areas of the platform, including content, settings, and user management. This role is managed at the platform level and cannot be changed from here. To modify it, go to Django Admin.',
+      description: 'Description for the permissions of the Super Admin role',
+    },
+    'authz.user.table.permissions.role.staff': {
+      id: 'authz.user.table.permissions.role.staff',
+      defaultMessage: 'Global Staff have access to all areas of the platform, similar to Super Admin, but cannot grant or revoke Super Admin or Global Staff roles to other users. This role is managed at the platform level and cannot be changed from here. To modify it, go to Django Admin.',
+      description: 'Description for the permissions of the Global Staff role',
     },
   },
 );

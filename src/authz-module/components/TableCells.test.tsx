@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
+import { DataTableContext } from '@openedx/paragon';
 import {
   NameCell,
   ViewActionCell,
@@ -554,38 +555,105 @@ describe('TableCells Components', () => {
   });
 
   describe('ViewAllPermissionsCell', () => {
-    const mockRow = {
-      original: {
-        role: 'library_admin', id: '123', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+    const mockUserRole = {
+      role: 'course_admin',
+      org: 'OpenedX',
+      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      permissionCount: 5,
+      fullName: 'John Doe',
+      username: 'johndoe',
+      email: 'johndoe@example.com',
+    };
+
+    const mockCellProps = {
+      row: {
+        original: mockUserRole,
+        id: 'test-row-1',
+        isExpanded: false,
+        toggleRowExpanded: jest.fn(),
+        values: mockUserRole,
       },
     };
 
-    it('renders a view more link', () => {
-      const props = {
-        row: mockRow,
-        column: { id: 'viewMore' },
-      };
-
-      renderWrapper(<ViewAllPermissionsCell {...props} />);
-
-      expect(screen.getByText('View all permissions')).toBeInTheDocument();
+    it('renders view more link', () => {
+      renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
+      expect(screen.getByText(/view all permissions/i)).toBeInTheDocument();
     });
 
-    it('calls onClick handler when view more link is clicked', async () => {
+    it('displays correct link text', () => {
+      renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
+      expect(screen.getByText(/view all permissions/i)).toBeInTheDocument();
+    });
+
+    it('handles toggle expand functionality with accordion behavior', async () => {
       const user = userEvent.setup();
-      const props = {
-        row: mockRow,
-        column: { id: 'viewMore' },
+      const mockToggleRowExpanded = jest.fn();
+      const mockInstance = {
+        state: {
+          expanded: {
+            'other-row-1': true,
+            'other-row-2': true,
+          },
+        },
+        toggleRowExpanded: mockToggleRowExpanded,
       };
 
-      renderWrapper(<ViewAllPermissionsCell {...props} />);
+      const propsWithToggle = {
+        row: {
+          ...mockCellProps.row,
+          toggleRowExpanded: jest.fn(),
+        },
+      };
 
-      const viewMoreButton = screen.getByText('View all permissions');
-      await user.click(viewMoreButton);
+      renderWrapper(
+        <DataTableContext.Provider value={mockInstance}>
+          <ViewAllPermissionsCell {...propsWithToggle} />
+        </DataTableContext.Provider>,
+      );
 
-      // TODO: replace console.log with actual view more logic and update this test accordingly
-      // eslint-disable-next-line no-console
-      expect(console.log).toHaveBeenCalledWith('View more clicked for row:', mockRow);
+      const toggleButton = screen.getByText(/view all permissions/i);
+      await user.click(toggleButton);
+
+      // Should close other expanded rows first
+      expect(mockToggleRowExpanded).toHaveBeenCalledWith('other-row-1', false);
+      expect(mockToggleRowExpanded).toHaveBeenCalledWith('other-row-2', false);
+      // Should toggle the current row
+      expect(propsWithToggle.row.toggleRowExpanded).toHaveBeenCalled();
+    });
+
+    it('toggles row without closing others when row is already expanded', async () => {
+      const user = userEvent.setup();
+      const mockToggleRowExpanded = jest.fn();
+      const mockInstance = {
+        state: {
+          expanded: {
+            'other-row-1': true,
+          },
+        },
+        toggleRowExpanded: mockToggleRowExpanded,
+      };
+
+      const propsWithExpandedRow = {
+        row: {
+          ...mockCellProps.row,
+          isExpanded: true,
+          toggleRowExpanded: jest.fn(),
+        },
+      };
+
+      renderWrapper(
+        <DataTableContext.Provider value={mockInstance}>
+          <ViewAllPermissionsCell {...propsWithExpandedRow} />
+        </DataTableContext.Provider>,
+      );
+
+      const toggleButton = screen.getByText(/hide all permissions/i);
+      await user.click(toggleButton);
+
+      // Should NOT close other expanded rows when current row is already expanded
+      expect(mockToggleRowExpanded).not.toHaveBeenCalled();
+      // Should still toggle the current row
+      expect(propsWithExpandedRow.row.toggleRowExpanded).toHaveBeenCalled();
     });
   });
 });
