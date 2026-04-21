@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Skeleton } from '@openedx/paragon';
 import { ROUTES } from '@src/authz-module/constants';
 import { Role } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import AuthZLayout from '../components/AuthZLayout';
 import { useLibraryAuthZ } from './context';
 import RoleCard from '../components/RoleCard';
-import { AssignNewRoleTrigger } from './components/AssignNewRoleModal';
 import ConfirmDeletionModal from './components/ConfirmDeletionModal';
 import { useLibrary, useRevokeUserRoles, useTeamMembers } from '../data/hooks';
 import { buildPermissionMatrixByRole } from './utils';
@@ -18,6 +18,7 @@ import messages from './messages';
 const LibrariesUserManager = () => {
   const intl = useIntl();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { username } = useParams();
   const {
     libraryId, permissions, roles, resources, canManageTeam,
@@ -153,12 +154,8 @@ const LibrariesUserManager = () => {
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
         pageSubtitle={user?.email || ''}
-        actions={user && canManageTeam
-          ? [<AssignNewRoleTrigger
-              username={user.username}
-              libraryId={libraryId}
-              currentUserRoles={userRoles.map(role => role.role)}
-          />]
+        actions={(user && canManageTeam)
+          ? [<AddRoleButton from={pathname} presetUsername={user.username} />]
           : []}
       >
         <Container className="bg-light-200 p-5">

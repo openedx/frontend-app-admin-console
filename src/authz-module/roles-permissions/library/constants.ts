@@ -26,10 +26,18 @@ export const CONTENT_LIBRARY_PERMISSIONS = {
 // Note: this information will eventually come from the backend API
 // but for the MVP we decided to manage it in the frontend
 export const libraryRolesMetadata: RoleMetadata[] = [
-  { role: 'library_admin', name: 'Library Admin', description: 'The Library Admin has full control over the library, including managing users, modifying content, and handling publishing workflows. They ensure content is properly maintained and accessible as needed.' },
-  { role: 'library_author', name: 'Library Author', description: 'The Library Author is responsible for creating, editing, and publishing content within a library. They can manage tags and collections but cannot delete libraries or manage users.' },
-  { role: 'library_contributor', name: 'Library Contributor', description: 'The Library Contributor can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.' },
-  { role: 'library_user', name: 'Library User', description: 'The Library User can view and reuse content but cannot edit or delete any resource.' },
+  {
+    role: 'library_admin', name: 'Library Admin', description: 'The Library Admin has full control over the library, including managing users, modifying content, and handling publishing workflows. They ensure content is properly maintained and accessible as needed.', contextType: 'library',
+  },
+  {
+    role: 'library_author', name: 'Library Author', description: 'The Library Author is responsible for creating, editing, and publishing content within a library. They can manage tags and collections but cannot delete libraries or manage users.', contextType: 'library',
+  },
+  {
+    role: 'library_contributor', name: 'Library Contributor', description: 'The Library Contributor can create and edit content within a library but cannot publish it. They support the authoring process while leaving final publishing to Authors or Admins.', contextType: 'library',
+  },
+  {
+    role: 'library_user', name: 'Library User', description: 'The Library User can view and reuse content but cannot edit or delete any resource.', contextType: 'library',
+  },
 ];
 
 export const libraryResourceTypes: ResourceMetadata[] = [
@@ -74,6 +82,7 @@ export const libraryPermissions: PermissionMetadata[] = [
 export const rolesLibraryObject = [
   {
     role: 'library_admin',
+    contextType: 'library',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -96,6 +105,7 @@ export const rolesLibraryObject = [
   },
   {
     role: 'library_author',
+    contextType: 'library',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -116,6 +126,7 @@ export const rolesLibraryObject = [
   },
   {
     role: 'library_contributor',
+    contextType: 'library',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -136,6 +147,7 @@ export const rolesLibraryObject = [
   },
   {
     role: 'library_user',
+    contextType: 'library',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT,

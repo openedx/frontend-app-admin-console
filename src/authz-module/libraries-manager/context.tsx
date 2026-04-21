@@ -8,8 +8,9 @@ import { usePermissionsByRole } from '@src/authz-module/data/hooks';
 import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import { CustomErrors } from '@src/constants';
 import {
-  CONTENT_LIBRARY_PERMISSIONS, libraryPermissions, libraryResourceTypes, libraryRolesMetadata,
+  CONTENT_LIBRARY_PERMISSIONS, libraryPermissions, libraryResourceTypes,
 } from '../constants';
+import { libraryRolesMetadata } from '../roles-permissions/library/constants';
 
 const LIBRARY_TEAM_PERMISSIONS = [
   CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,

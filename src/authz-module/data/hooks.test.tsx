@@ -12,10 +12,24 @@ import {
   useOrgs,
   useScopes,
   useUserAssignedRoles,
+  useValidateUsers,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
+}));
+
+jest.mock('@src/data/utils', () => ({
+  getApiUrl: (path: string) => `http://localhost:8000${path}`,
+  getStudioApiUrl: (path: string) => `http://localhost:8010${path}`,
+}));
+
+jest.mock('@edx/frontend-platform', () => ({
+  camelCaseObject: (obj: unknown) => obj,
+}));
+
+jest.mock('@src/constants', () => ({
+  appId: 'test-app',
 }));
 
 const mockMembers = {
@@ -202,6 +216,42 @@ describe('useTeamMembers', () => {
     expect(result.current.data).toEqual(mockMembers);
   });
 
+  it('appends roles and search params when provided', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { count: 0, results: [] } }),
+    });
+
+    const { result } = renderHook(
+      () => useTeamMembers('lib:123', { ...mockQuerySettings, roles: 'admin', search: 'alice' }),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const mockGetFn = getAuthenticatedHttpClient().get as jest.Mock;
+    const calledUrl = new URL(mockGetFn.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('roles')).toBe('admin');
+    expect(calledUrl.searchParams.get('search')).toBe('alice');
+  });
+
+  it('appends sort params when sortBy and order are provided', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: { count: 0, results: [] } }),
+    });
+
+    const { result } = renderHook(
+      () => useTeamMembers('lib:123', { ...mockQuerySettings, sortBy: 'username', order: 'asc' }),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const mockGetFn = getAuthenticatedHttpClient().get as jest.Mock;
+    const calledUrl = new URL(mockGetFn.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('sort_by')).toBe('username');
+    expect(calledUrl.searchParams.get('order')).toBe('asc');
+  });
+
   it('handles error when API call fails', async () => {
     getAuthenticatedHttpClient.mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('API failure')),
@@ -236,6 +286,31 @@ describe('useLibrary', () => {
     await waitFor(() => {
       expect(result.current.data).toEqual(mockLibrary);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    });
+  });
+
+  it('maps allow_public_read to allowPublicRead', async () => {
+    const rawLibrary = {
+      id: 'lib:org/test',
+      org: 'org',
+      title: 'Test Library',
+      slug: 'test-library',
+      allow_public_read: true,
+    };
+    getAuthenticatedHttpClient.mockReturnValue({
+      get: jest.fn().mockResolvedValueOnce({ data: rawLibrary }),
+    });
+
+    const { result } = renderHook(() => useLibrary('lib:org/test'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.data).toBeDefined());
+
+    expect(result.current.data).toEqual({
+      id: 'lib:org/test',
+      org: 'org',
+      title: 'Test Library',
+      slug: 'test-library',
+      allowPublicRead: true,
     });
   });
 
@@ -288,75 +363,105 @@ describe('usePermissionsByRole', () => {
       expect(e).toEqual(new Error('Not found'));
     }
   });
+});
 
-  describe('useAssignTeamMembersRole', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+describe('useAssignTeamMembersRole', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('successfully adds team members', async () => {
+    const mockResponse = {
+      completed: [
+        { user: 'jdoe', status: 'role_added' },
+        { user: 'alice@example.com', status: 'already_has_role' },
+      ],
+      errors: [],
+    };
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      put: jest.fn().mockResolvedValue({ data: mockResponse }),
     });
 
-    it('successfully adds team members', async () => {
-      const mockResponse = {
-        completed: [
-          {
-            user: 'jdoe',
-            status: 'role_added',
-          },
-          {
-            user: 'alice@example.com',
-            status: 'already_has_role',
-          },
-        ],
-        errors: [],
-      };
-
-      getAuthenticatedHttpClient.mockReturnValue({
-        put: jest.fn().mockResolvedValue({ data: mockResponse }),
-      });
-
-      const { result } = renderHook(() => useAssignTeamMembersRole(), {
-        wrapper: createWrapper(),
-      });
-
-      const addTeamMemberData = {
-        scope: 'lib:123',
-        users: ['jdoe'],
-        role: 'author',
-      };
-
-      await act(async () => {
-        result.current.mutate({ data: addTeamMemberData });
-      });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-      expect(result.current.data).toEqual(mockResponse);
+    const { result } = renderHook(() => useAssignTeamMembersRole(), {
+      wrapper: createWrapper(),
     });
 
-    it('handles error when adding team members fails', async () => {
-      getAuthenticatedHttpClient.mockReturnValue({
-        put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
-      });
-
-      const { result } = renderHook(() => useAssignTeamMembersRole(), {
-        wrapper: createWrapper(),
-      });
-
-      const addTeamMemberData = {
-        scope: 'lib:123',
-        users: ['jdoe'],
-        role: 'author',
-      };
-
-      await act(async () => {
-        result.current.mutate({ data: addTeamMemberData });
-      });
-
-      await waitFor(() => expect(result.current.isError).toBe(true));
-
-      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-      expect(result.current.error).toEqual(new Error('Failed to add members'));
+    await act(async () => {
+      result.current.mutate({ data: { scope: 'lib:123', users: ['jdoe'], role: 'author' } });
     });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('handles error when adding team members fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
+    });
+
+    const { result } = renderHook(() => useAssignTeamMembersRole(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { scope: 'lib:123', users: ['jdoe'], role: 'author' } });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.error).toEqual(new Error('Failed to add members'));
+  });
+});
+
+describe('useValidateUsers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('successfully validates users', async () => {
+    const mockResponse = {
+      validUsers: ['jdoe'],
+      invalidUsers: ['unknown_user'],
+    };
+
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockResolvedValue({ data: mockResponse }),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe', 'unknown_user'] } });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('handles error when validation fails', async () => {
+    getAuthenticatedHttpClient.mockReturnValue({
+      post: jest.fn().mockRejectedValue(new Error('Validation failed')),
+    });
+
+    const { result } = renderHook(() => useValidateUsers(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { users: ['jdoe'] } });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toEqual(new Error('Validation failed'));
   });
 });
 

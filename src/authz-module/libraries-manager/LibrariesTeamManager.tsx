@@ -6,19 +6,19 @@ import {
 import { useLibrary } from '@src/authz-module/data/hooks';
 import { useLocation } from 'react-router-dom';
 import { ROUTES } from '@src/authz-module/constants';
+import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import TeamTable from './components/TeamTable';
 import AuthZLayout from '../components/AuthZLayout';
 import RoleCard from '../components/RoleCard';
 import PermissionTable from '../components/PermissionTable';
 import { useLibraryAuthZ } from './context';
-import { AddNewTeamMemberTrigger } from './components/AddNewTeamMemberModal';
 import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
 
 import messages from './messages';
 
 const LibrariesTeamManager = () => {
   const intl = useIntl();
-  const { hash } = useLocation();
+  const { hash, pathname } = useLocation();
   const {
     libraryId, canManageTeam, roles, permissions, resources,
   } = useLibraryAuthZ();
@@ -51,7 +51,9 @@ const LibrariesTeamManager = () => {
         pageSubtitle={libraryId}
         actions={
           [
-            ...(canManageTeam ? [<AddNewTeamMemberTrigger libraryId={libraryId} key="add-new-member" />] : []),
+            ...(canManageTeam ? [
+              <AddRoleButton from={pathname} />,
+            ] : []),
           ]
         }
       >

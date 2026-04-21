@@ -1,4 +1,4 @@
-import { PermissionMetadata, ResourceMetadata } from 'types';
+import { PermissionMetadata, ResourceMetadata, RoleMetadata } from 'types';
 import {
   LibraryBooks, Article, Group, LocalOffer,
   BookOpen,
@@ -301,6 +301,7 @@ export const coursePermissions: PermissionMetadata[] = [
 export const rolesObject = [
   {
     role: 'course_admin',
+    contextType: 'course',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -340,6 +341,7 @@ export const rolesObject = [
 
   {
     role: 'course_staff',
+    contextType: 'course',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -376,6 +378,7 @@ export const rolesObject = [
   },
   {
     role: 'course_editor',
+    contextType: 'course',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -405,6 +408,7 @@ export const rolesObject = [
   },
   {
     role: 'course_auditor',
+    contextType: 'course',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -423,6 +427,21 @@ export const rolesObject = [
   },
 
 ];
+export const courseRolesMetadata: RoleMetadata[] = [
+  {
+    role: 'course_admin', name: 'Course Admin', description: 'Can manage the course team and all course settings.', contextType: 'course',
+  },
+  {
+    role: 'course_staff', name: 'Course Staff', description: 'Can publish content and manage the course lifecycle in Studio.', contextType: 'course',
+  },
+  {
+    role: 'course_editor', name: 'Course Editor', description: 'Can create and edit course content, but cannot publish or change critical course settings.', contextType: 'course', disabled: true,
+  },
+  {
+    role: 'course_auditor', name: 'Course Auditor', description: 'Can view course content and settings, but cannot make changes.', contextType: 'course', disabled: true,
+  },
+];
+
 // TODO: check if we need this later
 // export const DEFAULT_TOAST_DELAY = 5000;
 // export const RETRY_TOAST_DELAY = 120_000; // 2 minutes

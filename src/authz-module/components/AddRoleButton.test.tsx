@@ -76,7 +76,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?username=${presetUsername}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?users=${presetUsername}`);
     });
 
     it('handles special characters in presetUsername correctly', async () => {
@@ -88,7 +88,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?username=${presetUsername}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?${new URLSearchParams({ users: presetUsername }).toString()}`);
     });
   });
 
@@ -128,7 +128,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(3);
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role?username=testuser');
+      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role?users=testuser');
     });
   });
 });

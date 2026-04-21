@@ -83,6 +83,19 @@ export interface GetScopesResponse {
   previous: string | null;
   results:Array<Scope>;
 }
+export type ValidateUsersRequest = {
+  users: string[];
+};
+
+export type ValidateUsersResponse = {
+  validUsers: string[];
+  invalidUsers: string[];
+  summary: {
+    total: number;
+    validCount: number;
+    invalidCount: number;
+  };
+};
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
@@ -108,6 +121,16 @@ export const assignTeamMembersRole = async (
   data: AssignTeamMembersRoleRequest,
 ): Promise<PutAssignTeamMembersRoleResponse> => {
   const res = await getAuthenticatedHttpClient().put(getApiUrl('/api/authz/v1/roles/users/'), data);
+  return camelCaseObject(res.data);
+};
+
+export const validateUsers = async (
+  data: ValidateUsersRequest,
+): Promise<ValidateUsersResponse> => {
+  const res = await getAuthenticatedHttpClient().post(
+    getApiUrl('/api/authz/v1/users/validate/'),
+    data,
+  );
   return camelCaseObject(res.data);
 };
 
