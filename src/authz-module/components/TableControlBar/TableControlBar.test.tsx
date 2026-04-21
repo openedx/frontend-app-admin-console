@@ -4,6 +4,8 @@ import { DataTableContext, TextFilter } from '@openedx/paragon';
 import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
 import RolesFilter from './RolesFilter';
+import ScopesFilter from './ScopesFilter';
+import MultipleChoiceFilter from './MultipleChoiceFilter';
 
 const mockSetAllFilters = jest.fn();
 const mockOnFilterChange = jest.fn();
@@ -38,7 +40,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
       count: 0, next: null, previous: null, results: [],
     },
   }),
-  useScopes: () => ({ data: { scopes: [] } }),
+  useScopes: () => ({ data: { results: [] } }),
 }));
 
 describe('TableControlBar', () => {
@@ -112,6 +114,47 @@ describe('TableControlBar', () => {
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
+  it('renders scopes filter when configured', () => {
+    const contextWithScopesFilter = {
+      columns: [
+        {
+          id: 'scopes',
+          Header: 'Scopes',
+          Filter: ScopesFilter,
+          canFilter: true,
+          filterButtonText: 'Select Scopes',
+          setFilter: jest.fn(),
+        },
+      ],
+    };
+
+    renderWithContext(<TableControlBar />, contextWithScopesFilter);
+    expect(screen.getByText('Select Scopes')).toBeInTheDocument();
+  });
+
+  it('renders multiple choice filter when configured', () => {
+    const contextWithMultipleChoiceFilter = {
+      columns: [
+        {
+          id: 'status',
+          Header: 'Status',
+          Filter: MultipleChoiceFilter,
+          canFilter: true,
+          filterButtonText: 'Select Status',
+          setFilter: jest.fn(),
+          filterChoices: [
+            { displayName: 'Active', value: 'active' },
+            { displayName: 'Inactive', value: 'inactive' },
+          ],
+          filterValue: [],
+        },
+      ],
+    };
+
+    renderWithContext(<TableControlBar />, contextWithMultipleChoiceFilter);
+    expect(screen.getByText('Select Status')).toBeInTheDocument();
+  });
+
   it('displays filter chips when filters are applied', () => {
     const contextWithAppliedFilters = {
       state: {
@@ -173,12 +216,6 @@ describe('TableControlBar', () => {
     expect(container).toBeInTheDocument();
     expect(screen.queryByText('Filter by')).not.toBeInTheDocument();
   });
-  it('handles empty columns gracefully', () => {
-    renderWithContext(<TableControlBar />);
-    const container = document.querySelector('.authz-table-control-bar');
-    expect(container).toBeInTheDocument();
-    expect(screen.queryByText('Filter by')).not.toBeInTheDocument();
-  });
 
   it('generates keys using column id when available', () => {
     const contextWithIdColumn = {
@@ -233,7 +270,6 @@ describe('TableControlBar', () => {
     };
 
     renderWithContext(<TableControlBar />, contextWithFilter);
-
     const handleSetFilters = mockSetFilter.mock.calls[0]?.[0];
     if (handleSetFilters) {
       const newFilter = { groupName: 'roles', value: 'admin', displayName: 'Admin' };

@@ -37,10 +37,6 @@ const AuthZModule = () => (
               />
               <Route path={ROUTES.ASSIGN_ROLE_WIZARD_PATH} element={<AssignRoleWizardPage />} />
               <Route path="*" element={<NotFoundError />} />
-              <Route
-                path={ROUTES.AUDIT_USER_PATH}
-                element={<AuditUserPage />}
-              />
             </Routes>
           </Suspense>
         </ToastManagerProvider>

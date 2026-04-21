@@ -25,11 +25,16 @@ import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import UserPermissions from '@src/authz-module/components/UserPermissions';
+import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
+import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
+import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
+import { getCellHeader } from '../components/utils';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
+  const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
   const { username } = useParams();
   const { authenticatedUser } = useContext(AppContext as React.Context<AppContextType>);
   const navigate = useNavigate();
@@ -90,20 +95,29 @@ const AuditUserPage = () => {
 
   const columns = useMemo(() => [
     {
-      Header: formatMessage(messages['authz.user.table.role.column.header']),
+      Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
       Cell: RoleCell,
+      filter: 'includesValue',
+      Filter: RolesFilter,
+      filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
+      filterOrder: 2,
     },
     {
-      Header: formatMessage(messages['authz.user.table.organization.column.header']),
+      Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
       Cell: OrgCell,
+      filter: 'includesValue',
+      Filter: OrgFilter,
+      filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
+      filterOrder: 1,
     },
     {
-      Header: formatMessage(messages['authz.user.table.scope.column.header']),
+      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
       accessor: 'scope',
       Cell: ScopeCell,
       disableFilters: true,
+
     },
     {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
@@ -111,7 +125,7 @@ const AuditUserPage = () => {
       disableFilters: true,
       disableSortBy: true,
     },
-  ], [formatMessage]);
+  ], [formatMessage, columnsWithFiltersApplied]);
 
   const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
 
@@ -208,8 +222,12 @@ const AuditUserPage = () => {
         <Container className="bg-light-200 p-5">
           <DataTable
             isPaginated
+            isFilterable
+            isSortable
             manualPagination
             data={userAssignments}
+            manualFilters
+            manualSortBy
             fetchData={fetchData}
             itemCount={count}
             pageCount={pageCount}
@@ -222,6 +240,7 @@ const AuditUserPage = () => {
               <UserPermissions row={row} />
             )}
           >
+            <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
             <DataTable.Table />
             <TableFooter />
           </DataTable>

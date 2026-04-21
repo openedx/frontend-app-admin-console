@@ -167,6 +167,11 @@ const messages = defineMessages({
     defaultMessage: 'View all permissions',
     description: 'Text for the link to view all permissions in the user table',
   },
+  'authz.table.footer.pagination.label': {
+    id: 'authz.table.footer.pagination.label',
+    defaultMessage: 'Table pagination',
+    description: 'Label for the table pagination controls',
+  },
 });
 
 export default messages;
