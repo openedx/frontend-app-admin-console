@@ -68,6 +68,26 @@ const messages = defineMessages({
     defaultMessage: 'Role assigned successfully.',
     description: 'Toast message shown when a role is successfully assigned',
   },
+  'wizard.save.error.user_already_has_role': {
+    id: 'wizard.save.error.user_already_has_role',
+    defaultMessage: '{userIdentifier} already has this role in {scope}',
+    description: 'Error shown in the toast when the user already holds the role in the selected scope',
+  },
+  'wizard.save.error.user_not_found': {
+    id: 'wizard.save.error.user_not_found',
+    defaultMessage: 'User "{userIdentifier}" was not found',
+    description: 'Error shown in the toast when the username or email does not match any account',
+  },
+  'wizard.save.error.role_assignment_error': {
+    id: 'wizard.save.error.role_assignment_error',
+    defaultMessage: 'Could not assign role to {userIdentifier} in {scope}',
+    description: 'Error shown in the toast when an unexpected error occurs during role assignment',
+  },
+  'wizard.save.error.default': {
+    id: 'wizard.save.error.default',
+    defaultMessage: '{userIdentifier} ({scope}): {error}',
+    description: 'Fallback error line shown in the toast for unknown role-assignment error codes',
+  },
 
   // DefineApplicationScopeStep — filter bar
   'wizard.step2.search.placeholder': {

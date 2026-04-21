@@ -14,6 +14,7 @@ import { libraryRolesMetadata } from '../roles-permissions/library/constants';
 import { courseRolesMetadata } from '../roles-permissions/course/constants';
 import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
 import messages from './messages';
+import { formatRoleAssignmentError } from './utils';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
@@ -119,10 +120,8 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
       });
 
       if (result.errors?.length > 0) {
-        const msg = result.errors
-          .map((e) => `${e.userIdentifier} (${e.scope}): ${e.error}`)
-          .join(', ');
-        showErrorToast(new Error(msg), handleSave);
+        const lines = result.errors.map((e) => formatRoleAssignmentError(intl, e));
+        showToast({ message: lines.join(' · '), type: 'error' });
       } else {
         showToast({
           message: intl.formatMessage(messages['wizard.save.success']),
