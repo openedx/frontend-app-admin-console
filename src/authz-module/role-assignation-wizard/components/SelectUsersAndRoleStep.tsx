@@ -107,7 +107,7 @@ const SelectUsersAndRoleStep = ({
                       </Tooltip>
                     )}
                   >
-                    <div>{radioContent}</div>
+                    <div tabIndex={0} role="button" aria-disabled="true" aria-describedby={`tooltip-disabled-${role.role}`}>{radioContent}</div>
                   </OverlayTrigger>
                 );
               }
