@@ -47,7 +47,7 @@ describe('useQuerySettings', () => {
       sortBy: [{ id: 'username', desc: false }],
       filters: [
         { id: 'role', value: ['admin', 'editor'] },
-        { id: 'fullName', value: 'john' },
+        { id: 'username', value: 'john' },
       ],
     };
 
@@ -268,7 +268,7 @@ describe('useQuerySettings', () => {
       sortBy: [{ id: 'userRole', desc: true }],
       filters: [
         { id: 'role', value: ['admin', 'editor', 'viewer'] },
-        { id: 'fullName', value: 'test@example.com' },
+        { id: 'username', value: 'test@example.com' },
         { id: 'otherFilter', value: 'ignored' }, // Should be ignored
         { id: 'org', value: ['org1', 'org2'] },
         { id: 'scope', value: ['scope1', 'scope2'] },
@@ -327,7 +327,7 @@ describe('useQuerySettings', () => {
       pageIndex: 0,
       sortBy: [],
       filters: [
-        { id: 'fullName', value: '   ' }, // Whitespace only
+        { id: 'username', value: '   ' }, // Whitespace only
       ],
     };
 
@@ -376,7 +376,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'fullName', value: 'john' }],
+        filters: [{ id: 'username', value: 'john' }],
       });
     });
 
@@ -388,7 +388,7 @@ describe('useQuerySettings', () => {
         pageSize: 10,
         pageIndex: 0,
         sortBy: [],
-        filters: [{ id: 'fullName', value: 'jane' }],
+        filters: [{ id: 'username', value: 'jane' }],
       });
     });
 
