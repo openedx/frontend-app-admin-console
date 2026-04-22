@@ -13,6 +13,11 @@ const AssignRoleWizardPage = () => {
   const raw = searchParams.get('from') ?? '';
   const returnTo = (raw.startsWith('/') && !raw.startsWith('//')) ? raw : ROUTES.HOME_PATH;
 
+  const presetUser = initialUsers.trim();
+  const destination = (presetUser && !presetUser.includes(','))
+    ? `${ROUTES.HOME_PATH}/user/${presetUser}`
+    : returnTo;
+
   return (
     <AuthZLayout
       context={{ id: '', title: '', org: '' }}
@@ -25,7 +30,7 @@ const AssignRoleWizardPage = () => {
       {/* TODO: pass a filtered `roles` prop once the permission-lookup API is available,
           so the wizard only shows role groups the current user can assign. */}
       <AssignRoleWizard
-        onClose={() => navigate(returnTo)}
+        onClose={() => navigate(destination)}
         initialUsers={initialUsers}
       />
     </AuthZLayout>

@@ -47,7 +47,9 @@ const getInitialState = (initialUsers: string) => ({
   validatedUsers: [] as string[],
 });
 
-const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata }: AssignRoleWizardProps) => {
+const AssignRoleWizard = ({
+  onClose, initialUsers = '', roles = allRolesMetadata,
+}: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, showErrorToast } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
@@ -69,7 +71,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     setUsers(value);
   }, []);
 
-  const handleClose = () => {
+  const resetState = () => {
     const initialState = getInitialState(initialUsers);
     setActiveStep(initialState.activeStep);
     setUsers(initialState.users);
@@ -78,8 +80,9 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     setInvalidUsers(initialState.invalidUsers);
     setValidatedUsers(initialState.validatedUsers);
     setAssignmentErrors([]);
-    onClose();
   };
+
+  const handleClose = () => { resetState(); onClose(); };
 
   const validateUsersAndProceed = async () => {
     if (validateUsersMutation.isPending) { return; }
@@ -133,7 +136,8 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
           message: intl.formatMessage(messages['wizard.save.success']),
           type: 'success',
         });
-        handleClose();
+        resetState();
+        onClose();
       }
     } catch (error) {
       showErrorToast(error, handleSave);
