@@ -59,7 +59,7 @@ const DefineApplicationScopeStep = ({
     queryState,
     platformAggregateScopeItem,
     orgAggregateScopeItems,
-  } = useScopeListData({ contextType, search: debouncedSearch, org: selectedOrgs[0] || '' });
+  } = useScopeListData({ contextType, search: debouncedSearch, orgs: selectedOrgs });
 
   return (
     <div className="define-application-scope-step">

@@ -100,7 +100,7 @@ export type ValidateUsersResponse = {
 export interface GetScopesParams {
   scopeType?: string;
   search?: string;
-  org?: string;
+  orgs?: string[];
   page?: number;
   pageSize?: number;
   managementPermissionOnly?: boolean;
@@ -221,7 +221,7 @@ export const getScopes = async (params: GetScopesParams): Promise<GetScopesRespo
   const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
   if (params.search) { url.searchParams.set('search', params.search); }
   if (params.scopeType) { url.searchParams.set('scope_type', params.scopeType); }
-  if (params.org) { url.searchParams.set('org', params.org); }
+  if (params.orgs?.length) { url.searchParams.set('orgs', params.orgs.join(',')); }
   if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
   url.searchParams.set('page', (params.page ?? 1).toString());
   url.searchParams.set('page_size', (params.pageSize ?? 10).toString());

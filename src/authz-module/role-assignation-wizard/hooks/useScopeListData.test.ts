@@ -1,5 +1,4 @@
 import { renderHook } from '@testing-library/react';
-import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { intlWrapper as wrapper } from '@src/setupTest';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '../../data/hooks';
@@ -9,13 +8,8 @@ jest.mock('../../data/hooks', () => ({
   useOrgs: jest.fn(),
 }));
 
-jest.mock('@edx/frontend-platform/auth', () => ({
-  getAuthenticatedUser: jest.fn(),
-}));
-
 const mockUseScopes = useScopes as jest.Mock;
 const mockUseOrganizations = useOrgs as jest.Mock;
-const mockGetAuthenticatedUser = getAuthenticatedUser as jest.Mock;
 
 const makeScopesHook = (overrides = {}) => ({
   data: {
@@ -43,20 +37,17 @@ const defaultOrgs = [
 describe('useScopeListData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default: user is not administrator
-    mockGetAuthenticatedUser.mockReturnValue({ administrator: false });
   });
 
   describe('Return value structure', () => {
     it('returns expected shape when contextType is library', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current).toMatchObject({
@@ -72,33 +63,22 @@ describe('useScopeListData', () => {
           isError: expect.any(Boolean),
           fetchNextPage: expect.any(Function),
         }),
-        platformAggregateScopeItem: expect.objectContaining({
-          externalKey: '*',
-          displayName: 'All libraries in Platform',
-          description: 'Includes current and future libraries',
-          org: null,
-        }),
+        platformAggregateScopeItem: null,
         showOrgAggregates: true,
       });
     });
 
     it('returns expected shape when contextType is course', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
-      expect(result.current.platformAggregateScopeItem).toMatchObject({
-        externalKey: '*',
-        displayName: 'All courses in Platform',
-        description: 'Includes current and future courses',
-        org: null,
-      });
+      expect(result.current.platformAggregateScopeItem).toBeNull();
       expect(result.current.showOrgAggregates).toBe(true);
     });
 
@@ -109,7 +89,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: undefined,
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
@@ -138,7 +118,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(Object.keys(result.current.scopesByOrg)).toEqual(['org1', 'org2']);
@@ -166,7 +146,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(Object.keys(result.current.scopesByOrg)).toEqual(['org1']);
@@ -192,7 +172,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       const org1Scopes = result.current.scopesByOrg.org1;
@@ -222,73 +202,39 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.orderedOrgs).toEqual(['org1', 'org2', 'org3']);
     });
   });
 
-  describe('Platform aggregate controlled by administrator', () => {
-    it('returns platformAggregateScopeItem when user is administrator', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
+  describe('Platform aggregate scope item', () => {
+    it('returns null platformAggregateScopeItem for library context (disabled pending backend support)', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
-      expect(result.current.platformAggregateScopeItem).not.toBeNull();
-      expect(result.current.platformAggregateScopeItem?.displayName).toBe('All libraries in Platform');
+      expect(result.current.platformAggregateScopeItem).toBeNull();
       expect(result.current.showOrgAggregates).toBe(true);
     });
 
-    it('returns platformAggregateScopeItem when contextType is course and user is admin', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
+    it('returns null platformAggregateScopeItem for course context (disabled pending backend support)', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
-      }), { wrapper });
-
-      expect(result.current.platformAggregateScopeItem).not.toBeNull();
-      expect(result.current.platformAggregateScopeItem?.displayName).toBe('All courses in Platform');
-    });
-
-    it('returns null platformAggregateScopeItem when user is not administrator', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: false });
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
-        search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
-      expect(result.current.showOrgAggregates).toBe(false);
-    });
-
-    it('returns null platformAggregateScopeItem when administrator is undefined', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: undefined });
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
-        search: '',
-        org: '',
-      }), { wrapper });
-
-      expect(result.current.platformAggregateScopeItem).toBeNull();
-      expect(result.current.showOrgAggregates).toBe(false);
     });
 
     it('returns null platformAggregateScopeItem when contextType is undefined', () => {
@@ -298,7 +244,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: undefined,
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
@@ -313,7 +259,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.queryState.isLoading).toBe(true);
@@ -326,7 +272,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.queryState.isError).toBe(true);
@@ -340,7 +286,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       result.current.queryState.fetchNextPage();
@@ -356,7 +302,7 @@ describe('useScopeListData', () => {
       renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
@@ -371,7 +317,7 @@ describe('useScopeListData', () => {
       renderHook(() => useScopeListData({
         contextType: 'library',
         search: 'mylib',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
@@ -386,11 +332,11 @@ describe('useScopeListData', () => {
       renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: 'org1',
+        orgs: ['org1'],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
-        org: 'org1',
+        orgs: ['org1'],
       }));
     });
 
@@ -401,7 +347,7 @@ describe('useScopeListData', () => {
       renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
@@ -409,18 +355,18 @@ describe('useScopeListData', () => {
       }));
     });
 
-    it('passes undefined for empty org', () => {
+    it('passes undefined for empty orgs', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
-        org: undefined,
+        orgs: undefined,
       }));
     });
   });
@@ -443,7 +389,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.totalCount).toBe(42);
@@ -456,7 +402,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'library',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.totalCount).toBe(0);
@@ -464,11 +410,6 @@ describe('useScopeListData', () => {
   });
 
   describe('useScopeListData — error and loading states', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: false });
-    });
-
     it('handles loading state', () => {
       mockUseScopes.mockReturnValue(makeScopesHook({
         isLoading: true,
@@ -479,7 +420,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.queryState.isLoading).toBe(true);
@@ -495,7 +436,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.queryState.isError).toBe(true);
@@ -512,7 +453,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       result.current.queryState.fetchNextPage();
@@ -526,7 +467,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.organizations).toBeUndefined();
@@ -534,76 +475,20 @@ describe('useScopeListData', () => {
   });
 
   describe('useScopeListData — edge cases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      // Important: reset to return undefined by default to trigger edge case
-      mockGetAuthenticatedUser.mockReturnValue(undefined);
-    });
-
-    it('handles undefined user from getAuthenticatedUser', () => {
-      mockGetAuthenticatedUser.mockReturnValue(undefined);
+    it('showOrgAggregates is always true regardless of context', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
-      // undefined user should not crash - should handle gracefully
-      expect(result.current.platformAggregateScopeItem).toBeNull();
-    });
-
-    it('handles null user from getAuthenticatedUser', () => {
-      mockGetAuthenticatedUser.mockReturnValue(null);
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
-        search: '',
-        org: '',
-      }), { wrapper });
-
-      // null user should not crash - should handle gracefully
-      expect(result.current.platformAggregateScopeItem).toBeNull();
-    });
-
-    it('handles administrator with course context', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
-        search: '',
-        org: '',
-      }), { wrapper });
-
-      expect(result.current.platformAggregateScopeItem).not.toBeNull();
-      expect(result.current.platformAggregateScopeItem?.displayName).toBe('All courses in Platform');
-      expect(result.current.showOrgAggregates).toBe(true);
-    });
-
-    it('handles administrator with library context', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
-        search: '',
-        org: '',
-      }), { wrapper });
-
-      expect(result.current.platformAggregateScopeItem).not.toBeNull();
-      expect(result.current.platformAggregateScopeItem?.displayName).toBe('All libraries in Platform');
       expect(result.current.showOrgAggregates).toBe(true);
     });
 
     it('returns empty orderedOrgs when no scopes', () => {
-      mockGetAuthenticatedUser.mockReturnValue({ administrator: true });
       mockUseScopes.mockReturnValue(makeScopesHook({
         data: {
           pages: [{
@@ -616,7 +501,7 @@ describe('useScopeListData', () => {
       const { result } = renderHook(() => useScopeListData({
         contextType: 'course',
         search: '',
-        org: '',
+        orgs: [],
       }), { wrapper });
 
       expect(result.current.orderedOrgs).toEqual([]);

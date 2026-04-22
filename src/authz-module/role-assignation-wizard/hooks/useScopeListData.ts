@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
@@ -8,7 +7,7 @@ import messages from '../messages';
 interface UseScopeListDataParams {
   contextType: string | undefined;
   search: string;
-  org: string;
+  orgs: string[];
 }
 
 const groupByOrg = (acc: Record<string, Scope[]>, scope: Scope): Record<string, Scope[]> => {
@@ -18,7 +17,7 @@ const groupByOrg = (acc: Record<string, Scope[]>, scope: Scope): Record<string, 
   return acc;
 };
 
-const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) => {
+const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams) => {
   const intl = useIntl();
   const {
     data: scopesData,
@@ -30,7 +29,7 @@ const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) 
   } = useScopes({
     scopeType: contextType,
     search: search || undefined,
-    org: org || undefined,
+    orgs: orgs.length ? orgs : undefined,
   });
 
   const { data: orgsData } = useOrgs();
@@ -64,12 +63,11 @@ const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) 
     ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
     : intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library']);
 
-  // Only show platform aggregate and org aggregates for administrators.
-  // getAuthenticatedUser() is stable for the lifetime of a session (no hot user-switching).
-  const isPlatformAdmin = useMemo(
-    () => getAuthenticatedUser()?.administrator === true,
-    [],
-  );
+  // TODO: replace with `hasPlatformPermission` from `useScopePermissions` once the backend
+  // supports calling the permissions endpoint without a required scope.
+  const isPlatformAdmin = false;
+  // TODO: same blocker — replace with `hasOrgPermission` from `useScopePermissions`.
+  const showOrgAggregates = true;
 
   const platformAggregateScopeItem: Scope | null = (contextType && isPlatformAdmin)
     ? {
@@ -79,8 +77,6 @@ const useScopeListData = ({ contextType, search, org }: UseScopeListDataParams) 
       org: null,
     }
     : null;
-
-  const showOrgAggregates = isPlatformAdmin;
 
   const orgAggregateScopeItems = useMemo<Record<string, Scope>>(() => {
     if (!contextType || !showOrgAggregates) { return {}; }

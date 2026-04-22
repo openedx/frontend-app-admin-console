@@ -204,7 +204,7 @@ export const useOrgs = (search?: string, page?: number, pageSize?: number) => us
  *
  * @example
  * ```tsx
- * const { data, fetchNextPage, hasNextPage } = useScopes({ search: 'intro', org: 'edX' });
+ * const { data, fetchNextPage, hasNextPage } = useScopes({ search: 'intro', orgs: ['edX'] });
  * const scopes = data?.pages.flatMap((p) => p.results) ?? [];
  * ```
  */

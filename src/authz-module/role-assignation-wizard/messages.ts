@@ -98,6 +98,11 @@ const messages = defineMessages({
     defaultMessage: '{userIdentifier} ({scope}): {error}',
     description: 'Fallback error line shown in the toast for unknown role-assignment error codes',
   },
+  'wizard.save.error.forbidden': {
+    id: 'wizard.save.error.forbidden',
+    defaultMessage: 'You do not have permission to perform this assignment.',
+    description: 'Inline error shown in step 2 when the backend returns 403 on role assignment',
+  },
 
   // DefineApplicationScopeStep — filter bar
   'wizard.step2.search.placeholder': {
