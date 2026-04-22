@@ -496,4 +496,75 @@ describe('AuditUserPage', () => {
       expect(screen.getByText(/this is the user's only role/i)).toBeInTheDocument();
     });
   });
+
+  it('handles undefined data from useUserAssignedRoles with default destructuring', async () => {
+    (useUserAccount as jest.Mock).mockReturnValue({
+      data: mockUser,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({
+      data: undefined, // This triggers the default destructuring assignment
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('johndoe', { selector: 'li[aria-current="page"]' })).toBeInTheDocument();
+      expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to home when user not found and isErrorUser is false', async () => {
+    (useUserAccount as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({
+      data: mockAssignments,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Home Page')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to home when user not found and error is 404', async () => {
+    (useUserAccount as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: true,
+      error: {
+        customAttributes: {
+          httpErrorStatus: 404,
+        },
+      },
+    });
+
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({
+      data: mockAssignments,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Home Page')).toBeInTheDocument();
+    });
+  });
 });
