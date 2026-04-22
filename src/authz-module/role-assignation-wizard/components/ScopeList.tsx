@@ -22,8 +22,7 @@ interface ScopeListProps {
   onScopeToggle: (scopeId: string) => void;
   queryState: ScopeListQueryState;
   platformAggregateScopeItem: Scope | null;
-  showOrgAggregates: boolean;
-  contextType: string | undefined;
+  orgAggregateScopeItems: Record<string, Scope>;
 }
 
 const ScopeList = ({
@@ -34,27 +33,12 @@ const ScopeList = ({
   onScopeToggle,
   queryState,
   platformAggregateScopeItem,
-  showOrgAggregates,
-  contextType,
+  orgAggregateScopeItems,
 }: ScopeListProps) => {
   const intl = useIntl();
   const {
     isLoading, isFetchingNextPage, hasNextPage, isError, fetchNextPage,
   } = queryState;
-  const aggregateLabelMessages = {
-    course: messages['wizard.step2.scopeList.aggregate.label.course'],
-    library: messages['wizard.step2.scopeList.aggregate.label.library'],
-  };
-  const aggregateDescriptionMessages = {
-    course: messages['wizard.step2.scope.aggregate.description.course'],
-    library: messages['wizard.step2.scope.aggregate.description.library'],
-  };
-  const aggregateLabel = contextType && aggregateLabelMessages[contextType]
-    ? intl.formatMessage(aggregateLabelMessages[contextType])
-    : '';
-  const aggregateDescription = contextType && aggregateDescriptionMessages[contextType]
-    ? intl.formatMessage(aggregateDescriptionMessages[contextType])
-    : '';
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -88,27 +72,16 @@ const ScopeList = ({
             />
           )}
 
-          {orderedOrgs.map((org) => {
-            const aggregateScopeItem: Scope | undefined = (contextType && showOrgAggregates)
-              ? {
-                externalKey: contextType === 'course' ? `course-v1:${org}+*` : `lib:${org}:*`,
-                displayName: aggregateLabel,
-                description: aggregateDescription,
-                org: { id: '', name: org, shortName: org },
-              }
-              : undefined;
-
-            return (
-              <OrgSection
-                key={org}
-                orgName={organizations?.find((o) => o.shortName === org)?.name || org}
-                scopes={scopesByOrg[org]}
-                selectedScopes={selectedScopes}
-                onScopeToggle={onScopeToggle}
-                aggregateScopeItem={aggregateScopeItem}
-              />
-            );
-          })}
+          {orderedOrgs.map((org) => (
+            <OrgSection
+              key={org}
+              orgName={organizations?.find((o) => o.shortName === org)?.name || org}
+              scopes={scopesByOrg[org]}
+              selectedScopes={selectedScopes}
+              onScopeToggle={onScopeToggle}
+              aggregateScopeItem={orgAggregateScopeItems[org]}
+            />
+          ))}
 
           {orderedOrgs.length === 0 && (
             <p className="text-muted text-center py-3">{intl.formatMessage(messages['wizard.step2.scopeList.empty'])}</p>

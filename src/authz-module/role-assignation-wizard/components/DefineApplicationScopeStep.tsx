@@ -58,7 +58,7 @@ const DefineApplicationScopeStep = ({
     totalCount,
     queryState,
     platformAggregateScopeItem,
-    showOrgAggregates,
+    orgAggregateScopeItems,
   } = useScopeListData({ contextType, search: debouncedSearch, org: selectedOrgs[0] || '' });
 
   return (
@@ -97,8 +97,7 @@ const DefineApplicationScopeStep = ({
         onScopeToggle={onScopeToggle}
         queryState={queryState}
         platformAggregateScopeItem={platformAggregateScopeItem}
-        showOrgAggregates={showOrgAggregates}
-        contextType={contextType}
+        orgAggregateScopeItems={orgAggregateScopeItems}
       />
     </div>
   );

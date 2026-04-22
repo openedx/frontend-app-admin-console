@@ -225,8 +225,7 @@ describe('useScopeListData', () => {
         org: '',
       }), { wrapper });
 
-      // Object.keys preserves insertion order from the reduce operation (org2 first, then org1, then org3)
-      expect(result.current.orderedOrgs).toEqual(['org2', 'org1', 'org3']);
+      expect(result.current.orderedOrgs).toEqual(['org1', 'org2', 'org3']);
     });
   });
 

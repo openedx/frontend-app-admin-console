@@ -127,6 +127,10 @@
   max-height: 500px;
 }
 
+.scope-search-input {
+  width: 18.75rem; // 300px
+}
+
 .toast-container {
   // Ensure toast appears above modal
   z-index: 1000;

@@ -103,7 +103,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getNextButton());
     await waitFor(() => {
       expect(screen.getByText(/not associated with an account/i)).toBeInTheDocument();
-      expect(screen.queryByTestId('toggle-scope')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
     });
   });
 
@@ -115,7 +115,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope')).toBeInTheDocument();
+      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
     });
   });
 
@@ -128,7 +128,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getNextButton());
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.queryByTestId('toggle-scope')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
     });
   });
 
@@ -156,7 +156,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     await user.click(screen.getByRole('button', { name: /retry/i }));
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope')).toBeInTheDocument();
+      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
     });
   });
 });
@@ -168,7 +168,7 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope')).toBeInTheDocument();
+      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
     });
   };
 
@@ -207,7 +207,7 @@ describe('AssignRoleWizard — Step 2', () => {
     });
     renderWizard({ onClose });
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope'));
+    await user.click(screen.getByTestId('toggle-scope-*'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(mockAssignMutateAsync).toHaveBeenCalledWith({
@@ -225,7 +225,7 @@ describe('AssignRoleWizard — Step 2', () => {
     });
     renderWizard();
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope'));
+    await user.click(screen.getByTestId('toggle-scope-*'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
@@ -239,7 +239,7 @@ describe('AssignRoleWizard — Step 2', () => {
     mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
     renderWizard();
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope'));
+    await user.click(screen.getByTestId('toggle-scope-*'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();

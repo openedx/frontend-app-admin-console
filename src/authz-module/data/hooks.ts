@@ -173,13 +173,13 @@ export const useAllRoleAssignments = (querySettings: QuerySettings) => {
  * Results are cached for 30 minutes — suitable for both filter dropdowns and full listings.
  *
  * @param search - Optional text filter applied to organization names.
- * @param page - Page number to fetch (1-based). Omit to fetch the first page.
- * @param pageSize - Number of items per page. Omit to use the API default.
+ * @param page - 1-based page number; defaults to the first page when omitted.
+ * @param pageSize - Items per page; defaults to the API default when omitted.
  * @returns A `QueryResult<GetOrgsResponse>` with `results`, `count`, `next`, and `previous`.
  *
  * @example
  * ```tsx
- * const { data } = useOrgs({ search: 'edX' });
+ * const { data } = useOrgs('edX');
  * const orgs = data?.results ?? [];
  * ```
  */
@@ -223,6 +223,7 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
   },
   initialPageParam: 1,
   staleTime: 1000 * 60 * 5,
+  refetchOnWindowFocus: false,
 });
 
 /*

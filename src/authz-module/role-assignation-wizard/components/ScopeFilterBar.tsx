@@ -34,7 +34,7 @@ const ScopeFilterBar = ({
     <>
       <div className="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap">
         <div className="d-flex align-items-center gap-3">
-          <div style={{ width: '300px' }}>
+          <div className="scope-search-input">
             <Form.Group controlId="scope-search" className="mb-0">
               <Form.Control
                 type="text"
@@ -49,7 +49,7 @@ const ScopeFilterBar = ({
           <OrgFilter
             filterButtonText={intl.formatMessage(messages['wizard.step2.filter.org.label'])}
             filterValue={selectedOrgs}
-            setFilter={(value) => onOrgsChange(value)}
+            setFilter={onOrgsChange}
           />
         </div>
 

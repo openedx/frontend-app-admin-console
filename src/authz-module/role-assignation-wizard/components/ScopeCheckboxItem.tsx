@@ -12,7 +12,7 @@ const ScopeCheckboxItem = ({ scope, checked, onToggle }: ScopeCheckboxItemProps)
     <Form.Checkbox
       checked={checked}
       onChange={() => onToggle(scope.externalKey)}
-      data-testid="toggle-scope"
+      data-testid={`toggle-scope-${scope.externalKey}`}
     >
       {scope.displayName}
     </Form.Checkbox>
