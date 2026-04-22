@@ -4,6 +4,7 @@ import {
 } from '@openedx/paragon';
 import { Search } from '@openedx/paragon/icons';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
+import { ChangeEvent } from 'react';
 import messages from '../messages';
 
 interface ScopeFilterBarProps {
@@ -38,7 +39,7 @@ const ScopeFilterBar = ({
               <Form.Control
                 type="text"
                 value={search}
-                onChange={(e: { target: { value: string } }) => onSearchChange(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
                 placeholder={intl.formatMessage(messages['wizard.step2.search.placeholder'])}
                 trailingElement={<Icon src={Search} />}
               />

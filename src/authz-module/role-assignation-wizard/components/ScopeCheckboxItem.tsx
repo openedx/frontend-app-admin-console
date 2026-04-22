@@ -8,7 +8,7 @@ interface ScopeCheckboxItemProps {
 }
 
 const ScopeCheckboxItem = ({ scope, checked, onToggle }: ScopeCheckboxItemProps) => (
-  <div className="mb-2">
+  <div className="my-4">
     <Form.Checkbox
       checked={checked}
       onChange={() => onToggle(scope.externalKey)}
@@ -17,7 +17,7 @@ const ScopeCheckboxItem = ({ scope, checked, onToggle }: ScopeCheckboxItemProps)
       {scope.displayName}
     </Form.Checkbox>
     {scope.description && (
-      <small className="d-block text-muted pl-4">{scope.description}</small>
+      <small className="d-block text-muted font-italic pl-4">{scope.description}</small>
     )}
   </div>
 );
