@@ -12,7 +12,7 @@ const AuthzHome = () => {
   const { hash } = useLocation();
   const intl = useIntl();
   const [searchParams] = useSearchParams();
-  const presetScope = searchParams.get('scope') || undefined;
+  const presetScope = searchParams.get('scope')?.replace(/\s/g, '+') || undefined;
 
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
 
