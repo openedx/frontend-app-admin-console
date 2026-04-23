@@ -14,10 +14,6 @@ import {
   createActionsCell,
 } from './TableCells';
 
-// TODO: remove console.log mocks and implement actual logic for these cells, then update tests accordingly
-// Mock console.log for TODO functions
-jest.spyOn(console, 'log').mockImplementation(() => {});
-
 const mockNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
@@ -501,6 +497,7 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
+        hasPermissionToDeleteScope: () => true,
         isUserAuthenticatedPage: false,
       });
       renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
@@ -524,6 +521,7 @@ describe('TableCells Components', () => {
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
         isUserAuthenticatedPage: true,
+        hasPermissionToDeleteScope: () => true,
       });
       renderWrapper(<CustomActionsCell row={adminRow} column={{ id: 'actions' }} />);
 
@@ -543,6 +541,7 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
+        hasPermissionToDeleteScope: () => true,
         isUserAuthenticatedPage: true,
       });
       renderWrapper(<CustomActionsCell row={djangoRow} column={{ id: 'actions' }} />);
@@ -551,6 +550,18 @@ describe('TableCells Components', () => {
       expect(infoIcon).toBeInTheDocument();
       await user.hover(infoIcon);
       expect(screen.getByText(/Please go to Django Admin to manage it/i)).toBeInTheDocument();
+    });
+
+    it('renders a disabled button when user does not have permission', async () => {
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: false,
+        hasPermissionToDeleteScope: () => false,
+      });
+      renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
+
+      const deleteButton = screen.queryByRole('button', { name: /delete role action/i });
+      expect(deleteButton).toBeDisabled();
     });
   });
 

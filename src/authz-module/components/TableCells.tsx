@@ -10,7 +10,9 @@ import {
 } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
-import { ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
+import {
+  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+} from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
@@ -37,6 +39,7 @@ type ExtendedCellProps = CellPropsWithValue & {
 
 type ActionsCellExtraProps = {
   onClickDeleteButton: (role: RoleToDelete) => void;
+  hasPermissionToDeleteScope: (scope: string) => boolean;
   isUserAuthenticatedPage: boolean;
 };
 
@@ -160,9 +163,13 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   );
 };
 
-const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: ActionsCellProps) => {
+const ActionsCell = ({
+  row, onClickDeleteButton, isUserAuthenticatedPage, hasPermissionToDeleteScope,
+}: ActionsCellProps) => {
   const { formatMessage } = useIntl();
-  const { role } = row.original;
+  const { role, scope } = row.original;
+
+  const hasPermissionsToDelete = useMemo(() => hasPermissionToDeleteScope(scope), [hasPermissionToDeleteScope, scope]);
 
   const handleDelete = () => {
     const roleToDelete = {
@@ -205,7 +212,13 @@ const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: Acti
   }
 
   return (
-    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
+    <IconButton
+      disabled={!hasPermissionsToDelete}
+      variant={hasPermissionsToDelete ? 'danger' : 'light'}
+      onClick={handleDelete}
+      alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+      src={Delete}
+    />
   );
 };
 

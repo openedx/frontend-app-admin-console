@@ -10,10 +10,12 @@ import {
   Container, DataTable,
 } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
-import { AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import {
+  AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE,
+} from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUserAccount } from '@src/data/hooks';
+import { useUserAccount, useValidateUserPermissions } from '@src/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
@@ -30,7 +32,7 @@ import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilte
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
-import { getCellHeader } from '../components/utils';
+import { getCellHeader, getScopeManageActionPermission } from '../utils';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
@@ -52,6 +54,13 @@ const AuditUserPage = () => {
   } = useToastManager();
   const { mutate: revokeUserRoles, isPending: isRevokingUserRolePending } = useRevokeUserRoles();
 
+  const deletePermissions = useMemo(() => {
+    const uniqueScopes = [...new Set(userAssignments.map(assignment => assignment.scope))];
+    return uniqueScopes.map(scope => getScopeManageActionPermission(scope));
+  }, [userAssignments]);
+
+  const { data: permissionsToManageScope } = useValidateUserPermissions(deletePermissions);
+
   const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
 
   useEffect(() => {
@@ -72,6 +81,11 @@ const AuditUserPage = () => {
     setShowConfirmDeletionModal(true);
   }, [isRevokingUserRolePending]);
 
+  const hasPermissionToDeleteScope = useCallback((scope: string) => {
+    const permissionIndex = deletePermissions.findIndex(permission => permission.scope === scope);
+    return permissionsToManageScope?.[permissionIndex]?.allowed;
+  }, [deletePermissions, permissionsToManageScope]);
+
   const navLinks = useMemo(() => [
     {
       label: formatMessage(baseMessages['authz.management.home.nav.link']),
@@ -91,9 +105,10 @@ const AuditUserPage = () => {
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser.username,
+        hasPermissionToDeleteScope,
       }),
     },
-  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, username]);
+  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, hasPermissionToDeleteScope, username]);
 
   const columns = useMemo(() => [
     {

@@ -30,6 +30,10 @@ jest.mock('@edx/frontend-component-header', () => ({
 jest.mock('@src/data/hooks', () => ({
   ...jest.requireActual('@src/data/hooks'),
   useUserAccount: jest.fn(),
+  useValidateUserPermissions: jest.fn().mockReturnValue({
+    data: [{ allowed: true }],
+    isLoading: false,
+  }),
 }));
 
 // Mock the useRevokeUserRoles hook

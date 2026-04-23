@@ -3,7 +3,6 @@ import {
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import { LibraryMetadata } from '@src/types';
-import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getAllRoleAssignments,
   GetAllRoleAssignmentsResponse, getLibrary, getOrgs, GetOrgsResponse,
@@ -129,18 +128,19 @@ export const useValidateUsers = () => useMutation({
  */
 export const useRevokeUserRoles = () => {
   const queryClient = useQueryClient();
-  const { querySettings: defaultQuerySettings } = useQuerySettings();
   return useMutation({
     mutationFn: async ({ data }: {
       data: RevokeUserRolesRequest
     }) => revokeUserRoles(data),
-    onSettled: (_data, _error, { data: { scope, users, querySettings } }) => {
+    onSettled: (_data, _error, { data: { scope } }) => {
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.teamMembersAll(scope) });
       queryClient.invalidateQueries({ queryKey: authzQueryKeys.permissionsByRole(scope) });
       queryClient.invalidateQueries({
-        queryKey: authzQueryKeys.userRoles(users, querySettings),
+        predicate: (query) => query.queryKey.includes('userRoles'),
       });
-      queryClient.invalidateQueries({ queryKey: authzQueryKeys.allRoleAssignments(defaultQuerySettings) });
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes('allRoleAssignments'),
+      });
     },
   });
 };
