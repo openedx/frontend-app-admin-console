@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
@@ -92,7 +93,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
         .map((orgSlug) => [
           orgSlug,
           {
-            externalKey: contextType === 'course' ? `course-v1:${orgSlug}+*` : `lib:${orgSlug}:*`,
+            externalKey: getOrgAggregateScopeKey(contextType, orgSlug),
             displayName: orgAggregateLabel,
             description: aggregateDescription,
             org: { id: '0', name: orgSlug, shortName: orgSlug },

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/constants';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, getOrgAggregateScopeKey } from '@src/authz-module/constants';
 
 interface UseScopePermissionsParams {
   contextType: string | undefined;
@@ -16,20 +16,19 @@ const useScopePermissions = ({
   contextType,
   orderedOrgs,
 }: UseScopePermissionsParams): UseScopePermissionsResult => {
-  // TODO: compute hasPlatformPermission from per-org permission requests once the backend
-  // supports calling the permissions endpoint without a required scope.
+  // TODO: compute hasPlatformPermission once the backend supports validating platform-wide permissions.
   const hasPlatformPermission = false;
 
   // Validate per-organization permissions for org-level aggregate options
   // Note: Using glob patterns (*:org:*)
   const orgPermissionRequests = useMemo(() => {
-    if (!orderedOrgs.length) { return []; }
+    if (!orderedOrgs.length || !contextType) { return []; }
     const action = contextType === 'course'
       ? CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
       : CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM;
     return orderedOrgs.map((org) => ({
       action,
-      scope: contextType === 'course' ? `course-v1:${org}+*` : `lib:${org}:*`,
+      scope: getOrgAggregateScopeKey(contextType, org),
     }));
   }, [orderedOrgs, contextType]);
 

@@ -80,6 +80,17 @@ export const CONTENT_COURSE_PERMISSIONS = {
   VIEW_COURSE_GLOBAL_STAFF_SUPER_ADMINS: 'courses.view_global_staff_and_superadmins',
 };
 
+const ORG_AGGREGATE_SCOPE_BUILDERS = {
+  course: (orgSlug: string) => `course-v1:${orgSlug}+*`,
+  library: (orgSlug: string) => `lib:${orgSlug}:*`,
+};
+
+export const getOrgAggregateScopeKey = (contextType: string, orgSlug: string): string => {
+  const builder = ORG_AGGREGATE_SCOPE_BUILDERS[contextType];
+  if (!builder) { throw new Error(`Unknown contextType: "${contextType}"`); }
+  return builder(orgSlug);
+};
+
 export const libraryResourceTypes: ResourceMetadata[] = [
   { key: 'library', label: 'Library', description: 'Permissions related to the library as a whole.' },
   { key: 'library_content', label: 'Content', description: 'Permissions to create, edit, delete, and publish individual content items within the library.' },

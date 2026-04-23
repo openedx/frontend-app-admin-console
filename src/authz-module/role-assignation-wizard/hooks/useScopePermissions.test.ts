@@ -119,15 +119,13 @@ describe('useScopePermissions', () => {
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([]);
     });
 
-    it('uses library branch when contextType is undefined', () => {
+    it('passes empty array when contextType is undefined', () => {
       renderHook(() => useScopePermissions({
         contextType: undefined,
         orderedOrgs: ['MIT'],
       }));
 
-      expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
-        { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:MIT:*' },
-      ]);
+      expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([]);
     });
   });
 });

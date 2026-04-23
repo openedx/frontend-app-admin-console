@@ -1,4 +1,4 @@
-import { buildWizardPath, ROUTES } from './constants';
+import { buildWizardPath, getOrgAggregateScopeKey, ROUTES } from './constants';
 
 const BASE = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
 
@@ -30,5 +30,19 @@ describe('buildWizardPath', () => {
 
   it('omits the query string when users and from are both empty strings', () => {
     expect(buildWizardPath({ users: '', from: '' })).toBe(BASE);
+  });
+});
+
+describe('getOrgAggregateScopeKey', () => {
+  it('returns course wildcard scope for course context', () => {
+    expect(getOrgAggregateScopeKey('course', 'MIT')).toBe('course-v1:MIT+*');
+  });
+
+  it('returns library wildcard scope for library context', () => {
+    expect(getOrgAggregateScopeKey('library', 'MIT')).toBe('lib:MIT:*');
+  });
+
+  it('throws for an unknown contextType', () => {
+    expect(() => getOrgAggregateScopeKey('unknown', 'MIT')).toThrow('Unknown contextType: "unknown"');
   });
 });
