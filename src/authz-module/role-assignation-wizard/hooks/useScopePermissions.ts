@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { useOrgs } from '@src/authz-module/data/hooks';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/constants';
 
 interface UseScopePermissionsParams {
@@ -17,37 +16,9 @@ const useScopePermissions = ({
   contextType,
   orderedOrgs,
 }: UseScopePermissionsParams): UseScopePermissionsResult => {
-  const { data } = useOrgs();
-  const organizations = useMemo(() => data?.results ?? [], [data]);
-
-  // Build permission validation requests for platform-wide check
-  // Note: Using glob patterns (*:org:*)
-  const platformCoursePermissionRequests = useMemo(
-    () => organizations?.map((org) => ({
-      action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
-      scope: `course-v1:${org.shortName}+*`,
-    })) ?? [],
-    [organizations],
-  );
-
-  const platformLibraryPermissionRequests = useMemo(
-    () => organizations?.map((org) => ({
-      action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
-      scope: `lib:${org.shortName}:*`,
-    })) ?? [],
-    [organizations],
-  );
-
-  const { data: coursePlatformPerms } = useValidateUserPermissions(platformCoursePermissionRequests);
-  const { data: libraryPlatformPerms } = useValidateUserPermissions(platformLibraryPermissionRequests);
-
-  // Platform-wide permission = user has permission for ALL organizations
-  const hasPlatformCoursePermission = coursePlatformPerms?.every((p) => p.allowed) ?? false;
-  const hasPlatformLibraryPermission = libraryPlatformPerms?.every((p) => p.allowed) ?? false;
-
-  const hasPlatformPermission = contextType === 'course'
-    ? hasPlatformCoursePermission
-    : hasPlatformLibraryPermission;
+  // TODO: compute hasPlatformPermission from per-org permission requests once the backend
+  // supports calling the permissions endpoint without a required scope.
+  const hasPlatformPermission = false;
 
   // Validate per-organization permissions for org-level aggregate options
   // Note: Using glob patterns (*:org:*)
@@ -64,7 +35,7 @@ const useScopePermissions = ({
 
   const { data: orgPerms } = useValidateUserPermissions(orgPermissionRequests);
 
-  // Build a map of org -> has permission
+  // Build a map of `org: has_permission`
   const orgHasPermission = useMemo(() => {
     const map: Record<string, boolean> = {};
     orderedOrgs.forEach((org, idx) => {

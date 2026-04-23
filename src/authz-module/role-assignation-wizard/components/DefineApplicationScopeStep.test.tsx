@@ -4,11 +4,14 @@ import { renderWrapper } from '@src/setupTest';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useScopes, useOrgs } from '../../data/hooks';
+import useScopePermissions from '../hooks/useScopePermissions';
 
 jest.mock('../../data/hooks', () => ({
   useScopes: jest.fn(),
   useOrgs: jest.fn(),
 }));
+
+jest.mock('../hooks/useScopePermissions');
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedUser: jest.fn(),
@@ -66,6 +69,10 @@ describe('DefineApplicationScopeStep', () => {
     (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
     (useOrgs as jest.Mock).mockReturnValue({ data: { results: defaultOrgs } });
     (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: { org1: true, org2: true },
+    });
   });
 
   describe('Title and layout', () => {
@@ -283,6 +290,10 @@ describe('DefineApplicationScopeStep', () => {
           },
         }),
       );
+      (useScopePermissions as jest.Mock).mockReturnValue({
+        hasPlatformPermission: false,
+        orgHasPermission: { org3: true },
+      });
       renderComponent({ selectedRole: 'library_admin' });
       expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
     });

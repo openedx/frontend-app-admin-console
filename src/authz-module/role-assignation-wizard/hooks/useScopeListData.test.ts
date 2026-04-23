@@ -2,14 +2,18 @@ import { renderHook } from '@testing-library/react';
 import { intlWrapper as wrapper } from '@src/setupTest';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '../../data/hooks';
+import useScopePermissions from './useScopePermissions';
 
 jest.mock('../../data/hooks', () => ({
   useScopes: jest.fn(),
   useOrgs: jest.fn(),
 }));
 
+jest.mock('./useScopePermissions');
+
 const mockUseScopes = useScopes as jest.Mock;
 const mockUseOrganizations = useOrgs as jest.Mock;
+const mockUseScopePermissions = useScopePermissions as jest.Mock;
 
 const makeScopesHook = (overrides = {}) => ({
   data: {
@@ -37,6 +41,10 @@ const defaultOrgs = [
 describe('useScopeListData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseScopePermissions.mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: { org1: true, org2: true },
+    });
   });
 
   describe('Return value structure', () => {
@@ -64,7 +72,6 @@ describe('useScopeListData', () => {
           fetchNextPage: expect.any(Function),
         }),
         platformAggregateScopeItem: null,
-        showOrgAggregates: true,
       });
     });
 
@@ -79,7 +86,6 @@ describe('useScopeListData', () => {
       }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
-      expect(result.current.showOrgAggregates).toBe(true);
     });
 
     it('returns null platformAggregateScopeItem when contextType is undefined', () => {
@@ -221,7 +227,6 @@ describe('useScopeListData', () => {
       }), { wrapper });
 
       expect(result.current.platformAggregateScopeItem).toBeNull();
-      expect(result.current.showOrgAggregates).toBe(true);
     });
 
     it('returns null platformAggregateScopeItem for course context (disabled pending backend support)', () => {
@@ -475,19 +480,6 @@ describe('useScopeListData', () => {
   });
 
   describe('useScopeListData — edge cases', () => {
-    it('showOrgAggregates is always true regardless of context', () => {
-      mockUseScopes.mockReturnValue(makeScopesHook());
-      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
-
-      const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
-        search: '',
-        orgs: [],
-      }), { wrapper });
-
-      expect(result.current.showOrgAggregates).toBe(true);
-    });
-
     it('returns empty orderedOrgs when no scopes', () => {
       mockUseScopes.mockReturnValue(makeScopesHook({
         data: {

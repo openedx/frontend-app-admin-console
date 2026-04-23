@@ -6,6 +6,7 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import {
   useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
 } from '../data/hooks';
+import useScopePermissions from './hooks/useScopePermissions';
 import AssignRoleWizard from './AssignRoleWizard';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -29,6 +30,8 @@ jest.mock('../data/hooks', () => ({
   useScopes: jest.fn(),
   useOrgs: jest.fn(),
 }));
+
+jest.mock('./hooks/useScopePermissions');
 
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
 const mockUseAssignTeamMembersRole = useAssignTeamMembersRole as jest.Mock;
@@ -90,6 +93,10 @@ describe('AssignRoleWizard — Step 1', () => {
     mockUseScopes.mockReturnValue(emptyScopesReturn);
     mockUseOrgs.mockReturnValue({ data: { results: [] } });
     (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: {},
+    });
   });
 
   it('Cancel returns to the previous view', async () => {
@@ -204,6 +211,10 @@ describe('AssignRoleWizard — Step 2', () => {
     mockUseScopes.mockReturnValue(oneScopeReturn);
     mockUseOrgs.mockReturnValue({ data: { results: oneOrg } });
     (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: { org1: true },
+    });
   });
 
   it('Back button returns to Step 1', async () => {

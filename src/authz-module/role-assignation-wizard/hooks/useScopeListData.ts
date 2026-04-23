@@ -3,6 +3,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import messages from '../messages';
+import useScopePermissions from './useScopePermissions';
 
 interface UseScopeListDataParams {
   contextType: string | undefined;
@@ -51,6 +52,8 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
 
   const orderedOrgs = useMemo(() => Object.keys(scopesByOrg).sort(), [scopesByOrg]);
 
+  const { hasPlatformPermission, orgHasPermission } = useScopePermissions({ contextType, orderedOrgs });
+
   const aggregateDescription = contextType === 'course'
     ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
     : intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library']);
@@ -63,13 +66,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
     : intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library']);
 
-  // TODO: replace with `hasPlatformPermission` from `useScopePermissions` once the backend
-  // supports calling the permissions endpoint without a required scope.
-  const isPlatformAdmin = false;
-  // TODO: same blocker — replace with `hasOrgPermission` from `useScopePermissions`.
-  const showOrgAggregates = true;
-
-  const platformAggregateScopeItem: Scope | null = (contextType && isPlatformAdmin)
+  const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {
       externalKey: '*',
       displayName: platformAggregateLabel,
@@ -78,20 +75,31 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     }
     : null;
 
+  /**
+   * Builds a map of org-level aggregate scopes keyed by org slug.
+   *
+   * Each entry represents a wildcard scope that grants access to all courses or
+   * libraries within an org (e.g. `course-v1:OrgSlug+*` or `lib:OrgSlug:*`).
+   * Only orgs where the current user already holds permission are included.
+   *
+   * Returns an empty object when `contextType` is not yet defined.
+   */
   const orgAggregateScopeItems = useMemo<Record<string, Scope>>(() => {
-    if (!contextType || !showOrgAggregates) { return {}; }
+    if (!contextType) { return {}; }
     return Object.fromEntries(
-      orderedOrgs.map((orgSlug) => [
-        orgSlug,
-        {
-          externalKey: contextType === 'course' ? `course-v1:${orgSlug}+*` : `lib:${orgSlug}:*`,
-          displayName: orgAggregateLabel,
-          description: aggregateDescription,
-          org: { id: '0', name: orgSlug, shortName: orgSlug },
-        } satisfies Scope,
-      ]),
+      orderedOrgs
+        .filter((orgSlug) => orgHasPermission[orgSlug])
+        .map((orgSlug) => [
+          orgSlug,
+          {
+            externalKey: contextType === 'course' ? `course-v1:${orgSlug}+*` : `lib:${orgSlug}:*`,
+            displayName: orgAggregateLabel,
+            description: aggregateDescription,
+            org: { id: '0', name: orgSlug, shortName: orgSlug },
+          } satisfies Scope,
+        ]),
     );
-  }, [orderedOrgs, contextType, showOrgAggregates, orgAggregateLabel, aggregateDescription]);
+  }, [orderedOrgs, contextType, orgHasPermission, orgAggregateLabel, aggregateDescription]);
 
   return {
     organizations,
@@ -103,7 +111,6 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
       isLoading, isFetchingNextPage, hasNextPage, isError, fetchNextPage,
     },
     platformAggregateScopeItem,
-    showOrgAggregates,
     orgAggregateScopeItems,
   };
 };
