@@ -2,16 +2,77 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { useValidateUsers } from '../data/hooks';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import {
+  useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
+} from '../data/hooks';
+import useScopePermissions from './hooks/useScopePermissions';
 import AssignRoleWizard from './AssignRoleWizard';
 
-jest.mock('@edx/frontend-platform/logging');
-jest.mock('../data/hooks', () => ({
-  useValidateUsers: jest.fn(),
+jest.mock('@edx/frontend-platform/auth', () => ({
+  getAuthenticatedUser: jest.fn(),
 }));
 
+const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+(globalThis as any).IntersectionObserver = mockIntersectionObserver;
+
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
+
+jest.mock('../data/hooks', () => ({
+  useValidateUsers: jest.fn(),
+  useAssignTeamMembersRole: jest.fn(),
+  useScopes: jest.fn(),
+  useOrgs: jest.fn(),
+}));
+
+jest.mock('./hooks/useScopePermissions');
+
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
+const mockUseAssignTeamMembersRole = useAssignTeamMembersRole as jest.Mock;
+const mockUseScopes = useScopes as jest.Mock;
+const mockUseOrgs = useOrgs as jest.Mock;
 const mockValidateMutateAsync = jest.fn();
+const mockAssignMutateAsync = jest.fn();
+
+const emptyScopesReturn = {
+  data: { pages: [] },
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  isFetchingNextPage: false,
+  isLoading: false,
+  isError: false,
+};
+
+const mockScopeItem = {
+  externalKey: 'lib:org1/lib1',
+  displayName: 'Library One',
+  org: { id: 1, name: 'Organization One', shortName: 'org1' },
+};
+
+const oneScopeReturn = {
+  data: {
+    pages: [{
+      results: [mockScopeItem], count: 1, next: null, previous: null,
+    }],
+  },
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  isFetchingNextPage: false,
+  isLoading: false,
+  isError: false,
+};
+
+const oneOrg = [
+  {
+    id: 1, name: 'Organization One', shortName: 'org1', description: '', logo: null, active: true,
+  },
+];
 
 const renderWizard = (props = {}) => renderWrapper(
   <ToastManagerProvider>
@@ -19,19 +80,22 @@ const renderWizard = (props = {}) => renderWrapper(
   </ToastManagerProvider>,
 );
 
-// selectors
 const getUsersInput = () => screen.getByLabelText(/Add users by username or email/i);
 const getRoleRadio = (name: RegExp) => screen.getByRole('radio', { name });
 const getNextButton = () => screen.getByRole('button', { name: /^Next$/i });
 const getCancelButton = () => screen.getByRole('button', { name: /^Cancel$/i });
-const getStep2Heading = () => screen.queryByRole('heading', { name: 'Step 2' });
 
 describe('AssignRoleWizard — Step 1', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseValidateUsers.mockReturnValue({
-      mutateAsync: mockValidateMutateAsync,
-      isPending: false,
+    mockUseValidateUsers.mockReturnValue({ mutateAsync: mockValidateMutateAsync, isPending: false });
+    mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: false });
+    mockUseScopes.mockReturnValue(emptyScopesReturn);
+    mockUseOrgs.mockReturnValue({ data: { results: [] } });
+    (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: {},
     });
   });
 
@@ -46,6 +110,11 @@ describe('AssignRoleWizard — Step 1', () => {
   it('opens with the user pre-populated when provided via initialUsers', () => {
     renderWizard({ initialUsers: 'alice' });
     expect(getUsersInput()).toHaveValue('alice');
+  });
+
+  it('Next button is disabled without both users and a role', () => {
+    renderWizard();
+    expect(getNextButton()).toBeDisabled();
   });
 
   it('selecting a different role replaces the previous selection', async () => {
@@ -66,7 +135,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getNextButton());
     await waitFor(() => {
       expect(screen.getByText(/not associated with an account/i)).toBeInTheDocument();
-      expect(getStep2Heading()).not.toBeInTheDocument();
+      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
     });
   });
 
@@ -78,7 +147,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Step 2' })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   });
 
@@ -90,9 +159,8 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      // Toast should appear with retry option
       expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(getStep2Heading()).not.toBeInTheDocument();
+      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
     });
   });
 
@@ -116,18 +184,11 @@ describe('AssignRoleWizard — Step 1', () => {
     renderWizard();
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
-
-    // First attempt fails - toast appears with retry
     await user.click(getNextButton());
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
-
-    // Click retry button
-    const retryButton = screen.getByRole('button', { name: /retry/i });
-    await user.click(retryButton);
-
-    // Should advance to step 2 on retry
+    await user.click(screen.getByRole('button', { name: /retry/i }));
     await waitFor(() => {
-      expect(getStep2Heading()).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   });
 });
@@ -139,15 +200,20 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Step 2' })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseValidateUsers.mockReturnValue({
-      mutateAsync: mockValidateMutateAsync,
-      isPending: false,
+    mockUseValidateUsers.mockReturnValue({ mutateAsync: mockValidateMutateAsync, isPending: false });
+    mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: false });
+    mockUseScopes.mockReturnValue(oneScopeReturn);
+    mockUseOrgs.mockReturnValue({ data: { results: oneOrg } });
+    (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: { org1: true },
     });
   });
 
@@ -158,6 +224,61 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(screen.getByRole('button', { name: /^Back$/i }));
     await waitFor(() => {
       expect(getUsersInput()).toBeInTheDocument();
+    });
+  });
+
+  it('Save button is disabled when no scopes are selected', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await advanceToStep2(user);
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeDisabled();
+  });
+
+  it('saves role assignment successfully and closes the wizard', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    mockAssignMutateAsync.mockResolvedValue({
+      completed: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [],
+    });
+    renderWizard({ onClose });
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+    await waitFor(() => {
+      expect(mockAssignMutateAsync).toHaveBeenCalledWith({
+        data: { users: ['alice'], role: 'library_admin', scopes: ['lib:org1/lib1'] },
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('shows error toast and inline alert when the API returns assignment errors', async () => {
+    const user = userEvent.setup();
+    mockAssignMutateAsync.mockResolvedValue({
+      completed: [],
+      errors: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' }],
+    });
+    renderWizard();
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
+      expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error toast when save throws a network error', async () => {
+    const user = userEvent.setup();
+    mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
+    renderWizard();
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
     });
   });
 });

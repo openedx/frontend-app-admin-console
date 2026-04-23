@@ -22,6 +22,15 @@ const emptyResponse = {
   refetch: jest.fn(),
 };
 
+const emptyScopesResponse = {
+  data: { pages: [] },
+  error: null,
+  isLoading: false,
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  isFetchingNextPage: false,
+};
+
 const renderAuthzHome = () => renderWithAllProviders(
   <ToastManagerProvider>
     <AuthzHome />
@@ -32,7 +41,7 @@ describe('AuthzHome', () => {
   beforeEach(() => {
     (useAllRoleAssignments as jest.Mock).mockReturnValue(emptyResponse);
     (useOrgs as jest.Mock).mockReturnValue(emptyResponse);
-    (useScopes as jest.Mock).mockReturnValue(emptyResponse);
+    (useScopes as jest.Mock).mockReturnValue(emptyScopesResponse);
   });
 
   it('renders without crashing', () => {

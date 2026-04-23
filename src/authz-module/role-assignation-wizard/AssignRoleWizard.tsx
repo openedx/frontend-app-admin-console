@@ -10,13 +10,12 @@ import { RoleMetadata } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { useValidateUsers } from '../data/hooks';
 import { libraryRolesMetadata } from '../roles-permissions/library/constants';
 import { courseRolesMetadata } from '../roles-permissions/course/constants';
+import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
 import messages from './messages';
+import { formatRoleAssignmentError } from './utils';
 
-// Default: all roles. Callers may pass a filtered subset once a permission-
-// lookup API is available (e.g. only library roles when user lacks course scope).
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 const STEPS = {
@@ -48,9 +47,11 @@ const getInitialState = (initialUsers: string) => ({
   validatedUsers: [] as string[],
 });
 
-const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata }: AssignRoleWizardProps) => {
+const AssignRoleWizard = ({
+  onClose, initialUsers = '', roles = allRolesMetadata,
+}: AssignRoleWizardProps) => {
   const intl = useIntl();
-  const { showErrorToast } = useToastManager();
+  const { showToast, showErrorToast } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -58,17 +59,19 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
   const [validatedUsers, setValidatedUsers] = useState<string[]>([]);
+  const [assignmentErrors, setAssignmentErrors] = useState<string[]>([]);
 
   const usersInputRef = useRef<HTMLTextAreaElement>(null);
 
   const validateUsersMutation = useValidateUsers();
+  const assignRoleMutation = useAssignTeamMembersRole();
 
   const handleUsersChange = useCallback((value: string) => {
     setInvalidUsers((prev) => (prev.length > 0 ? [] : prev));
     setUsers(value);
   }, []);
 
-  const handleClose = () => {
+  const resetState = () => {
     const initialState = getInitialState(initialUsers);
     setActiveStep(initialState.activeStep);
     setUsers(initialState.users);
@@ -76,8 +79,10 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     setSelectedScopes(initialState.selectedScopes);
     setInvalidUsers(initialState.invalidUsers);
     setValidatedUsers(initialState.validatedUsers);
-    onClose();
+    setAssignmentErrors([]);
   };
+
+  const handleClose = () => { resetState(); onClose(); };
 
   const validateUsersAndProceed = async () => {
     if (validateUsersMutation.isPending) { return; }
@@ -107,10 +112,44 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
     });
   }, []);
 
-  // TODO: replace with real assignment API call using validatedUsers, selectedRole, selectedScopes
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) { return; }
-    handleClose();
+    setAssignmentErrors([]);
+
+    try {
+      const result = await assignRoleMutation.mutateAsync({
+        data: {
+          users: validatedUsers,
+          role: selectedRole,
+          scopes: Array.from(selectedScopes),
+        },
+      });
+
+      if (result.errors?.length > 0) {
+        setAssignmentErrors(result.errors.map((e) => formatRoleAssignmentError(intl, e)));
+        showToast({
+          message: intl.formatMessage(messages['wizard.save.errors.summary']),
+          type: 'error',
+        });
+      } else {
+        showToast({
+          message: intl.formatMessage(messages['wizard.save.success']),
+          type: 'success',
+        });
+        resetState();
+        onClose();
+      }
+    } catch (error) {
+      // TODO: remove once the backend supports the permissions endpoint without a required scope.
+      if ((error as any)?.customAttributes?.httpErrorStatus === 403) {
+        showToast({
+          message: intl.formatMessage(messages['wizard.save.error.forbidden']),
+          type: 'error',
+        });
+      } else {
+        showErrorToast(error, handleSave);
+      }
+    }
   };
 
   useEffect(() => {
@@ -155,6 +194,7 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
             selectedRole={selectedRole}
             selectedScopes={selectedScopes}
             onScopeToggle={handleScopeToggle}
+            assignmentErrors={assignmentErrors}
           />
         </Stepper.Step>
       </div>
@@ -182,7 +222,14 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
           <Button variant="outline-primary" onClick={handleClose}>
             {intl.formatMessage(messages['wizard.button.cancel'])}
           </Button>
-          <Button variant="tertiary" onClick={() => setActiveStep(STEPS.SELECT_USERS_AND_ROLE)}>
+          <Button
+            variant="tertiary"
+            onClick={() => {
+              setSelectedScopes(new Set());
+              setAssignmentErrors([]);
+              setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
+            }}
+          >
             {intl.formatMessage(messages['wizard.button.back'])}
           </Button>
           <Stepper.ActionRow.Spacer />
@@ -192,9 +239,9 @@ const AssignRoleWizard = ({ onClose, initialUsers = '', roles = allRolesMetadata
               pending: intl.formatMessage(messages['wizard.button.save.pending']),
             }}
             icons={{ pending: <Icon src={SpinnerSimple} /> }}
-            state="default"
+            state={assignRoleMutation.isPending ? 'pending' : 'default'}
             onClick={handleSave}
-            disabled={!canSave}
+            disabled={!canSave || assignRoleMutation.isPending}
           />
         </Stepper.ActionRow>
       </div>

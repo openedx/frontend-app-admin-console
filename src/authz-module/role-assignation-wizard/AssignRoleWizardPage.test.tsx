@@ -14,6 +14,13 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../data/hooks', () => ({
   useValidateUsers: jest.fn(),
+  useAssignTeamMembersRole: jest.fn(() => ({
+    mutate: jest.fn(),
+    mutateAsync: jest.fn(),
+    isPending: false,
+    isError: false,
+    isSuccess: false,
+  })),
 }));
 
 jest.mock('@edx/frontend-component-header', () => ({
@@ -83,5 +90,21 @@ describe('AssignRoleWizardPage', () => {
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
     expect(navigate).toHaveBeenCalledWith('/authz');
+  });
+
+  it('navigates to the user-specific view when a single preset user is set', async () => {
+    const { navigate } = setupMocks({ users: 'alice' });
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: /Cancel/i }));
+    expect(navigate).toHaveBeenCalledWith('/authz/user/alice');
+  });
+
+  it('navigates to returnTo when multiple preset users are set', async () => {
+    const { navigate } = setupMocks({ users: 'alice,bob', from: '/authz/team' });
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(screen.getByRole('button', { name: /Cancel/i }));
+    expect(navigate).toHaveBeenCalledWith('/authz/team');
   });
 });

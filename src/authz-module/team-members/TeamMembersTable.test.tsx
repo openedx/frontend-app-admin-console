@@ -56,37 +56,41 @@ const mockedOrgs = {
 
 const mockedScopes = {
   data: {
-    count: 2,
-    next: null,
-    previous: null,
-    results: [
+    pages: [
       {
-        externalKey: 'course-v1:OpenedX+DemoX+DemoCourse',
-        displayName: 'Open edX Demo Course',
-        org: {
-          id: 1,
-          created: '2026-04-02T19:30:36.779095Z',
-          modified: '2026-04-02T19:30:36.779095Z',
-          name: 'OpenedX',
-          shortName: 'OpenedX',
-          description: '',
-          logo: null,
-          active: true,
-        },
-      },
-      {
-        externalKey: 'lib:WGU:CSPROB',
-        displayName: 'Computer Science Problems',
-        org: {
-          id: 2,
-          created: '2026-04-02T19:31:21.196446Z',
-          modified: '2026-04-02T19:31:21.196446Z',
-          name: 'WGU',
-          shortName: 'WGU',
-          description: '',
-          logo: null,
-          active: true,
-        },
+        count: 2,
+        next: null,
+        previous: null,
+        results: [
+          {
+            externalKey: 'course-v1:OpenedX+DemoX+DemoCourse',
+            displayName: 'Open edX Demo Course',
+            org: {
+              id: 1,
+              created: '2026-04-02T19:30:36.779095Z',
+              modified: '2026-04-02T19:30:36.779095Z',
+              name: 'OpenedX',
+              shortName: 'OpenedX',
+              description: '',
+              logo: null,
+              active: true,
+            },
+          },
+          {
+            externalKey: 'lib:WGU:CSPROB',
+            displayName: 'Computer Science Problems',
+            org: {
+              id: 2,
+              created: '2026-04-02T19:31:21.196446Z',
+              modified: '2026-04-02T19:31:21.196446Z',
+              name: 'WGU',
+              shortName: 'WGU',
+              description: '',
+              logo: null,
+              active: true,
+            },
+          },
+        ],
       },
     ],
   },

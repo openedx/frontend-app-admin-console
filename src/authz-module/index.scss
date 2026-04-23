@@ -89,6 +89,13 @@
     word-break: break-word;
     overflow-wrap: break-word;
     width: 100%;
+
+    &.form-control {
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.5;
+      padding: 0.375rem 0.75rem;
+    }
   }
 
   &__overlay {
@@ -107,13 +114,20 @@
     z-index: 1;
     min-height: 100px;
     resize: vertical;
-    caret-color: #212529;
 
-    &--highlighted {
+    &--highlighted.form-control {
       color: transparent;
       background: transparent;
     }
   }
+}
+
+.scope-list {
+  max-height: 500px;
+}
+
+.scope-search-input {
+  width: 18.75rem; // 300px
 }
 
 .toast-container {

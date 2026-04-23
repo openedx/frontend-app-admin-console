@@ -15,9 +15,9 @@ const ScopesFilter = ({
 }: ScopesFilterProps) => {
   const { formatMessage } = useIntl();
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
-  const { data: scopesData = { results: [] } } = useScopes(searchValue, 1, DEFAULT_FILTER_PAGE_SIZE);
+  const { data: scopesData } = useScopes({ search: searchValue, pageSize: DEFAULT_FILTER_PAGE_SIZE });
 
-  const filterChoices = useMemo(() => scopesData.results.map((scope) => {
+  const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? []).map((scope) => {
     const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
     if (scope.externalKey?.startsWith('lib')) {
@@ -30,7 +30,7 @@ const ScopesFilter = ({
       groupName,
       groupIcon: scopeIcon,
     };
-  }), [scopesData, formatMessage]);
+  }), [scopesData?.pages, formatMessage]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

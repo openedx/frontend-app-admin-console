@@ -54,13 +54,13 @@ export type PermissionsByRole = {
 };
 export interface PutAssignTeamMembersRoleResponse {
   completed: { userIdentifier: string; status: string }[];
-  errors: { userIdentifier: string; error: string }[];
+  errors: { userIdentifier: string; scope: string; error: string }[];
 }
 
 export interface AssignTeamMembersRoleRequest {
   users: string[];
   role: string;
-  scope: string;
+  scopes: string[];
 }
 
 export interface GetAllRoleAssignmentsResponse {
@@ -96,6 +96,15 @@ export type ValidateUsersResponse = {
     invalidCount: number;
   };
 };
+
+export interface GetScopesParams {
+  scopeType?: string;
+  search?: string;
+  orgs?: string[];
+  page?: number;
+  pageSize?: number;
+  managementPermissionOnly?: boolean;
+}
 
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
@@ -208,17 +217,14 @@ export const getOrgs = async (search?: string, page?: number, pageSize?: number)
   return camelCaseObject(data);
 };
 
-export const getScopes = async (search?: string, page?: number, pageSize?: number): Promise<GetScopesResponse> => {
+export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
-  if (search !== undefined) {
-    url.searchParams.set('search', search);
-  }
-  if (page !== undefined) {
-    url.searchParams.set('page', page.toString());
-  }
-  if (pageSize !== undefined) {
-    url.searchParams.set('page_size', pageSize.toString());
-  }
+  if (params.search) { url.searchParams.set('search', params.search); }
+  if (params.scopeType) { url.searchParams.set('scope_type', params.scopeType); }
+  if (params.orgs?.length) { url.searchParams.set('orgs', params.orgs.join(',')); }
+  if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
+  url.searchParams.set('page', (params.page ?? 1).toString());
+  url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
   const { data } = await getAuthenticatedHttpClient().get(url);
   return camelCaseObject(data);
 };
