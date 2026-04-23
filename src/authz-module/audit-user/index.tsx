@@ -42,7 +42,9 @@ const AuditUserPage = () => {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
   } = useUserAccount(username);
   const { querySettings, handleTableFetch } = useQuerySettings();
-  const { isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 } } = useUserAssignedRoles(username ?? '', querySettings);
+  const {
+    isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 },
+  } = useUserAssignedRoles(username, querySettings);
   const [roleToDelete, setRoleToDelete] = useState<RoleToDelete | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const {
