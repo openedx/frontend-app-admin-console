@@ -133,11 +133,10 @@ describe('DefineApplicationScopeStep', () => {
       org: orgSlug ? { id: 1, name: orgSlug, shortName: orgSlug } : null,
     });
 
-    it('renders platform aggregate as checkbox', () => {
+    it('does not render platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      // Platform aggregate is always shown - created by useScopeListData hook with label "All libraries in Platform"
       renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.getByText('All libraries in Platform')).toBeInTheDocument();
+      expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
     });
 
     it('renders scopes grouped by org in OrgSection', () => {
@@ -288,19 +287,10 @@ describe('DefineApplicationScopeStep', () => {
       expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
     });
 
-    it('shows platform aggregate when all orgs are managed', () => {
+    it('does not show platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      // All orgs in defaultOrgs (org1, org2) are in managedOrgs (org1, org2)
       renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.getByText('All libraries in Platform')).toBeInTheDocument();
-    });
-
-    // Platform aggregate is ALWAYS visible now - backend filters orgs by user permissions
-    it('always shows platform aggregate regardless of managed orgs', () => {
-      (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      // Even though only org1 is in managedOrgs, platform aggregate is still shown
-      renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.getByText('All libraries in Platform')).toBeInTheDocument();
+      expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
     });
 
     it('does not show platform aggregate when selectedRole is null', () => {
@@ -308,9 +298,9 @@ describe('DefineApplicationScopeStep', () => {
       expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
     });
 
-    it('shows "All courses in Platform" for course context type', () => {
+    it('does not show "All courses in Platform" (disabled pending backend support)', () => {
       renderComponent({ selectedRole: 'course_admin' });
-      expect(screen.getByText('All courses in Platform')).toBeInTheDocument();
+      expect(screen.queryByText('All courses in Platform')).not.toBeInTheDocument();
     });
   });
 
@@ -336,7 +326,7 @@ describe('DefineApplicationScopeStep', () => {
       await userEvent.click(toggle);
       await waitFor(() => screen.getByText('Organization One'));
       await userEvent.click(screen.getByText('Organization One'));
-      expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ org: 'org1' }));
+      expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ orgs: ['org1'] }));
     });
 
     it('clears org filter when selected organization is deselected', async () => {
@@ -346,7 +336,7 @@ describe('DefineApplicationScopeStep', () => {
       await waitFor(() => screen.getByText('Organization One'));
       await userEvent.click(screen.getByText('Organization One'));
       await userEvent.click(screen.getByText('Organization One'));
-      expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ org: undefined }));
+      expect(useScopes).toHaveBeenLastCalledWith(expect.objectContaining({ orgs: undefined }));
     });
   });
 

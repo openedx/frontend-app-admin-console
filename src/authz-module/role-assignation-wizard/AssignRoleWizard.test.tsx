@@ -46,6 +46,31 @@ const emptyScopesReturn = {
   isError: false,
 };
 
+const mockScopeItem = {
+  externalKey: 'lib:org1/lib1',
+  displayName: 'Library One',
+  org: { id: 1, name: 'Organization One', shortName: 'org1' },
+};
+
+const oneScopeReturn = {
+  data: {
+    pages: [{
+      results: [mockScopeItem], count: 1, next: null, previous: null,
+    }],
+  },
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  isFetchingNextPage: false,
+  isLoading: false,
+  isError: false,
+};
+
+const oneOrg = [
+  {
+    id: 1, name: 'Organization One', shortName: 'org1', description: '', logo: null, active: true,
+  },
+];
+
 const renderWizard = (props = {}) => renderWrapper(
   <ToastManagerProvider>
     <AssignRoleWizard onClose={jest.fn()} {...props} />
@@ -115,7 +140,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   });
 
@@ -156,7 +181,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     await user.click(screen.getByRole('button', { name: /retry/i }));
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   });
 });
@@ -168,7 +193,7 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByTestId('toggle-scope-*')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   };
 
@@ -176,8 +201,8 @@ describe('AssignRoleWizard — Step 2', () => {
     jest.clearAllMocks();
     mockUseValidateUsers.mockReturnValue({ mutateAsync: mockValidateMutateAsync, isPending: false });
     mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: false });
-    mockUseScopes.mockReturnValue(emptyScopesReturn);
-    mockUseOrgs.mockReturnValue({ data: { results: [] } });
+    mockUseScopes.mockReturnValue(oneScopeReturn);
+    mockUseOrgs.mockReturnValue({ data: { results: oneOrg } });
     (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
   });
 
@@ -202,16 +227,16 @@ describe('AssignRoleWizard — Step 2', () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
     mockAssignMutateAsync.mockResolvedValue({
-      completed: [{ userIdentifier: 'alice', scope: 'lib:test:123', status: 'role_added' }],
+      completed: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', status: 'role_added' }],
       errors: [],
     });
     renderWizard({ onClose });
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope-*'));
+    await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(mockAssignMutateAsync).toHaveBeenCalledWith({
-        data: { users: ['alice'], role: 'library_admin', scopes: ['*'] },
+        data: { users: ['alice'], role: 'library_admin', scopes: ['lib:org1/lib1'] },
       });
       expect(onClose).toHaveBeenCalled();
     });
@@ -221,16 +246,16 @@ describe('AssignRoleWizard — Step 2', () => {
     const user = userEvent.setup();
     mockAssignMutateAsync.mockResolvedValue({
       completed: [],
-      errors: [{ userIdentifier: 'alice', scope: 'lib:test:123', error: 'user_already_has_role' }],
+      errors: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' }],
     });
     renderWizard();
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope-*'));
+    await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
       expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
-      expect(screen.getByText(/alice already has this role in lib:test:123/i)).toBeInTheDocument();
+      expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
     });
   });
 
@@ -239,7 +264,7 @@ describe('AssignRoleWizard — Step 2', () => {
     mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
     renderWizard();
     await advanceToStep2(user);
-    await user.click(screen.getByTestId('toggle-scope-*'));
+    await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
