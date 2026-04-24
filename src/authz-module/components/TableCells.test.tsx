@@ -486,6 +486,7 @@ describe('TableCells Components', () => {
         org: 'Test Org',
         scope: 'Test Scope',
         permissionCount: 1,
+        canManageScope: true,
       },
     };
 
@@ -497,7 +498,6 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
-        hasPermissionToDeleteScope: () => true,
         isUserAuthenticatedPage: false,
       });
       renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
@@ -509,7 +509,7 @@ describe('TableCells Components', () => {
       expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
     });
 
-    it('renders a disabled button for admin roles when isUserAuthenticatedPage is true', () => {
+    it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {
       const adminRow = {
         original: {
           role: 'course_admin',
@@ -521,12 +521,32 @@ describe('TableCells Components', () => {
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
         isUserAuthenticatedPage: true,
-        hasPermissionToDeleteScope: () => true,
       });
       renderWrapper(<CustomActionsCell row={adminRow} column={{ id: 'actions' }} />);
 
-      const button = screen.getByRole('button', { name: /delete role action/i });
-      expect(button).toBeDisabled();
+      const infoIcon = screen.getByRole('img', { hidden: true });
+      expect(infoIcon).toBeInTheDocument();
+    });
+
+    it('renders a tooltip when hovering over delete icon for admin roles when isUserAuthenticatedPage is true', async () => {
+      const adminRow = {
+        original: {
+          role: 'course_admin',
+          org: 'Test Org',
+          scope: 'Test Scope',
+          permissionCount: 1,
+        },
+      };
+      const user = userEvent.setup();
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: true,
+      });
+      renderWrapper(<CustomActionsCell row={adminRow} column={{ id: 'actions' }} />);
+
+      const infoIcon = screen.getByRole('img', { hidden: true });
+      await user.hover(infoIcon);
+      expect(screen.getByText(/You can’t remove your own admin role/i)).toBeInTheDocument();
     });
 
     it('renders info icon with tooltip for Django managed roles', async () => {
@@ -541,7 +561,6 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
-        hasPermissionToDeleteScope: () => true,
         isUserAuthenticatedPage: true,
       });
       renderWrapper(<CustomActionsCell row={djangoRow} column={{ id: 'actions' }} />);
@@ -556,9 +575,14 @@ describe('TableCells Components', () => {
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
         isUserAuthenticatedPage: false,
-        hasPermissionToDeleteScope: () => false,
       });
-      renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
+      const customRow = {
+        original: {
+          ...baseRow,
+          canManageScope: false,
+        },
+      };
+      renderWrapper(<CustomActionsCell row={customRow} column={{ id: 'actions' }} />);
 
       const deleteButton = screen.queryByRole('button', { name: /delete role action/i });
       expect(deleteButton).toBeDisabled();

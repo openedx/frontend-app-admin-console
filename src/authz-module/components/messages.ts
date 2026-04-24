@@ -157,6 +157,11 @@ const messages = defineMessages({
     defaultMessage: 'You can’t remove this role here. Please go to Django Admin to manage it.',
     description: 'Tooltip for delete button when hovering over Django roles',
   },
+  'authz.user.table.delete.action.adminrole.tooltip': {
+    id: 'authz.user.table.delete.action.adminrole.tooltip',
+    defaultMessage: 'You can’t remove your own admin role. This prevents a resource from being left without an admin. Another user with the required permissions can revoke it.',
+    description: 'Tooltip for delete button when hovering over Admin roles',
+  },
   'authz.user.table.view_all_permissions.link.text.close': {
     id: 'authz.user.table.view_all_permissions.link.text.close',
     defaultMessage: 'Hide all permissions',

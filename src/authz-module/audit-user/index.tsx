@@ -5,7 +5,6 @@ import {
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import type { AppContextType } from '@edx/frontend-platform/react';
-import debounce from 'lodash.debounce';
 import {
   Container, DataTable,
 } from '@openedx/paragon';
@@ -15,7 +14,7 @@ import {
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUserAccount, useValidateUserPermissions } from '@src/data/hooks';
+import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
@@ -59,9 +58,25 @@ const AuditUserPage = () => {
     return uniqueScopes.map(scope => getScopeManageActionPermission(scope));
   }, [userAssignments]);
 
-  const { data: permissionsToManageScope } = useValidateUserPermissions(deletePermissions);
+  const {
+    data: permissionsToManageScope,
+  } = useValidateUserPermissionsNonSuspense(deletePermissions);
 
-  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
+  const rowsWithPermissions = useMemo(() => {
+    if (!permissionsToManageScope) { return userAssignments; }
+
+    return userAssignments.map(assignment => {
+      const canManageScope = permissionsToManageScope.some(
+        permission => permission.scope === assignment.scope && permission.allowed,
+      );
+      return {
+        ...assignment,
+        canManageScope,
+      };
+    });
+  }, [userAssignments, permissionsToManageScope]);
+
+  const fetchData = useMemo(() => handleTableFetch, [handleTableFetch]);
 
   useEffect(() => {
     if (!user && !isLoadingUser) {
@@ -72,19 +87,12 @@ const AuditUserPage = () => {
     }
   }, [user, isLoadingUser, navigate, isErrorUser, errorUser]);
 
-  useEffect(() => () => fetchData.cancel(), [fetchData]);
-
   const handleShowConfirmDeletionModal = useCallback((role: RoleToDelete) => {
     if (isRevokingUserRolePending) { return; }
 
     setRoleToDelete(role);
     setShowConfirmDeletionModal(true);
   }, [isRevokingUserRolePending]);
-
-  const hasPermissionToDeleteScope = useCallback((scope: string) => {
-    const permissionIndex = deletePermissions.findIndex(permission => permission.scope === scope);
-    return permissionsToManageScope?.[permissionIndex]?.allowed;
-  }, [deletePermissions, permissionsToManageScope]);
 
   const navLinks = useMemo(() => [
     {
@@ -105,10 +113,9 @@ const AuditUserPage = () => {
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser.username,
-        hasPermissionToDeleteScope,
       }),
     },
-  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, hasPermissionToDeleteScope, username]);
+  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, username]);
 
   const columns = useMemo(() => [
     {
@@ -242,7 +249,7 @@ const AuditUserPage = () => {
             isFilterable
             isSortable
             manualPagination
-            data={userAssignments}
+            data={rowsWithPermissions}
             manualFilters
             manualSortBy
             fetchData={fetchData}

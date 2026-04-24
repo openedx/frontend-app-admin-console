@@ -128,3 +128,7 @@ export type RoleToDelete = {
   name?: string;
   scope: string;
 };
+
+export type UserRoleWithPermissions = UserRole & {
+  canManageScope?: boolean;
+};
