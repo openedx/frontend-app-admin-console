@@ -6,8 +6,12 @@ import { getCellHeader, getScopeManageAction, getScopeManageActionPermission } f
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './constants';
 
 const renderCellHeader = (columnId: string, columnTitle: string, filtersApplied: string[]) => {
-  const component = getCellHeader(columnId, columnTitle, filtersApplied);
-  return renderWrapper(<div>{component}</div>);
+  const result = getCellHeader(columnId, columnTitle, filtersApplied);
+  if (typeof result === 'function') {
+    const Component = result;
+    return renderWrapper(<Component />);
+  }
+  return renderWrapper(<div>{result}</div>);
 };
 
 describe('utils', () => {
