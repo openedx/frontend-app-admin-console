@@ -687,6 +687,95 @@ describe('useRevokeUserRoles', () => {
     expect(calledUrl.searchParams.get('role')).toBe(revokeRoleData.role);
     expect(calledUrl.searchParams.get('scope')).toBe(revokeRoleData.scope);
   });
+
+  it('invalidates userRoles queries on mutation completion', async () => {
+    const mockResponse = {
+      completed: [
+        {
+          userIdentifiers: 'jdoe',
+          status: 'role_removed',
+        },
+      ],
+      errors: [],
+    };
+
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      delete: jest.fn().mockResolvedValue({ data: mockResponse }),
+    });
+
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+
+    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useRevokeUserRoles(), {
+      wrapper,
+    });
+
+    const revokeRoleData = {
+      scope: 'lib:123',
+      users: 'jdoe',
+      role: 'author',
+    };
+
+    await act(async () => {
+      result.current.mutate({ data: revokeRoleData });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+    });
+
+  // Type workaround for SpyInstance type not matching function signature
+  type MockCall = Parameters<any>[0];
+  type PredicateCall = MockCall & { predicate: (query: { queryKey: readonly unknown[] }) => boolean };
+
+  const predicateCalls = invalidateQueriesSpy.mock.calls
+    .map(call => call[0])
+    .filter((call): call is PredicateCall => call !== undefined
+      && 'predicate' in call
+      && typeof call.predicate === 'function');
+
+  const userRolesCall = predicateCalls.find(call => {
+    const { predicate } = call;
+    return predicate({ queryKey: ['test-app', 'authz', 'userRoles', 'testuser'] });
+  });
+
+  expect(userRolesCall).toBeDefined();
+
+  if (userRolesCall) {
+    const { predicate } = userRolesCall;
+    expect(predicate({ queryKey: ['test-app', 'authz', 'userRoles'] })).toBe(true);
+    expect(predicate({ queryKey: ['test-app', 'authz', 'teamMembers'] })).toBe(false);
+  }
+
+  const allRoleAssignmentsCall = predicateCalls.find(call => {
+    const { predicate } = call;
+    return predicate({ queryKey: ['test-app', 'authz', 'allRoleAssignments', {}] });
+  });
+
+  expect(allRoleAssignmentsCall).toBeDefined();
+
+  if (allRoleAssignmentsCall) {
+    const { predicate } = allRoleAssignmentsCall;
+    expect(predicate({ queryKey: ['test-app', 'authz', 'allRoleAssignments'] })).toBe(true);
+    expect(predicate({ queryKey: ['test-app', 'authz', 'userRoles'] })).toBe(false);
+  }
+
+  invalidateQueriesSpy.mockRestore();
+  });
 });
 
 describe('useAllRoleAssignments', () => {

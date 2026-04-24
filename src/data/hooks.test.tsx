@@ -2,7 +2,7 @@ import { act, ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { useValidateUserPermissions, useUserAccount } from './hooks';
+import { useValidateUserPermissions, useUserAccount, useValidateUserPermissionsNonSuspense } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
@@ -133,6 +133,128 @@ describe('useValidateUserPermissions', () => {
     } catch (error) {
       expect(error).toEqual(mockError); // Check for the expected error
     }
+  });
+});
+
+describe('useValidateUserPermissionsNonSuspense', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns allowed true when permissions are valid', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: jest.fn().mockResolvedValueOnce({ data: mockValidPermissions }),
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(permissions), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data[0].allowed).toBe(true);
+  });
+
+  it('returns allowed false when permissions are invalid', async () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: jest.fn().mockResolvedValue({ data: mockInvalidPermissions }),
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(permissions), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(result.current.data[0].allowed).toBe(false);
+  });
+
+  it('handles error when the API call fails', async () => {
+    const mockError = new Error('API Error');
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: jest.fn().mockRejectedValueOnce(mockError),
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(permissions), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toEqual(mockError);
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('starts with loading state', () => {
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: jest.fn().mockImplementation(() => new Promise(() => {})),
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(permissions), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('handles empty permissions array', async () => {
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense([]), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('does not retry on failure', async () => {
+    const mockPost = jest.fn().mockRejectedValue(new Error('Network Error'));
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(permissions), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(mockPost).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles multiple permissions validation', async () => {
+    const multiplePermissions = [
+      {
+        action: 'act:read',
+        object: 'lib:test-lib',
+        scope: 'org:OpenedX',
+      },
+      {
+        action: 'act:write',
+        object: 'course:test-course',
+        scope: 'org:OpenedX',
+      },
+    ];
+
+    const multipleValidPermissions = [
+      { action: 'act:read', object: 'lib:test-lib', allowed: true },
+      { action: 'act:write', object: 'course:test-course', allowed: false },
+    ];
+
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: jest.fn().mockResolvedValueOnce({ data: multipleValidPermissions }),
+    });
+
+    const { result } = renderHook(() => useValidateUserPermissionsNonSuspense(multiplePermissions), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(2);
+    expect(result.current.data[0].allowed).toBe(true);
+    expect(result.current.data[1].allowed).toBe(false);
   });
 });
 

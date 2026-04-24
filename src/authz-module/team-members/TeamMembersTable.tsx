@@ -12,7 +12,7 @@ import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
 import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFilter';
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
-import { getCellHeader } from '@src/authz-module/components/utils';
+import { getCellHeader } from '@src/authz-module/utils';
 import {
   ViewActionCell, NameCell, OrgCell, RoleCell, ScopeCell,
 } from '@src/authz-module/components/TableCells';

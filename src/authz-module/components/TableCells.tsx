@@ -6,11 +6,13 @@ import {
   Info,
 } from '@openedx/paragon/icons';
 import {
-  TableCellValue, AppContextType, UserRole, RoleToDelete,
+  TableCellValue, AppContextType, UserRoleWithPermissions, RoleToDelete,
 } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
-import { ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
+import {
+  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+} from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
@@ -25,7 +27,7 @@ interface DataTableInstance {
   toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
 }
 
-type CellProps = TableCellValue<UserRole>;
+type CellProps = TableCellValue<UserRoleWithPermissions>;
 type CellPropsWithValue = CellProps & {
   value: string;
 };
@@ -160,9 +162,11 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   );
 };
 
-const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: ActionsCellProps) => {
+const ActionsCell = ({
+  row, onClickDeleteButton, isUserAuthenticatedPage,
+}: ActionsCellProps) => {
   const { formatMessage } = useIntl();
-  const { role } = row.original;
+  const { role, canManageScope } = row.original;
 
   const handleDelete = () => {
     const roleToDelete = {
@@ -193,19 +197,30 @@ const ActionsCell = ({ row, onClickDeleteButton, isUserAuthenticatedPage }: Acti
 
   if (ADMIN_ROLES.includes(role) && isUserAuthenticatedPage) {
     return (
-      <IconButton
-        // @ts-ignore
-        disabled
-        isActive={false}
-        variant="light"
-        alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
-        src={Delete}
-      />
+      <OverlayTrigger
+        placement="left"
+        overlay={(
+          <Tooltip variant="light" id="tooltip-left">
+            {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
+          </Tooltip>
+      )}
+      >
+        <Icon
+          className="mx-2 pl-1 text-light-500"
+          src={Delete}
+        />
+      </OverlayTrigger>
     );
   }
 
   return (
-    <IconButton variant="danger" onClick={handleDelete} alt={formatMessage(messages['authz.user.table.delete.action.alt'])} src={Delete} />
+    <IconButton
+      disabled={!canManageScope}
+      variant={canManageScope ? 'danger' : 'light'}
+      onClick={handleDelete}
+      alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+      src={Delete}
+    />
   );
 };
 
