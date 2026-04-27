@@ -202,6 +202,9 @@ const AuditUserPage = () => {
             type: 'success',
           });
           handleCloseConfirmDeletionModal();
+          if (remainingRolesCount === 0) {
+            navigate(AUTHZ_HOME_PATH);
+          }
         },
         onError: (error, retryVariables) => {
           showErrorToast(error, () => runRevokeRole(retryVariables));
