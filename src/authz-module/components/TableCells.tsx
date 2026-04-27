@@ -108,11 +108,14 @@ const ScopeCell = ({ row }: CellProps) => {
   );
 };
 
-const RoleCell = ({ value, cell }: ExtendedCellProps) => (
-  <span {...cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' })}>
-    {MAP_ROLE_KEY_TO_LABEL[value] || ''}
-  </span>
-);
+const RoleCell = ({ value, cell }: ExtendedCellProps) => {
+  const { key, ...cellProps } = cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' });
+  return (
+    <span key={key} {...cellProps}>
+      {MAP_ROLE_KEY_TO_LABEL[value] || ''}
+    </span>
+  );
+};
 
 const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();

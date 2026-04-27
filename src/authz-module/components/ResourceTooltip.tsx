@@ -17,14 +17,14 @@ const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
           <p className="small">{resourceGroup.description}</p>
           <ul className="small">
             {resourceGroup.permissions.map(permission => (
-              <li><b>{permission.label.trim()}:</b> {permission.description}</li>
+              <li key={permission.key}><b>{permission.label.trim()}:</b> {permission.description}</li>
             ))}
           </ul>
         </Popover.Content>
       </Popover>
     )}
   >
-    <Icon className="d-inline-block text-gray-300 ml-2 my-auto" size="inline" src={Info} />
+    <Icon className="d-inline-block text-gray-300 ml-2 my-auto" src={Info} />
   </OverlayTrigger>
 );
 
