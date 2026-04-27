@@ -18,7 +18,7 @@ const messages = defineMessages({
   },
   'error.page.message.notFound': {
     id: 'error.page.message.notFound',
-    defaultMessage: 'The library you are looking for could not be found.',
+    defaultMessage: 'The resource you are looking for could not be found.',
     description: 'Error message when the resource is not found',
   },
   'error.page.title.server': {
@@ -48,8 +48,8 @@ const messages = defineMessages({
   },
   'error.page.action.back': {
     id: 'error.page.action.back',
-    defaultMessage: 'Back to Libraries',
-    description: 'Label for return to libraries action',
+    defaultMessage: 'Back to Studio',
+    description: 'Label for return to Studio action',
   },
 });
 

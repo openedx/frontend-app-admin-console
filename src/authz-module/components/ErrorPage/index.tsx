@@ -80,7 +80,7 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
         {showBackButton && (
         <Button
           as={Hyperlink}
-          destination={`${getConfig().COURSE_AUTHORING_MICROFRONTEND_URL}/libraries`}
+          destination={`${getConfig().COURSE_AUTHORING_MICROFRONTEND_URL}`}
           className="m-2"
           variant={showReloadButton ? 'outline-primary' : 'primary'}
         >
@@ -93,5 +93,5 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
   );
 };
 
-const LibrariesErrorFallback = (props: FallbackProps) => <ErrorPage {...props} />;
-export default LibrariesErrorFallback;
+const ErrorFallback = (props: FallbackProps) => <ErrorPage {...props} />;
+export default ErrorFallback;
