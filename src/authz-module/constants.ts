@@ -530,8 +530,6 @@ export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
 
 export const ROUTES = {
   HOME_PATH: '/authz',
-  LIBRARIES_TEAM_PATH: '/libraries/:libraryId',
-  LIBRARIES_USER_PATH: '/libraries/:libraryId/:username',
   AUDIT_USER_PATH: '/user/:username',
   ASSIGN_ROLE_WIZARD_PATH: '/assign-role',
 };
