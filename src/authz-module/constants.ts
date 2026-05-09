@@ -1,4 +1,4 @@
-import { PermissionMetadata, ResourceMetadata } from 'types';
+import { PermissionMetadata, ResourceMetadata, Role } from 'types';
 import {
   School, LibraryBooks, Article, Group, LocalOffer,
   BookOpen,
@@ -389,9 +389,11 @@ export const coursePermissions: PermissionMetadata[] = [
 
 ];
 
-export const rolesObject = [
+export const rolesObject: Role[] = [
   {
     role: 'course_admin',
+    contextType: 'course',
+    scope: '',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -432,6 +434,8 @@ export const rolesObject = [
 
   {
     role: 'course_staff',
+    contextType: 'course',
+    scope: '',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -469,6 +473,8 @@ export const rolesObject = [
   },
   {
     role: 'course_editor',
+    contextType: 'course',
+    scope: '',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
@@ -499,6 +505,8 @@ export const rolesObject = [
   },
   {
     role: 'course_auditor',
+    contextType: 'course',
+    scope: '',
     permissions: [
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
       CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,

@@ -4,7 +4,6 @@ import {
 } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
-import type { AppContextType } from '@edx/frontend-platform/react';
 import {
   Container, DataTable,
 } from '@openedx/paragon';
@@ -37,7 +36,7 @@ const AuditUserPage = () => {
   const { formatMessage } = useIntl();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
   const { username } = useParams();
-  const { authenticatedUser } = useContext(AppContext as React.Context<AppContextType>);
+  const { authenticatedUser } = useContext(AppContext);
   const navigate = useNavigate();
   const {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
@@ -112,10 +111,10 @@ const AuditUserPage = () => {
       Header: formatMessage(messages['authz.user.table.action.column.header']),
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
-        isUserAuthenticatedPage: username === authenticatedUser.username,
+        isUserAuthenticatedPage: username === authenticatedUser?.username,
       }),
     },
-  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, username]);
+  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username]);
 
   const columns = useMemo(() => [
     {

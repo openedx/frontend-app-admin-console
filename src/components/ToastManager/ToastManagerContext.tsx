@@ -22,19 +22,19 @@ export const ERROR_TOAST_MAP: Record<number | string, { type: ToastType; message
 
 export interface AppToast {
   id: string;
-  message: string;
+  message: string | React.ReactNode;
   type: ToastType;
   onRetry?: () => void;
   delay?: number;
 }
 
-const Bold = (chunk: string) => <b>{chunk}</b>;
+const Bold = (chunks: React.ReactNode[]) => <b>{chunks}</b>;
 const Br = () => <br />;
 
 type ToastManagerContextType = {
   showToast: (toast: Omit<AppToast, 'id'>) => void;
   showErrorToast: (error, retryFn?: () => void) => void;
-  Bold: (chunk: string) => JSX.Element;
+  Bold: (chunks: React.ReactNode[]) => JSX.Element;
   Br: () => JSX.Element;
 };
 
@@ -111,7 +111,7 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
               label: intl.formatMessage(messages['authz.team.toast.retry.label']),
             } : undefined}
           >
-            {toast.message}
+            {toast.message as string}
           </Toast>
         ))}
       </div>

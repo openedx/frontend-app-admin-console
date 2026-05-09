@@ -1,9 +1,14 @@
 import { Icon, OverlayTrigger, Popover } from '@openedx/paragon';
 import { Info } from '@openedx/paragon/icons';
-import { PermissionsResourceGrouped, RoleResourceGroup } from '@src/types';
+import { PermissionMetadata } from '@src/types';
 
 type ResourceTooltipProps = {
-  resourceGroup: PermissionsResourceGrouped | RoleResourceGroup;
+  resourceGroup: {
+    key: string;
+    label: string;
+    description: string;
+    permissions: PermissionMetadata[];
+  };
 };
 
 const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
@@ -17,7 +22,7 @@ const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
           <p className="small">{resourceGroup.description}</p>
           <ul className="small">
             {resourceGroup.permissions.map(permission => (
-              <li key={permission.key}><b>{permission.label.trim()}:</b> {permission.description}</li>
+              <li key={permission.key}><b>{permission.label?.trim() ?? ''}:</b> {permission.description}</li>
             ))}
           </ul>
         </Popover.Content>

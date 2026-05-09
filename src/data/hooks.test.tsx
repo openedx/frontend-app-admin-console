@@ -2,6 +2,7 @@ import { act, ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { mockHttpClient } from '@src/setupTest';
 import { useValidateUserPermissions, useUserAccount, useValidateUserPermissionsNonSuspense } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -88,7 +89,7 @@ describe('useValidateUserPermissions', () => {
   });
 
   it('returns allowed true when permissions are valid', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValueOnce({ data: mockValidPermissions }),
     });
 
@@ -96,14 +97,13 @@ describe('useValidateUserPermissions', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.data?.[0].allowed).toBe(true));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data[0].allowed).toBe(true);
   });
 
   it('returns allowed false when permissions are invalid', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValue({ data: mockInvalidPermissions }),
     });
 
@@ -111,16 +111,15 @@ describe('useValidateUserPermissions', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.data?.[0].allowed).toBe(false));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data[0].allowed).toBe(false);
   });
 
   it('handles error when the API call fails', async () => {
     const mockError = new Error('API Error');
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockRejectedValue(new Error('API Error')),
     });
 
@@ -142,7 +141,7 @@ describe('useValidateUserPermissionsNonSuspense', () => {
   });
 
   it('returns allowed true when permissions are valid', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValueOnce({ data: mockValidPermissions }),
     });
 
@@ -150,14 +149,13 @@ describe('useValidateUserPermissionsNonSuspense', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.data?.[0].allowed).toBe(true));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data[0].allowed).toBe(true);
   });
 
   it('returns allowed false when permissions are invalid', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValue({ data: mockInvalidPermissions }),
     });
 
@@ -165,15 +163,14 @@ describe('useValidateUserPermissionsNonSuspense', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.data?.[0].allowed).toBe(false));
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data[0].allowed).toBe(false);
   });
 
   it('handles error when the API call fails', async () => {
     const mockError = new Error('API Error');
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockRejectedValueOnce(mockError),
     });
 
@@ -188,7 +185,7 @@ describe('useValidateUserPermissionsNonSuspense', () => {
   });
 
   it('starts with loading state', () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockImplementation(() => new Promise(() => {})),
     });
 
@@ -210,7 +207,7 @@ describe('useValidateUserPermissionsNonSuspense', () => {
 
   it('does not retry on failure', async () => {
     const mockPost = jest.fn().mockRejectedValue(new Error('Network Error'));
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: mockPost,
     });
 
@@ -242,7 +239,7 @@ describe('useValidateUserPermissionsNonSuspense', () => {
       { action: 'act:write', object: 'course:test-course', allowed: false },
     ];
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValueOnce({ data: multipleValidPermissions }),
     });
 
@@ -250,11 +247,11 @@ describe('useValidateUserPermissionsNonSuspense', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data).toHaveLength(2);
-    expect(result.current.data[0].allowed).toBe(true);
-    expect(result.current.data[1].allowed).toBe(false);
+    await waitFor(() => {
+      expect(result.current.data).toHaveLength(2);
+      expect(result.current.data?.[0].allowed).toBe(true);
+      expect(result.current.data?.[1].allowed).toBe(false);
+    });
   });
 });
 
@@ -264,7 +261,7 @@ describe('useUserAccount', () => {
   });
 
   it('fetches user account data successfully', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValueOnce({ data: mockUserAccountData }),
     });
 
@@ -280,7 +277,7 @@ describe('useUserAccount', () => {
   });
 
   it('handles user account data with minimal information', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValueOnce({ data: mockEmptyUserData }),
     });
 
@@ -297,7 +294,7 @@ describe('useUserAccount', () => {
 
   it('handles API error gracefully', async () => {
     const mockError = new Error('User not found');
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValueOnce(mockError),
     });
 
@@ -313,7 +310,7 @@ describe('useUserAccount', () => {
 
   it('does not refetch on window focus', async () => {
     const mockGet = jest.fn().mockResolvedValueOnce({ data: mockUserAccountData });
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: mockGet,
     });
 
@@ -335,7 +332,7 @@ describe('useUserAccount', () => {
       .mockResolvedValueOnce({ data: mockUserAccountData })
       .mockResolvedValueOnce({ data: mockEmptyUserData });
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: mockGet,
     });
 

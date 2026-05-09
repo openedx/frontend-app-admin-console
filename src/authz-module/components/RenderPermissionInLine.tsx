@@ -1,18 +1,6 @@
 import { Icon } from '@openedx/paragon';
-import { RolePermission } from 'types';
 import ResourceTooltip from './ResourceTooltip';
-
-interface ExtendedRolePermission extends RolePermission {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}
-
-interface PermissionItem {
-  key: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  label: string;
-  description: string;
-  perms: ExtendedRolePermission[];
-}
+import type { PermissionItem } from './RenderPermissionColumn';
 
 interface RenderPermissionInLineProps {
   items: PermissionItem[];

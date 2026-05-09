@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AuthZTitle, { AuthZTitleProps } from './AuthZTitle';
+import AuthZTitle from './AuthZTitle';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -9,7 +9,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('AuthZTitle', () => {
-  const defaultProps: AuthZTitleProps = {
+  const defaultProps = {
     activeLabel: 'Current Page',
     pageTitle: 'Page Title',
     pageSubtitle: 'Page Subtitle',

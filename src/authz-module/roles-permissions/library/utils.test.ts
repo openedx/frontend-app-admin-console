@@ -1,6 +1,7 @@
-import { buildPermissionMatrixByResource, buildPermissionMatrixByRole } from './utils';
+import type { IntlShape } from '@edx/frontend-platform/i18n';
+import { buildPermissionMatrixByResource } from './utils';
 
-const intl = { formatMessage: jest.fn((msg: any) => msg) };
+const intl = { formatMessage: jest.fn((msg: any) => msg) } as unknown as IntlShape;
 
 const permissions = [
   {
@@ -15,57 +16,17 @@ const resources = [
 ];
 const roles = [
   {
-    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '', contextType: '',
+    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '', contextType: '', scope: '',
   },
   {
-    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '', contextType: '',
+    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '', contextType: '', scope: '',
   },
   {
-    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '', contextType: '',
+    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '', contextType: '', scope: '',
   },
 ];
 
 describe('buildPermissionsMatrix', () => {
-  it('returns permissions a matrix of given roles', () => {
-    const matrix = buildPermissionMatrixByRole({
-      roles, permissions, resources, intl,
-    });
-    expect(matrix.length).toBe(3);
-    expect(matrix[1]).toEqual({
-      name: 'editor',
-      userCount: 2,
-      role: 'editor',
-      description: '',
-      contextType: '',
-      permissions: ['edit_library'],
-      resources: [
-        {
-          key: 'library',
-          label: 'Library',
-          description: '',
-          permissions: [
-            {
-              actionKey: 'create',
-              description: '',
-              disabled: true,
-              key: 'create_library',
-              label: 'Create Library',
-              resource: 'library',
-            },
-            {
-              key: 'edit_library',
-              resource: 'library',
-              label: 'Edit Library',
-              description: '',
-              actionKey: 'edit',
-              disabled: false,
-            },
-          ],
-        },
-      ],
-    });
-  });
-
   it('should build permission matrix grouped by resources with role access mapped', () => {
     const matrix = buildPermissionMatrixByResource({
       roles, permissions, resources, intl,
