@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
 import { useScopes } from '@src/authz-module/data/hooks';

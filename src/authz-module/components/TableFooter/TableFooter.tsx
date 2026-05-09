@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { DataTableContext, Pagination, TableFooter } from '@openedx/paragon';
 import messages from '../messages';
