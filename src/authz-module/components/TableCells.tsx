@@ -5,9 +5,7 @@ import {
   Delete, ExpandMore,
   Info,
 } from '@openedx/paragon/icons';
-import {
-  TableCellValue, AppContextType, UserRoleWithPermissions, RoleToDelete,
-} from '@src/types';
+import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
 import {
@@ -15,6 +13,7 @@ import {
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
+  type DataTableCellProps,
 } from '@openedx/paragon';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
@@ -27,7 +26,7 @@ interface DataTableInstance {
   toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
 }
 
-type CellProps = TableCellValue<UserRoleWithPermissions>;
+type CellProps = DataTableCellProps<UserRoleWithPermissions>;
 type CellPropsWithValue = CellProps & {
   value: string;
 };
@@ -46,7 +45,7 @@ type ActionsCellProps = CellProps & ActionsCellExtraProps;
 
 const NameCell = ({ row }: CellProps) => {
   const intl = useIntl();
-  const { authenticatedUser } = useContext(AppContext) as AppContextType;
+  const { authenticatedUser } = useContext(AppContext);
   const username = authenticatedUser?.username;
 
   if (row.original.username === username) {
@@ -57,7 +56,7 @@ const NameCell = ({ row }: CellProps) => {
       </span>
     );
   }
-  return row.original.fullName || row.original.username;
+  return <>{row.original.fullName || row.original.username || ''}</>;
 };
 
 const ViewActionCell = ({ row }: CellProps) => {
@@ -147,7 +146,7 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
       });
     }
     // Toggle the current row
-    row.toggleRowExpanded();
+    row.toggleRowExpanded?.();
   };
 
   return (

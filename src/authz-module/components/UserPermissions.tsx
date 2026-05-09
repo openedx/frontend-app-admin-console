@@ -8,8 +8,8 @@ import {
   libraryResourceTypes,
   libraryPermissions,
   rolesLibraryObject,
-} from '@src/authz-module/libraries/constants';
-import RenderPermissionColumn from './RenderPermissionColumn';
+} from '@src/authz-module/roles-permissions/library/constants';
+import RenderPermissionColumn, { type PermissionItem } from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';
 
@@ -60,7 +60,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
       );
       return perms.length ? { ...resource, perms } : null;
     })
-    .filter(Boolean);
+    .filter((r): r is PermissionItem => r !== null);
 
   const isSingleRow = resources.length <= 3;
   const mid = Math.ceil(resources.length / 2);

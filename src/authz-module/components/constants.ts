@@ -1,4 +1,4 @@
-import { IntlShape } from '@edx/frontend-platform/i18n';
+import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { Language, LibraryBooks, School } from '@openedx/paragon/icons';
 import messages from './messages';
 

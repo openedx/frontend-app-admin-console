@@ -83,35 +83,6 @@ export type PermissionsResourceGrouped = ResourceMetadata & {
   permissions: PermissionWithRoles[];
 };
 
-export type RolePermission = EnrichedPermission & {
-  disabled: boolean;
-};
-
-export type RoleResourceGroup = {
-  key: string;
-  label: string;
-  description: string;
-  permissions: RolePermission[];
-};
-
-export type PermissionsRoleGrouped = Role & {
-  resources: RoleResourceGroup[];
-};
-
-// Paragon table type
-export interface TableCellValue<T> {
-  row: {
-    original: T;
-  };
-}
-
-export type AppContextType = {
-  authenticatedUser: {
-    username: string;
-    email: string;
-  };
-};
-
 export interface UserRole {
   isSuperadmin?: boolean;
   role: string;

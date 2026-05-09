@@ -1,4 +1,5 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { mockHttpClient } from '@src/setupTest';
 import {
   getTeamMembers,
   getUserAssignedRoles,
@@ -41,7 +42,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -55,7 +56,7 @@ describe('API functions', () => {
     it('should handle all query parameters', async () => {
       const mockResponse = { data: { results: [], count: 0 } };
       const mockGet = jest.fn().mockResolvedValue(mockResponse);
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: mockGet,
       });
 
@@ -92,7 +93,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -106,7 +107,7 @@ describe('API functions', () => {
     it('should handle all query parameters including organizations', async () => {
       const mockResponse = { data: { results: [], count: 0 } };
       const mockGet = jest.fn().mockResolvedValue(mockResponse);
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: mockGet,
       });
 
@@ -142,14 +143,14 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         put: jest.fn().mockResolvedValue(mockResponse),
       });
 
       const requestData = {
         users: ['user1'],
         role: 'admin',
-        scope: 'lib:123',
+        scopes: ['lib:123'],
       };
 
       const result = await assignTeamMembersRole(requestData);
@@ -169,7 +170,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         delete: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -197,7 +198,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -221,7 +222,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -245,7 +246,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -259,7 +260,7 @@ describe('API functions', () => {
     it('should handle search, page, and pageSize parameters', async () => {
       const mockResponse = { data: { results: [], count: 0 } };
       const mockGet = jest.fn().mockResolvedValue(mockResponse);
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: mockGet,
       });
 
@@ -286,7 +287,7 @@ describe('API functions', () => {
         },
       };
 
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: jest.fn().mockResolvedValue(mockResponse),
       });
 
@@ -303,7 +304,7 @@ describe('API functions', () => {
         },
       };
       const mockGet = jest.fn().mockResolvedValue(mockResponse);
-      getAuthenticatedHttpClient.mockReturnValue({
+      mockHttpClient().mockReturnValue({
         get: mockGet,
       });
 

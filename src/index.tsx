@@ -30,7 +30,8 @@ subscribe(APP_READY, () => {
   );
 });
 
-subscribe(APP_INIT_ERROR, (error) => {
+subscribe(APP_INIT_ERROR, (_message, data) => {
+  const error = data as Error;
   const root = createRoot(document.getElementById('root') as HTMLElement);
 
   root.render(
@@ -47,7 +48,7 @@ initialize({
     config: () => {
       mergeConfig({
         COURSE_AUTHORING_MICROFRONTEND_URL: process.env.COURSE_AUTHORING_MICROFRONTEND_URL || null,
-      }, 'AdminConsoleAppConfig');
+      });
     },
   },
 });
