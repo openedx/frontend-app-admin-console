@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import { getCellHeader, getScopeManageAction, getScopeManageActionPermission } from './utils';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './constants';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
 const renderCellHeader = (columnId: string, columnTitle: string, filtersApplied: string[]) => {
   const result = getCellHeader(columnId, columnTitle, filtersApplied);
