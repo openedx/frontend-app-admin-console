@@ -87,42 +87,6 @@ const mockOrgs = {
   ],
 };
 
-const mockScopes = {
-  count: 2,
-  next: null,
-  previous: null,
-  results: [
-    {
-      externalKey: 'course-v1:OpenedX+DemoX+DemoCourse',
-      displayName: 'Open edX Demo Course',
-      org: {
-        id: 1,
-        created: '2026-04-02T19:30:36.779095Z',
-        modified: '2026-04-02T19:30:36.779095Z',
-        name: 'OpenedX',
-        shortName: 'OpenedX',
-        description: '',
-        logo: null,
-        active: true,
-      },
-    },
-    {
-      externalKey: 'lib:WGU:CSPROB',
-      displayName: 'Computer Science Problems',
-      org: {
-        id: 2,
-        created: '2026-04-02T19:31:21.196446Z',
-        modified: '2026-04-02T19:31:21.196446Z',
-        name: 'WGU',
-        shortName: 'WGU',
-        description: '',
-        logo: null,
-        active: true,
-      },
-    },
-  ],
-};
-
 const mockQuerySettings: QuerySettings = {
   roles: null,
   scopes: null,
@@ -558,6 +522,17 @@ describe('useScopes', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeDefined();
   });
+
+  it('handles search parameter', async () => {
+    mockHttpClient().mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse() }),
+    });
+
+    const { result } = renderHook(() => useScopes({ search: 'library' }), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.pages[0].results).toHaveLength(1);
+  });
 });
 
 describe('useOrgs', () => {
@@ -565,19 +540,15 @@ describe('useOrgs', () => {
     jest.clearAllMocks();
   });
 
-  const mockOrgsResult = [{
-    id: 1, name: 'Org One', shortName: 'org1', description: '', logo: null, active: true,
-  }];
-
   it('returns organizations on success', async () => {
     mockHttpClient().mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { results: mockOrgsResult } }),
+      get: jest.fn().mockResolvedValue({ data: mockOrgs }),
     });
 
     const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.results).toEqual(mockOrgsResult);
+    expect(result.current.data?.results).toEqual(mockOrgs.results);
   });
 
   it('handles error when API fails', async () => {
@@ -789,16 +760,7 @@ describe('useAllRoleAssignments', () => {
 
   it('fetches and returns role assignments', async () => {
     const { result } = renderHook(
-      () => useAllRoleAssignments({
-        roles: null,
-        scopes: null,
-        organizations: null,
-        search: null,
-        order: null,
-        sortBy: null,
-        pageSize: 10,
-        pageIndex: 0,
-      }),
+      () => useAllRoleAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
@@ -817,85 +779,12 @@ describe('useAllRoleAssignments', () => {
       })),
     });
     const { result } = renderHook(
-      () => useAllRoleAssignments({
-        roles: null,
-        scopes: null,
-        organizations: null,
-        search: null,
-        order: null,
-        sortBy: null,
-        pageSize: 10,
-        pageIndex: 0,
-      }),
+      () => useAllRoleAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
       expect(result.current.data?.results).toEqual([]);
       expect(result.current.data?.count).toBe(0);
-    });
-  });
-});
-
-describe('useOrgs', () => {
-  beforeEach(() => {
-    mockHttpClient().mockReturnValue({
-      get: jest.fn(() => Promise.resolve({ data: mockOrgs })),
-    });
-  });
-
-  it('fetches and returns organizations', async () => {
-    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.results).toHaveLength(2);
-      expect(result.current.data?.results[0].name).toBe('Organization 1');
-      expect(result.current.data?.count).toBe(2);
-    });
-  });
-
-  it('handles empty results', async () => {
-    mockHttpClient().mockReturnValueOnce({
-      get: jest.fn(() => Promise.resolve({
-        data: {
-          count: 0, next: null, previous: null, results: [],
-        },
-      })),
-    });
-    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.results).toEqual([]);
-      expect(result.current.data?.count).toBe(0);
-    });
-  });
-});
-
-describe('useScopes', () => {
-  beforeEach(() => {
-    mockHttpClient().mockReturnValue({
-      get: jest.fn(() => Promise.resolve({ data: mockScopes })),
-    });
-  });
-
-  it('fetches and returns scopes', async () => {
-    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.pages[0].results).toHaveLength(2);
-      expect(result.current.data?.pages[0].results[0].displayName).toBe('Open edX Demo Course');
-      expect(result.current.data?.pages[0].count).toBe(2);
-    });
-  });
-
-  it('handles empty results', async () => {
-    mockHttpClient().mockReturnValueOnce({
-      get: jest.fn(() => Promise.resolve({
-        data: {
-          count: 0, next: null, previous: null, results: [],
-        },
-      })),
-    });
-    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.pages[0].results).toEqual([]);
-      expect(result.current.data?.pages[0].count).toBe(0);
     });
   });
 });
@@ -1024,76 +913,5 @@ describe('useUserAssignedRoles', () => {
 
     await waitFor(() => expect(result.current.data?.count).toBe(1));
     expect(mockGet).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('useScopes', () => {
-  const mockScopesData = {
-    count: 2,
-    next: null,
-    previous: null,
-    results: [
-      {
-        displayName: 'Test Library 1',
-        scope: 'lib:test-library-1',
-      },
-      {
-        displayName: 'Test Course 1',
-        scope: 'course:test-course-1',
-      },
-    ],
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns scopes when API call succeeds', async () => {
-    mockHttpClient().mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: mockScopesData }),
-    });
-
-    const { result } = renderHook(() => useScopes(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data?.pages[0]).toEqual(mockScopesData);
-    expect(result.current.data?.pages[0].results).toHaveLength(2);
-  });
-
-  it('handles search parameter', async () => {
-    mockHttpClient().mockReturnValue({
-      get: jest.fn().mockResolvedValue({
-        data: {
-          count: 1, next: null, previous: null, results: [mockScopesData.results[0]],
-        },
-      }),
-    });
-
-    const { result } = renderHook(() => useScopes({ search: 'library' }), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.pages[0].results).toHaveLength(1);
-  });
-
-  it('handles error when API call fails', async () => {
-    mockHttpClient().mockReturnValue({
-      get: jest.fn().mockRejectedValue(new Error('API failure')),
-    });
-
-    const { result } = renderHook(() => useScopes(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-
-    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.error).toBeDefined();
-    expect(result.current.data).toBeUndefined();
   });
 });

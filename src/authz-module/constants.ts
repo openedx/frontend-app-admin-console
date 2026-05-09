@@ -1,4 +1,4 @@
-import { PermissionMetadata, ResourceMetadata, Role } from 'types';
+import { PermissionMetadata, ResourceMetadata, Role } from '@src/types';
 import {
   School, LibraryBooks, Article, Group, LocalOffer,
   BookOpen,

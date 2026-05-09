@@ -1,5 +1,5 @@
 import { Form } from '@openedx/paragon';
-import { Scope } from 'types';
+import { Scope } from '@src/types';
 
 interface ScopeCheckboxItemProps {
   scope: Scope;
