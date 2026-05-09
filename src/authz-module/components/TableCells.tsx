@@ -56,7 +56,7 @@ const NameCell = ({ row }: CellProps) => {
       </span>
     );
   }
-  return <>{row.original.fullName || row.original.username || ''}</>;
+  return <span>{row.original.fullName || row.original.username || ''}</span>;
 };
 
 const ViewActionCell = ({ row }: CellProps) => {
