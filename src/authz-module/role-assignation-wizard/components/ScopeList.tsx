@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Spinner } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Org, Scope } from 'types';
+import { Org, Scope } from '@src/types';
 import OrgSection from './OrgSection';
 import ScopeCheckboxItem from './ScopeCheckboxItem';
 import messages from '../messages';

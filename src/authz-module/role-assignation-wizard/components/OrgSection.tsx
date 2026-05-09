@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Icon } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Scope } from 'types';
+import { Scope } from '@src/types';
 import messages from '../messages';
 import ScopeCheckboxItem from './ScopeCheckboxItem';
 

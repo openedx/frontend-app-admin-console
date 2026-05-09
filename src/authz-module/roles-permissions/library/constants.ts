@@ -1,6 +1,6 @@
 import {
   PermissionMetadata, ResourceMetadata, Role, RoleMetadata,
-} from 'types';
+} from '@src/types';
 import {
   Group, CollectionsBookmark, Notes, AutoAwesomeMosaic,
 } from '@openedx/paragon/icons';

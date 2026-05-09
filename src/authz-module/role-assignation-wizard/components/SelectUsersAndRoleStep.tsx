@@ -5,7 +5,7 @@ import {
   Tooltip,
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
-import { RoleMetadata } from 'types';
+import { RoleMetadata } from '@src/types';
 import HighlightedUsersInput from './HighlightedUsersInput';
 import messages from '../messages';
 
