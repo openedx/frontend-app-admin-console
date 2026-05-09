@@ -1,14 +1,12 @@
+import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
   rolesObject,
-  DJANGO_MANAGED_ROLES,
-} from '@src/authz-module/constants';
-import {
   libraryResourceTypes,
   libraryPermissions,
   rolesLibraryObject,
-} from '@src/authz-module/roles-permissions/library/constants';
+} from '@src/authz-module/roles-permissions';
 import RenderPermissionColumn, { type PermissionItem } from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';

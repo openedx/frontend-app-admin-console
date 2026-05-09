@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, getOrgAggregateScopeKey } from '@src/authz-module/constants';
+import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 
 interface UseScopePermissionsParams {
   contextType: string | undefined;
