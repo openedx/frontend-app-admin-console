@@ -1,6 +1,6 @@
 import { Icon } from '@openedx/paragon';
 import { FilterList } from '@openedx/paragon/icons';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './constants';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
 /**
  * Returns a header value for a DataTable column that shows a filter icon

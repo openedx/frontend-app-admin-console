@@ -1,6 +1,6 @@
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
-import * as coursesConstants from '@src/authz-module/constants';
+import * as coursesConstants from '@src/authz-module/roles-permissions';
 import UserPermissions from './UserPermissions';
 
 jest.mock('./RenderPermissionInLine', () => (
@@ -88,7 +88,8 @@ describe('UserPermissions', () => {
     ];
 
     const originalRolesObject = coursesConstants.rolesObject;
-    (coursesConstants as any).rolesObject = [...originalRolesObject, ...mockRoleObject];
+    const rolesObjectSpy = jest.spyOn(coursesConstants, 'rolesObject', 'get')
+      .mockReturnValue([...originalRolesObject, ...mockRoleObject] as typeof originalRolesObject);
 
     const props = {
       row: {
@@ -100,7 +101,7 @@ describe('UserPermissions', () => {
 
     const { getByTestId } = renderWrapper(<UserPermissions {...props} />);
     expect(getByTestId('render-permission-inline')).toBeInTheDocument();
-    (coursesConstants as any).rolesObject = originalRolesObject;
+    rolesObjectSpy.mockRestore();
   });
 
   it('returns null when role is not found in rolesObject (line 52 coverage)', () => {

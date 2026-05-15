@@ -7,14 +7,20 @@ import {
   Container, Hyperlink,
 } from '@openedx/paragon';
 
-import { coursePermissions, courseResourceTypes, rolesObject } from '@src/authz-module/constants';
+import {
+  coursePermissions,
+  courseResourceTypes,
+  rolesObject,
+  rolesLibraryObject,
+  libraryPermissions,
+  libraryResourceTypes,
+} from '@src/authz-module/roles-permissions';
 import AnchorButton from '../components/AnchorButton';
 import PermissionTable from '../components/PermissionTable';
 
 import { buildPermissionMatrixByResource } from './library/utils';
 
 import messages from './library/messages';
-import { rolesLibraryObject, libraryPermissions, libraryResourceTypes } from './library/constants';
 
 const RolesPermissions = () => {
   const intl = useIntl();

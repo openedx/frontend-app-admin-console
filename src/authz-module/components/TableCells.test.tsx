@@ -49,6 +49,7 @@ describe('TableCells Components', () => {
     };
     const mockCellProps = {
       row: {
+        id: '0',
         original: mockUserRole,
       },
     };
@@ -70,6 +71,7 @@ describe('TableCells Components', () => {
     it('displays username when full name is not available', () => {
       const propsWithoutFullName = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             fullName: undefined,
@@ -84,6 +86,7 @@ describe('TableCells Components', () => {
     it('displays username when full name is empty string', () => {
       const propsWithEmptyFullName = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             fullName: '',
@@ -98,6 +101,7 @@ describe('TableCells Components', () => {
     it('shows current user indicator when username matches authenticated user', () => {
       const currentUserProps = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             username: 'testuser',
@@ -120,6 +124,7 @@ describe('TableCells Components', () => {
     it('shows current user indicator with username fallback when no full name is provided', () => {
       const currentUserPropsNoFullName = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             username: 'testuser',
@@ -161,6 +166,7 @@ describe('TableCells Components', () => {
 
     const mockCellProps = {
       row: {
+        id: '0',
         original: mockUserRole,
       },
     };
@@ -201,6 +207,7 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const differentUserProps = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             username: 'janedoe',
@@ -220,6 +227,7 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const emptyUsernameProps = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             username: '',
@@ -239,6 +247,7 @@ describe('TableCells Components', () => {
       const user = userEvent.setup();
       const specialUsernameProps = {
         row: {
+          id: '0',
           original: {
             ...mockUserRole,
             username: 'user+with@special.chars',
@@ -265,6 +274,7 @@ describe('TableCells Components', () => {
         value: 'library_admin',
         cell: mockCell,
         row: {
+          id: '0',
           original: {
             role: 'library_admin', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -283,6 +293,7 @@ describe('TableCells Components', () => {
         value: 'unknown_role',
         cell: mockCell,
         row: {
+          id: '0',
           original: {
             role: 'unknown_role', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -302,6 +313,7 @@ describe('TableCells Components', () => {
         value: 'course_staff',
         cell: mockCell,
         row: {
+          id: '0',
           original: {
             role: 'course_staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -321,6 +333,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'Test Org',
         row: {
+          id: '0',
           original: {
             role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -338,6 +351,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'Test Org',
         row: {
+          id: '0',
           original: {
             role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -355,6 +369,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'Test Organization',
         row: {
+          id: '0',
           original: {
             role: 'library_admin', org: 'Test Organization', scope: 'Test Scope', permissionCount: 1,
           },
@@ -374,6 +389,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'library',
         row: {
+          id: '0',
           original: {
             role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -391,6 +407,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'course',
         row: {
+          id: '0',
           original: {
             role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
@@ -408,6 +425,7 @@ describe('TableCells Components', () => {
       const props = {
         value: 'Course Scope',
         row: {
+          id: '0',
           original: {
             role: 'course_admin', org: 'Test Org', scope: 'Course Scope', permissionCount: 1,
           },
@@ -426,6 +444,7 @@ describe('TableCells Components', () => {
     it('displays "Total Access" for Django superuser role', () => {
       const props = {
         row: {
+          id: '0',
           original: {
             role: 'django.superuser',
             org: 'Test Org',
@@ -444,6 +463,7 @@ describe('TableCells Components', () => {
     it('displays "Partial Access" for Django global staff role', () => {
       const props = {
         row: {
+          id: '0',
           original: {
             role: 'django.globalstaff',
             permissionCount: 5,
@@ -462,6 +482,7 @@ describe('TableCells Components', () => {
     it('displays permission count for non-Django roles', () => {
       const props = {
         row: {
+          id: '0',
           original: {
             role: 'library_admin',
             permissionCount: 3,
@@ -602,8 +623,8 @@ describe('TableCells Components', () => {
 
     const mockCellProps = {
       row: {
-        original: mockUserRole,
         id: 'test-row-1',
+        original: mockUserRole,
         isExpanded: false,
         toggleRowExpanded: jest.fn(),
         values: mockUserRole,

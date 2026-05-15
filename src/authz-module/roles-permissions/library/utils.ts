@@ -1,8 +1,8 @@
-import { IntlShape } from '@edx/frontend-platform/i18n';
+import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
 import {
   EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,
-  PermissionsRoleGrouped, ResourceMetadata, Role, RoleResourceGroup,
+  ResourceMetadata, Role,
 } from '@src/types';
 import actionMessages from '@src/authz-module/components/RoleCard/messages';
 
@@ -96,60 +96,4 @@ const buildPermissionMatrixByResource = ({
   });
 };
 
-/**
- * Builds a permission matrix for grouped by roles.
- *
- * Builds a permission matrix grouped by resource, mapping each action to its display label
- * and enabled/disabled state based on the role's allowed permissions.
- *
- * @param roles - Array of roles metadata.
- * @param permissions - Permissions metadata.
- * @param resources - Resources metadata.
- * @param intl - the i18n function to enable label translations.
- * @returns An array of permission groupings by role and resource with action-level details.
- */
-const buildPermissionMatrixByRole = ({
-  roles, permissions, resources, intl,
-}: BuildPermissionsMatrixProps): PermissionsRoleGrouped[] => {
-  const enrichedPermissions = permissions.reduce((acc, perm) => {
-    acc[perm.key] = getPermissionMetadata(perm, intl);
-    return acc;
-  }, {} as Record<string, EnrichedPermission>);
-
-  return roles.map(role => {
-    const allowed = new Set(role.permissions);
-    const permissionsGroupedByResource: Record<string, RoleResourceGroup> = {};
-
-    permissions.forEach(permission => {
-      const enriched = enrichedPermissions[permission.key];
-      const { resource } = permission;
-
-      if (!enriched.actionKey) { return; }
-
-      if (!permissionsGroupedByResource[resource]) {
-        const resourceInfo = resources.find(r => r.key === resource);
-        if (!resourceInfo) { return; }
-
-        permissionsGroupedByResource[resource] = {
-          key: resourceInfo.key,
-          label: resourceInfo.label,
-          description: resourceInfo.description,
-          permissions: [],
-        };
-      }
-
-      permissionsGroupedByResource[resource].permissions.push({
-        ...enriched,
-        description: permission.description,
-        disabled: !allowed.has(permission.key),
-      });
-    });
-
-    return {
-      ...role,
-      resources: Object.values(permissionsGroupedByResource),
-    };
-  });
-};
-
-export { buildPermissionMatrixByResource, buildPermissionMatrixByRole };
+export { buildPermissionMatrixByResource };
