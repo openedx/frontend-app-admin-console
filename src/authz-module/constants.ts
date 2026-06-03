@@ -67,7 +67,6 @@ export const CONTENT_COURSE_PERMISSIONS = {
   MANAGE_COURSE_GROUP_CONFIGURATION: 'courses.manage_group_configurations',
 
   MANAGE_COURSE_TAGS: 'courses.manage_tags',
-  MANAGE_COURSE_TAXONOMIES: 'courses.manage_taxonomies',
 
   MANAGE_COURSE_ADVANCED_SETTINGS: 'courses.manage_advanced_settings',
   MANAGE_COURSE_CERTIFICATES: 'courses.manage_certificates',
@@ -117,7 +116,7 @@ export const libraryPermissions: PermissionMetadata[] = [
 
 export const courseResourceTypes: ResourceMetadata[] = [
   {
-    key: 'course_tags_taxonomies', label: 'Tags & taxonomies', description: 'Permissions for managing tags and taxonomies used to organize course content.', icon: LocalOffer,
+    key: 'course_tags_taxonomies', label: 'Tags', description: 'Permissions for managing tags used to organize course content.', icon: LocalOffer,
   },
   {
     key: 'course_updates_handouts', label: 'Course updates & handouts', description: 'Permissions for viewing and managing course updates and handouts that are visible to learners.', icon: Sync,
@@ -327,13 +326,6 @@ export const coursePermissions: PermissionMetadata[] = [
     label: 'Manage tags',
     icon: Settings,
   },
-  {
-    key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TAXONOMIES,
-    resource: 'course_tags_taxonomies',
-    description: 'Create, edit, and delete taxonomies used to organize course content.',
-    label: 'Manage taxonomies',
-    icon: Settings,
-  },
 
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_ADVANCED_SETTINGS,
@@ -423,7 +415,6 @@ export const rolesObject = [
       CONTENT_COURSE_PERMISSIONS.EXPORT_COURSE,
       CONTENT_COURSE_PERMISSIONS.EXPORT_COURSE_TAGS,
       CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
-      CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TAXONOMIES,
     ],
     userCount: 1,
     name: 'Course Admin',
