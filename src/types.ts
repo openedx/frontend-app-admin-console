@@ -56,6 +56,10 @@ export type PermissionMetadata = {
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
+export type PermissionItem = ResourceMetadata & {
+  perms: PermissionMetadata[];
+};
+
 export type Org = {
   id: string;
   name: string;

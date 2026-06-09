@@ -1,10 +1,6 @@
 import { Icon } from '@openedx/paragon';
-import { PermissionMetadata, ResourceMetadata } from '@src/types';
+import { PermissionItem } from '@src/types';
 import ResourceTooltip from './ResourceTooltip';
-
-export type PermissionItem = ResourceMetadata & {
-  perms: PermissionMetadata[];
-};
 
 interface RenderPermissionColumnProps {
   items: PermissionItem[];

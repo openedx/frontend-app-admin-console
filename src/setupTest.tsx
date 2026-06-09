@@ -11,13 +11,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // Lazy so each test file's own `jest.mock('@edx/frontend-platform/auth', ...)`
 // (which is hoisted above this setup file's imports) is in effect by the time
 // callers do `mockHttpClient().mockReturnValue(...)`.
-export const mockHttpClient = (): jest.Mock => {
-  // eslint-disable-next-line global-require
-  const { getAuthenticatedHttpClient } = require('@edx/frontend-platform/auth');
-  return getAuthenticatedHttpClient as jest.Mock;
-};
+export const mockHttpClient = (): jest.Mock => jest.requireMock('@edx/frontend-platform/auth').getAuthenticatedHttpClient;
 
-const mockAppContext = {
+export const mockAppContext = {
   authenticatedUser: {
     userId: 1,
     username: 'testuser',

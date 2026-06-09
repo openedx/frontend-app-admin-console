@@ -2,10 +2,9 @@ import {
   render, screen, waitFor, act,
 } from '@testing-library/react';
 import { AppContext } from '@edx/frontend-platform/react';
-import type { ConfigDocument } from '@edx/frontend-platform/config';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { mockHttpClient } from '@src/setupTest';
+import { mockHttpClient, mockAppContext } from '@src/setupTest';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
@@ -76,26 +75,6 @@ const renderWithRouter = (route = '/audit/johndoe') => {
       },
     },
   });
-
-  const mockAppContext = {
-    authenticatedUser: {
-      userId: 1,
-      username: 'testuser',
-      email: 'testuser@example.com',
-      roles: [],
-      administrator: false,
-    },
-    config: {
-      LMS_BASE_URL: 'http://localhost:18000',
-      STUDIO_BASE_URL: 'http://localhost:18010',
-      AUTHZ_MICROFRONTEND_URL: 'http://localhost:18012',
-      ACCESS_TOKEN_COOKIE_NAME: 'edx-jwt-cookie-header-payload',
-      BASE_URL: 'http://localhost:18012',
-      ENVIRONMENT: 'test',
-      LANGUAGE_PREFERENCE_COOKIE_NAME: 'openedx-language-preference',
-      ...process.env,
-    } as unknown as ConfigDocument,
-  };
 
   return render(
     <AppContext.Provider value={mockAppContext}>

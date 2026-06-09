@@ -1,6 +1,6 @@
 import { Icon } from '@openedx/paragon';
+import { PermissionItem } from '@src/types';
 import ResourceTooltip from './ResourceTooltip';
-import type { PermissionItem } from './RenderPermissionColumn';
 
 interface RenderPermissionInLineProps {
   items: PermissionItem[];

@@ -7,7 +7,8 @@ import {
   libraryPermissions,
   rolesLibraryObject,
 } from '@src/authz-module/roles-permissions';
-import RenderPermissionColumn, { type PermissionItem } from './RenderPermissionColumn';
+import { PermissionItem } from '@src/types';
+import RenderPermissionColumn from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';
 

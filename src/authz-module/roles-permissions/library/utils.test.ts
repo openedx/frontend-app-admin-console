@@ -1,7 +1,7 @@
-import type { IntlShape } from '@edx/frontend-platform/i18n';
+import { createIntl } from '@edx/frontend-platform/i18n';
 import { buildPermissionMatrixByResource } from './utils';
 
-const intl = { formatMessage: jest.fn((msg: any) => msg) } as unknown as IntlShape;
+const intl = createIntl({ locale: 'en', messages: {} });
 
 const permissions = [
   {
