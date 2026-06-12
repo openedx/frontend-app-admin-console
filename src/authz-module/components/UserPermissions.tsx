@@ -1,14 +1,13 @@
+import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
   rolesObject,
-  DJANGO_MANAGED_ROLES,
-} from '@src/authz-module/constants';
-import {
   libraryResourceTypes,
   libraryPermissions,
   rolesLibraryObject,
-} from '@src/authz-module/libraries/constants';
+} from '@src/authz-module/roles-permissions';
+import { PermissionItem } from '@src/types';
 import RenderPermissionColumn from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';
@@ -60,7 +59,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
       );
       return perms.length ? { ...resource, perms } : null;
     })
-    .filter(Boolean);
+    .filter((r): r is PermissionItem => r !== null);
 
   const isSingleRow = resources.length <= 3;
   const mid = Math.ceil(resources.length / 2);

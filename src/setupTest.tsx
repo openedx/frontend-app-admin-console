@@ -4,17 +4,26 @@ import { ReactNode } from 'react';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppContext } from '@edx/frontend-platform/react';
+import type { ConfigDocument } from '@edx/frontend-platform/config';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const mockAppContext = {
+// Lazy so each test file's own `jest.mock('@edx/frontend-platform/auth', ...)`
+// (which is hoisted above this setup file's imports) is in effect by the time
+// callers do `mockHttpClient().mockReturnValue(...)`.
+export const mockHttpClient = (): jest.Mock => jest.requireMock('@edx/frontend-platform/auth').getAuthenticatedHttpClient;
+
+export const mockAppContext = {
   authenticatedUser: {
+    userId: 1,
     username: 'testuser',
     email: 'testuser@example.com',
+    roles: [],
+    administrator: false,
   },
   config: {
     ...process.env,
-  },
+  } as ConfigDocument,
 };
 
 interface WrapperProps {

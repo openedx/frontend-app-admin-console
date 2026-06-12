@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { mockHttpClient } from '@src/setupTest';
+import type { QuerySettings } from './api';
 import {
   useLibrary,
   usePermissionsByRole,
@@ -85,43 +87,7 @@ const mockOrgs = {
   ],
 };
 
-const mockScopes = {
-  count: 2,
-  next: null,
-  previous: null,
-  results: [
-    {
-      externalKey: 'course-v1:OpenedX+DemoX+DemoCourse',
-      displayName: 'Open edX Demo Course',
-      org: {
-        id: 1,
-        created: '2026-04-02T19:30:36.779095Z',
-        modified: '2026-04-02T19:30:36.779095Z',
-        name: 'OpenedX',
-        shortName: 'OpenedX',
-        description: '',
-        logo: null,
-        active: true,
-      },
-    },
-    {
-      externalKey: 'lib:WGU:CSPROB',
-      displayName: 'Computer Science Problems',
-      org: {
-        id: 2,
-        created: '2026-04-02T19:31:21.196446Z',
-        modified: '2026-04-02T19:31:21.196446Z',
-        name: 'WGU',
-        shortName: 'WGU',
-        description: '',
-        logo: null,
-        active: true,
-      },
-    },
-  ],
-};
-
-const mockQuerySettings = {
+const mockQuerySettings: QuerySettings = {
   roles: null,
   scopes: null,
   organizations: null,
@@ -204,7 +170,7 @@ describe('useTeamMembers', () => {
   });
 
   it('returns data when API call succeeds', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: mockMembers }),
     });
 
@@ -219,7 +185,7 @@ describe('useTeamMembers', () => {
   });
 
   it('appends roles and search params when provided', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: { count: 0, results: [] } }),
     });
 
@@ -237,7 +203,7 @@ describe('useTeamMembers', () => {
   });
 
   it('appends sort params when sortBy and order are provided', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: { count: 0, results: [] } }),
     });
 
@@ -255,7 +221,7 @@ describe('useTeamMembers', () => {
   });
 
   it('handles error when API call fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('API failure')),
     });
 
@@ -277,7 +243,7 @@ describe('useLibrary', () => {
   });
 
   it('returns metadata on success', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValueOnce({ data: mockLibrary }),
     });
 
@@ -299,7 +265,7 @@ describe('useLibrary', () => {
       slug: 'test-library',
       allow_public_read: true,
     };
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValueOnce({ data: rawLibrary }),
     });
 
@@ -317,7 +283,7 @@ describe('useLibrary', () => {
   });
 
   it('throws on error', () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('Not found')),
     });
 
@@ -341,7 +307,7 @@ describe('usePermissionsByRole', () => {
       { role: 'user', permissions: ['perm2'], userCount: 2 },
     ];
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: { results: mockRoles } }),
     });
 
@@ -353,7 +319,7 @@ describe('usePermissionsByRole', () => {
   });
 
   it('returns error if getRoles fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('Not found')),
     });
     const wrapper = createWrapper();
@@ -381,7 +347,7 @@ describe('useAssignTeamMembersRole', () => {
       errors: [],
     };
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       put: jest.fn().mockResolvedValue({ data: mockResponse }),
     });
 
@@ -400,7 +366,7 @@ describe('useAssignTeamMembersRole', () => {
   });
 
   it('handles error when adding team members fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
     });
 
@@ -430,7 +396,7 @@ describe('useValidateUsers', () => {
       invalidUsers: ['unknown_user'],
     };
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockResolvedValue({ data: mockResponse }),
     });
 
@@ -449,7 +415,7 @@ describe('useValidateUsers', () => {
   });
 
   it('handles error when validation fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       post: jest.fn().mockRejectedValue(new Error('Validation failed')),
     });
 
@@ -484,7 +450,7 @@ describe('useScopes', () => {
   });
 
   it('returns pages data on success', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: makeScopesResponse() }),
     });
 
@@ -497,7 +463,7 @@ describe('useScopes', () => {
   });
 
   it('hasNextPage is false when next is null', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: makeScopesResponse(null) }),
     });
 
@@ -508,7 +474,7 @@ describe('useScopes', () => {
   });
 
   it('hasNextPage is true when next URL has page param', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({
         data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/?page=2'),
       }),
@@ -521,7 +487,7 @@ describe('useScopes', () => {
   });
 
   it('hasNextPage is false when next URL has no page param', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({
         data: makeScopesResponse('http://localhost:8000/api/authz/v1/scopes/'),
       }),
@@ -534,7 +500,7 @@ describe('useScopes', () => {
   });
 
   it('hasNextPage is false when next is an invalid URL', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({
         data: makeScopesResponse('not-a-valid-url'),
       }),
@@ -547,7 +513,7 @@ describe('useScopes', () => {
   });
 
   it('handles error when API call fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('Network error')),
     });
 
@@ -556,6 +522,17 @@ describe('useScopes', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeDefined();
   });
+
+  it('handles search parameter', async () => {
+    mockHttpClient().mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: makeScopesResponse() }),
+    });
+
+    const { result } = renderHook(() => useScopes({ search: 'library' }), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.pages[0].results).toHaveLength(1);
+  });
 });
 
 describe('useOrgs', () => {
@@ -563,23 +540,19 @@ describe('useOrgs', () => {
     jest.clearAllMocks();
   });
 
-  const mockOrgsResult = [{
-    id: 1, name: 'Org One', shortName: 'org1', description: '', logo: null, active: true,
-  }];
-
   it('returns organizations on success', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: { results: mockOrgsResult } }),
+    mockHttpClient().mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockOrgs }),
     });
 
     const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.results).toEqual(mockOrgsResult);
+    expect(result.current.data?.results).toEqual(mockOrgs.results);
   });
 
   it('handles error when API fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('Failed')),
     });
 
@@ -605,7 +578,7 @@ describe('useRevokeUserRoles', () => {
       errors: [],
     };
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       delete: jest.fn().mockResolvedValue({ data: mockResponse }),
     });
 
@@ -630,7 +603,7 @@ describe('useRevokeUserRoles', () => {
   });
 
   it('handles error when revoking roles fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       delete: jest.fn().mockRejectedValue(new Error('Failed to revoke roles')),
     });
 
@@ -659,7 +632,7 @@ describe('useRevokeUserRoles', () => {
       data: { completed: [], errors: [] },
     });
 
-    getAuthenticatedHttpClient.mockReturnValue({
+    mockHttpClient().mockReturnValue({
       delete: mockDelete,
     });
 
@@ -699,7 +672,7 @@ describe('useRevokeUserRoles', () => {
       errors: [],
     };
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       delete: jest.fn().mockResolvedValue({ data: mockResponse }),
     });
 
@@ -780,23 +753,14 @@ describe('useRevokeUserRoles', () => {
 
 describe('useAllRoleAssignments', () => {
   beforeEach(() => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn(() => Promise.resolve({ data: mockAssignments })),
     });
   });
 
   it('fetches and returns role assignments', async () => {
     const { result } = renderHook(
-      () => useAllRoleAssignments({
-        roles: null,
-        scopes: null,
-        organizations: null,
-        search: null,
-        order: null,
-        sortBy: null,
-        pageSize: 10,
-        pageIndex: 0,
-      }),
+      () => useAllRoleAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
@@ -807,7 +771,7 @@ describe('useAllRoleAssignments', () => {
   });
 
   it('handles empty results', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
+    mockHttpClient().mockReturnValueOnce({
       get: jest.fn(() => Promise.resolve({
         data: {
           results: [], count: 0, next: null, previous: null,
@@ -815,85 +779,12 @@ describe('useAllRoleAssignments', () => {
       })),
     });
     const { result } = renderHook(
-      () => useAllRoleAssignments({
-        roles: null,
-        scopes: null,
-        organizations: null,
-        search: null,
-        order: null,
-        sortBy: null,
-        pageSize: 10,
-        pageIndex: 0,
-      }),
+      () => useAllRoleAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
       expect(result.current.data?.results).toEqual([]);
       expect(result.current.data?.count).toBe(0);
-    });
-  });
-});
-
-describe('useOrgs', () => {
-  beforeEach(() => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
-      get: jest.fn(() => Promise.resolve({ data: mockOrgs })),
-    });
-  });
-
-  it('fetches and returns organizations', async () => {
-    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.results).toHaveLength(2);
-      expect(result.current.data?.results[0].name).toBe('Organization 1');
-      expect(result.current.data?.count).toBe(2);
-    });
-  });
-
-  it('handles empty results', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
-      get: jest.fn(() => Promise.resolve({
-        data: {
-          count: 0, next: null, previous: null, results: [],
-        },
-      })),
-    });
-    const { result } = renderHook(() => useOrgs(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.results).toEqual([]);
-      expect(result.current.data?.count).toBe(0);
-    });
-  });
-});
-
-describe('useScopes', () => {
-  beforeEach(() => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
-      get: jest.fn(() => Promise.resolve({ data: mockScopes })),
-    });
-  });
-
-  it('fetches and returns scopes', async () => {
-    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.pages[0].results).toHaveLength(2);
-      expect(result.current.data?.pages[0].results[0].displayName).toBe('Open edX Demo Course');
-      expect(result.current.data?.pages[0].count).toBe(2);
-    });
-  });
-
-  it('handles empty results', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValueOnce({
-      get: jest.fn(() => Promise.resolve({
-        data: {
-          count: 0, next: null, previous: null, results: [],
-        },
-      })),
-    });
-    const { result } = renderHook(() => useScopes(), { wrapper: createWrapper() });
-    await waitFor(() => {
-      expect(result.current.data?.pages[0].results).toEqual([]);
-      expect(result.current.data?.pages[0].count).toBe(0);
     });
   });
 });
@@ -904,7 +795,7 @@ describe('useUserAssignedRoles', () => {
   });
 
   it('returns user role assignments when API call succeeds', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: mockUserAssignments }),
     });
 
@@ -921,7 +812,7 @@ describe('useUserAssignedRoles', () => {
   });
 
   it('returns empty results when user has no role assignments', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: mockEmptyUserAssignments }),
     });
 
@@ -944,7 +835,7 @@ describe('useUserAssignedRoles', () => {
       pageIndex: 1,
     };
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockResolvedValue({ data: mockFilteredUserAssignments }),
     });
 
@@ -959,7 +850,7 @@ describe('useUserAssignedRoles', () => {
   });
 
   it('handles API error when fetching user assignments fails', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('User not found')),
     });
 
@@ -975,7 +866,7 @@ describe('useUserAssignedRoles', () => {
 
   it('does not refetch on window focus', async () => {
     const mockGet = jest.fn().mockResolvedValue({ data: mockUserAssignments });
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: mockGet,
     });
 
@@ -997,7 +888,7 @@ describe('useUserAssignedRoles', () => {
       .mockResolvedValueOnce({ data: mockUserAssignments })
       .mockResolvedValueOnce({ data: mockFilteredUserAssignments });
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: mockGet,
     });
 
@@ -1022,76 +913,5 @@ describe('useUserAssignedRoles', () => {
 
     await waitFor(() => expect(result.current.data?.count).toBe(1));
     expect(mockGet).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('useScopes', () => {
-  const mockScopesData = {
-    count: 2,
-    next: null,
-    previous: null,
-    results: [
-      {
-        displayName: 'Test Library 1',
-        scope: 'lib:test-library-1',
-      },
-      {
-        displayName: 'Test Course 1',
-        scope: 'course:test-course-1',
-      },
-    ],
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns scopes when API call succeeds', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({ data: mockScopesData }),
-    });
-
-    const { result } = renderHook(() => useScopes(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.data?.pages[0]).toEqual(mockScopesData);
-    expect(result.current.data?.pages[0].results).toHaveLength(2);
-  });
-
-  it('handles search parameter', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue({
-        data: {
-          count: 1, next: null, previous: null, results: [mockScopesData.results[0]],
-        },
-      }),
-    });
-
-    const { result } = renderHook(() => useScopes({ search: 'library' }), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.pages[0].results).toHaveLength(1);
-  });
-
-  it('handles error when API call fails', async () => {
-    getAuthenticatedHttpClient.mockReturnValue({
-      get: jest.fn().mockRejectedValue(new Error('API failure')),
-    });
-
-    const { result } = renderHook(() => useScopes(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-
-    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    expect(result.current.error).toBeDefined();
-    expect(result.current.data).toBeUndefined();
   });
 });

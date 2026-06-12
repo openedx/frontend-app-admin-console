@@ -1,4 +1,6 @@
-import { PermissionMetadata, ResourceMetadata, RoleMetadata } from 'types';
+import {
+  PermissionMetadata, ResourceMetadata, Role, RoleMetadata,
+} from '@src/types';
 import {
   Group, CollectionsBookmark, Notes, AutoAwesomeMosaic,
 } from '@openedx/paragon/icons';
@@ -79,10 +81,11 @@ export const libraryPermissions: PermissionMetadata[] = [
   { key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION, resource: 'library_collection', description: 'Delete entire collections from the library.' },
 ];
 
-export const rolesLibraryObject = [
+export const rolesLibraryObject: Role[] = [
   {
     role: 'library_admin',
     contextType: 'library',
+    scope: '',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -106,6 +109,7 @@ export const rolesLibraryObject = [
   {
     role: 'library_author',
     contextType: 'library',
+    scope: '',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -127,6 +131,7 @@ export const rolesLibraryObject = [
   {
     role: 'library_contributor',
     contextType: 'library',
+    scope: '',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -148,6 +153,7 @@ export const rolesLibraryObject = [
   {
     role: 'library_user',
     contextType: 'library',
+    scope: '',
     permissions: [
       CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
       CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT,

@@ -56,6 +56,10 @@ export type PermissionMetadata = {
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
+export type PermissionItem = ResourceMetadata & {
+  perms: PermissionMetadata[];
+};
+
 export type Org = {
   id: string;
   name: string;
@@ -81,35 +85,6 @@ export type PermissionWithRoles = EnrichedPermission & {
 
 export type PermissionsResourceGrouped = ResourceMetadata & {
   permissions: PermissionWithRoles[];
-};
-
-export type RolePermission = EnrichedPermission & {
-  disabled: boolean;
-};
-
-export type RoleResourceGroup = {
-  key: string;
-  label: string;
-  description: string;
-  permissions: RolePermission[];
-};
-
-export type PermissionsRoleGrouped = Role & {
-  resources: RoleResourceGroup[];
-};
-
-// Paragon table type
-export interface TableCellValue<T> {
-  row: {
-    original: T;
-  };
-}
-
-export type AppContextType = {
-  authenticatedUser: {
-    username: string;
-    email: string;
-  };
 };
 
 export interface UserRole {

@@ -1,4 +1,4 @@
-import { IntlShape } from '@edx/frontend-platform/i18n';
+import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { PutAssignTeamMembersRoleResponse } from '@src/authz-module/data/api';
 import { ROLE_ASSIGNMENT_ERRORS } from './constants';
 import messages from './messages';

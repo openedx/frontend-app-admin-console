@@ -4,7 +4,7 @@ import {
 import { AppContext } from '@edx/frontend-platform/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { mockHttpClient, mockAppContext } from '@src/setupTest';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
@@ -76,24 +76,6 @@ const renderWithRouter = (route = '/audit/johndoe') => {
     },
   });
 
-  const mockAppContext = {
-    authenticatedUser: {
-      username: 'testuser',
-      email: 'testuser@example.com',
-      userId: 1,
-    },
-    config: {
-      LMS_BASE_URL: 'http://localhost:18000',
-      STUDIO_BASE_URL: 'http://localhost:18010',
-      AUTHZ_MICROFRONTEND_URL: 'http://localhost:18012',
-      ACCESS_TOKEN_COOKIE_NAME: 'edx-jwt-cookie-header-payload',
-      BASE_URL: 'http://localhost:18012',
-      ENVIRONMENT: 'test',
-      LANGUAGE_PREFERENCE_COOKIE_NAME: 'openedx-language-preference',
-      ...process.env,
-    },
-  };
-
   return render(
     <AppContext.Provider value={mockAppContext}>
       <QueryClientProvider client={queryClient}>
@@ -116,7 +98,7 @@ describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Set up default mock behavior for useRevokeUserRoles
-    mockRevokeUserRoles.mockImplementation((variables, { onSuccess }) => {
+    mockRevokeUserRoles.mockImplementation((_variables, { onSuccess }) => {
       // Simulate successful deletion by default
       onSuccess({ errors: [], completed: ['role1'] });
     });
@@ -154,7 +136,7 @@ describe('AuditUserPage', () => {
   });
 
   it('navigates to home if user is not found', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: null })
@@ -169,7 +151,7 @@ describe('AuditUserPage', () => {
   });
 
   it('allows user to interact with Assign Role button', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -215,7 +197,7 @@ describe('AuditUserPage', () => {
   });
 
   it('renders correct table headers', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -294,7 +276,7 @@ describe('AuditUserPage', () => {
   });
 
   it('renders the breadcrumb navigation with home link', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -310,7 +292,7 @@ describe('AuditUserPage', () => {
   });
 
   it('opens and closes the ConfirmDeletionModal when delete is clicked and cancel is pressed', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -342,7 +324,7 @@ describe('AuditUserPage', () => {
   });
 
   it('calls onSave when confirming deletion in ConfirmDeletionModal', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -389,7 +371,7 @@ describe('AuditUserPage', () => {
       });
     });
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -424,12 +406,12 @@ describe('AuditUserPage', () => {
 
   it('shows error toast with retry when role revocation fails', async () => {
     // Override mock for this specific test case
-    mockRevokeUserRoles.mockImplementation((variables, { onError }) => {
+    mockRevokeUserRoles.mockImplementation((_variables, { onError }) => {
       // Call onError immediately to simulate failure
       onError(new Error('Network error'));
     });
 
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })
@@ -464,7 +446,7 @@ describe('AuditUserPage', () => {
   });
 
   it('shows the extra warning when rolesCount is 1', async () => {
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+    mockHttpClient().mockReturnValue({
       get: jest
         .fn()
         .mockResolvedValueOnce({ data: mockUser })

@@ -6,7 +6,7 @@ import {
   Stepper, Button, StatefulButton, Icon,
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
-import { RoleMetadata } from 'types';
+import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';

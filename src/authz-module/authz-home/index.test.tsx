@@ -1,4 +1,3 @@
-import React from 'react';
 import { screen } from '@testing-library/react';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { renderWithAllProviders } from '@src/setupTest';

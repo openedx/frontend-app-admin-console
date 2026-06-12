@@ -3,12 +3,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-      "baseUrl": "./src",
-      "paths": {
-        "*": ["*"],
-        "@src/*": ["*"]
-      }
-    },
-    "include": ["*.js", ".eslintrc.js", "src/**/*", "plugins/**/*"],
-    "exclude": ["dist", "node_modules"]
+    // Ignore deprecation warnings for TypeScript 6.0, which will be used in the next major release of TypeScript.
+   "ignoreDeprecations": "6.0",
+    "paths": {
+      "@src/*": ["./src/*"]
+    }
+  },
+  "include": ["*.js", ".eslintrc.js", "src/**/*", "plugins/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

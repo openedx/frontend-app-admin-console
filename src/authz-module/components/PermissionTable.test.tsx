@@ -11,6 +11,7 @@ const mockRoles: Role[] = [
     permissions: [],
     role: '',
     contextType: '',
+    scope: '',
   },
   {
     name: 'Editor',
@@ -19,6 +20,7 @@ const mockRoles: Role[] = [
     permissions: [],
     role: '',
     contextType: '',
+    scope: '',
   },
   {
     name: 'Viewer',
@@ -27,6 +29,7 @@ const mockRoles: Role[] = [
     permissions: [],
     role: '',
     contextType: '',
+    scope: '',
   },
 ];
 
