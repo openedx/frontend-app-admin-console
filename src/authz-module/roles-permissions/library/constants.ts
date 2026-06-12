@@ -3,6 +3,14 @@ import {
 } from '@src/types';
 import {
   Group, CollectionsBookmark, Notes, AutoAwesomeMosaic,
+  RemoveRedEye,
+  Settings,
+  DownloadDone,
+  Plus,
+  EditOutline,
+  Delete,
+  SpinnerIcon,
+  FileDownload,
 } from '@openedx/paragon/icons';
 
 export const CONTENT_LIBRARY_PERMISSIONS = {
@@ -58,27 +66,48 @@ export const libraryResourceTypes: ResourceMetadata[] = [
 ];
 
 export const libraryPermissions: PermissionMetadata[] = [
-  { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY, resource: 'library', description: 'View content, search, filter, and sort within the library.' },
   {
-    key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS, resource: 'library', description: 'Add or remove tags from content.', label: 'Manage Tags',
+    key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY, resource: 'library', label: 'View', description: 'See the library in Studio and access its content in read-only mode.', icon: RemoveRedEye,
   },
-  { key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT, resource: 'library', description: 'Allows the user to publish the library and all its contents.' },
-
-  { key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT, resource: 'library_content', description: 'Create content within the library.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT, resource: 'library_content', description: 'Edit content in draft mode' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT, resource: 'library_content', description: 'Delete content within the library.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT, resource: 'library_content', description: 'Publish content, making it available for reuse' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT, resource: 'library_content', description: 'Reuse published content within a course.' },
   {
-    key: CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT, resource: 'library_content', description: 'Import content from courses.', label: 'Import Content from Course',
+    key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS, resource: 'library', label: 'Manage tag', description: 'Create, edit, and delete tags on this library.', icon: Settings,
   },
-
-  { key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, resource: 'library_team', description: 'View the list of users who have access to the library.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, resource: 'library_team', description: 'Add, remove, and assign roles to users within the library.' },
-
-  { key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_COLLECTION, resource: 'library_collection', description: 'Create new collections within a library.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION, resource: 'library_collection', description: 'Add or remove content from existing collections.' },
-  { key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION, resource: 'library_collection', description: 'Delete entire collections from the library.' },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY, resource: 'library', label: 'Publish', description: 'Publish the library to make it available for use in courses.', icon: DownloadDone,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT, resource: 'library_content', label: 'Create', description: 'Create new content items in the library.', icon: Plus,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT, resource: 'library_content', label: 'Edit', description: 'Edit existing content items in the library.', icon: EditOutline,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT, resource: 'library_content', label: 'Delete', description: 'Permanently remove content items from the library.', icon: Delete,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT, resource: 'library_content', label: 'Publish', description: 'Publish individual content items to make them available for reuse in courses.', icon: DownloadDone,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT, resource: 'library_content', label: 'Reuse', description: 'Add published content from this library to a course.', icon: SpinnerIcon,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT, resource: 'library_content', label: 'Import Content from Course', description: ' Import content from an existing course into this library.', icon: FileDownload,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, resource: 'library_team', label: 'View', description: 'See the list of users with a role assigned to this library.', icon: RemoveRedEye,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, resource: 'library_team', label: 'Manage', description: 'Add, change, or remove role assignments for this library from the Roles and Permissions console.', icon: Settings,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_COLLECTION, resource: 'library_collection', label: 'View', description: 'Create new collections to organize content within the library.', icon: RemoveRedEye,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION, resource: 'library_collection', label: 'Publish', description: 'Update the name and contents of existing collections.', icon: EditOutline,
+  },
+  {
+    key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION, resource: 'library_collection', label: 'Edit', description: 'Permanently remove collections from the library.', icon: EditOutline,
+  },
 ];
 
 export const rolesLibraryObject: Role[] = [
