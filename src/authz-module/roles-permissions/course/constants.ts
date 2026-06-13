@@ -10,6 +10,14 @@ import {
   Download,
   DrawShapes,
   CheckCircle,
+  RemoveRedEye,
+  Plus,
+  EditOutline,
+  DownloadDone,
+  Settings,
+  Checklist,
+  Delete,
+  Upload,
   Award,
 } from '@openedx/paragon/icons';
 
@@ -103,24 +111,28 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_access_content',
     description: 'View course in the course list, access the course outline in read only mode, includes the "View Live" entry point.',
     label: 'View course',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.CREATE_COURSE,
     resource: 'course_access_content',
     description: 'Create a new course in Studio.',
     label: 'Create course',
+    icon: Plus,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_CONTENT,
     resource: 'course_access_content',
     description: 'Edit course content, outline, units, components.',
     label: 'Edit course content',
+    icon: EditOutline,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.PUBLISH_COURSE_CONTENT,
     resource: 'course_access_content',
     description: 'Publish course content.',
     label: 'Publish course content',
+    icon: DownloadDone,
   },
 
   {
@@ -128,6 +140,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_library_updates',
     description: 'Accept or reject library updates in Studio.',
     label: 'Review library updates',
+    icon: Checklist,
   },
 
   {
@@ -135,12 +148,14 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_updates_handouts',
     description: 'View course updates and handouts.',
     label: 'View course updates',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_UPDATES,
     resource: 'course_updates_handouts',
     description: 'Manage course updates and handouts, create, edit, delete.',
     label: 'Manage course updates',
+    icon: Settings,
   },
 
   {
@@ -148,12 +163,14 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_pages_resources',
     description: 'View Pages and Resources.',
     label: 'View pages & resources',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_PAGES_RESOURCES,
     resource: 'course_pages_resources',
     description: 'Edit Pages and Resources, including toggles and content managed from that section.',
     label: 'Manage pages & resources',
+    icon: Settings,
   },
 
   {
@@ -161,24 +178,28 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_files',
     description: 'View the Files page.',
     label: 'View files',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.CREATE_COURSE_FILES,
     resource: 'course_files',
     description: 'Upload files.',
     label: 'Create files',
+    icon: Plus,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_FILES,
     resource: 'course_files',
     description: 'Non destructive file actions, for example lock or unlock, exact actions depend on implementation.',
     label: 'Edit files',
+    icon: EditOutline,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.DELETE_COURSE_FILES,
     resource: 'course_files',
     description: 'Delete files.',
     label: 'Delete files',
+    icon: Delete,
   },
 
   {
@@ -186,24 +207,28 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_schedule_details',
     description: 'View course schedule.',
     label: 'View schedule',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_SCHEDULE,
     resource: 'course_schedule_details',
     description: 'Edit course schedule.',
     label: 'Edit schedule',
+    icon: EditOutline,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_DETAILS,
     resource: 'course_schedule_details',
     description: 'View course details.',
     label: 'View course details',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_DETAILS,
     resource: 'course_schedule_details',
     description: 'Edit course details, includes Course Summary, Course Pacing, Course Details, Course Pre requisite.',
     label: 'Edit course details',
+    icon: EditOutline,
   },
 
   {
@@ -211,12 +236,14 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_grading',
     description: 'View grading settings page.',
     label: 'View grading settings',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_GRADING_SETTINGS,
     resource: 'course_grading',
     description: 'Edit grading settings.',
     label: 'Edit grading settings',
+    icon: EditOutline,
   },
 
   {
@@ -224,18 +251,21 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_team_group',
     description: 'View the course team roster.',
     label: 'View course team',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
     resource: 'course_team_group',
     description: 'Edit course team membership and roles.',
     label: 'Manage course team',
+    icon: Settings,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_GROUP_CONFIGURATION,
     resource: 'course_team_group',
     description: 'Manage content groups.',
     label: 'Manage group configuration',
+    icon: Settings,
   },
 
   {
@@ -243,6 +273,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_tags_taxonomies',
     description: 'Create, edit, delete tags.',
     label: 'Manage tags',
+    icon: Settings,
   },
 
   {
@@ -250,12 +281,14 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_advanced_certificates',
     description: 'Access and edit Advanced Settings.',
     label: 'Manage advanced settings',
+    icon: Settings,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_CERTIFICATES,
     resource: 'course_advanced_certificates',
     description: 'Access and edit Certificates.',
     label: 'Manage certificates',
+    icon: Settings,
   },
 
   {
@@ -263,18 +296,21 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_import_export',
     description: 'Show Import in Studio, this is treated as a high privilege action and effectively implies most authoring permissions.',
     label: 'Import course',
+    icon: Download,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EXPORT_COURSE,
     resource: 'course_import_export',
     description: 'Show Export in Studio.',
     label: 'Export course',
+    icon: Upload,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EXPORT_COURSE_TAGS,
     resource: 'course_import_export',
     description: 'Export tags.',
     label: 'Export tags',
+    icon: Upload,
   },
 
   {
@@ -282,14 +318,15 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_other',
     description: 'View checklists.',
     label: 'View checklists',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GLOBAL_STAFF_SUPER_ADMINS,
     resource: 'course_other',
     description: 'Allow course or library admins to view the list of global Staff and Super Admin users.',
     label: 'View global staff & super admins',
+    icon: RemoveRedEye,
   },
-
 ];
 
 // roles hardcoded, todo: need to add the constants from above in order to merge the different permissions array.
