@@ -28,3 +28,4 @@ export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
   { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
   { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
 ];
+export { buildPermissionMatrixByResource, getPermissionMetadata } from './utils';

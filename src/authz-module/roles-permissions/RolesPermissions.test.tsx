@@ -5,7 +5,7 @@ import { renderWrapper } from '@src/setupTest';
 import RolesPermissions from './RolesPermissions';
 
 // Mock utils
-jest.mock('./library/utils', () => ({
+jest.mock('./utils', () => ({
   buildPermissionMatrixByResource: jest.fn(() => [
     {
       key: 'test-resource',
