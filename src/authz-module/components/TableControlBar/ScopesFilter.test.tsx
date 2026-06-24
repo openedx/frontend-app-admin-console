@@ -28,6 +28,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 
 describe('ScopesFilter', () => {
   const defaultProps = {
+    filterId: 'scope',
     filterButtonText: 'Scopes',
     filterValue: [],
     setFilter: jest.fn(),

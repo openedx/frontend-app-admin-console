@@ -23,16 +23,11 @@ import OrgFilter from './OrgFilter';
 import ScopesFilter from './ScopesFilter';
 import { FilterChoice } from './types';
 
+// Keyed by column id, which is what FilterChoice.groupName carries.
 const FILTER_CHIPS_ICONS = {
   role: Person,
-  organization: Business,
+  org: Business,
   scope: LocationOn,
-};
-
-const FILTER_GROUP_TO_ID = {
-  role: 'role',
-  organization: 'org',
-  scope: 'scope',
 };
 
 interface TableControlBarProps {
@@ -82,16 +77,17 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
     secondField: columnTextFilterHeaders[1] || '',
   });
 
-  const handleCloseFilter = (filterName, filterValue) => {
-    const actualFilterId = FILTER_GROUP_TO_ID[filterName] || filterName;
-    const filterGroup = state.filters.find((filter) => filter.id === actualFilterId);
+  const handleCloseFilter = (filterId, filterValue) => {
+    const filterGroup = state.filters.find((filter) => filter.id === filterId);
     const newFilterValue = filterGroup?.value.filter(item => item !== filterValue) || [];
     setAllFilters(state.filters.map(item => (
-      item.id !== actualFilterId ? item : { id: item.id, value: newFilterValue })));
+      item.id !== filterId ? item : { id: item.id, value: newFilterValue })));
     setChronologicalFilters((prevFilters) => prevFilters.filter((filter) => filter.value !== filterValue));
   };
 
-  const handleSetFilters = (setFilter) => (allFilters: string[], newFilter: FilterChoice) => {
+  const handleSetFilters = (
+    setFilter: (filters: string[]) => void,
+  ) => (allFilters: string[], newFilter: FilterChoice) => {
     setFilter(allFilters);
     setChronologicalFilters((prevFilters) => {
       if (!prevFilters.find((filter) => filter.value === newFilter.value)) {
@@ -115,6 +111,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
               <RolesFilter
                 key={column.id || column.accessor}
                 {...column}
+                filterId={column.id || column.accessor}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
               />
@@ -125,6 +122,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
               <OrgFilter
                 key={column.id || column.accessor}
                 {...column}
+                filterId={column.id || column.accessor}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
               />
@@ -135,6 +133,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
               <MultipleChoiceFilter
                 key={column.id || column.accessor}
                 {...column}
+                filterId={column.id || column.accessor}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
               />
@@ -145,6 +144,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
               <ScopesFilter
                 key={column.id || column.accessor}
                 {...column}
+                filterId={column.id || column.accessor}
                 setFilter={handleSetFilters(column.setFilter)}
                 disabled={filtersLimitReached}
                 filterValue={state.filters.find(filter => filter.id === 'scope')?.value || null}

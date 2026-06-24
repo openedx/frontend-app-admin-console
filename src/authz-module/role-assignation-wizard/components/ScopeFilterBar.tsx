@@ -47,6 +47,7 @@ const ScopeFilterBar = ({
           </div>
 
           <OrgFilter
+            filterId="org"
             filterButtonText={intl.formatMessage(messages['wizard.step2.filter.org.label'])}
             filterValue={selectedOrgs}
             setFilter={onOrgsChange}

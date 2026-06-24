@@ -3,11 +3,12 @@ import {
 } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { FilterList, Info, Search } from '@openedx/paragon/icons';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import messages from '../messages';
 import { FilterChoice, MultipleChoiceFilterProps } from './types';
 
 const MultipleChoiceFilter = ({
+  filterId,
   filterButtonText,
   filterChoices,
   filterValue,
@@ -22,9 +23,9 @@ const MultipleChoiceFilter = ({
   const { formatMessage } = useIntl();
 
   const checkedBoxes = filterValue || [];
-  const handleClickCheckbox = (value, displayName) => {
+  const handleClickCheckbox = (value: string, displayName: string) => {
     const newValue = {
-      groupName: filterButtonText?.toLocaleLowerCase() || '',
+      groupName: filterId,
       value,
       displayName,
     };
@@ -36,7 +37,7 @@ const MultipleChoiceFilter = ({
     return setFilter(newCheckedBoxes, newValue);
   };
 
-  const getGroupedChoices = () => {
+  const groupedChoices = useMemo(() => {
     const groupedFilterChoices = filterChoices.reduce((groups, choice) => {
       const groupName = choice.groupName || 'Ungrouped';
       const icon = choice.groupIcon || undefined;
@@ -49,9 +50,9 @@ const MultipleChoiceFilter = ({
         description: choice.description,
       });
       return groups;
-    }, new Map<string, { groupName: string; options: Array<FilterChoice>; icon?: any }>());
+    }, new Map<string, { groupName: string; options: Array<FilterChoice>; icon?: React.ComponentType<{}> }>());
     return Array.from(groupedFilterChoices.values());
-  };
+  }, [filterChoices]);
 
   return (
     <Dropdown className="no-caret-dropdown filters">
@@ -105,7 +106,7 @@ const MultipleChoiceFilter = ({
               </div>
             </Form.Checkbox>
           ))
-            : getGroupedChoices().map(({ groupName, icon, options }) => (
+            : groupedChoices.map(({ groupName, icon, options }) => (
               <div key={groupName}>
                 <div className="pgn__dropdown-filter-group-name text-info-700 d-flex align-items-center small m-2 ml-0">
                   {icon && <Icon color="primary" src={icon} className="mr-2" size="xs" />}
