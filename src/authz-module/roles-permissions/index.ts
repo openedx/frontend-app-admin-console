@@ -13,3 +13,5 @@ export {
   rolesObject,
   courseRolesMetadata,
 } from './course/constants';
+
+export { buildPermissionMatrixByResource, getPermissionMetadata } from './utils';

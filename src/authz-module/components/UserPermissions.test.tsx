@@ -1,3 +1,4 @@
+import { screen } from '@testing-library/react';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import * as coursesConstants from '@src/authz-module/roles-permissions';
@@ -50,6 +51,30 @@ describe('UserPermissions', () => {
 
     const { container } = renderWrapper(<UserPermissions {...props} />);
     expect(container.querySelector('.d-flex')).toBeInTheDocument();
+  });
+
+  it('renders library role permissions with their metadata labels', () => {
+    const props = {
+      row: {
+        original: {
+          role: 'library_admin',
+        },
+      },
+    };
+
+    const { container } = renderWrapper(<UserPermissions {...props} />);
+
+    // Resource group headers from libraryResourceTypes
+    expect(screen.getByText('Library')).toBeInTheDocument();
+    expect(screen.getByText('Team')).toBeInTheDocument();
+    // Explicit labels from the permission metadata
+    expect(screen.getAllByText('Manage tags').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Publish').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Reuse').length).toBeGreaterThan(0);
+    // No permission renders with an empty label
+    const labels = Array.from(container.querySelectorAll('li span.font-weight-light'));
+    expect(labels.length).toBeGreaterThan(0);
+    labels.forEach((label) => expect(label.textContent?.trim()).not.toBe(''));
   });
 
   it('returns null when role is empty', () => {
