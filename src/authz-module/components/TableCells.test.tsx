@@ -260,7 +260,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
+      expect(mockNavigate).toHaveBeenCalledWith(`/authz/user/${encodeURIComponent('user+with@special.chars')}`);
     });
 
     it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {

@@ -1,5 +1,7 @@
 import { CONTENT_COURSE_PERMISSIONS } from './course/constants';
 import { CONTENT_LIBRARY_PERMISSIONS, libraryRolesMetadata as _libraryRolesMetadata } from './library/constants';
+import type { RoleMetadata } from '@src/types';
+import { courseRolesMetadata as _courseRolesMetadata } from './course/constants';
 
 export {
   CONTENT_LIBRARY_PERMISSIONS,
@@ -28,3 +30,4 @@ export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
   { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
   { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
 ];
+export const allRolesMetadata: RoleMetadata[] = [..._courseRolesMetadata, ..._libraryRolesMetadata];

@@ -27,13 +27,13 @@ describe('RenderAdminRole', () => {
     expect(container.querySelector('.mb-0')).toBeInTheDocument();
   });
 
-  it('displays admin message for roles containing admin', () => {
-    renderWrapper(<RenderAdminRole role={adminRole} />);
+  it('displays admin message for superuser role', () => {
+    renderWrapper(<RenderAdminRole role={superuserRole} />);
     expect(screen.getByText(/super admins have full access/i)).toBeInTheDocument();
   });
 
-  it('displays staff message for superuser role', () => {
-    renderWrapper(<RenderAdminRole role={superuserRole} />);
+  it('displays staff message for non-django admin roles', () => {
+    renderWrapper(<RenderAdminRole role={adminRole} />);
     expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
 
@@ -57,9 +57,9 @@ describe('RenderAdminRole', () => {
     expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
 
-  it('displays admin message for mixed case admin role', () => {
+  it('displays staff message for mixed case admin role', () => {
     renderWrapper(<RenderAdminRole role={mixedCaseAdminRole} />);
-    expect(screen.getByText(/super admins have full access/i)).toBeInTheDocument();
+    expect(screen.getByText(/global staff have access/i)).toBeInTheDocument();
   });
 
   it('displays staff message for regular role without admin', () => {
