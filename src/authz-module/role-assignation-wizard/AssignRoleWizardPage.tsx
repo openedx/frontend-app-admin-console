@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '../components/AuthZLayout';
-import { ROUTES } from '../constants';
+import { buildUserPath, ROUTES } from '../constants';
 import messages from './messages';
 
 const AssignRoleWizardPage = () => {
@@ -15,7 +15,7 @@ const AssignRoleWizardPage = () => {
 
   const presetUser = initialUsers.trim();
   const destination = (presetUser && !presetUser.includes(','))
-    ? `${ROUTES.HOME_PATH}/user/${presetUser}`
+    ? buildUserPath(presetUser)
     : returnTo;
 
   return (

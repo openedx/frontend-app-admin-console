@@ -1,74 +1,44 @@
 import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { Language, LibraryBooks, School } from '@openedx/paragon/icons';
+import { allRolesMetadata } from '@src/authz-module/roles-permissions';
+import { GLOBAL_STAFF_ROLE, MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE } from '@src/authz-module/constants';
 import messages from './messages';
-
-export const getRolesFiltersOptions = (intl: IntlShape) => [
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.global']),
-    groupIcon: Language,
-    displayName: 'Super Admin',
-    value: 'super_admin',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.global']),
-    groupIcon: Language,
-    displayName: 'Global Staff',
-    value: 'global_staff',
-  },
-
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
-    groupIcon: School,
-    displayName: 'Course Admin',
-    value: 'course_admin',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
-    groupIcon: School,
-    displayName: 'Course Staff',
-    value: 'course_staff',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
-    groupIcon: School,
-    displayName: 'Course Editor',
-    value: 'course_editor',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
-    groupIcon: School,
-    displayName: 'Course Auditor',
-    value: 'course_auditor',
-  },
-
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
-    groupIcon: LibraryBooks,
-    displayName: 'Library Admin',
-    value: 'library_admin',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
-    groupIcon: LibraryBooks,
-    displayName: 'Library Author',
-    value: 'library_author',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
-    groupIcon: LibraryBooks,
-    displayName: 'Library Contributor',
-    value: 'library_contributor',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
-    groupIcon: LibraryBooks,
-    displayName: 'Library User',
-    value: 'library_user',
-  },
-];
 
 export const RESOURCE_ICONS = {
   COURSE: School,
   LIBRARY: LibraryBooks,
   GLOBAL: Language,
+};
+
+// The API expects the underscore format when roles are sent as filter values,
+// while role data received from the API uses the dotted format (e.g. django.superuser).
+const GLOBAL_ROLE_FILTER_OPTIONS = [
+  { value: 'super_admin', displayName: MAP_ROLE_KEY_TO_LABEL[SUPERUSER_ROLE] },
+  { value: 'global_staff', displayName: MAP_ROLE_KEY_TO_LABEL[GLOBAL_STAFF_ROLE] },
+];
+
+export const getRolesFiltersOptions = (intl: IntlShape) => {
+  const globalGroup = {
+    groupName: intl.formatMessage(messages['authz.team.members.table.group.global']),
+    groupIcon: RESOURCE_ICONS.GLOBAL,
+  };
+  const contextGroups = {
+    course: {
+      groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
+      groupIcon: RESOURCE_ICONS.COURSE,
+    },
+    library: {
+      groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
+      groupIcon: RESOURCE_ICONS.LIBRARY,
+    },
+  };
+
+  return [
+    ...GLOBAL_ROLE_FILTER_OPTIONS.map((role) => ({ ...globalGroup, ...role })),
+    ...allRolesMetadata.map((meta) => ({
+      ...contextGroups[meta.contextType],
+      displayName: meta.name,
+      value: meta.role,
+    })),
+  ];
 };

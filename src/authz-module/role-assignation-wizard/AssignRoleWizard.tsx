@@ -10,13 +10,10 @@ import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { libraryRolesMetadata } from '../roles-permissions/library/constants';
-import { courseRolesMetadata } from '../roles-permissions/course/constants';
+import { allRolesMetadata } from '../roles-permissions';
 import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
 import messages from './messages';
 import { formatRoleAssignmentError } from './utils';
-
-const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 const STEPS = {
   SELECT_USERS_AND_ROLE: 'select-users-and-role',

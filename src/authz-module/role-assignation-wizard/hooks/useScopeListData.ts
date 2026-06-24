@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Scope } from '@src/types';
+import { ContextType, Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
 interface UseScopeListDataParams {
-  contextType: string | undefined;
+  contextType: ContextType | undefined;
   search: string;
   orgs: string[];
 }

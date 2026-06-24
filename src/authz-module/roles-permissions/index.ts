@@ -1,3 +1,7 @@
+import type { RoleMetadata } from '@src/types';
+import { libraryRolesMetadata } from './library/constants';
+import { courseRolesMetadata } from './course/constants';
+
 export {
   CONTENT_LIBRARY_PERMISSIONS,
   libraryResourceTypes,
@@ -13,3 +17,5 @@ export {
   rolesObject,
   courseRolesMetadata,
 } from './course/constants';
+
+export const allRolesMetadata: RoleMetadata[] = [...courseRolesMetadata, ...libraryRolesMetadata];
