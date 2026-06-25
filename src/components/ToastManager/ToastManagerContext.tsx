@@ -1,11 +1,12 @@
 import {
-  createContext, useContext, useState, useMemo,
+  createContext, useContext, useState, useMemo, useCallback, useEffect, useRef,
 } from 'react';
 import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Toast } from '@openedx/paragon';
 import messages from '@src/authz-module/messages';
 import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '@src/authz-module/constants';
+import { getHttpErrorStatus } from '@src/data/utils';
 
 type ToastType = 'success' | 'error' | 'error-retry';
 
@@ -33,7 +34,7 @@ const Br = () => <br />;
 
 type ToastManagerContextType = {
   showToast: (toast: Omit<AppToast, 'id'>) => void;
-  showErrorToast: (error, retryFn?: () => void) => void;
+  showErrorToast: (error: unknown, retryFn?: () => void) => void;
   Bold: (chunks: React.ReactNode[]) => JSX.Element;
   Br: () => JSX.Element;
 };
@@ -47,26 +48,33 @@ interface ToastManagerProviderProps {
 export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) => {
   const intl = useIntl();
   const [toasts, setToasts] = useState<(AppToast & { visible: boolean })[]>([]);
+  const removalTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const showToast = (toast: Omit<AppToast, 'id'>) => {
+  const showToast = useCallback((toast: Omit<AppToast, 'id'>) => {
     const id = `toast-notification-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
     const newToast = { ...toast, id, visible: true };
     setToasts(prev => [...prev, newToast]);
-  };
+  }, []);
 
-  const discardToast = (id: string) => {
+  const discardToast = useCallback((id: string) => {
     setToasts(prev => prev.map(t => (t.id === id ? { ...t, visible: false } : t)));
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 5000);
-  };
+    }, DEFAULT_TOAST_DELAY);
+    removalTimers.current.push(timer);
+  }, []);
+
+  // Clear any pending removal timers when the provider unmounts.
+  useEffect(() => () => {
+    removalTimers.current.forEach(clearTimeout);
+  }, []);
 
   const value = useMemo<ToastManagerContextType>(() => {
-    const showErrorToast = (error, retryFn?: () => void) => {
-      logError(error);
-      const errorStatus = error?.customAttributes?.httpErrorStatus;
-      const toastConfig = ERROR_TOAST_MAP[errorStatus] || ERROR_TOAST_MAP.DEFAULT;
+    const showErrorToast = (error: unknown, retryFn?: () => void) => {
+      logError(error as Error);
+      const errorStatus = getHttpErrorStatus(error);
+      const toastConfig = (errorStatus !== undefined && ERROR_TOAST_MAP[errorStatus]) || ERROR_TOAST_MAP.DEFAULT;
       const message = intl.formatMessage(messages[toastConfig.messageId], { Bold, Br });
       /**
        * For retryable errors, we set a longer delay to give users more time to read the message
@@ -90,7 +98,7 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
       Bold,
       Br,
     });
-  }, [intl]);
+  }, [intl, showToast]);
 
   return (
     <ToastManagerContext.Provider value={value}>

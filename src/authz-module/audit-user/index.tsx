@@ -14,6 +14,7 @@ import {
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
+import type { RevokeUserRolesRequest } from '@src/authz-module/data/api';
 import { RoleToDelete } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import UserPermissions from '@src/authz-module/components/UserPermissions';
@@ -79,8 +81,7 @@ const AuditUserPage = () => {
 
   useEffect(() => {
     if (!user && !isLoadingUser) {
-      // @ts-ignore
-      if (!isErrorUser || errorUser?.customAttributes?.httpErrorStatus === 404) {
+      if (!isErrorUser || getHttpErrorStatus(errorUser) === 404) {
         navigate(AUTHZ_HOME_PATH);
       }
     }
@@ -166,7 +167,7 @@ const AuditUserPage = () => {
       scope: roleToDelete.scope,
     };
 
-    const runRevokeRole = (variables) => {
+    const runRevokeRole = (variables: { data: RevokeUserRolesRequest }) => {
       const variablesData = {
         data: {
           ...variables.data,
