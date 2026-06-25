@@ -7,26 +7,6 @@ export interface PermissionValidationResponse extends PermissionValidationReques
   allowed: boolean;
 }
 
-// Libraries AuthZ types
-export interface TeamMember {
-  username: string;
-  fullName: string;
-  email: string;
-  roles: string[];
-  createdAt: string;
-  scope: { resource: string, type: 'COURSE' | 'LIBRARY' | 'GLOBAL' };
-  organization: string;
-  role: string;
-}
-
-export interface LibraryMetadata {
-  id: string;
-  org: string;
-  title: string;
-  slug: string;
-  allowPublicRead: boolean;
-}
-
 export interface RoleMetadata {
   role: string;
   name: string;
