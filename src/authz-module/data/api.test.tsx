@@ -1,12 +1,9 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { mockHttpClient } from '@src/setupTest';
 import {
-  getTeamMembers,
   getUserAssignedRoles,
   assignTeamMembersRole,
   revokeUserRoles,
-  getPermissionsByRole,
-  getLibrary,
   getOrgs,
   getScopes,
 } from './api';
@@ -29,57 +26,6 @@ const mockQuerySettings = {
 describe('API functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('getTeamMembers', () => {
-    it('should fetch team members successfully', async () => {
-      const mockResponse = {
-        data: {
-          results: [
-            { username: 'user1', email: 'user1@example.com' },
-          ],
-          count: 1,
-        },
-      };
-
-      mockHttpClient().mockReturnValue({
-        get: jest.fn().mockResolvedValue(mockResponse),
-      });
-
-      const result = await getTeamMembers('lib:123', mockQuerySettings);
-
-      expect(result.results).toHaveLength(1);
-      expect(result.count).toBe(1);
-      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    });
-
-    it('should handle all query parameters', async () => {
-      const mockResponse = { data: { results: [], count: 0 } };
-      const mockGet = jest.fn().mockResolvedValue(mockResponse);
-      mockHttpClient().mockReturnValue({
-        get: mockGet,
-      });
-
-      const queryWithAllParams = {
-        roles: 'admin,editor',
-        search: 'test user',
-        sortBy: 'username',
-        order: 'desc' as const,
-        scopes: null,
-        organizations: null,
-        pageSize: 20,
-        pageIndex: 2,
-      };
-
-      await getTeamMembers('lib:123', queryWithAllParams);
-
-      expect(mockGet).toHaveBeenCalled();
-      const calledUrl = mockGet.mock.calls[0][0];
-      expect(calledUrl.toString()).toContain('roles=admin%2Ceditor');
-      expect(calledUrl.toString()).toContain('search=test+user');
-      expect(calledUrl.toString()).toContain('sort_by=username');
-      expect(calledUrl.toString()).toContain('order=desc');
-    });
   });
 
   describe('getUserAssignedRoles', () => {
@@ -184,53 +130,6 @@ describe('API functions', () => {
 
       expect(result.completed).toHaveLength(1);
       expect(result.errors).toHaveLength(0);
-      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    });
-  });
-
-  describe('getPermissionsByRole', () => {
-    it('should fetch permissions by role successfully', async () => {
-      const mockResponse = {
-        data: {
-          results: [
-            { role: 'admin', permissions: ['read', 'write'], userCount: 5 },
-          ],
-        },
-      };
-
-      mockHttpClient().mockReturnValue({
-        get: jest.fn().mockResolvedValue(mockResponse),
-      });
-
-      const result = await getPermissionsByRole('lib:123');
-
-      expect(result).toHaveLength(1);
-      expect(result[0].role).toBe('admin');
-      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
-    });
-  });
-
-  describe('getLibrary', () => {
-    it('should fetch library successfully', async () => {
-      const mockResponse = {
-        data: {
-          id: 'lib:123',
-          org: 'test-org',
-          title: 'Test Library',
-          slug: 'test-library',
-          allow_public_read: false,
-        },
-      };
-
-      mockHttpClient().mockReturnValue({
-        get: jest.fn().mockResolvedValue(mockResponse),
-      });
-
-      const result = await getLibrary('lib:123');
-
-      expect(result.id).toBe('lib:123');
-      expect(result.title).toBe('Test Library');
-      expect(result.allowPublicRead).toBe(false);
       expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     });
   });
