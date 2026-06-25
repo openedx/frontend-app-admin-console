@@ -6,7 +6,7 @@ import RenderAdminRole from './RenderAdminRole';
 describe('RenderAdminRole', () => {
   const adminRole = 'course_admin';
   const superuserRole = 'django.superuser';
-  const staffRole = 'django.globalstaff';
+  const staffRole = 'django.staff';
   const instructorRole = 'instructor';
   const emptyRole = '';
   const mixedCaseAdminRole = 'Library_Admin';
