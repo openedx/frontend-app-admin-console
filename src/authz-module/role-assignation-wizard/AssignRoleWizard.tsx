@@ -7,6 +7,7 @@ import {
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
 import { RoleMetadata } from '@src/types';
+import { getHttpErrorStatus } from '@src/data/utils';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
@@ -141,7 +142,7 @@ const AssignRoleWizard = ({
       }
     } catch (error) {
       // TODO: remove once the backend supports the permissions endpoint without a required scope.
-      if ((error as any)?.customAttributes?.httpErrorStatus === 403) {
+      if (getHttpErrorStatus(error) === 403) {
         showToast({
           message: intl.formatMessage(messages['wizard.save.error.forbidden']),
           type: 'error',
