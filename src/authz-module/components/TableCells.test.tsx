@@ -364,7 +364,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -420,7 +420,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'scope' },
@@ -476,7 +476,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff',
+            role: 'django.staff',
             permissionCount: 5,
             org: 'Test Org',
             scope: 'Test Scope',

@@ -39,7 +39,7 @@ export const MAX_TABLE_FILTERS_APPLIED = 10;
 
 // Role data received from the API uses the dotted format for Django-managed roles.
 export const SUPERUSER_ROLE = 'django.superuser';
-export const GLOBAL_STAFF_ROLE = 'django.globalstaff';
+export const GLOBAL_STAFF_ROLE = 'django.staff';
 export const DJANGO_MANAGED_ROLES = [SUPERUSER_ROLE, GLOBAL_STAFF_ROLE];
 
 export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
