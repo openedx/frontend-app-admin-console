@@ -18,7 +18,7 @@ jest.mock('./utils', () => ({
 
 // Mock constants
 jest.mock('./course/constants', () => ({
-  rolesObject: [
+  courseRolesWithPermissions: [
     {
       name: 'Course Admin', role: 'admin', permissions: [], userCount: 1,
     },
@@ -29,7 +29,7 @@ jest.mock('./course/constants', () => ({
 }));
 
 jest.mock('./library/constants', () => ({
-  rolesLibraryObject: [
+  libraryRolesWithPermissions: [
     {
       name: 'Library Admin', role: 'admin', permissions: [], userCount: 1,
     },

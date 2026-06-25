@@ -10,8 +10,8 @@ import {
 import {
   coursePermissions,
   courseResourceTypes,
-  rolesObject,
-  rolesLibraryObject,
+  courseRolesWithPermissions,
+  libraryRolesWithPermissions,
   libraryPermissions,
   libraryResourceTypes,
 } from '@src/authz-module/roles-permissions';
@@ -28,7 +28,7 @@ const RolesPermissions = () => {
 
   const libraryPermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
-      roles: rolesLibraryObject,
+      roles: libraryRolesWithPermissions,
       permissions: libraryPermissions,
       resources: libraryResourceTypes,
       intl,
@@ -39,7 +39,7 @@ const RolesPermissions = () => {
 
   const coursePermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
-      roles: rolesObject,
+      roles: courseRolesWithPermissions,
       permissions: coursePermissions,
       resources: courseResourceTypes,
       intl,
@@ -71,7 +71,7 @@ const RolesPermissions = () => {
         <div className="position-relative">
           <PermissionTable
             permissionsTable={coursePermissionsByResource}
-            roles={rolesObject}
+            roles={courseRolesWithPermissions}
             title={intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab.title'])}
           />
           <Alert
@@ -99,7 +99,7 @@ const RolesPermissions = () => {
       { active === 'libraries' && (
         <PermissionTable
           permissionsTable={libraryPermissionsByResource}
-          roles={rolesLibraryObject}
+          roles={libraryRolesWithPermissions}
           title={intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab.title'])}
         />
       )}
