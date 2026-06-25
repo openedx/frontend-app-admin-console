@@ -6,7 +6,7 @@ import { Search } from '@openedx/paragon/icons';
 
 interface SearchFilterProps {
   filterValue: string;
-  setFilter: (value: string) => void;
+  setFilter: (value: string | undefined) => void;
   placeholder: string;
 }
 

@@ -4,6 +4,7 @@ import RolesFilter from './RolesFilter';
 
 describe('RolesFilter', () => {
   const defaultProps = {
+    filterId: 'role',
     filterButtonText: 'Roles',
     filterValue: [],
     setFilter: jest.fn(),

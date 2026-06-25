@@ -7,6 +7,9 @@ export type FilterChoice = {
 };
 
 export interface MultipleChoiceFilterProps {
+  /** Column id of the filtered column. Used (not the localized label) to
+   *  identify the filter group on chips and when removing applied filters. */
+  filterId: string;
   filterButtonText: string;
   filterChoices: Array<FilterChoice>;
   filterValue: string[] | undefined;

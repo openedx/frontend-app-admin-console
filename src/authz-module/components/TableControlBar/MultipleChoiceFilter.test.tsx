@@ -5,6 +5,7 @@ import MultipleChoiceFilter from './MultipleChoiceFilter';
 
 describe('MultipleChoiceFilter', () => {
   const defaultProps = {
+    filterId: 'test-column',
     filterButtonText: 'Test Filter',
     filterChoices: [
       { displayName: 'Option 1', value: 'option1' },
@@ -72,7 +73,7 @@ describe('MultipleChoiceFilter', () => {
     expect(defaultProps.setFilter).toHaveBeenCalledWith(
       ['groupA1'],
       {
-        groupName: 'test filter',
+        groupName: 'test-column',
         value: 'groupA1',
         displayName: 'Group A Option',
       },
@@ -101,7 +102,7 @@ describe('MultipleChoiceFilter', () => {
     expect(mockSetFilter).toHaveBeenCalledWith(
       ['option1'],
       {
-        groupName: 'test filter',
+        groupName: 'test-column',
         value: 'option1',
         displayName: 'Option 1',
       },
@@ -119,7 +120,7 @@ describe('MultipleChoiceFilter', () => {
     expect(mockSetFilter).toHaveBeenCalledWith(
       [],
       {
-        groupName: 'test filter',
+        groupName: 'test-column',
         value: 'option1',
         displayName: 'Option 1',
       },
@@ -137,7 +138,7 @@ describe('MultipleChoiceFilter', () => {
     expect(mockSetFilter).toHaveBeenCalledWith(
       ['option1', 'option2'],
       {
-        groupName: 'test filter',
+        groupName: 'test-column',
         value: 'option2',
         displayName: 'Option 2',
       },
