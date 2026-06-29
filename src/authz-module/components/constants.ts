@@ -4,19 +4,6 @@ import messages from './messages';
 
 export const getRolesFiltersOptions = (intl: IntlShape) => [
   {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.global']),
-    groupIcon: Language,
-    displayName: 'Super Admin',
-    value: 'super_admin',
-  },
-  {
-    groupName: intl.formatMessage(messages['authz.team.members.table.group.global']),
-    groupIcon: Language,
-    displayName: 'Global Staff',
-    value: 'global_staff',
-  },
-
-  {
     groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
     groupIcon: School,
     displayName: 'Course Admin',

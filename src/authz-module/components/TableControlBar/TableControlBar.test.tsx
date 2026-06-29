@@ -90,9 +90,9 @@ describe('TableControlBar', () => {
     const rolesButton = screen.getByText('Select Roles');
     expect(rolesButton).toBeInTheDocument();
     await user.click(rolesButton);
-    const superAdminOption = screen.getByRole('checkbox', { name: /Super Admin/i });
-    expect(superAdminOption).toBeInTheDocument();
-    await user.click(superAdminOption);
+    const courseAdminOption = screen.getByRole('checkbox', { name: /Course Admin/i });
+    expect(courseAdminOption).toBeInTheDocument();
+    await user.click(courseAdminOption);
     expect(contextWithRolesFilter.columns[0].setFilter).toHaveBeenCalled();
   });
 
