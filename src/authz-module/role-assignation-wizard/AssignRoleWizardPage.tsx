@@ -1,9 +1,13 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '../components/AuthZLayout';
 import { ROUTES } from '../constants';
 import messages from './messages';
+import {
+  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
+} from '../roles-permissions';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
@@ -18,6 +22,18 @@ const AssignRoleWizardPage = () => {
     ? `${ROUTES.HOME_PATH}/user/${presetUser}`
     : returnTo;
 
+  const { data: permissionValidationResponse } = useValidateUserPermissionsNonSuspense([
+    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM },
+    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM },
+  ]);
+
+  const rolesAssignable = permissionValidationResponse?.flatMap((p) => {
+    if (!p.allowed) { return []; }
+    if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
+    if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) { return courseRolesMetadata; }
+    return [];
+  });
+
   return (
     <AuthZLayout
       context={{ id: '', title: '', org: '' }}
@@ -27,11 +43,10 @@ const AssignRoleWizardPage = () => {
       pageSubtitle=""
       actions={[]}
     >
-      {/* TODO: pass a filtered `roles` prop once the permission-lookup API is available,
-          so the wizard only shows role groups the current user can assign. */}
       <AssignRoleWizard
         onClose={() => navigate(destination)}
         initialUsers={initialUsers}
+        roles={rolesAssignable}
       />
     </AuthZLayout>
   );
