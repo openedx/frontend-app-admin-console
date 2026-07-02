@@ -10,13 +10,9 @@ import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { libraryRolesMetadata } from '../roles-permissions/library/constants';
-import { courseRolesMetadata } from '../roles-permissions/course/constants';
 import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
 import messages from './messages';
 import { formatRoleAssignmentError } from './utils';
-
-const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 const STEPS = {
   SELECT_USERS_AND_ROLE: 'select-users-and-role',
@@ -28,8 +24,6 @@ type StepKey = typeof STEPS[keyof typeof STEPS];
 interface AssignRoleWizardProps {
   onClose: () => void;
   initialUsers?: string;
-  /** Filtered role list. Defaults to all roles (course + library). Pass a subset
-   *  once a permission-lookup API is available to hide groups the caller cannot assign. */
   roles?: RoleMetadata[];
 }
 
@@ -48,7 +42,7 @@ const getInitialState = (initialUsers: string) => ({
 });
 
 const AssignRoleWizard = ({
-  onClose, initialUsers = '', roles = allRolesMetadata,
+  onClose, initialUsers = '', roles = [],
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, showErrorToast } = useToastManager();
