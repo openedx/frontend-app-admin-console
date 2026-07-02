@@ -3,6 +3,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Person } from '@openedx/paragon/icons';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { CONTEXT_TYPES } from '@src/authz-module/constants';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { MultipleChoiceFilterProps } from './types';
 import { getRolesFiltersOptions } from '../constants';
@@ -24,8 +25,8 @@ const RolesFilter = ({
     const contexts = new Set<string>();
     permissions?.forEach((p) => {
       if (!p.allowed) { return; }
-      if (p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM) { contexts.add('library'); }
-      if (p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM) { contexts.add('course'); }
+      if (p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM) { contexts.add(CONTEXT_TYPES.LIBRARY); }
+      if (p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM) { contexts.add(CONTEXT_TYPES.COURSE); }
     });
     return contexts;
   }, [permissions]);
