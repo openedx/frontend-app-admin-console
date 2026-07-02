@@ -1,4 +1,5 @@
 import { createIntl } from '@edx/frontend-platform/i18n';
+import type { Role } from '@src/types';
 import { buildPermissionMatrixByResource } from './utils';
 
 const intl = createIntl({ locale: 'en', messages: {} });
@@ -14,15 +15,15 @@ const permissions = [
 const resources = [
   { key: 'library', label: 'Library', description: '' },
 ];
-const roles = [
+const roles: Role[] = [
   {
-    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '', contextType: '', scope: '',
+    name: 'admin', permissions: ['create_library', 'edit_library'], userCount: 2, role: 'admin', description: '', contextType: 'library', scope: '',
   },
   {
-    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '', contextType: '', scope: '',
+    name: 'editor', permissions: ['edit_library'], userCount: 2, role: 'editor', description: '', contextType: 'library', scope: '',
   },
   {
-    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '', contextType: '', scope: '',
+    name: 'guest', permissions: [], userCount: 2, role: 'guest', description: '', contextType: 'library', scope: '',
   },
 ];
 

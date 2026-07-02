@@ -260,7 +260,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
+      expect(mockNavigate).toHaveBeenCalledWith(`/authz/user/${encodeURIComponent('user+with@special.chars')}`);
     });
   });
 
@@ -353,7 +353,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -409,7 +409,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'scope' },
@@ -465,7 +465,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff',
+            role: 'django.staff',
             permissionCount: 5,
             org: 'Test Org',
             scope: 'Test Scope',

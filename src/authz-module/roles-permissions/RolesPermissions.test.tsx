@@ -25,6 +25,7 @@ jest.mock('./course/constants', () => ({
   ],
   coursePermissions: [],
   courseResourceTypes: [],
+  courseRolesMetadata: [],
 }));
 
 jest.mock('./library/constants', () => ({
@@ -35,6 +36,7 @@ jest.mock('./library/constants', () => ({
   ],
   libraryPermissions: [],
   libraryResourceTypes: [],
+  libraryRolesMetadata: [],
 }));
 
 jest.mock('@openedx/paragon', () => ({

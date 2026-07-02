@@ -9,7 +9,8 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, buildUserPath, DJANGO_MANAGED_ROLES, getScopeContextType,
+  MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -62,7 +63,7 @@ const NameCell = ({ row }: CellProps) => {
 const ViewActionCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const viewPath = `/authz/user/${row.original.username}`;
+  const viewPath = buildUserPath(row.original.username ?? '');
   return (
     <IconButton
       src={RemoveRedEye}
@@ -92,7 +93,7 @@ const ScopeCell = ({ row }: CellProps) => {
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const scopeIcon = getScopeContextType(row.original.scope) === 'library' ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
       scopeText: row.original.scope,
       iconSrc: scopeIcon,
@@ -125,7 +126,7 @@ const PermissionsCell = ({ row }: CellProps) => {
       { isDjangoRole
         ? formatMessage(
           messages['authz.user.table.permissions.access.label'],
-          { accessType: role === 'django.superuser' ? 'total' : 'partial' },
+          { accessType: role === SUPERUSER_ROLE ? 'total' : 'partial' },
         )
         : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
     </span>
