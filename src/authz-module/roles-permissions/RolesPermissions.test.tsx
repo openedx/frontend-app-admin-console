@@ -5,7 +5,7 @@ import { renderWrapper } from '@src/setupTest';
 import RolesPermissions from './RolesPermissions';
 
 // Mock utils
-jest.mock('./library/utils', () => ({
+jest.mock('./utils', () => ({
   buildPermissionMatrixByResource: jest.fn(() => [
     {
       key: 'test-resource',
@@ -18,23 +18,25 @@ jest.mock('./library/utils', () => ({
 
 // Mock constants
 jest.mock('./course/constants', () => ({
-  rolesObject: [
+  courseRolesWithPermissions: [
     {
       name: 'Course Admin', role: 'admin', permissions: [], userCount: 1,
     },
   ],
   coursePermissions: [],
   courseResourceTypes: [],
+  courseRolesMetadata: [],
 }));
 
 jest.mock('./library/constants', () => ({
-  rolesLibraryObject: [
+  libraryRolesWithPermissions: [
     {
       name: 'Library Admin', role: 'admin', permissions: [], userCount: 1,
     },
   ],
   libraryPermissions: [],
   libraryResourceTypes: [],
+  libraryRolesMetadata: [],
 }));
 
 jest.mock('@openedx/paragon', () => ({

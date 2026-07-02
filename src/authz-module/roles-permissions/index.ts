@@ -3,13 +3,15 @@ export {
   libraryResourceTypes,
   libraryPermissions,
   libraryRolesMetadata,
-  rolesLibraryObject,
+  libraryRolesWithPermissions,
 } from './library/constants';
 
 export {
   CONTENT_COURSE_PERMISSIONS,
   courseResourceTypes,
   coursePermissions,
-  rolesObject,
+  courseRolesWithPermissions,
   courseRolesMetadata,
 } from './course/constants';
+
+export { buildPermissionMatrixByResource, getPermissionMetadata } from './utils';

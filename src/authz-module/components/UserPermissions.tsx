@@ -1,13 +1,14 @@
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
-  rolesObject,
+  courseRolesWithPermissions,
   libraryResourceTypes,
   libraryPermissions,
-  rolesLibraryObject,
+  libraryRolesWithPermissions,
+  getPermissionMetadata,
 } from '@src/authz-module/roles-permissions';
-import { PermissionItem } from '@src/types';
 import RenderPermissionColumn from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
 import RenderAdminRole from './RenderAdminRole';
@@ -21,6 +22,7 @@ interface UserPermissionsProps {
 }
 
 const UserPermissions = ({ row }: UserPermissionsProps) => {
+  const intl = useIntl();
   let roleKey = row?.original?.role;
   if (!roleKey) { return null; }
 
@@ -39,27 +41,29 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     ? {
       resourceTypes: libraryResourceTypes,
       permissions: libraryPermissions,
-      roles: rolesLibraryObject,
+      roles: libraryRolesWithPermissions,
     }
     : {
       resourceTypes: courseResourceTypes,
       permissions: coursePermissions,
-      roles: rolesObject,
+      roles: courseRolesWithPermissions,
     };
 
   const roleObj = config.roles.find(r => r.role === roleKey);
   if (!roleObj) { return null; }
 
   const rolePerms = new Set(roleObj.permissions.map(String));
-  // Build resource list with permissions (only once)
+  // Build resource list with permissions (only once). Permissions without an
+  // explicit label (most library ones) get a localized label derived from
+  // their action key, the same enrichment the permissions matrix uses.
   const resources = config.resourceTypes
     .map(resource => {
-      const perms = config.permissions.filter(
-        p => p.resource === resource.key && rolePerms.has(String(p.key)),
-      );
+      const perms = config.permissions
+        .filter(p => p.resource === resource.key && rolePerms.has(String(p.key)))
+        .map(p => getPermissionMetadata(p, intl));
       return perms.length ? { ...resource, perms } : null;
     })
-    .filter((r): r is PermissionItem => r !== null);
+    .filter((r): r is NonNullable<typeof r> => r !== null);
 
   const isSingleRow = resources.length <= 3;
   const mid = Math.ceil(resources.length / 2);

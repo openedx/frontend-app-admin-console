@@ -96,4 +96,4 @@ const buildPermissionMatrixByResource = ({
   });
 };
 
-export { buildPermissionMatrixByResource };
+export { buildPermissionMatrixByResource, getPermissionMetadata };
