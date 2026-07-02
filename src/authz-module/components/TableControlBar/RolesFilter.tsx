@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Person } from '@openedx/paragon/icons';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, MANAGE_TEAM_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { CONTEXT_TYPES } from '@src/authz-module/constants';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { MultipleChoiceFilterProps } from './types';
 import { getRolesFiltersOptions } from '../constants';
@@ -13,10 +14,7 @@ const RolesFilter = ({
   filterButtonText, filterValue, setFilter, disabled,
 }: RolesFilterProps) => {
   const intl = useIntl();
-  const { data: permissions } = useValidateUserPermissionsNonSuspense([
-    { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
-    { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
-  ]);
+  const { data: permissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
 
   // Only show role groups for the domains the user can view. Global roles stay
   // hidden until a platform-wide permission is available to gate them on.
@@ -24,8 +22,8 @@ const RolesFilter = ({
     const contexts = new Set<string>();
     permissions?.forEach((p) => {
       if (!p.allowed) { return; }
-      if (p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM) { contexts.add('library'); }
-      if (p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM) { contexts.add('course'); }
+      if (p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM) { contexts.add(CONTEXT_TYPES.LIBRARY); }
+      if (p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM) { contexts.add(CONTEXT_TYPES.COURSE); }
     });
     return contexts;
   }, [permissions]);

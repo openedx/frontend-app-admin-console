@@ -7,6 +7,7 @@ import { ROUTES } from '../constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
+  MANAGE_TEAM_PERMISSIONS,
 } from '../roles-permissions';
 
 const AssignRoleWizardPage = () => {
@@ -22,10 +23,7 @@ const AssignRoleWizardPage = () => {
     ? `${ROUTES.HOME_PATH}/user/${presetUser}`
     : returnTo;
 
-  const { data: permissionValidationResponse } = useValidateUserPermissionsNonSuspense([
-    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM },
-    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM },
-  ]);
+  const { data: permissionValidationResponse } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
 
   const rolesAssignable = permissionValidationResponse?.flatMap((p) => {
     if (!p.allowed) { return []; }
