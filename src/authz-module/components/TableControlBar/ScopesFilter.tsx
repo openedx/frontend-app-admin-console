@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { CONTENT_COURSE_PERMISSIONS, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
@@ -15,7 +17,17 @@ const ScopesFilter = ({
 }: ScopesFilterProps) => {
   const { formatMessage } = useIntl();
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
-  const { data: scopesData } = useScopes({ search: searchValue, pageSize: DEFAULT_FILTER_PAGE_SIZE });
+
+  const { data: permissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
+  const isCourseViewAllowed = permissions
+    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
+    : true;
+
+  const { data: scopesData } = useScopes({
+    search: searchValue,
+    pageSize: DEFAULT_FILTER_PAGE_SIZE,
+    ...(isCourseViewAllowed ? {} : { scopeType: 'library' }),
+  });
 
   const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? []).map((scope) => {
     const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;

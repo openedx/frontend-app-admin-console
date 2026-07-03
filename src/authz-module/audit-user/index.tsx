@@ -14,6 +14,7 @@ import {
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { CONTENT_COURSE_PERMISSIONS, VIEW_TEAM_PERMISSIONS, libraryRolesMetadata } from '@src/authz-module/roles-permissions';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
@@ -32,6 +33,8 @@ import messages from './messages';
 import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
 import { getCellHeader, getScopeManageActionPermission } from '../utils';
 
+const LIBRARY_ROLE_KEYS = libraryRolesMetadata.map((r) => r.role).join(',');
+
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
@@ -42,9 +45,20 @@ const AuditUserPage = () => {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
   } = useUserAccount(username);
   const { querySettings, handleTableFetch } = useQuerySettings();
+
+  const { data: permissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
+  const isCourseViewAllowed = permissions
+    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
+    : true;
+
+  const effectiveQuerySettings = useMemo(() => {
+    if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
+    return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
+  }, [isCourseViewAllowed, querySettings]);
+
   const {
     isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 },
-  } = useUserAssignedRoles(username, querySettings);
+  } = useUserAssignedRoles(username, effectiveQuerySettings);
   const [roleToDelete, setRoleToDelete] = useState<RoleToDelete | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const {

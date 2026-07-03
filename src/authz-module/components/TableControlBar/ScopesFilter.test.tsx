@@ -1,30 +1,46 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { useScopes } from '@src/authz-module/data/hooks';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import ScopesFilter from './ScopesFilter';
 
+jest.mock('@src/data/hooks', () => ({
+  useValidateUserPermissionsNonSuspense: jest.fn(),
+}));
+
+const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+
 jest.mock('@src/authz-module/data/hooks', () => ({
-  useScopes: () => ({
+  useScopes: jest.fn(() => ({
     data: {
       pages: [
         {
           results: [
             {
-              externalKey: 'course:123',
-              name: 'Test Course',
-              organization: { name: 'Test Org' },
+              externalKey: 'course-v1:org+course+run',
+              displayName: 'Test Course',
+              org: { shortName: 'TestOrg' },
             },
             {
-              externalKey: 'library:456',
-              name: 'Test Library',
-              organization: { name: 'Another Org' },
+              externalKey: 'lib:org:library',
+              displayName: 'Test Library',
+              org: { shortName: 'TestOrg' },
             },
           ],
         },
       ],
     },
-  }),
+  })),
 }));
+
+const mockUseScopes = useScopes as jest.Mock;
+
+const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => [
+  { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: !!library },
+  { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: !!course },
+];
 
 describe('ScopesFilter', () => {
   const defaultProps = {
@@ -36,6 +52,7 @@ describe('ScopesFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: true }) });
   });
 
   it('renders without crashing', () => {
@@ -67,5 +84,28 @@ describe('ScopesFilter', () => {
     const mockSetFilter = jest.fn();
     renderWrapper(<ScopesFilter {...defaultProps} setFilter={mockSetFilter} />);
     expect(screen.getByText('Scopes')).toBeInTheDocument();
+  });
+
+  it('fetches all scope types when the user can view courses', () => {
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.not.objectContaining({ scopeType: 'library' }),
+    );
+  });
+
+  it('fetches only library scopes when the user cannot view courses', () => {
+    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: false }) });
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeType: 'library' }),
+    );
+  });
+
+  it('defaults to showing all scopes while permissions are loading', () => {
+    mockUsePermissions.mockReturnValue({ data: undefined });
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.not.objectContaining({ scopeType: 'library' }),
+    );
   });
 });

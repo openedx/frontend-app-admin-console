@@ -7,6 +7,8 @@ import {
 } from '@openedx/paragon';
 
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { CONTENT_COURSE_PERMISSIONS, VIEW_TEAM_PERMISSIONS, libraryRolesMetadata } from '@src/authz-module/roles-permissions';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
@@ -18,8 +20,11 @@ import {
 } from '@src/authz-module/components/TableCells';
 import { useAllRoleAssignments } from '@src/authz-module/data/hooks';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { UserRole } from '@src/types';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
+
+const LIBRARY_ROLE_KEYS = libraryRolesMetadata.map((r) => r.role).join(',');
 
 interface TeamMembersTableProps {
   presetScope?: string;
@@ -43,12 +48,22 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   const { querySettings, handleTableFetch } = useQuerySettings(initialQuerySettings);
 
+  const { data: permissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
+  const isCourseViewAllowed = permissions
+    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
+    : true;
+
+  const effectiveQuerySettings = useMemo(() => {
+    if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
+    return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
+  }, [isCourseViewAllowed, querySettings]);
+
   const {
-    data: { results: roleAssignments, count } = { results: [], count: 0 },
+    data: { results: roleAssignments, count } = { results: [] as UserRole[], count: 0 },
     isLoading: isLoadingAllRoleAssignments,
     error,
     refetch,
-  } = useAllRoleAssignments(querySettings);
+  } = useAllRoleAssignments(effectiveQuerySettings);
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
