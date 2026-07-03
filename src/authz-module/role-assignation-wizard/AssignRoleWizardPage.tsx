@@ -7,7 +7,7 @@ import { ROUTES } from '../constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
-  MANAGE_TEAM_PERMISSIONS,
+  MANAGE_TEAM_PERMISSIONS, VIEW_TEAM_PERMISSIONS,
 } from '../roles-permissions';
 
 const AssignRoleWizardPage = () => {
@@ -23,12 +23,19 @@ const AssignRoleWizardPage = () => {
     ? `${ROUTES.HOME_PATH}/user/${presetUser}`
     : returnTo;
 
-  const { data: permissionValidationResponse } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
+  const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
+  const { data: viewPermissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
 
-  const rolesAssignable = permissionValidationResponse?.flatMap((p) => {
+  const isCourseViewAllowed = viewPermissions
+    ? viewPermissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
+    : true;
+
+  const rolesAssignable = managePermissions?.flatMap((p) => {
     if (!p.allowed) { return []; }
     if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
-    if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) { return courseRolesMetadata; }
+    if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) {
+      return isCourseViewAllowed ? courseRolesMetadata : [];
+    }
     return [];
   });
 

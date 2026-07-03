@@ -49,6 +49,26 @@ const allowAllPermissions = {
   isLoading: false,
 };
 
+const mockPermissions = (
+  manageData: typeof allowAllPermissions,
+  { courseViewAllowed = true } = {},
+) => (permissions: { action: string }[]) => {
+  const isViewCall = permissions.some(
+    (p) => p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM
+      || p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM,
+  );
+  if (isViewCall) {
+    return {
+      data: [
+        { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: true },
+        { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: courseViewAllowed },
+      ],
+      isLoading: false,
+    };
+  }
+  return manageData;
+};
+
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
   const params = new URLSearchParams();
@@ -73,7 +93,7 @@ describe('AssignRoleWizardPage', () => {
       mutateAsync: jest.fn(),
       isPending: false,
     });
-    mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
+    mockUseValidatePermissions.mockImplementation(mockPermissions(allowAllPermissions));
   });
 
   it('renders the page with the wizard and title', () => {
@@ -147,10 +167,10 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it.each(scopeRoles)('shows only the roles for the allowed scope %#', ({ action, roles }) => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
 
@@ -165,10 +185,10 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it('shows no roles when no scope is allowed', () => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: scopeRoles.map(({ action }) => ({ action, allowed: false })),
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
       allRoles.forEach((role) => {
@@ -177,14 +197,28 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it('ignores allowed permissions whose action is not a known role scope', () => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: [{ action: 'some.unrelated.permission', allowed: true }],
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
       allRoles.forEach((role) => {
         expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides course roles when VIEW_COURSE_TEAM is not allowed even if MANAGE_COURSE_TEAM is allowed', () => {
+      mockUseValidatePermissions.mockImplementation(
+        mockPermissions(allowAllPermissions, { courseViewAllowed: false }),
+      );
+      setupMocks();
+      renderPage();
+      courseRolesMetadata.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+      libraryRolesMetadata.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
       });
     });
   });
