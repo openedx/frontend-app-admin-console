@@ -20,7 +20,6 @@ import {
 } from '@src/authz-module/components/TableCells';
 import { useAllRoleAssignments } from '@src/authz-module/data/hooks';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
-import { UserRole } from '@src/types';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
 
@@ -54,7 +53,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   }, [isCourseViewAllowed, querySettings]);
 
   const {
-    data: { results: roleAssignments, count } = { results: [] as UserRole[], count: 0 },
+    data: { results: roleAssignments, count } = { results: [], count: 0 },
     isLoading: isLoadingAllRoleAssignments,
     error,
     refetch,

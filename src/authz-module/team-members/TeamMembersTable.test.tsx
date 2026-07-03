@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import type { GetAllRoleAssignmentsResponse } from '@src/authz-module/data/api';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
@@ -13,7 +14,12 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
 
 const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
 
-const mockedAllRoleAssignments = {
+const mockedAllRoleAssignments: {
+  data: GetAllRoleAssignmentsResponse | undefined;
+  error: Error | null;
+  isLoading: boolean;
+  refetch: jest.Mock;
+} = {
   data: {
     results: [
       {
@@ -208,7 +214,6 @@ describe('TeamMembersTable', () => {
   });
 
   it('renders safely when role assignments data is undefined', () => {
-    // @ts-ignore
     mockApiResponses({ ...mockedAllRoleAssignments, data: undefined });
     renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
     expect(screen.queryByText('John Doe')).not.toBeInTheDocument();

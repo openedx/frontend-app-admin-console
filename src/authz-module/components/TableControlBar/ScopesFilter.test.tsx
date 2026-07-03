@@ -101,11 +101,11 @@ describe('ScopesFilter', () => {
     );
   });
 
-  it('defaults to showing all scopes while permissions are loading', () => {
-    mockUsePermissions.mockReturnValue({ data: undefined });
+  it('defaults to showing only library scopes while permissions are loading', () => {
+    mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
-      expect.not.objectContaining({ scopeType: 'library' }),
+      expect.objectContaining({ scopeType: 'library' }),
     );
   });
 });

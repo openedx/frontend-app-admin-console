@@ -8,11 +8,11 @@ export const useViewTeamPermissions = () => {
 
   const isCourseViewAllowed = permissions
     ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
-    : true;
+    : false;
 
   const isLibraryViewAllowed = permissions
     ? permissions.some((p) => p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM && p.allowed)
-    : true;
+    : false;
 
   return { isCourseViewAllowed, isLibraryViewAllowed, isLoading };
 };
