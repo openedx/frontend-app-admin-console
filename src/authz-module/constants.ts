@@ -577,9 +577,9 @@ export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
 
 // Resource Type Definitions
-export const RESOURCE_TYPES = {
+export const CONTEXT_TYPES = {
   LIBRARY: 'library',
   COURSE: 'course',
 } as const;
 
-export type ResourceType = typeof RESOURCE_TYPES[keyof typeof RESOURCE_TYPES];
+export type ResourceType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
