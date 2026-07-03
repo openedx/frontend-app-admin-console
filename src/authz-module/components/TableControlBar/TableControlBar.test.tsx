@@ -43,6 +43,20 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   useScopes: () => ({ data: { results: [] } }),
 }));
 
+// RolesFilter validates view-team permissions to decide which role groups to show.
+// Grant both so the full course/library role set renders for these wiring tests.
+jest.mock('@src/data/hooks', () => {
+  const { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } = jest.requireActual('@src/authz-module/roles-permissions');
+  return {
+    useValidateUserPermissionsNonSuspense: () => ({
+      data: [
+        { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: true },
+        { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: true },
+      ],
+    }),
+  };
+});
+
 describe('TableControlBar', () => {
   const mockDataTableContext = {
     columns: mockColumns,
@@ -90,9 +104,9 @@ describe('TableControlBar', () => {
     const rolesButton = screen.getByText('Select Roles');
     expect(rolesButton).toBeInTheDocument();
     await user.click(rolesButton);
-    const superAdminOption = screen.getByRole('checkbox', { name: /Super Admin/i });
-    expect(superAdminOption).toBeInTheDocument();
-    await user.click(superAdminOption);
+    const courseAdminOption = screen.getByRole('checkbox', { name: /Course Admin/i });
+    expect(courseAdminOption).toBeInTheDocument();
+    await user.click(courseAdminOption);
     expect(contextWithRolesFilter.columns[0].setFilter).toHaveBeenCalled();
   });
 
