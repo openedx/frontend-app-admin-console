@@ -1,8 +1,15 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWithAllProviders } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useValidateUsers } from '../data/hooks';
+import {
+  CONTENT_COURSE_PERMISSIONS,
+  CONTENT_LIBRARY_PERMISSIONS,
+  courseRolesMetadata,
+  libraryRolesMetadata,
+} from '../roles-permissions';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
 
 jest.mock('@edx/frontend-platform/logging');
@@ -27,7 +34,20 @@ jest.mock('@edx/frontend-component-header', () => ({
   StudioHeader: () => null,
 }));
 
+jest.mock('@src/data/hooks', () => ({
+  ...jest.requireActual('@src/data/hooks'),
+  useValidateUserPermissionsNonSuspense: jest.fn(),
+}));
+
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
+const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const allowAllPermissions = {
+  data: [
+    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
+    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+  ],
+  isLoading: false,
+};
 
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
@@ -40,7 +60,7 @@ const setupMocks = ({ users = '', from = '' } = {}) => {
   return { navigate };
 };
 
-const renderPage = () => renderWrapper(
+const renderPage = () => renderWithAllProviders(
   <ToastManagerProvider>
     <AssignRoleWizardPage />
   </ToastManagerProvider>,
@@ -53,6 +73,7 @@ describe('AssignRoleWizardPage', () => {
       mutateAsync: jest.fn(),
       isPending: false,
     });
+    mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
   });
 
   it('renders the page with the wizard and title', () => {
@@ -106,5 +127,65 @@ describe('AssignRoleWizardPage', () => {
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
     expect(navigate).toHaveBeenCalledWith('/authz/team');
+  });
+
+  describe('assignable roles', () => {
+    // Each entry maps an allowed permission to the role metadata the wizard should
+    // surface for it. Add a row here as more scopes/roles are introduced.
+    const scopeRoles = [
+      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRolesMetadata },
+      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRolesMetadata },
+    ];
+    const allRoles = scopeRoles.flatMap(({ roles }) => roles);
+
+    it('shows the roles for every allowed scope', () => {
+      setupMocks();
+      renderPage();
+      allRoles.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
+      });
+    });
+
+    it.each(scopeRoles)('shows only the roles for the allowed scope %#', ({ action, roles }) => {
+      mockUseValidatePermissions.mockReturnValue({
+        data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
+        isLoading: false,
+      });
+      setupMocks();
+      renderPage();
+
+      roles.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
+      });
+      allRoles
+        .filter((role) => !roles.includes(role))
+        .forEach((role) => {
+          expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+        });
+    });
+
+    it('shows no roles when no scope is allowed', () => {
+      mockUseValidatePermissions.mockReturnValue({
+        data: scopeRoles.map(({ action }) => ({ action, allowed: false })),
+        isLoading: false,
+      });
+      setupMocks();
+      renderPage();
+      allRoles.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+    });
+
+    it('ignores allowed permissions whose action is not a known role scope', () => {
+      mockUseValidatePermissions.mockReturnValue({
+        data: [{ action: 'some.unrelated.permission', allowed: true }],
+        isLoading: false,
+      });
+      setupMocks();
+      renderPage();
+      allRoles.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+    });
   });
 });

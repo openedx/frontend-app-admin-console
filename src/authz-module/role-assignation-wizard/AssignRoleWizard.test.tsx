@@ -7,7 +7,10 @@ import {
   useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
 } from '../data/hooks';
 import useScopePermissions from './hooks/useScopePermissions';
+import { courseRolesMetadata, libraryRolesMetadata } from '../roles-permissions';
 import AssignRoleWizard from './AssignRoleWizard';
+
+const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedUser: jest.fn(),
@@ -76,7 +79,7 @@ const oneOrg = [
 
 const renderWizard = (props = {}) => renderWrapper(
   <ToastManagerProvider>
-    <AssignRoleWizard onClose={jest.fn()} {...props} />
+    <AssignRoleWizard onClose={jest.fn()} roles={allRolesMetadata} {...props} />
   </ToastManagerProvider>,
 );
 
@@ -114,6 +117,12 @@ describe('AssignRoleWizard — Step 1', () => {
 
   it('Next button is disabled without both users and a role', () => {
     renderWizard();
+    expect(getNextButton()).toBeDisabled();
+  });
+
+  it('renders no role options and keeps Next disabled when roles is empty', () => {
+    renderWizard({ roles: [] });
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument();
     expect(getNextButton()).toBeDisabled();
   });
 
