@@ -2,8 +2,16 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
+
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: jest.fn(),
+}));
+
+const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
 
 const mockedAllRoleAssignments = {
   data: {
@@ -127,6 +135,11 @@ const mockApiResponses = (
 describe('TeamMembersTable', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: true,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
   });
 
   it('renders table with role assignments data', async () => {
@@ -192,6 +205,28 @@ describe('TeamMembersTable', () => {
     const viewButtons = screen.getAllByRole('button', { name: /view/i });
     await user.click(viewButtons[0]);
     expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
+  });
+
+  it('renders safely when role assignments data is undefined', () => {
+    // @ts-ignore
+    mockApiResponses({ ...mockedAllRoleAssignments, data: undefined });
+    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  });
+
+  it('filters to library roles only when course view is not allowed', async () => {
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+    mockApiResponses();
+    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    await waitFor(() => {
+      expect(useAllRoleAssignments).toHaveBeenCalledWith(
+        expect.objectContaining({ roles: LIBRARY_ROLE_KEYS }),
+      );
+    });
   });
 
   it('handles empty data gracefully', async () => {

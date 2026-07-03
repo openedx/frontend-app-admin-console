@@ -7,8 +7,8 @@ import {
 } from '@openedx/paragon';
 
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, VIEW_TEAM_PERMISSIONS, libraryRolesMetadata } from '@src/authz-module/roles-permissions';
+import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
@@ -23,8 +23,6 @@ import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { UserRole } from '@src/types';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
-
-const LIBRARY_ROLE_KEYS = libraryRolesMetadata.map((r) => r.role).join(',');
 
 interface TeamMembersTableProps {
   presetScope?: string;
@@ -48,10 +46,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   const { querySettings, handleTableFetch } = useQuerySettings(initialQuerySettings);
 
-  const { data: permissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
-  const isCourseViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
-    : true;
+  const { isCourseViewAllowed } = useViewTeamPermissions();
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) { return querySettings; }

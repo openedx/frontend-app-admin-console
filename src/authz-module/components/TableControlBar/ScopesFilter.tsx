@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
@@ -18,10 +17,7 @@ const ScopesFilter = ({
   const { formatMessage } = useIntl();
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
 
-  const { data: permissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
-  const isCourseViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
-    : true;
+  const { isCourseViewAllowed } = useViewTeamPermissions();
 
   const { data: scopesData } = useScopes({
     search: searchValue,

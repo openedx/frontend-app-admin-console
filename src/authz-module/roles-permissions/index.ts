@@ -1,5 +1,5 @@
 import { CONTENT_COURSE_PERMISSIONS } from './course/constants';
-import { CONTENT_LIBRARY_PERMISSIONS } from './library/constants';
+import { CONTENT_LIBRARY_PERMISSIONS, libraryRolesMetadata as _libraryRolesMetadata } from './library/constants';
 
 export {
   CONTENT_LIBRARY_PERMISSIONS,
@@ -8,6 +8,8 @@ export {
   libraryRolesMetadata,
   rolesLibraryObject,
 } from './library/constants';
+
+export const LIBRARY_ROLE_KEYS = _libraryRolesMetadata.map((r) => r.role).join(',');
 
 export {
   CONTENT_COURSE_PERMISSIONS,

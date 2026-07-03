@@ -7,8 +7,9 @@ import { ROUTES } from '../constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
-  MANAGE_TEAM_PERMISSIONS, VIEW_TEAM_PERMISSIONS,
+  MANAGE_TEAM_PERMISSIONS,
 } from '../roles-permissions';
+import { useViewTeamPermissions } from '../hooks/useViewTeamPermissions';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
@@ -24,11 +25,7 @@ const AssignRoleWizardPage = () => {
     : returnTo;
 
   const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
-  const { data: viewPermissions } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
-
-  const isCourseViewAllowed = viewPermissions
-    ? viewPermissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
-    : true;
+  const { isCourseViewAllowed } = useViewTeamPermissions();
 
   const rolesAssignable = managePermissions?.flatMap((p) => {
     if (!p.allowed) { return []; }

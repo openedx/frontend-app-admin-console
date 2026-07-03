@@ -91,7 +91,7 @@ describe('RolesFilter', () => {
 
   it('shows no role options while permissions are still loading', async () => {
     const user = userEvent.setup();
-    mockUsePermissions.mockReturnValue({ data: undefined });
+    mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
     renderWrapper(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
