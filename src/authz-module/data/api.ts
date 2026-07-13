@@ -1,10 +1,7 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import {
-  LibraryMetadata, Org, Scope, TeamMember,
-  UserRole,
-} from '@src/types';
+import { Org, Scope, UserRole } from '@src/types';
 import { camelCaseObject } from '@edx/frontend-platform';
-import { getApiUrl, getStudioApiUrl } from '@src/data/utils';
+import { getApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
   roles: string | null;
@@ -15,11 +12,6 @@ export interface QuerySettings {
   sortBy: string | null;
   pageSize: number;
   pageIndex: number;
-}
-
-export interface GetTeamMembersResponse {
-  results: TeamMember[];
-  count: number;
 }
 
 export interface GetUserAssignmentsResponse {
@@ -47,11 +39,6 @@ export interface DeleteRevokeUserRolesResponse {
   }[],
 }
 
-export type PermissionsByRole = {
-  role: string;
-  permissions: string[];
-  userCount: number;
-};
 export interface PutAssignTeamMembersRoleResponse {
   completed: { userIdentifier: string; status: string }[];
   errors: { userIdentifier: string; scope: string; error: string }[];
@@ -106,26 +93,6 @@ export interface GetScopesParams {
   managementPermissionOnly?: boolean;
 }
 
-export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
-  const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
-
-  if (querySettings.roles) {
-    url.searchParams.set('roles', querySettings.roles);
-  }
-  if (querySettings.search) {
-    url.searchParams.set('search', querySettings.search);
-  }
-  if (querySettings.sortBy && querySettings.order) {
-    url.searchParams.set('sort_by', querySettings.sortBy);
-    url.searchParams.set('order', querySettings.order);
-  }
-  url.searchParams.set('page_size', querySettings.pageSize.toString());
-  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
-
-  const { data } = await getAuthenticatedHttpClient().get(url);
-  return camelCaseObject(data);
-};
-
 export const assignTeamMembersRole = async (
   data: AssignTeamMembersRoleRequest,
 ): Promise<PutAssignTeamMembersRoleResponse> => {
@@ -141,25 +108,6 @@ export const validateUsers = async (
     data,
   );
   return camelCaseObject(res.data);
-};
-
-// TODO: this should be replaced in the future with Console API
-export const getLibrary = async (libraryId: string): Promise<LibraryMetadata> => {
-  const { data } = await getAuthenticatedHttpClient().get(getStudioApiUrl(`/api/libraries/v2/${libraryId}/`));
-  return {
-    id: data.id,
-    org: data.org,
-    title: data.title,
-    slug: data.slug,
-    allowPublicRead: data.allow_public_read,
-  };
-};
-
-export const getPermissionsByRole = async (scope: string): Promise<PermissionsByRole[]> => {
-  const url = new URL(getApiUrl('/api/authz/v1/roles/'));
-  url.searchParams.append('scope', scope);
-  const { data } = await getAuthenticatedHttpClient().get(url);
-  return camelCaseObject(data.results);
 };
 
 export const revokeUserRoles = async (
