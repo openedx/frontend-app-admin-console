@@ -19,6 +19,7 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 
 describe('OrgFilter', () => {
   const defaultProps = {
+    filterId: 'org',
     filterButtonText: 'Organizations',
     filterValue: [],
     setFilter: jest.fn(),

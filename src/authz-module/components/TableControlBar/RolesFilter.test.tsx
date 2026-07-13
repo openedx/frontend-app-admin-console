@@ -18,6 +18,7 @@ const permissionsData = ({ library, course }: { library?: boolean; course?: bool
 
 describe('RolesFilter', () => {
   const defaultProps = {
+    filterId: 'role',
     filterButtonText: 'Roles',
     filterValue: [],
     setFilter: jest.fn(),

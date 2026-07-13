@@ -8,7 +8,7 @@ import MultipleChoiceFilter from './MultipleChoiceFilter';
 type OrgFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
 
 const OrgFilter = ({
-  filterButtonText, filterValue, setFilter, disabled,
+  filterId, filterButtonText, filterValue, setFilter, disabled,
 }: OrgFilterProps) => {
   const [searchValue, setSearchValue] = React.useState<string | undefined>(undefined);
   const {
@@ -27,6 +27,7 @@ const OrgFilter = ({
 
   return (
     <MultipleChoiceFilter
+      filterId={filterId}
       filterButtonText={filterButtonText}
       filterChoices={filterChoices}
       filterValue={filterValue}
