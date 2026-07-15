@@ -38,6 +38,23 @@ jest.mock('@src/data/hooks', () => ({
 
 // Mock the useRevokeUserRoles hook
 const mockRevokeUserRoles = jest.fn();
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: () => ({
+    isCourseViewAllowed: true,
+    isLibraryViewAllowed: true,
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isOrgAuthoringEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('@src/authz-module/data/hooks', () => ({
   ...jest.requireActual('@src/authz-module/data/hooks'),
   useRevokeUserRoles: () => ({

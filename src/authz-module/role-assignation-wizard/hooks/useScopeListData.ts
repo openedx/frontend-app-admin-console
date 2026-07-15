@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
@@ -37,12 +38,24 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
   const { data: orgsData } = useOrgs();
   const organizations = orgsData?.results;
 
-  const allScopes = useMemo(
-    () => scopesData?.pages.flatMap((page) => page.results) ?? [],
-    [scopesData],
-  );
+  const { isCourseEnabled, isOrgAuthoringEnabled } = useCourseAuthoringFlag();
 
-  const totalCount = scopesData?.pages[0]?.count ?? 0;
+  const { allScopes, totalCount } = useMemo(
+    () => {
+      const scopes = scopesData?.pages.flatMap((page) => page.results) ?? [];
+      const serverCount = scopesData?.pages[0]?.count ?? 0;
+      // Course scopes are gated by the course-authoring flag; libraries always pass.
+      if (contextType !== 'course') { return { allScopes: scopes, totalCount: serverCount }; }
+      const enabledScopes = scopes.filter((scope) => isCourseEnabled(scope.externalKey));
+      // The server count includes authoring-disabled courses this filter hides; subtract
+      // the ones already loaded so the reported total converges as pages arrive.
+      return {
+        allScopes: enabledScopes,
+        totalCount: serverCount - (scopes.length - enabledScopes.length),
+      };
+    },
+    [scopesData, contextType, isCourseEnabled],
+  );
 
   const scopesByOrg = useMemo(
     () => allScopes
@@ -90,6 +103,8 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     return Object.fromEntries(
       orderedOrgs
         .filter((orgSlug) => orgHasPermission[orgSlug])
+        // The org-wide aggregate is only offered when authoring is enabled for that org.
+        .filter((orgSlug) => contextType !== 'course' || isOrgAuthoringEnabled(orgSlug))
         .map((orgSlug) => [
           orgSlug,
           {
@@ -100,7 +115,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
           } satisfies Scope,
         ]),
     );
-  }, [orderedOrgs, contextType, orgHasPermission, orgAggregateLabel, aggregateDescription]);
+  }, [orderedOrgs, contextType, orgHasPermission, orgAggregateLabel, aggregateDescription, isOrgAuthoringEnabled]);
 
   return {
     organizations,

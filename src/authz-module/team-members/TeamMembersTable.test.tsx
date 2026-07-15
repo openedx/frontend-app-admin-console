@@ -122,6 +122,14 @@ jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('@src/authz-module/data/hooks', () => ({
   useAllRoleAssignments: jest.fn(),
   useOrgs: jest.fn(),

@@ -6,6 +6,23 @@ import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useScopes, useOrgs } from '../../data/hooks';
 import useScopePermissions from '../hooks/useScopePermissions';
 
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: () => ({
+    isCourseViewAllowed: true,
+    isLibraryViewAllowed: true,
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isOrgAuthoringEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('../../data/hooks', () => ({
   useScopes: jest.fn(),
   useOrgs: jest.fn(),

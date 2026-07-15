@@ -9,7 +9,7 @@ import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
   MANAGE_TEAM_PERMISSIONS,
 } from '../roles-permissions';
-import { useViewTeamPermissions } from '../hooks/useViewTeamPermissions';
+import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
@@ -25,13 +25,14 @@ const AssignRoleWizardPage = () => {
     : returnTo;
 
   const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
-  const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { isCourseAuthoringEnabled } = useCourseAuthoringFlag();
 
   const rolesAssignable = managePermissions?.flatMap((p) => {
     if (!p.allowed) { return []; }
     if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
     if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) {
-      return isCourseViewAllowed ? courseRolesMetadata : [];
+      // Course (authoring) roles are only assignable when the course-authoring flag is enabled.
+      return isCourseAuthoringEnabled ? courseRolesMetadata : [];
     }
     return [];
   });

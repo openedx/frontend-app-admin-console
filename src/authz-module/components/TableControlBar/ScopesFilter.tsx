@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { LocationOn } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
@@ -18,6 +19,7 @@ const ScopesFilter = ({
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const { data: scopesData } = useScopes({
     search: searchValue,
@@ -25,20 +27,23 @@ const ScopesFilter = ({
     ...(isCourseViewAllowed ? {} : { scopeType: 'library' }),
   });
 
-  const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? []).map((scope) => {
-    const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
-    let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
-    if (scope.externalKey?.startsWith('lib')) {
-      groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
-    }
-    return {
-      displayName: scope.displayName,
-      value: scope.externalKey,
-      description: scope.org?.shortName,
-      groupName,
-      groupIcon: scopeIcon,
-    };
-  }), [scopesData?.pages, formatMessage]);
+  const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? [])
+    // Libraries are always available; courses only when the authoring flag is enabled for them.
+    .filter((scope) => scope.externalKey?.startsWith('lib') || isCourseEnabled(scope.externalKey))
+    .map((scope) => {
+      const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+      let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
+      if (scope.externalKey?.startsWith('lib')) {
+        groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
+      }
+      return {
+        displayName: scope.displayName,
+        value: scope.externalKey,
+        description: scope.org?.shortName,
+        groupName,
+        groupIcon: scopeIcon,
+      };
+    }), [scopesData?.pages, formatMessage, isCourseEnabled]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

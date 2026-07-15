@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import RolesFilter from './RolesFilter';
 
@@ -9,7 +10,12 @@ jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissionsNonSuspense: jest.fn(),
 }));
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
 const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
 const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => [
   { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: !!library },
@@ -32,6 +38,11 @@ describe('RolesFilter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: true }) });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isLoading: false,
+    });
   });
 
   it('renders the filter toggle', () => {
@@ -92,6 +103,33 @@ describe('RolesFilter', () => {
   it('shows no role options while permissions are still loading', async () => {
     const user = userEvent.setup();
     mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
+    renderWrapper(<RolesFilter {...defaultProps} />);
+    const menu = await openDropdown(user);
+    expect(menu.queryByText('Courses')).not.toBeInTheDocument();
+    expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
+  });
+
+  it('hides course roles when the course-authoring flag is disabled', async () => {
+    const user = userEvent.setup();
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isLoading: false,
+    });
+    renderWrapper(<RolesFilter {...defaultProps} />);
+    const menu = await openDropdown(user);
+    expect(menu.getByText('Libraries')).toBeInTheDocument();
+    expect(menu.queryByText('Courses')).not.toBeInTheDocument();
+    expect(menu.queryByLabelText('Course Admin')).not.toBeInTheDocument();
+  });
+
+  it('shows no role options while the course-authoring flag is still loading', async () => {
+    const user = userEvent.setup();
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isLoading: true,
+    });
     renderWrapper(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
