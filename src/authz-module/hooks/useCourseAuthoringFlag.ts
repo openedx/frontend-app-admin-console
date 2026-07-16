@@ -59,18 +59,23 @@ export const useCourseAuthoringFlag = () => {
     const global = flagStates?.global ?? false;
 
     const courseEnabled = (courseId: string): boolean => {
-      if (courseOn.has(courseId)) { return true; }
-      if (courseOff.has(courseId)) { return false; }
+      const courseFlagOverrideEnabled = courseOn.has(courseId);
+      const courseFlagOverrideDisabled = courseOff.has(courseId);
+      if (courseFlagOverrideEnabled) { return true; }
+      if (courseFlagOverrideDisabled) { return false; }
       const org = orgOf(courseId);
-      if (org && orgOn.has(org)) { return true; }
-      if (org && orgOff.has(org)) { return false; }
+      const orgFlagOverrideEnabled = !!org && orgOn.has(org);
+      const orgFlagOverrideDisabled = !!org && orgOff.has(org);
+      if (orgFlagOverrideEnabled) { return true; }
+      if (orgFlagOverrideDisabled) { return false; }
       return global;
     };
 
     const orgsWithForcedOnCourse = new Set([...courseOn].map(orgOf));
 
     const orgAuthoringEnabled = (org: string): boolean => {
-      if (orgOn.has(org)) { return true; }
+      const orgFlagOverrideEnabled = orgOn.has(org);
+      if (orgFlagOverrideEnabled) { return true; }
       if (orgsWithForcedOnCourse.has(org)) { return true; }
       if (orgOff.has(org)) { return false; }
       return global;

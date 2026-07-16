@@ -9,6 +9,7 @@ import {
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
@@ -16,7 +17,7 @@ import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFil
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import { getCellHeader } from '@src/authz-module/utils';
 import {
-  ViewActionCell, NameCell, OrgCell, RoleCell, ScopeCell,
+  createViewActionCell, NameCell, OrgCell, RoleCell, ScopeCell,
 } from '@src/authz-module/components/TableCells';
 import { useAllRoleAssignments } from '@src/authz-module/data/hooks';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
@@ -46,6 +47,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   const { querySettings, handleTableFetch } = useQuerySettings(initialQuerySettings);
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
@@ -58,6 +60,8 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
     error,
     refetch,
   } = useAllRoleAssignments(effectiveQuerySettings);
+
+  const viewActionCell = useMemo(() => createViewActionCell({ isCourseEnabled }), [isCourseEnabled]);
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
@@ -93,7 +97,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           {
             id: 'action',
             Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
-            Cell: ViewActionCell,
+            Cell: viewActionCell,
           },
         ]}
         columns={

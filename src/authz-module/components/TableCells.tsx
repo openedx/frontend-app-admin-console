@@ -19,6 +19,10 @@ import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
 
+type ViewActionCellExtraProps = {
+  isCourseEnabled: (scope: string) => boolean;
+};
+
 interface DataTableInstance {
   state?: {
     expanded?: Record<string, boolean>;
@@ -59,18 +63,25 @@ const NameCell = ({ row }: CellProps) => {
   return <span>{row.original.fullName || row.original.username || ''}</span>;
 };
 
-const ViewActionCell = ({ row }: CellProps) => {
+const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const viewPath = `/authz/user/${row.original.username}`;
+  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
+  const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
   return (
     <IconButton
       src={RemoveRedEye}
       alt={formatMessage(messages['authz.table.column.actions.view.title'])}
       size="sm"
       onClick={() => navigate(viewPath)}
+      disabled={isDisabled}
     />
   );
+};
+
+const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function customViewActionCell(cellProps) {
+  return <ViewActionCell {...cellProps} {...extraProps} />;
 };
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
@@ -239,4 +250,5 @@ export {
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
+  createViewActionCell,
 };

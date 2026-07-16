@@ -21,9 +21,10 @@ const OrgFilter = ({
     },
   } = useOrgs(searchValue, 1, DEFAULT_FILTER_PAGE_SIZE);
 
-  // Libraries span orgs and are always enabled, so they must keep their behavior: only
-  // filter orgs by the course-authoring flag for course-only users, and never while
-  // permissions or flag states are still loading (default to showing every org).
+  // Users with library access (including those with both library and course roles) must
+  // always see all orgs: library access is not gated by the course-authoring flag,
+  // so the flag must never be used to filter orgs for them. Only filter orgs by the
+  // flag for course-only users, and never while permissions or flag states are loading.
   const filterByAuthoringFlag = !isLoading && !isFlagLoading && !isLibraryViewAllowed;
 
   const filterChoices = useMemo(() => (orgsData?.results ?? [])
