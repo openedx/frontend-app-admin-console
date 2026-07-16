@@ -33,6 +33,7 @@ const flagStates = (overrides = {}) => ({
 const statesHook = (overrides = {}) => ({
   data: flagStates(),
   isLoading: false,
+  isError: false,
   error: null,
   refetch: jest.fn(),
   ...overrides,
@@ -85,13 +86,14 @@ describe('useCourseAuthoringFlag', () => {
 
     it('surfaces a generic error toast and keeps resolving to false when the fetch fails', async () => {
       const error = new Error('Request failed');
-      mockUseCourseAuthoringFlagStates.mockReturnValue(statesHook({ data: undefined, error }));
+      mockUseCourseAuthoringFlagStates.mockReturnValue(statesHook({ data: undefined, isError: true, error }));
 
       const { result } = renderHook(() => useCourseAuthoringFlag(), { wrapper });
 
       expect(await screen.findByRole('alert')).toBeInTheDocument();
       expect(screen.getByText('Something went wrong on our end.')).toBeInTheDocument();
       expect(logError).toHaveBeenCalledWith(error);
+      expect(result.current.isError).toBe(true);
       expect(result.current.isCourseAuthoringEnabled).toBe(false);
       expect(result.current.isCourseEnabled('course-v1:org1+A+2024')).toBe(false);
       expect(result.current.isOrgAuthoringEnabled('org1')).toBe(false);

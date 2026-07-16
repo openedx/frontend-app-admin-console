@@ -264,5 +264,7 @@ export const useUserAssignedRoles = (
 export const useCourseAuthoringFlagStates = () => useQuery<CourseAuthoringFlagStates, Error>({
   queryKey: authzQueryKeys.courseAuthoringFlagStates(),
   queryFn: () => getCourseAuthoringFlagStates(),
+  staleTime: 1000 * 60 * 30,
+  refetchOnWindowFocus: false,
   retry: false,
 });

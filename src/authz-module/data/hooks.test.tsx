@@ -15,6 +15,7 @@ import {
   useScopes,
   useUserAssignedRoles,
   useValidateUsers,
+  useCourseAuthoringFlagStates,
 } from './hooks';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -913,5 +914,43 @@ describe('useUserAssignedRoles', () => {
 
     await waitFor(() => expect(result.current.data?.count).toBe(1));
     expect(mockGet).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useCourseAuthoringFlagStates', () => {
+  const mockFlagStates = {
+    global: true,
+    org_overrides: { on: ['OrgA'], off: [] },
+    course_overrides: { on: [], off: ['course-v1:OrgA+COURSE1+2024'] },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns flag states when API call succeeds', async () => {
+    mockHttpClient().mockReturnValue({
+      get: jest.fn().mockResolvedValue({ data: mockFlagStates }),
+    });
+
+    const { result } = renderHook(() => useCourseAuthoringFlagStates(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual(mockFlagStates);
+    const mockGetFn = getAuthenticatedHttpClient().get as jest.Mock;
+    expect(mockGetFn.mock.calls[0][0]).toContain('/api/authz/v1/waffle-flag-states/');
+  });
+
+  it('returns error state when API call fails', async () => {
+    mockHttpClient().mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('Server error')),
+    });
+
+    const { result } = renderHook(() => useCourseAuthoringFlagStates(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.data).toBeUndefined();
   });
 });

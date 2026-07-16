@@ -34,7 +34,7 @@ const toastedErrors = new WeakSet<Error>();
  */
 export const useCourseAuthoringFlag = () => {
   const {
-    data: flagStates, isLoading, error, refetch,
+    data: flagStates, isLoading, isError, error, refetch,
   } = useCourseAuthoringFlagStates();
   const { showErrorToast } = useToastManager();
 
@@ -80,6 +80,6 @@ export const useCourseAuthoringFlag = () => {
   }, [flagStates]);
 
   return {
-    isCourseAuthoringEnabled, isCourseEnabled, isOrgAuthoringEnabled, isLoading,
+    isCourseAuthoringEnabled, isCourseEnabled, isOrgAuthoringEnabled, isLoading, isError,
   };
 };
