@@ -8,7 +8,7 @@ import { mockHttpClient, mockAppContext } from '@src/setupTest';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { useUserAccount } from '@src/data/hooks';
+import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import AuditUserPage from './index';
 
@@ -46,10 +46,11 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   }),
 }));
 
+const mockIsCourseEnabled = jest.fn(() => true);
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: () => ({
     isCourseAuthoringEnabled: true,
-    isCourseEnabled: () => true,
+    isCourseEnabled: mockIsCourseEnabled,
     isOrgAuthoringEnabled: () => true,
     isLoading: false,
   }),
@@ -114,6 +115,7 @@ const renderWithRouter = (route = '/audit/johndoe') => {
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsCourseEnabled.mockReturnValue(true);
     // Set up default mock behavior for useRevokeUserRoles
     mockRevokeUserRoles.mockImplementation((_variables, { onSuccess }) => {
       // Simulate successful deletion by default
@@ -568,6 +570,60 @@ describe('AuditUserPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Home Page')).toBeInTheDocument();
+    });
+  });
+
+  describe('course authoring flag', () => {
+    const courseScope = 'course-v1:TestOrg+C101+2026';
+    const mockCourseAssignments = {
+      count: 1,
+      results: [
+        {
+          id: '1',
+          role: 'course_staff',
+          org: 'Test Org',
+          scope: courseScope,
+          permissionCount: 5,
+        },
+      ],
+      next: null,
+      previous: null,
+    };
+
+    beforeEach(() => {
+      (useUserAccount as jest.Mock).mockReturnValue({
+        data: mockUser,
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+      (useUserAssignedRoles as jest.Mock).mockReturnValue({
+        data: mockCourseAssignments,
+        isLoading: false,
+      });
+      (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue({
+        data: [{ scope: courseScope, allowed: true }],
+        isLoading: false,
+      });
+    });
+
+    it('disables the delete action for a course assignment when authoring is disabled for the course', async () => {
+      mockIsCourseEnabled.mockReturnValue(false);
+
+      renderWithRouter();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /delete role action/i })).toBeDisabled();
+      });
+      expect(mockIsCourseEnabled).toHaveBeenCalledWith(courseScope);
+    });
+
+    it('keeps the delete action enabled for a course assignment when authoring is enabled for the course', async () => {
+      renderWithRouter();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /delete role action/i })).toBeEnabled();
+      });
     });
   });
 });

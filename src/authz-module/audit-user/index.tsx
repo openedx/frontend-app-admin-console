@@ -23,6 +23,7 @@ import {
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { RoleToDelete } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
@@ -46,6 +47,7 @@ const AuditUserPage = () => {
   const { querySettings, handleTableFetch } = useQuerySettings();
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
@@ -75,15 +77,16 @@ const AuditUserPage = () => {
     if (!permissionsToManageScope) { return userAssignments; }
 
     return userAssignments.map(assignment => {
+      // Library roles are always manageable; course roles only when the authoring flag is enabled for the course.
       const canManageScope = permissionsToManageScope.some(
         permission => permission.scope === assignment.scope && permission.allowed,
-      );
+      ) && (assignment.scope.startsWith('lib') || isCourseEnabled(assignment.scope));
       return {
         ...assignment,
         canManageScope,
       };
     });
-  }, [userAssignments, permissionsToManageScope]);
+  }, [userAssignments, permissionsToManageScope, isCourseEnabled]);
 
   const fetchData = useMemo(() => handleTableFetch, [handleTableFetch]);
 
