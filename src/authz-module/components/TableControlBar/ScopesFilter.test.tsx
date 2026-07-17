@@ -140,4 +140,41 @@ describe('ScopesFilter', () => {
     expect(await screen.findByText('Test Library')).toBeInTheDocument();
     expect(screen.queryByText('Test Course')).not.toBeInTheDocument();
   });
+
+  it('hides only the flag-disabled course while keeping enabled courses and libraries (mixed per-course)', async () => {
+    const user = userEvent.setup();
+    mockUseScopes.mockReturnValue({
+      data: {
+        pages: [{
+          results: [
+            {
+              externalKey: 'course-v1:org+enabled+run',
+              displayName: 'Enabled Course',
+              org: { shortName: 'TestOrg' },
+            },
+            {
+              externalKey: 'course-v1:org+disabled+run',
+              displayName: 'Disabled Course',
+              org: { shortName: 'TestOrg' },
+            },
+            {
+              externalKey: 'lib:org:library',
+              displayName: 'Test Library',
+              org: { shortName: 'TestOrg' },
+            },
+          ],
+        }],
+      },
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: (id: string) => id === 'course-v1:org+enabled+run',
+      isLoading: false,
+    });
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: /Scopes/i }));
+    expect(await screen.findByText('Enabled Course')).toBeInTheDocument();
+    expect(screen.queryByText('Disabled Course')).not.toBeInTheDocument();
+    expect(screen.getByText('Test Library')).toBeInTheDocument();
+  });
 });
