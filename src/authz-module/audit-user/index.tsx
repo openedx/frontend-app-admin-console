@@ -77,16 +77,15 @@ const AuditUserPage = () => {
     if (!permissionsToManageScope) { return userAssignments; }
 
     return userAssignments.map(assignment => {
-      // Library roles are always manageable; course roles only when the authoring flag is enabled for the course.
       const canManageScope = permissionsToManageScope.some(
         permission => permission.scope === assignment.scope && permission.allowed,
-      ) && (assignment.scope.startsWith('lib') || isCourseEnabled(assignment.scope));
+      );
       return {
         ...assignment,
         canManageScope,
       };
     });
-  }, [userAssignments, permissionsToManageScope, isCourseEnabled]);
+  }, [userAssignments, permissionsToManageScope]);
 
   const fetchData = useMemo(() => handleTableFetch, [handleTableFetch]);
 
@@ -125,9 +124,10 @@ const AuditUserPage = () => {
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser?.username,
+        isCourseEnabled,
       }),
     },
-  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username]);
+  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username, isCourseEnabled]);
 
   const columns = useMemo(() => [
     {

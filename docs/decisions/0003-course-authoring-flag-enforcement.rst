@@ -85,6 +85,7 @@ While flag states are loading, all resolvers return `false` so course authoring 
 * **Scope filter:** course options are filtered with `isCourseEnabled`; library scopes are always included.
 * **Organization filter:** organizations are filtered with `isOrgAuthoringEnabled` only for users without library-view permissions. Users with library access—and all users while permissions or flag states are loading—see all organizations.
 * **Assignment wizard:** assignable course roles require both the appropriate management permission and `isCourseAuthoringEnabled`.
+* **Assignment table row actions:** the per-row view and delete actions are disabled — with a tooltip pointing users to Studio — when the row's course scope resolves to disabled via `isCourseEnabled`. Library rows are unaffected.
 
 **4. Leave paginated assignment data to the backend.**
 
@@ -107,7 +108,7 @@ Behavior depends on `ENABLE_AUTOMATIC_AUTHZ_COURSE_AUTHORING_MIGRATION` (`ADR 00
 
 * Flag changes never migrate authorization data automatically.
 * The flag-state endpoint reflects runtime configuration, while Casbin continues to reflect the most recent manual migration.
-* The frontend uses the flag only to determine which UI controls are available. Paginated assignment lists continue to reflect Casbin and may therefore appear stale. This inconsistency cannot be resolved by the frontend.
+* The frontend uses the flag only to determine which UI controls are available. Paginated assignment lists continue to reflect Casbin and may therefore appear stale. The frontend cannot hide such rows without breaking pagination, but it disables their row actions (see Decision 3) so stale course assignments cannot be managed from the console.
 
 Assumptions
 ***********

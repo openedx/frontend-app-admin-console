@@ -7,7 +7,7 @@ import {
 } from '@openedx/paragon/icons';
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
@@ -43,9 +43,40 @@ type ExtendedCellProps = CellPropsWithValue & {
 type ActionsCellExtraProps = {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
+  isCourseEnabled?: (scope: string) => boolean;
 };
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
+
+type DisabledCourseActionButtonProps = Pick<ComponentProps<typeof IconButton>, 'src' | 'alt' | 'size' | 'variant'>;
+
+// A disabled button can't trigger its own tooltip (Paragon sets pointer-events: none on it),
+// so the OverlayTrigger must live on a wrapper element that still receives hover events.
+const DisabledCourseActionButton = ({
+  src, alt, size, variant,
+}: DisabledCourseActionButtonProps) => {
+  const { formatMessage } = useIntl();
+  return (
+    <OverlayTrigger
+      placement="left"
+      overlay={(
+        <Tooltip variant="light" id="tooltip-left">
+          {formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
+        </Tooltip>
+      )}
+    >
+      <span className="d-inline-block">
+        <IconButton
+          src={src}
+          alt={alt}
+          size={size}
+          variant={variant}
+          disabled
+        />
+      </span>
+    </OverlayTrigger>
+  );
+};
 
 const NameCell = ({ row }: CellProps) => {
   const intl = useIntl();
@@ -69,13 +100,23 @@ const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewAction
   const viewPath = `/authz/user/${row.original.username}`;
   const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
   const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
+
+  if (isDisabled) {
+    return (
+      <DisabledCourseActionButton
+        src={RemoveRedEye}
+        alt={formatMessage(messages['authz.table.column.actions.view.title'])}
+        size="sm"
+      />
+    );
+  }
+
   return (
     <IconButton
       src={RemoveRedEye}
       alt={formatMessage(messages['authz.table.column.actions.view.title'])}
       size="sm"
       onClick={() => navigate(viewPath)}
-      disabled={isDisabled}
     />
   );
 };
@@ -176,7 +217,7 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
 };
 
 const ActionsCell = ({
-  row, onClickDeleteButton, isUserAuthenticatedPage,
+  row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
   const { role, canManageScope } = row.original;
@@ -223,6 +264,20 @@ const ActionsCell = ({
           src={Delete}
         />
       </OverlayTrigger>
+    );
+  }
+
+  const isCourseScope = !role?.startsWith('lib');
+  const isCourseAuthoringDisabled = isCourseEnabled !== undefined
+    && isCourseScope && !isCourseEnabled(row.original.scope);
+
+  if (isCourseAuthoringDisabled) {
+    return (
+      <DisabledCourseActionButton
+        src={Delete}
+        alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        variant="light"
+      />
     );
   }
 
