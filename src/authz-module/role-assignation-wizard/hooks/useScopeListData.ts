@@ -3,7 +3,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
+import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
@@ -83,7 +83,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
 
   const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {
-      externalKey: '*',
+      externalKey: getPlatformAggregateScopeKey(contextType),
       displayName: platformAggregateLabel,
       description: aggregateDescription,
       org: null,
