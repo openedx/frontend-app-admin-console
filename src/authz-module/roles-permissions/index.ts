@@ -1,5 +1,5 @@
 import { CONTENT_COURSE_PERMISSIONS } from './course/constants';
-import { CONTENT_LIBRARY_PERMISSIONS } from './library/constants';
+import { CONTENT_LIBRARY_PERMISSIONS, libraryRolesMetadata as _libraryRolesMetadata } from './library/constants';
 
 export {
   CONTENT_LIBRARY_PERMISSIONS,
@@ -8,6 +8,8 @@ export {
   libraryRolesMetadata,
   rolesLibraryObject,
 } from './library/constants';
+
+export const LIBRARY_ROLE_KEYS = _libraryRolesMetadata.map((r) => r.role).join(',');
 
 export {
   CONTENT_COURSE_PERMISSIONS,
@@ -20,4 +22,9 @@ export {
 export const MANAGE_TEAM_PERMISSIONS: { action: string }[] = [
   { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM },
   { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM },
+];
+
+export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
+  { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
+  { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
 ];

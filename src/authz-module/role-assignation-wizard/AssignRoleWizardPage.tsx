@@ -9,6 +9,7 @@ import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
   MANAGE_TEAM_PERMISSIONS,
 } from '../roles-permissions';
+import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
@@ -23,12 +24,16 @@ const AssignRoleWizardPage = () => {
     ? `${ROUTES.HOME_PATH}/user/${presetUser}`
     : returnTo;
 
-  const { data: permissionValidationResponse } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
+  const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
+  const { isCourseAuthoringEnabled } = useCourseAuthoringFlag();
 
-  const rolesAssignable = permissionValidationResponse?.flatMap((p) => {
+  const rolesAssignable = managePermissions?.flatMap((p) => {
     if (!p.allowed) { return []; }
     if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
-    if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) { return courseRolesMetadata; }
+    if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) {
+      // Course (authoring) roles are only assignable when the course-authoring flag is enabled.
+      return isCourseAuthoringEnabled ? courseRolesMetadata : [];
+    }
     return [];
   });
 

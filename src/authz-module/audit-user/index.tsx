@@ -15,6 +15,8 @@ import {
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
@@ -22,6 +24,7 @@ import {
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
@@ -43,9 +46,18 @@ const AuditUserPage = () => {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
   } = useUserAccount(username);
   const { querySettings, handleTableFetch } = useQuerySettings();
+
+  const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { isCourseEnabled } = useCourseAuthoringFlag();
+
+  const effectiveQuerySettings = useMemo(() => {
+    if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
+    return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
+  }, [isCourseViewAllowed, querySettings]);
+
   const {
     isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 },
-  } = useUserAssignedRoles(username, querySettings);
+  } = useUserAssignedRoles(username, effectiveQuerySettings);
   const [roleToDelete, setRoleToDelete] = useState<RoleToDelete | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const {
@@ -112,10 +124,11 @@ const AuditUserPage = () => {
       Header: formatMessage(messages['authz.user.table.action.column.header']),
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
-        isUserAuthenticatedPage: username === authenticatedUser.username,
+        isUserAuthenticatedPage: username === authenticatedUser?.username,
+        isCourseEnabled,
       }),
     },
-  ], [authenticatedUser.username, formatMessage, handleShowConfirmDeletionModal, username]);
+  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username, isCourseEnabled]);
 
   const columns = useMemo(() => [
     {

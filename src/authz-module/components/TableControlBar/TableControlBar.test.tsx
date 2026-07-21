@@ -34,6 +34,14 @@ const mockState = {
   ],
 };
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('@src/authz-module/data/hooks', () => ({
   useOrgs: () => ({
     data: {

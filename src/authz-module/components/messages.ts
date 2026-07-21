@@ -162,6 +162,11 @@ const messages = defineMessages({
     defaultMessage: 'You can’t remove your own admin role. This prevents a resource from being left without an admin. Another user with the required permissions can revoke it.',
     description: 'Tooltip for delete button when hovering over Admin roles',
   },
+  'authz.table.actions.course.disabled.tooltip': {
+    id: 'authz.table.actions.course.disabled.tooltip',
+    defaultMessage: 'This course hasn’t moved to the new roles experience yet. Manage its team in Studio instead.',
+    description: 'Tooltip for disabled action buttons on rows of courses where the course authoring flag is off, pointing users to Studio to manage the course team',
+  },
   'authz.user.table.view_all_permissions.link.text.close': {
     id: 'authz.user.table.view_all_permissions.link.text.close',
     defaultMessage: 'Hide all permissions',

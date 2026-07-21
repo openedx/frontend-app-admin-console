@@ -83,7 +83,9 @@ const ScopeList = ({
             />
           ))}
 
-          {orderedOrgs.length === 0 && (
+          {/* Loaded pages can be entirely filtered out client-side while later pages
+              still hold visible scopes, so only report empty once every page is in. */}
+          {orderedOrgs.length === 0 && !hasNextPage && !isFetchingNextPage && (
             <p className="text-muted text-center py-3">{intl.formatMessage(messages['wizard.step2.scopeList.empty'])}</p>
           )}
 

@@ -253,6 +253,17 @@ describe('TableCells Components', () => {
 
       expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
     });
+
+    it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {
+      const user = userEvent.setup();
+      renderWrapper(<ViewActionCell {...mockCellProps} isCourseEnabled={() => false} />);
+
+      const viewButton = screen.getByRole('button', { name: /view/i });
+      expect(viewButton).toBeDisabled();
+
+      await user.hover(viewButton);
+      expect(screen.getByText(/manage its team in Studio instead/i)).toBeInTheDocument();
+    });
   });
 
   describe('RoleCell', () => {
@@ -586,6 +597,43 @@ describe('TableCells Components', () => {
 
       const deleteButton = screen.queryByRole('button', { name: /delete role action/i });
       expect(deleteButton).toBeDisabled();
+    });
+
+    it('renders a disabled delete button with a tooltip when course authoring is disabled for the course', async () => {
+      const user = userEvent.setup();
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: false,
+        isCourseEnabled: () => false,
+      });
+      const courseRow = {
+        original: {
+          role: 'course_staff',
+          org: 'Test Org',
+          scope: 'course-v1:TestOrg+C101+2026',
+          permissionCount: 1,
+          canManageScope: true,
+        },
+      };
+      renderWrapper(<CustomActionsCell row={courseRow} column={{ id: 'actions' }} />);
+
+      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+      expect(deleteButton).toBeDisabled();
+
+      await user.hover(deleteButton);
+      expect(screen.getByText(/manage its team in Studio instead/i)).toBeInTheDocument();
+    });
+
+    it('keeps the delete action enabled for library roles when course authoring is disabled', () => {
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: false,
+        isCourseEnabled: () => false,
+      });
+      renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
+
+      const deleteButton = screen.getByRole('button', { name: /delete role action/i });
+      expect(deleteButton).toBeEnabled();
     });
   });
 

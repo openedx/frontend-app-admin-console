@@ -7,6 +7,14 @@ import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerC
 import AuthzHome from './index';
 import messages from './messages';
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('@src/authz-module/data/hooks', () => ({
   useAllRoleAssignments: jest.fn(),
   useOrgs: jest.fn(),
