@@ -10,6 +10,7 @@ import {
   GetTeamMembersResponse, PermissionsByRole, QuerySettings, revokeUserRoles,
   RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
   validateUsers, ValidateUsersRequest, GetScopesParams,
+  getCourseAuthoringFlagStates, CourseAuthoringFlagStates,
 } from './api';
 
 const authzQueryKeys = {
@@ -23,6 +24,7 @@ const authzQueryKeys = {
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'scopes', search, page, pageSize] as const,
   userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
+  courseAuthoringFlagStates: () => [...authzQueryKeys.all, 'courseAuthoringFlagStates'] as const,
 };
 
 /**
@@ -246,4 +248,23 @@ export const useUserAssignedRoles = (
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
   enabled: !!username,
   refetchOnWindowFocus: false,
+});
+
+/**
+ * React Query hook to fetch the enablement state of the course-authoring waffle flag
+ * across scopes (global, org overrides, course overrides).
+ *
+ * Follows the same caching rules as the permission-validation hooks.
+ *
+ * @example
+ * ```tsx
+ * const { data } = useCourseAuthoringFlagStates();
+ * ```
+ */
+export const useCourseAuthoringFlagStates = () => useQuery<CourseAuthoringFlagStates, Error>({
+  queryKey: authzQueryKeys.courseAuthoringFlagStates(),
+  queryFn: () => getCourseAuthoringFlagStates(),
+  staleTime: 1000 * 60 * 30,
+  refetchOnWindowFocus: false,
+  retry: false,
 });

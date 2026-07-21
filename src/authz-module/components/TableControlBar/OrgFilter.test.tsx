@@ -1,6 +1,8 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import OrgFilter from './OrgFilter';
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -10,12 +12,23 @@ jest.mock('@src/authz-module/data/hooks', () => ({
       next: null,
       previous: null,
       results: [
-        { id: 'org1', name: 'Organization 1' },
-        { id: 'org2', name: 'Organization 2' },
+        { id: 'org1', name: 'Organization 1', shortName: 'Org1' },
+        { id: 'org2', name: 'Organization 2', shortName: 'Org2' },
       ],
     },
   }),
 }));
+
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: jest.fn(),
+}));
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
+const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
 describe('OrgFilter', () => {
   const defaultProps = {
@@ -25,8 +38,23 @@ describe('OrgFilter', () => {
     disabled: false,
   };
 
+  const openDropdown = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole('button', { name: /Organizations/i }));
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: true,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isOrgAuthoringEnabled: () => true,
+      isLoading: false,
+    });
   });
 
   it('renders without crashing', () => {
@@ -59,5 +87,57 @@ describe('OrgFilter', () => {
     const mockSetFilter = jest.fn();
     renderWrapper(<OrgFilter {...defaultProps} setFilter={mockSetFilter} />);
     expect(screen.getByText('Organizations')).toBeInTheDocument();
+  });
+
+  it('keeps all orgs for users with library access even when authoring is disabled', async () => {
+    const user = userEvent.setup();
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isOrgAuthoringEnabled: () => false,
+      isLoading: false,
+    });
+    renderWrapper(<OrgFilter {...defaultProps} />);
+    await openDropdown(user);
+    expect(await screen.findByText('Organization 1')).toBeInTheDocument();
+    expect(screen.getByText('Organization 2')).toBeInTheDocument();
+  });
+
+  it('hides authoring-disabled orgs for course-only users', async () => {
+    const user = userEvent.setup();
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: true,
+      isLibraryViewAllowed: false,
+      isLoading: false,
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isOrgAuthoringEnabled: (org: string) => org === 'Org1',
+      isLoading: false,
+    });
+    renderWrapper(<OrgFilter {...defaultProps} />);
+    await openDropdown(user);
+    expect(await screen.findByText('Organization 1')).toBeInTheDocument();
+    expect(screen.queryByText('Organization 2')).not.toBeInTheDocument();
+  });
+
+  it('keeps all orgs while permissions are still loading', async () => {
+    const user = userEvent.setup();
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: false,
+      isLoading: true,
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isOrgAuthoringEnabled: () => false,
+      isLoading: false,
+    });
+    renderWrapper(<OrgFilter {...defaultProps} />);
+    await openDropdown(user);
+    expect(await screen.findByText('Organization 1')).toBeInTheDocument();
+    expect(screen.getByText('Organization 2')).toBeInTheDocument();
   });
 });

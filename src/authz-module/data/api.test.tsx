@@ -9,6 +9,7 @@ import {
   getLibrary,
   getOrgs,
   getScopes,
+  getCourseAuthoringFlagStates,
 } from './api';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -315,6 +316,31 @@ describe('API functions', () => {
       expect(calledUrl.toString()).toContain('search=library');
       expect(calledUrl.toString()).toContain('page=3');
       expect(calledUrl.toString()).toContain('page_size=50');
+    });
+  });
+
+  describe('getCourseAuthoringFlagStates', () => {
+    it('should fetch the flag states and camel-case the response', async () => {
+      const mockResponse = {
+        data: {
+          global: false,
+          org_overrides: { on: ['Demo'], off: [] },
+          course_overrides: { on: [], off: ['course-v1:testing+CT01+CT01-2024'] },
+        },
+      };
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      mockHttpClient().mockReturnValue({ get: mockGet });
+
+      const result = await getCourseAuthoringFlagStates();
+
+      expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+      const calledUrl = mockGet.mock.calls[0][0];
+      expect(calledUrl.toString()).toContain('/api/authz/v1/waffle-flag-states/');
+      expect(result).toEqual({
+        global: false,
+        orgOverrides: { on: ['Demo'], off: [] },
+        courseOverrides: { on: [], off: ['course-v1:testing+CT01+CT01-2024'] },
+      });
     });
   });
 });

@@ -2,10 +2,25 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import type { GetAllRoleAssignmentsResponse } from '@src/authz-module/data/api';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
+import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
 
-const mockedAllRoleAssignments = {
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: jest.fn(),
+}));
+
+const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
+
+const mockedAllRoleAssignments: {
+  data: GetAllRoleAssignmentsResponse | undefined;
+  error: Error | null;
+  isLoading: boolean;
+  refetch: jest.Mock;
+} = {
   data: {
     results: [
       {
@@ -108,6 +123,12 @@ jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
+
 jest.mock('@src/authz-module/data/hooks', () => ({
   useAllRoleAssignments: jest.fn(),
   useOrgs: jest.fn(),
@@ -127,6 +148,16 @@ const mockApiResponses = (
 describe('TeamMembersTable', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: true,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isLoading: false,
+    });
   });
 
   it('renders table with role assignments data', async () => {
@@ -192,6 +223,42 @@ describe('TeamMembersTable', () => {
     const viewButtons = screen.getAllByRole('button', { name: /view/i });
     await user.click(viewButtons[0]);
     expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
+  });
+
+  it('renders safely when role assignments data is undefined', () => {
+    mockApiResponses({ ...mockedAllRoleAssignments, data: undefined });
+    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  });
+
+  it('filters to library roles only when course view is not allowed', async () => {
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+    mockApiResponses();
+    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    await waitFor(() => {
+      expect(useAllRoleAssignments).toHaveBeenCalledWith(
+        expect.objectContaining({ roles: LIBRARY_ROLE_KEYS }),
+      );
+    });
+  });
+
+  it('disables the view action for course assignments in disabled scopes', async () => {
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: (scope: string) => scope !== 'course-v1:OpenedX+DemoX+DemoCourse',
+      isLoading: false,
+    });
+    mockApiResponses();
+    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    await waitFor(() => {
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      expect(viewButtons[0]).toBeDisabled();
+      expect(viewButtons[1]).not.toBeDisabled();
+    });
   });
 
   it('handles empty data gracefully', async () => {

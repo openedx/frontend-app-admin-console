@@ -106,6 +106,22 @@ export interface GetScopesParams {
   managementPermissionOnly?: boolean;
 }
 
+export interface WaffleFlagOverrides {
+  on: string[];
+  off: string[];
+}
+
+/**
+ * Enablement state of the course-authoring waffle flag across scopes.
+ * `orgOverrides`/`courseOverrides` list the org short names / course ids whose
+ * override differs from `global` (explicitly forced `on` or `off`).
+ */
+export interface CourseAuthoringFlagStates {
+  global: boolean;
+  orgOverrides: WaffleFlagOverrides;
+  courseOverrides: WaffleFlagOverrides;
+}
+
 export const getTeamMembers = async (object: string, querySettings: QuerySettings): Promise<GetTeamMembersResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/roles/users/?scope=${object}`));
 
@@ -226,6 +242,11 @@ export const getScopes = async (params: GetScopesParams): Promise<GetScopesRespo
   url.searchParams.set('page', (params.page ?? 1).toString());
   url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
   const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+export const getCourseAuthoringFlagStates = async (): Promise<CourseAuthoringFlagStates> => {
+  const { data } = await getAuthenticatedHttpClient().get(getApiUrl('/api/authz/v1/waffle-flag-states/'));
   return camelCaseObject(data);
 };
 
