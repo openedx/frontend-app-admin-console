@@ -33,6 +33,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     scopeType: contextType,
     search: search || undefined,
     orgs: orgs.length ? orgs : undefined,
+    managementPermissionOnly: true,
   });
 
   const { data: orgsData } = useOrgs();

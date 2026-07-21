@@ -327,6 +327,21 @@ describe('useScopeListData', () => {
       }));
     });
 
+    it('restricts scopes to those the user can manage', () => {
+      mockUseScopes.mockReturnValue(makeScopesHook());
+      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
+
+      renderHook(() => useScopeListData({
+        contextType: 'course',
+        search: '',
+        orgs: [],
+      }), { wrapper });
+
+      expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
+        managementPermissionOnly: true,
+      }));
+    });
+
     it('passes search to useScopes when provided', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
