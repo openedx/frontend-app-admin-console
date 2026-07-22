@@ -27,6 +27,23 @@ jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
 }));
 
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: () => ({
+    isCourseViewAllowed: true,
+    isLibraryViewAllowed: true,
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isOrgAuthoringEnabled: () => true,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('../data/hooks', () => ({
   useValidateUsers: jest.fn(),
   useAssignTeamMembersRole: jest.fn(),

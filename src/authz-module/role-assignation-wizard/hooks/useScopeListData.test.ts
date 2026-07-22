@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { intlWrapper as wrapper } from '@src/setupTest';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '../../data/hooks';
 import useScopePermissions from './useScopePermissions';
@@ -9,11 +10,16 @@ jest.mock('../../data/hooks', () => ({
   useOrgs: jest.fn(),
 }));
 
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
 jest.mock('./useScopePermissions');
 
 const mockUseScopes = useScopes as jest.Mock;
 const mockUseOrganizations = useOrgs as jest.Mock;
 const mockUseScopePermissions = useScopePermissions as jest.Mock;
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
 const makeScopesHook = (overrides = {}) => ({
   data: {
@@ -44,6 +50,12 @@ describe('useScopeListData', () => {
     mockUseScopePermissions.mockReturnValue({
       hasPlatformPermission: false,
       orgHasPermission: { org1: true, org2: true },
+    });
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isOrgAuthoringEnabled: () => true,
+      isLoading: false,
     });
   });
 
@@ -498,6 +510,92 @@ describe('useScopeListData', () => {
 
       expect(result.current.orderedOrgs).toEqual([]);
       expect(result.current.scopesByOrg).toEqual({});
+    });
+  });
+
+  describe('Course-authoring flag filtering', () => {
+    const courseScopes = makeScopesHook({
+      data: {
+        pages: [{
+          results: [
+            { externalKey: 'course-v1:org1+A+2024', displayName: 'Course A', org: { id: 1, name: 'Org 1', shortName: 'org1' } },
+            { externalKey: 'course-v1:org1+B+2024', displayName: 'Course B', org: { id: 1, name: 'Org 1', shortName: 'org1' } },
+          ],
+          count: 2,
+          next: null,
+          previous: null,
+        }],
+      },
+    });
+
+    it('filters out course scopes whose authoring flag is disabled', () => {
+      mockUseScopes.mockReturnValue(courseScopes);
+      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: true,
+        isCourseEnabled: (id: string) => id === 'course-v1:org1+A+2024',
+        isOrgAuthoringEnabled: () => true,
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() => useScopeListData({
+        contextType: 'course',
+        search: '',
+        orgs: [],
+      }), { wrapper });
+
+      expect(result.current.allScopes.map((s) => s.externalKey)).toEqual(['course-v1:org1+A+2024']);
+      expect(result.current.totalCount).toBe(1);
+    });
+
+    it('does not filter library scopes by the authoring flag', () => {
+      const libScopes = makeScopesHook({
+        data: {
+          pages: [{
+            results: [
+              { externalKey: 'lib:org1:lib1', displayName: 'Library 1', org: { id: 1, name: 'Org 1', shortName: 'org1' } },
+            ],
+            count: 1,
+            next: null,
+            previous: null,
+          }],
+        },
+      });
+      mockUseScopes.mockReturnValue(libScopes);
+      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: false,
+        isCourseEnabled: () => false,
+        isOrgAuthoringEnabled: () => false,
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() => useScopeListData({
+        contextType: 'library',
+        search: '',
+        orgs: [],
+      }), { wrapper });
+
+      expect(result.current.allScopes).toHaveLength(1);
+    });
+
+    it('omits org-wide aggregates for authoring-disabled orgs', () => {
+      mockUseScopes.mockReturnValue(courseScopes);
+      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: true,
+        isCourseEnabled: () => true,
+        isOrgAuthoringEnabled: () => false,
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() => useScopeListData({
+        contextType: 'course',
+        search: '',
+        orgs: [],
+      }), { wrapper });
+
+      expect(result.current.orgAggregateScopeItems).toEqual({});
     });
   });
 });

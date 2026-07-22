@@ -4,6 +4,7 @@ import { renderWithAllProviders } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useValidateUsers } from '../data/hooks';
+import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
 import {
   CONTENT_COURSE_PERMISSIONS,
   CONTENT_LIBRARY_PERMISSIONS,
@@ -39,8 +40,13 @@ jest.mock('@src/data/hooks', () => ({
   useValidateUserPermissionsNonSuspense: jest.fn(),
 }));
 
+jest.mock('../hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
 const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 const allowAllPermissions = {
   data: [
     { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
@@ -48,6 +54,10 @@ const allowAllPermissions = {
   ],
   isLoading: false,
 };
+
+const mockPermissions = (
+  manageData: typeof allowAllPermissions,
+) => () => manageData;
 
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
@@ -73,7 +83,12 @@ describe('AssignRoleWizardPage', () => {
       mutateAsync: jest.fn(),
       isPending: false,
     });
-    mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
+    mockUseValidatePermissions.mockImplementation(mockPermissions(allowAllPermissions));
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isLoading: false,
+    });
   });
 
   it('renders the page with the wizard and title', () => {
@@ -147,10 +162,10 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it.each(scopeRoles)('shows only the roles for the allowed scope %#', ({ action, roles }) => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
 
@@ -165,10 +180,10 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it('shows no roles when no scope is allowed', () => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: scopeRoles.map(({ action }) => ({ action, allowed: false })),
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
       allRoles.forEach((role) => {
@@ -177,14 +192,30 @@ describe('AssignRoleWizardPage', () => {
     });
 
     it('ignores allowed permissions whose action is not a known role scope', () => {
-      mockUseValidatePermissions.mockReturnValue({
+      mockUseValidatePermissions.mockImplementation(mockPermissions({
         data: [{ action: 'some.unrelated.permission', allowed: true }],
         isLoading: false,
-      });
+      }));
       setupMocks();
       renderPage();
       allRoles.forEach((role) => {
         expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', () => {
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: false,
+        isCourseEnabled: () => false,
+        isLoading: false,
+      });
+      setupMocks();
+      renderPage();
+      courseRolesMetadata.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+      libraryRolesMetadata.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
       });
     });
   });
