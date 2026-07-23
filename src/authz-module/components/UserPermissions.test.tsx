@@ -112,8 +112,8 @@ describe('UserPermissions', () => {
       },
     ];
 
-    const originalRolesObject = coursesConstants.rolesObject;
-    const rolesObjectSpy = jest.spyOn(coursesConstants, 'rolesObject', 'get')
+    const originalRolesObject = coursesConstants.courseRolesWithPermissions;
+    const courseRolesWithPermissionsSpy = jest.spyOn(coursesConstants, 'courseRolesWithPermissions', 'get')
       .mockReturnValue([...originalRolesObject, ...mockRoleObject] as typeof originalRolesObject);
 
     const props = {
@@ -126,10 +126,10 @@ describe('UserPermissions', () => {
 
     const { getByTestId } = renderWrapper(<UserPermissions {...props} />);
     expect(getByTestId('render-permission-inline')).toBeInTheDocument();
-    rolesObjectSpy.mockRestore();
+    courseRolesWithPermissionsSpy.mockRestore();
   });
 
-  it('returns null when role is not found in rolesObject (line 52 coverage)', () => {
+  it('returns null when role is not found in courseRolesWithPermissions (line 52 coverage)', () => {
     const props = {
       row: {
         original: {

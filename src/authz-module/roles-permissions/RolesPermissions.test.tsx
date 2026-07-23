@@ -16,6 +16,29 @@ jest.mock('./utils', () => ({
   ]),
 }));
 
+// Mock constants
+jest.mock('./course/constants', () => ({
+  courseRolesWithPermissions: [
+    {
+      name: 'Course Admin', role: 'admin', permissions: [], userCount: 1,
+    },
+  ],
+  coursePermissions: [],
+  courseResourceTypes: [],
+  courseRolesMetadata: [],
+}));
+
+jest.mock('./library/constants', () => ({
+  libraryRolesWithPermissions: [
+    {
+      name: 'Library Admin', role: 'admin', permissions: [], userCount: 1,
+    },
+  ],
+  libraryPermissions: [],
+  libraryResourceTypes: [],
+  libraryRolesMetadata: [],
+}));
+
 jest.mock('@openedx/paragon', () => ({
   ...jest.requireActual('@openedx/paragon'),
   Hyperlink: ({ children, ...props }:

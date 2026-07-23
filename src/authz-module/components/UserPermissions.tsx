@@ -3,10 +3,10 @@ import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
-  rolesObject,
+  courseRolesWithPermissions,
   libraryResourceTypes,
   libraryPermissions,
-  rolesLibraryObject,
+  libraryRolesWithPermissions,
   getPermissionMetadata,
 } from '@src/authz-module/roles-permissions';
 import RenderPermissionColumn from './RenderPermissionColumn';
@@ -41,12 +41,12 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     ? {
       resourceTypes: libraryResourceTypes,
       permissions: libraryPermissions,
-      roles: rolesLibraryObject,
+      roles: libraryRolesWithPermissions,
     }
     : {
       resourceTypes: courseResourceTypes,
       permissions: coursePermissions,
-      roles: rolesObject,
+      roles: courseRolesWithPermissions,
     };
 
   const roleObj = config.roles.find(r => r.role === roleKey);
