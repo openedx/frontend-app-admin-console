@@ -1,4 +1,6 @@
-import { buildWizardPath, getOrgAggregateScopeKey, ROUTES } from './constants';
+import {
+  buildUserPath, buildWizardPath, getOrgAggregateScopeKey, getScopeContextType, ROUTES,
+} from './constants';
 
 const BASE = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
 
@@ -30,6 +32,30 @@ describe('buildWizardPath', () => {
 
   it('omits the query string when users and from are both empty strings', () => {
     expect(buildWizardPath({ users: '', from: '' })).toBe(BASE);
+  });
+});
+
+describe('buildUserPath', () => {
+  it('builds the audit-user path for a username', () => {
+    expect(buildUserPath('alice')).toBe(`${ROUTES.HOME_PATH}/user/alice`);
+  });
+
+  it('encodes special characters in the username', () => {
+    expect(buildUserPath('a b@c')).toBe(`${ROUTES.HOME_PATH}/user/a%20b%40c`);
+  });
+});
+
+describe('getScopeContextType', () => {
+  it('returns library for a library scope', () => {
+    expect(getScopeContextType('lib:MIT:intro')).toBe('library');
+  });
+
+  it('returns course for a course scope', () => {
+    expect(getScopeContextType('course-v1:MIT+6.00x+2024')).toBe('course');
+  });
+
+  it('defaults to course for an unrecognized scope', () => {
+    expect(getScopeContextType('MIT')).toBe('course');
   });
 });
 

@@ -4,7 +4,7 @@ import { LocationOn } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useScopes } from '@src/authz-module/data/hooks';
-import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
+import { DEFAULT_FILTER_PAGE_SIZE, getScopeContextType } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { RESOURCE_ICONS } from '../constants';
@@ -29,13 +29,13 @@ const ScopesFilter = ({
 
   const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? [])
     // Libraries are always available; courses only when the authoring flag is enabled for them.
-    .filter((scope) => scope.externalKey?.startsWith('lib') || isCourseEnabled(scope.externalKey))
+    .filter((scope) => getScopeContextType(scope.externalKey ?? '') === 'library' || isCourseEnabled(scope.externalKey))
     .map((scope) => {
-      const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
-      let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
-      if (scope.externalKey?.startsWith('lib')) {
-        groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
-      }
+      const isLibraryScope = getScopeContextType(scope.externalKey ?? '') === 'library';
+      const scopeIcon = isLibraryScope ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+      const groupName = isLibraryScope
+        ? formatMessage(messages['authz.team.members.table.group.libraries'])
+        : formatMessage(messages['authz.team.members.table.group.courses']);
       return {
         displayName: scope.displayName,
         value: scope.externalKey,

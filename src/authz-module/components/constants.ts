@@ -13,8 +13,8 @@ export const RESOURCE_ICONS = {
 // The API expects the underscore format when roles are sent as filter values,
 // while role data received from the API uses the dotted format (e.g. django.superuser).
 const GLOBAL_ROLE_FILTER_OPTIONS = [
-  { value: 'super_admin', displayName: MAP_ROLE_KEY_TO_LABEL[SUPERUSER_ROLE] },
-  { value: 'global_staff', displayName: MAP_ROLE_KEY_TO_LABEL[GLOBAL_STAFF_ROLE] },
+  { value: 'super_admin', displayName: MAP_ROLE_KEY_TO_LABEL[SUPERUSER_ROLE], contextType: 'global' },
+  { value: 'global_staff', displayName: MAP_ROLE_KEY_TO_LABEL[GLOBAL_STAFF_ROLE], contextType: 'global' },
 ];
 
 export const getRolesFiltersOptions = (intl: IntlShape) => {
@@ -39,6 +39,7 @@ export const getRolesFiltersOptions = (intl: IntlShape) => {
       ...contextGroups[meta.contextType],
       displayName: meta.name,
       value: meta.role,
+      contextType: meta.contextType,
     })),
   ];
 };

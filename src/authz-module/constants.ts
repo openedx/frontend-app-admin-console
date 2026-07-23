@@ -58,5 +58,3 @@ export const CONTEXT_TYPES = {
   LIBRARY: 'library',
   COURSE: 'course',
 } as const;
-
-export type ResourceType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
