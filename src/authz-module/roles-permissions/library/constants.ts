@@ -10,7 +10,6 @@ import {
   EditOutline,
   Delete,
   SpinnerIcon,
-  FileDownload,
 } from '@openedx/paragon/icons';
 
 export const CONTENT_LIBRARY_PERMISSIONS = {
@@ -18,12 +17,9 @@ export const CONTENT_LIBRARY_PERMISSIONS = {
   MANAGE_LIBRARY_TAGS: 'content_libraries.manage_library_tags',
   VIEW_LIBRARY: 'content_libraries.view_library',
 
-  CREATE_LIBRARY_CONTENT: 'content_libraries.create_library_content',
   EDIT_LIBRARY_CONTENT: 'content_libraries.edit_library_content',
-  DELETE_LIBRARY_CONTENT: 'content_libraries.delete_library_content',
   PUBLISH_LIBRARY_CONTENT: 'content_libraries.publish_library_content',
   REUSE_LIBRARY_CONTENT: 'content_libraries.reuse_library_content',
-  IMPORT_LIBRARY_CONTENT: 'content_libraries.import_library_content',
 
   MANAGE_LIBRARY_TEAM: 'content_libraries.manage_library_team',
   VIEW_LIBRARY_TEAM: 'content_libraries.view_library_team',
@@ -72,7 +68,7 @@ export const libraryResourceTypes: ResourceMetadata[] = [
   {
     key: 'library_content',
     label: 'Content',
-    description: 'Permissions for creating, editing, deleting, and publishing content within the library.',
+    description: 'Permissions for editing, publishing, and reusing content within the library.',
     icon: Notes,
   },
   {
@@ -112,25 +108,11 @@ export const libraryPermissions: PermissionMetadata[] = [
     icon: Delete,
   },
   {
-    key: CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
-    resource: 'library_content',
-    label: 'Create',
-    description: 'Create new content items in the library.',
-    icon: Plus,
-  },
-  {
     key: CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_CONTENT,
     resource: 'library_content',
     label: 'Edit',
-    description: 'Edit existing content items in the library.',
+    description: 'Create, edit, and delete content items in the library.',
     icon: EditOutline,
-  },
-  {
-    key: CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
-    resource: 'library_content',
-    label: 'Delete',
-    description: 'Permanently remove content items from the library.',
-    icon: Delete,
   },
   {
     key: CONTENT_LIBRARY_PERMISSIONS.PUBLISH_LIBRARY_CONTENT,
@@ -145,13 +127,6 @@ export const libraryPermissions: PermissionMetadata[] = [
     label: 'Reuse',
     description: 'Add published content from this library to a course.',
     icon: SpinnerIcon,
-  },
-  {
-    key: CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
-    resource: 'library_content',
-    label: 'Import Content from Course',
-    description: ' Import content from an existing course into this library.',
-    icon: FileDownload,
   },
   {
     key: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM,
@@ -202,10 +177,7 @@ const LIBRARY_ROLE_PERMISSIONS: Record<string, string[]> = {
     CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION,
-    CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
     CONTENT_LIBRARY_PERMISSIONS.REUSE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
   ],
   library_author: [
     CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
@@ -217,9 +189,6 @@ const LIBRARY_ROLE_PERMISSIONS: Record<string, string[]> = {
     CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION,
-    CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
   ],
   library_contributor: [
     CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
@@ -230,9 +199,6 @@ const LIBRARY_ROLE_PERMISSIONS: Record<string, string[]> = {
     CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.EDIT_LIBRARY_COLLECTION,
     CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_COLLECTION,
-    CONTENT_LIBRARY_PERMISSIONS.CREATE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.DELETE_LIBRARY_CONTENT,
-    CONTENT_LIBRARY_PERMISSIONS.IMPORT_LIBRARY_CONTENT,
   ],
   library_user: [
     CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY,
