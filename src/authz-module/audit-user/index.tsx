@@ -9,7 +9,7 @@ import {
 } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
-  AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE,
+  ROUTES, TABLE_DEFAULT_PAGE_SIZE,
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -93,7 +93,7 @@ const AuditUserPage = () => {
     if (!user && !isLoadingUser) {
       // @ts-ignore
       if (!isErrorUser || errorUser?.customAttributes?.httpErrorStatus === 404) {
-        navigate(AUTHZ_HOME_PATH);
+        navigate(ROUTES.HOME_PATH);
       }
     }
   }, [user, isLoadingUser, navigate, isErrorUser, errorUser]);
@@ -108,7 +108,7 @@ const AuditUserPage = () => {
   const navLinks = useMemo(() => [
     {
       label: formatMessage(baseMessages['authz.management.home.nav.link']),
-      to: AUTHZ_HOME_PATH,
+      to: ROUTES.HOME_PATH,
     },
   ], [formatMessage]);
 
@@ -215,7 +215,7 @@ const AuditUserPage = () => {
           });
           handleCloseConfirmDeletionModal();
           if (remainingRolesCount === 0) {
-            navigate(AUTHZ_HOME_PATH);
+            navigate(ROUTES.HOME_PATH);
           }
         },
         onError: (error, retryVariables) => {

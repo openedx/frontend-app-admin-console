@@ -1,5 +1,6 @@
 import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
+  LIBRARY_ROLE_KEYS,
   courseResourceTypes,
   coursePermissions,
   rolesObject,
@@ -34,7 +35,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
 
   // Normalize role string to match keys in constants (e.g. "Course Admin" -> "course_admin")
   roleKey = roleKey.trim().toLowerCase().replace(/[-\s]+/g, '_');
-  const isLibraryRole = roleKey.includes('library');
+  const isLibraryRole = LIBRARY_ROLE_KEYS.includes(roleKey);
   const config = isLibraryRole
     ? {
       resourceTypes: libraryResourceTypes,

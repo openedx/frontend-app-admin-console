@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { QuerySettings } from '@src/authz-module/data/api';
+import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 
 interface DataTableFilters {
   pageSize: number;
@@ -32,7 +33,7 @@ export const useQuerySettings = (
     scopes: null,
     organizations: null,
     search: null,
-    pageSize: 10,
+    pageSize: TABLE_DEFAULT_PAGE_SIZE,
     pageIndex: 0,
     order: null,
     sortBy: null,
@@ -49,7 +50,7 @@ export const useQuerySettings = (
       const scopesFilter = tableFilters.filters?.find((filter) => filter.id === 'scope')?.value?.join(',') ?? '';
 
       // Extract pagination
-      const { pageSize = 10, pageIndex = 0 } = tableFilters;
+      const { pageSize = TABLE_DEFAULT_PAGE_SIZE, pageIndex = 0 } = tableFilters;
 
       // Extract and convert sorting
       let sortByOption = '';

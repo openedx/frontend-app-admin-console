@@ -9,7 +9,8 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, buildUserPath, DJANGO_MANAGED_ROLES, getScopeContextType,
+  MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -97,8 +98,8 @@ const NameCell = ({ row }: CellProps) => {
 const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const viewPath = `/authz/user/${row.original.username}`;
-  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
+  const viewPath = buildUserPath(row.original.username ?? '');
+  const isCourseScope = getScopeContextType(row.original.scope) === 'course' && !DJANGO_MANAGED_ROLES.includes(row.original.role);
   const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isDisabled) {
@@ -144,7 +145,7 @@ const ScopeCell = ({ row }: CellProps) => {
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const scopeIcon = getScopeContextType(row.original.scope) === 'library' ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
       scopeText: row.original.scope,
       iconSrc: scopeIcon,
@@ -174,10 +175,10 @@ const PermissionsCell = ({ row }: CellProps) => {
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
   return (
     <span>
-      { isDjangoRole
+      {isDjangoRole
         ? formatMessage(
           messages['authz.user.table.permissions.access.label'],
-          { accessType: role === 'django.superuser' ? 'total' : 'partial' },
+          { accessType: role === SUPERUSER_ROLE ? 'total' : 'partial' },
         )
         : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
     </span>
@@ -239,7 +240,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.djangorole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1"
@@ -257,7 +258,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1 text-light-500"
@@ -267,7 +268,7 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = !role?.startsWith('lib');
+  const isCourseScope = getScopeContextType(row.original.scope) === 'course';
   const isCourseAuthoringDisabled = isCourseEnabled !== undefined
     && isCourseScope && !isCourseEnabled(row.original.scope);
 

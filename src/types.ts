@@ -27,11 +27,13 @@ export interface LibraryMetadata {
   allowPublicRead: boolean;
 }
 
+export type ContextType = 'course' | 'library';
+
 export interface RoleMetadata {
   role: string;
   name: string;
   description: string;
-  contextType: string;
+  contextType: ContextType;
   disabled?: boolean;
 }
 // TODO: remove unnecessary fields when libraries gets removed

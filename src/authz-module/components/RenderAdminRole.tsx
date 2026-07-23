@@ -1,4 +1,5 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { SUPERUSER_ROLE } from '@src/authz-module/constants';
 import messages from '@src/authz-module/audit-user/messages';
 
 interface RenderAdminRoleProps {
@@ -7,8 +8,7 @@ interface RenderAdminRoleProps {
 
 const RenderAdminRole = ({ role }: RenderAdminRoleProps) => {
   const intl = useIntl();
-  // Determine which message to show based on role
-  const messageKey = role?.toLowerCase().includes('admin')
+  const messageKey = role === SUPERUSER_ROLE
     ? 'authz.user.table.permissions.role.admin'
     : 'authz.user.table.permissions.role.staff';
 

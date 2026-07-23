@@ -15,6 +15,6 @@ export const STATUS_404 = 404;
 
 export const ERROR_STATUS: ErrorStatusCode = {
   [CustomErrors.NO_ACCESS]: [403, 401],
-  [CustomErrors.NOT_FOUND]: [400, 404],
+  [CustomErrors.NOT_FOUND]: [STATUS_400, STATUS_404],
   [CustomErrors.SERVER_ERROR]: [500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511],
 };
