@@ -48,7 +48,7 @@ interface ToastManagerProviderProps {
 export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) => {
   const intl = useIntl();
   const [toasts, setToasts] = useState<(AppToast & { visible: boolean })[]>([]);
-  const removalTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const showToast = useCallback((toast: Omit<AppToast, 'id'>) => {
     const id = `toast-notification-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
@@ -59,10 +59,16 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
   const discardToast = useCallback((id: string) => {
     setToasts(prev => prev.map(t => (t.id === id ? { ...t, visible: false } : t)));
 
+    // If a removal is already pending for this id, don't stack another.
+    if (removalTimers.current.has(id)) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
+      removalTimers.current.delete(id);
     }, DEFAULT_TOAST_DELAY);
-    removalTimers.current.push(timer);
+    removalTimers.current.set(id, timer);
   }, []);
 
   // Clear any pending removal timers when the provider unmounts.
