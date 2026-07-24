@@ -10,17 +10,19 @@ import {
 import {
   coursePermissions,
   courseResourceTypes,
-  rolesObject,
-  rolesLibraryObject,
+  courseRolesWithPermissions,
+} from './course/constants';
+import {
+  libraryRolesWithPermissions,
   libraryPermissions,
   libraryResourceTypes,
-} from '@src/authz-module/roles-permissions';
+} from './library/constants';
 import AnchorButton from '../components/AnchorButton';
 import PermissionTable from '../components/PermissionTable';
 
-import { buildPermissionMatrixByResource } from './library/utils';
+import { buildPermissionMatrixByResource } from './utils';
 
-import messages from './library/messages';
+import messages from './messages';
 
 const RolesPermissions = () => {
   const intl = useIntl();
@@ -28,7 +30,7 @@ const RolesPermissions = () => {
 
   const libraryPermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
-      roles: rolesLibraryObject,
+      roles: libraryRolesWithPermissions,
       permissions: libraryPermissions,
       resources: libraryResourceTypes,
       intl,
@@ -39,7 +41,7 @@ const RolesPermissions = () => {
 
   const coursePermissionsByResource = useMemo(() => {
     const permissionsByResource = buildPermissionMatrixByResource({
-      roles: rolesObject,
+      roles: courseRolesWithPermissions,
       permissions: coursePermissions,
       resources: courseResourceTypes,
       intl,
@@ -56,13 +58,13 @@ const RolesPermissions = () => {
             onClick={() => setActive('courses')}
             variant={`${active === 'courses' ? 'primary' : 'outline-primary'}`}
           >
-            {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab']) }
+            {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab']) }
           </Button>
           <Button
             onClick={() => setActive('libraries')}
             variant={`${active === 'libraries' ? 'primary' : 'outline-primary'}`}
           >
-            {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab']) }
+            {intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab']) }
           </Button>
         </ButtonGroup>
       </Container>
@@ -71,8 +73,8 @@ const RolesPermissions = () => {
         <div className="position-relative">
           <PermissionTable
             permissionsTable={coursePermissionsByResource}
-            roles={rolesObject}
-            title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.tab.title'])}
+            roles={courseRolesWithPermissions}
+            title={intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab.title'])}
           />
           <Alert
             variant="info"
@@ -80,15 +82,15 @@ const RolesPermissions = () => {
           >
             <div className="row align-items-center">
               <div className="col col-7">
-                <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.title'])}</p>
+                <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.title'])}</p>
                 <span>
-                  <span className="font-weight-bold">{intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.note'])}</span>
-                  {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.description'])}
+                  <span className="font-weight-bold">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.note'])}</span>
+                  {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.description'])}
                 </span>
               </div>
               <div className="col col-5">
                 <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
-                  {intl.formatMessage(messages['library.authz.tabs.permissionsRoles.courses.alert.link'])}
+                  {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.link'])}
                 </Hyperlink>
               </div>
             </div>
@@ -99,8 +101,8 @@ const RolesPermissions = () => {
       { active === 'libraries' && (
         <PermissionTable
           permissionsTable={libraryPermissionsByResource}
-          roles={rolesLibraryObject}
-          title={intl.formatMessage(messages['library.authz.tabs.permissionsRoles.libraries.tab.title'])}
+          roles={libraryRolesWithPermissions}
+          title={intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab.title'])}
         />
       )}
       <AnchorButton />
