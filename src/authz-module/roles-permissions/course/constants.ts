@@ -66,7 +66,7 @@ export const CONTENT_COURSE_PERMISSIONS = {
 export const courseResourceTypes: ResourceMetadata[] = [
   {
     key: 'course_access_content',
-    label: 'Course Access & content',
+    label: 'Course access & content',
     description: 'Permissions related to accessing the course and managing core course content, including creating, editing, and publishing materials.',
     icon: BookOpen,
   },
@@ -91,7 +91,7 @@ export const courseResourceTypes: ResourceMetadata[] = [
   {
     key: 'course_files',
     label: 'Files',
-    description: 'Permissions for viewing and managing course pages and additional learning resources.',
+    description: 'Permissions for viewing and managing files and assets uploaded to the course.',
     icon: Folder,
   },
   {
