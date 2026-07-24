@@ -4,6 +4,7 @@ import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
+import type { ContextType } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
@@ -83,7 +84,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
 
   const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {
-      externalKey: getPlatformAggregateScopeKey(contextType),
+      externalKey: getPlatformAggregateScopeKey(contextType as ContextType),
       displayName: platformAggregateLabel,
       description: aggregateDescription,
       org: null,
@@ -109,7 +110,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
         .map((orgSlug) => [
           orgSlug,
           {
-            externalKey: getOrgAggregateScopeKey(contextType, orgSlug),
+            externalKey: getOrgAggregateScopeKey(contextType as ContextType, orgSlug),
             displayName: orgAggregateLabel,
             description: aggregateDescription,
             org: { id: '0', name: orgSlug, shortName: orgSlug },

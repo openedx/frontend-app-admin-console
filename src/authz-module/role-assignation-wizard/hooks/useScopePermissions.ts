@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
 import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
+import type { ContextType } from '@src/authz-module/constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 
 interface UseScopePermissionsParams {
@@ -27,10 +28,10 @@ const useScopePermissions = ({
       ? CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
       : CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM;
     return [
-      { action, scope: getPlatformAggregateScopeKey(contextType) },
+      { action, scope: getPlatformAggregateScopeKey(contextType as ContextType) },
       ...orderedOrgs.map((org) => ({
         action,
-        scope: getOrgAggregateScopeKey(contextType, org),
+        scope: getOrgAggregateScopeKey(contextType as ContextType, org),
       })),
     ];
   }, [orderedOrgs, contextType]);
