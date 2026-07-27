@@ -16,9 +16,12 @@ describe('useScopePermissions', () => {
   });
 
   describe('hasPlatformPermission', () => {
-    it('is true when the platform-wide entry (index 0) is allowed', () => {
+    it('is true when the platform-wide scope is allowed', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: true }, { allowed: false }],
+        data: [
+          { scope: 'course-v1:*', allowed: true },
+          { scope: 'course-v1:MIT+*', allowed: false },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -29,9 +32,12 @@ describe('useScopePermissions', () => {
       expect(result.current.hasPlatformPermission).toBe(true);
     });
 
-    it('is false when the platform-wide entry is not allowed', () => {
+    it('is false when the platform-wide scope is not allowed', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: false }, { allowed: true }],
+        data: [
+          { scope: 'course-v1:*', allowed: false },
+          { scope: 'course-v1:MIT+*', allowed: true },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -62,10 +68,13 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({});
     });
 
-    it('maps allowed responses by org slug index for course context', () => {
-      // Index 0 is the platform-wide entry; org entries follow.
+    it('maps allowed responses by org slug for course context', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: false }, { allowed: true }, { allowed: false }],
+        data: [
+          { scope: 'course-v1:*', allowed: false },
+          { scope: 'course-v1:MIT+*', allowed: true },
+          { scope: 'course-v1:HarvardX+*', allowed: false },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -76,10 +85,13 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({ MIT: true, HarvardX: false });
     });
 
-    it('maps allowed responses by org slug index for library context', () => {
-      // Index 0 is the platform-wide entry; org entries follow.
+    it('maps allowed responses by org slug for library context', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: false }, { allowed: false }, { allowed: true }],
+        data: [
+          { scope: 'lib:*', allowed: false },
+          { scope: 'lib:MIT:*', allowed: false },
+          { scope: 'lib:HarvardX:*', allowed: true },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -101,7 +113,7 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({ MIT: false });
     });
 
-    it('defaults to false when orgPerms data is undefined', () => {
+    it('defaults to false when the response data is undefined', () => {
       mockUseValidateUserPermissions.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopePermissions({
