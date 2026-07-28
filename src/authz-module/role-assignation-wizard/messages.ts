@@ -205,12 +205,12 @@ const messages = defineMessages({
   },
   'wizard.step2.scope.aggregate.platform.label.course': {
     id: 'wizard.step2.scope.aggregate.platform.label.course',
-    defaultMessage: 'All courses in Platform',
+    defaultMessage: 'All courses on the platform',
     description: 'Display name for the platform-wide aggregate scope item when context type is course',
   },
   'wizard.step2.scope.aggregate.platform.label.library': {
     id: 'wizard.step2.scope.aggregate.platform.label.library',
-    defaultMessage: 'All libraries in Platform',
+    defaultMessage: 'All libraries on the platform',
     description: 'Display name for the platform-wide aggregate scope item when context type is library',
   },
 
