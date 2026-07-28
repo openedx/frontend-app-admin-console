@@ -6,7 +6,7 @@ export {
   libraryResourceTypes,
   libraryPermissions,
   libraryRolesMetadata,
-  rolesLibraryObject,
+  libraryRolesWithPermissions,
 } from './library/constants';
 
 export const LIBRARY_ROLE_KEYS = _libraryRolesMetadata.map((r) => r.role).join(',');
@@ -15,7 +15,7 @@ export {
   CONTENT_COURSE_PERMISSIONS,
   courseResourceTypes,
   coursePermissions,
-  rolesObject,
+  courseRolesWithPermissions,
   courseRolesMetadata,
 } from './course/constants';
 
@@ -28,3 +28,4 @@ export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
   { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
   { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
 ];
+export { buildPermissionMatrixByResource, getPermissionMetadata } from './utils';
