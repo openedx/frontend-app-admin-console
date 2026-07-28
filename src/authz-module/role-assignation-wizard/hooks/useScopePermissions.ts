@@ -4,9 +4,6 @@ import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/auth
 import type { ContextType } from '@src/authz-module/constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 
-// Stands in for the org slug on the platform-wide entry, which belongs to no org.
-const PLATFORM_ORG_KEY = '*';
-
 interface UseScopePermissionsParams {
   contextType: string | undefined;
   orderedOrgs: string[];
@@ -21,49 +18,57 @@ const useScopePermissions = ({
   contextType,
   orderedOrgs,
 }: UseScopePermissionsParams): UseScopePermissionsResult => {
-  // Every scope this hook validates, mapped back to the org it belongs to: the
-  // platform-wide aggregate (course-v1:* / lib:*) plus one org-level aggregate per
-  // org. Keyed by scope because that is what the API echoes back on each result.
-  // Note: Using glob patterns (*:org:*)
-  const orgByScope = useMemo(() => {
-    if (!contextType) { return new Map<string, string>(); }
-    return new Map<string, string>([
-      [getPlatformAggregateScopeKey(contextType as ContextType), PLATFORM_ORG_KEY],
-      ...orderedOrgs.map((org) => (
-        [getOrgAggregateScopeKey(contextType as ContextType, org), org] as [string, string]
-      )),
-    ]);
-  }, [orderedOrgs, contextType]);
+  // Validate the platform-wide aggregate (course-v1:* / lib:*) and one org-level
+  // aggregate (course-v1:Org+* / lib:Org:*) per org in a single request; `action`
+  // is the same for every scope.
+  const typedContext = contextType as ContextType;
 
-  // Validate them all in a single request. Building the payload from the keys keeps
-  // the org slugs out of it; `action` is the same for every scope.
+  // 1. Build the API request payload
   const permissionRequests = useMemo(() => {
-    const action = contextType === 'course'
+    if (!typedContext) { return []; }
+
+    const action = typedContext === 'course'
       ? CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
       : CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM;
-    return Array.from(orgByScope.keys(), (scope) => ({ action, scope }));
-  }, [orgByScope, contextType]);
+
+    const platformRequest = { action, scope: getPlatformAggregateScopeKey(typedContext) };
+    const orgRequests = orderedOrgs.map((org) => ({
+      action,
+      scope: getOrgAggregateScopeKey(typedContext, org),
+    }));
+
+    return [platformRequest, ...orgRequests];
+  }, [orderedOrgs, typedContext]);
 
   const { data: perms } = useValidateUserPermissions(permissionRequests);
 
-  // Results are matched by the `scope` the API echoes back. Orgs are seeded to `false` first
-  // so any scope the response omits stays denied.
-  return useMemo(() => {
-    const orgHasPermission: Record<string, boolean> = {};
-    orgByScope.forEach((org) => {
-      if (org !== PLATFORM_ORG_KEY) { orgHasPermission[org] = false; }
-    });
-    let hasPlatformPermission = false;
+  // 2. Create a lightweight index for fast lookups
+  // Indexed by the `scope` the API echoes back on each result.
+  const allowedByScope = useMemo(() => {
+    const byScope: Record<string, boolean> = Object.create(null);
     perms?.forEach(({ scope, allowed }) => {
-      const org = scope === undefined ? undefined : orgByScope.get(scope);
-      if (org === PLATFORM_ORG_KEY) {
-        hasPlatformPermission = allowed;
-      } else if (org !== undefined) {
-        orgHasPermission[org] = allowed;
-      }
+      if (scope !== undefined) { byScope[scope] = allowed; }
     });
-    return { hasPlatformPermission, orgHasPermission };
-  }, [orgByScope, perms]);
+    return byScope;
+  }, [perms]);
+
+  // 3. Extract platform-wide permission
+  const hasPlatformPermission = !!typedContext
+    && (allowedByScope[getPlatformAggregateScopeKey(typedContext)] ?? false);
+
+  // 4. Map permissions back to the requested Orgs
+  const orgHasPermission = useMemo(() => {
+    const result: Record<string, boolean> = {};
+    if (typedContext) {
+      orderedOrgs.forEach((org) => {
+        const scope = getOrgAggregateScopeKey(typedContext, org);
+        result[org] = allowedByScope[scope] ?? false;
+      });
+    }
+    return result;
+  }, [orderedOrgs, typedContext, allowedByScope]);
+
+  return { hasPlatformPermission, orgHasPermission };
 };
 
 export default useScopePermissions;
