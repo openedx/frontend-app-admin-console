@@ -8,6 +8,7 @@ import {
 import {
   CustomErrors, ERROR_STATUS, STATUS_400, STATUS_404,
 } from '@src/constants';
+import { getHttpErrorStatus } from '@src/data/utils';
 
 import messages from './messages';
 
@@ -52,7 +53,7 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
   const intl = useIntl();
   const [reloading, setReloading] = useState(false);
 
-  const errorStatus: number = error?.customAttributes?.httpErrorStatus;
+  const errorStatus = getHttpErrorStatus(error);
   const errorMessage: string = error?.message;
   const {
     title, description, statusCode, showBackButton, showReloadButton,

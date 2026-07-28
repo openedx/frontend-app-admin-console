@@ -134,15 +134,7 @@ const AssignRoleWizard = ({
         onClose();
       }
     } catch (error) {
-      // TODO: remove once the backend supports the permissions endpoint without a required scope.
-      if ((error as any)?.customAttributes?.httpErrorStatus === 403) {
-        showToast({
-          message: intl.formatMessage(messages['wizard.save.error.forbidden']),
-          type: 'error',
-        });
-      } else {
-        showErrorToast(error, handleSave);
-      }
+      showErrorToast(error, handleSave);
     }
   };
 
