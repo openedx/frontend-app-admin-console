@@ -1,5 +1,6 @@
 import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { Language, LibraryBooks, School } from '@openedx/paragon/icons';
+import { unsupportedCourseRolesMetadata } from '@src/authz-module/roles-permissions';
 import messages from './messages';
 
 export const getRolesFiltersOptions = (intl: IntlShape) => [
@@ -46,6 +47,14 @@ export const getRolesFiltersOptions = (intl: IntlShape) => [
     value: 'course_auditor',
     contextType: 'course',
   },
+  // Roles assigned outside this console can still show up in the table, so they are filterable too.
+  ...unsupportedCourseRolesMetadata.map(({ role, name }) => ({
+    groupName: intl.formatMessage(messages['authz.team.members.table.group.courses']),
+    groupIcon: School,
+    displayName: name,
+    value: role,
+    contextType: 'course',
+  })),
 
   {
     groupName: intl.formatMessage(messages['authz.team.members.table.group.libraries']),
