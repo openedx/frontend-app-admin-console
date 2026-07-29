@@ -17,6 +17,7 @@ export {
   coursePermissions,
   courseRolesWithPermissions,
   courseRolesMetadata,
+  unsupportedCourseRolesMetadata,
 } from './course/constants';
 
 export const MANAGE_TEAM_PERMISSIONS: { action: string }[] = [

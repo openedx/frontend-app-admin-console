@@ -377,6 +377,44 @@ export const courseRolesMetadata: RoleMetadata[] = [
   },
 ];
 
+// Course roles that exist in openedx-authz but have not yet been migrated.
+// These roles can be listed, but no permissions are defined for them yet,
+// so they are not managed by this console.
+//
+// They are kept separate from `courseRolesMetadata` so they can be
+// removed or promoted to supported roles once the migration is complete.
+
+export const unsupportedCourseRolesMetadata: RoleMetadata[] = [
+  {
+    role: 'course_limited_staff',
+    name: 'Course Limited Staff',
+    description: "Course team members with the Limited Staff role help you manage your course. Limited Staff can enroll and unenroll learners, as well as modify their grades and access all course data. Limited Staff don't have access to your course in Studio. Any users not yet enrolled in the course will be automatically enrolled when added as Limited Staff.",
+    contextType: 'course',
+    disabled: true,
+  },
+  {
+    role: 'course_data_researcher',
+    name: 'Course Data Researcher',
+    description: 'Course Data Researchers can access the data download tab. Any users not yet enrolled in the course will be automatically enrolled when added as Course Data Researcher.',
+    contextType: 'course',
+    disabled: true,
+  },
+  {
+    role: 'course_beta_tester',
+    name: 'Course Beta Tester',
+    description: 'Beta Testers can see course content before other learners. They can make sure that the content works, but have no additional privileges. Any users not yet enrolled in the course will be automatically enrolled when added as Beta Tester.',
+    contextType: 'course',
+    disabled: true,
+  },
+  {
+    role: 'ccx_coach',
+    name: 'CCX Coach',
+    description: 'Legacy "CCX Coach" course role. Grants management of a custom course (CCX) derived from this course.',
+    contextType: 'course',
+    disabled: true,
+  },
+];
+
 // Permission keys granted to each course role.
 const COURSE_ROLE_PERMISSIONS: Record<string, string[]> = {
   course_admin: [

@@ -1,3 +1,5 @@
+import { unsupportedCourseRolesMetadata } from './roles-permissions';
+
 // Resource Type Definitions
 export const CONTEXT_TYPES = {
   LIBRARY: 'library',
@@ -66,6 +68,8 @@ export const MAX_TABLE_FILTERS_APPLIED = 10;
 export const AUTHZ_HOME_PATH = '/authz';
 
 export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
+  // Labels for roles assigned outside this console.
+  ...Object.fromEntries(unsupportedCourseRolesMetadata.map(({ role, name }) => [role, name])),
   library_admin: 'Library Admin',
   library_author: 'Library Author',
   library_contributor: 'Library Contributor',

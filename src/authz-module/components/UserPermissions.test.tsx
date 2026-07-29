@@ -77,6 +77,25 @@ describe('UserPermissions', () => {
     labels.forEach((label) => expect(label.textContent?.trim()).not.toBe(''));
   });
 
+  describe('unsupported course roles', () => {
+    it.each(coursesConstants.unsupportedCourseRolesMetadata)(
+      'describes what the $name role grants instead of listing permissions',
+      ({ role, description }) => {
+        const props = {
+          row: {
+            original: {
+              role,
+            },
+          },
+        };
+
+        renderWrapper(<UserPermissions {...props} />);
+
+        expect(screen.getByText(description)).toBeInTheDocument();
+      },
+    );
+  });
+
   it('returns null when role is empty', () => {
     const props = {
       row: {

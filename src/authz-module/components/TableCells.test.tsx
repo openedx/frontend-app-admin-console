@@ -3,6 +3,7 @@ import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
+import { unsupportedCourseRolesMetadata } from '@src/authz-module/roles-permissions';
 import {
   NameCell,
   ViewActionCell,
@@ -297,6 +298,24 @@ describe('TableCells Components', () => {
 
       expect(screen.getByText('Library Admin')).toBeInTheDocument();
       expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'Library Admin' });
+    });
+
+    it.each(unsupportedCourseRolesMetadata)('names the $name role, assigned outside this console', ({ role, name }) => {
+      const props = {
+        value: role,
+        cell: mockCell,
+        row: {
+          id: '0',
+          original: {
+            role, org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+          },
+        },
+        column: { id: 'role' },
+      };
+
+      renderWrapper(<RoleCell {...props} />);
+
+      expect(screen.getByText(name)).toBeInTheDocument();
     });
 
     it('renders empty string for unmapped role', () => {

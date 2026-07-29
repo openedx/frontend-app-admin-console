@@ -8,6 +8,7 @@ import {
   libraryPermissions,
   libraryRolesWithPermissions,
   getPermissionMetadata,
+  unsupportedCourseRolesMetadata,
 } from '@src/authz-module/roles-permissions';
 import RenderPermissionColumn from './RenderPermissionColumn';
 import RenderPermissionInLine from './RenderPermissionInLine';
@@ -36,6 +37,20 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
 
   // Normalize role string to match keys in constants (e.g. "Course Admin" -> "course_admin")
   roleKey = roleKey.trim().toLowerCase().replace(/[-\s]+/g, '_');
+
+  // Roles that can't be managed from this console have no permission metadata to list,
+  // so describe what the role grants instead.
+  const unsupportedRole = unsupportedCourseRolesMetadata.find(({ role }) => role === roleKey);
+  if (unsupportedRole) {
+    return (
+      <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light-200">
+        <p className="mb-0 text-primary-400 font-weight-light">
+          {unsupportedRole.description}
+        </p>
+      </div>
+    );
+  }
+
   const isLibraryRole = roleKey.includes('library');
   const config = isLibraryRole
     ? {
