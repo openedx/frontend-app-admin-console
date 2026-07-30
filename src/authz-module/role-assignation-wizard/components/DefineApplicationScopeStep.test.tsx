@@ -160,7 +160,7 @@ describe('DefineApplicationScopeStep', () => {
     it('does not render platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
       renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
+      expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
     it('renders scopes grouped by org in OrgSection', () => {
@@ -318,17 +318,17 @@ describe('DefineApplicationScopeStep', () => {
     it('does not show platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
       renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
+      expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
     it('does not show platform aggregate when selectedRole is null', () => {
       renderComponent({ selectedRole: null });
-      expect(screen.queryByText('All libraries in Platform')).not.toBeInTheDocument();
+      expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
-    it('does not show "All courses in Platform" (disabled pending backend support)', () => {
+    it('does not show "All courses on the platform" (disabled pending backend support)', () => {
       renderComponent({ selectedRole: 'course_admin' });
-      expect(screen.queryByText('All courses in Platform')).not.toBeInTheDocument();
+      expect(screen.queryByText('All courses on the platform')).not.toBeInTheDocument();
     });
   });
 

@@ -1,4 +1,7 @@
-import { buildWizardPath, getOrgAggregateScopeKey, ROUTES } from './constants';
+import {
+  buildWizardPath, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
+} from './constants';
+import type { ContextType } from './constants';
 
 const BASE = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
 
@@ -43,6 +46,20 @@ describe('getOrgAggregateScopeKey', () => {
   });
 
   it('throws for an unknown contextType', () => {
-    expect(() => getOrgAggregateScopeKey('unknown', 'MIT')).toThrow('Unknown contextType: "unknown"');
+    expect(() => getOrgAggregateScopeKey('unknown' as ContextType, 'MIT')).toThrow('Unknown contextType: "unknown"');
+  });
+});
+
+describe('getPlatformAggregateScopeKey', () => {
+  it('returns the platform-wide course wildcard scope for course context', () => {
+    expect(getPlatformAggregateScopeKey('course')).toBe('course-v1:*');
+  });
+
+  it('returns the platform-wide library wildcard scope for library context', () => {
+    expect(getPlatformAggregateScopeKey('library')).toBe('lib:*');
+  });
+
+  it('throws for an unknown contextType', () => {
+    expect(() => getPlatformAggregateScopeKey('unknown' as ContextType)).toThrow('Unknown contextType: "unknown"');
   });
 });

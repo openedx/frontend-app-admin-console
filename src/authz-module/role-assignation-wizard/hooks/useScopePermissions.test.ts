@@ -16,9 +16,41 @@ describe('useScopePermissions', () => {
   });
 
   describe('hasPlatformPermission', () => {
-    it('is always false (pending backend support)', () => {
+    it('is true when the platform-wide scope is allowed', () => {
+      mockUseValidateUserPermissions.mockReturnValue({
+        data: [
+          { scope: 'course-v1:*', allowed: true },
+          { scope: 'course-v1:MIT+*', allowed: false },
+        ],
+      });
+
       const { result } = renderHook(() => useScopePermissions({
         contextType: 'course',
+        orderedOrgs: ['MIT'],
+      }));
+
+      expect(result.current.hasPlatformPermission).toBe(true);
+    });
+
+    it('is false when the platform-wide scope is not allowed', () => {
+      mockUseValidateUserPermissions.mockReturnValue({
+        data: [
+          { scope: 'course-v1:*', allowed: false },
+          { scope: 'course-v1:MIT+*', allowed: true },
+        ],
+      });
+
+      const { result } = renderHook(() => useScopePermissions({
+        contextType: 'course',
+        orderedOrgs: ['MIT'],
+      }));
+
+      expect(result.current.hasPlatformPermission).toBe(false);
+    });
+
+    it('is false when contextType is undefined', () => {
+      const { result } = renderHook(() => useScopePermissions({
+        contextType: undefined,
         orderedOrgs: ['MIT'],
       }));
 
@@ -36,9 +68,13 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({});
     });
 
-    it('maps allowed responses by org slug index for course context', () => {
+    it('maps allowed responses by org slug for course context', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: true }, { allowed: false }],
+        data: [
+          { scope: 'course-v1:*', allowed: false },
+          { scope: 'course-v1:MIT+*', allowed: true },
+          { scope: 'course-v1:HarvardX+*', allowed: false },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -49,9 +85,13 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({ MIT: true, HarvardX: false });
     });
 
-    it('maps allowed responses by org slug index for library context', () => {
+    it('maps allowed responses by org slug for library context', () => {
       mockUseValidateUserPermissions.mockReturnValue({
-        data: [{ allowed: false }, { allowed: true }],
+        data: [
+          { scope: 'lib:*', allowed: false },
+          { scope: 'lib:MIT:*', allowed: false },
+          { scope: 'lib:HarvardX:*', allowed: true },
+        ],
       });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -73,7 +113,7 @@ describe('useScopePermissions', () => {
       expect(result.current.orgHasPermission).toEqual({ MIT: false });
     });
 
-    it('defaults to false when orgPerms data is undefined', () => {
+    it('defaults to false when the response data is undefined', () => {
       mockUseValidateUserPermissions.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopePermissions({
@@ -86,37 +126,41 @@ describe('useScopePermissions', () => {
   });
 
   describe('permission request construction', () => {
-    it('uses MANAGE_COURSE_TEAM action with course-v1 scope for course context', () => {
+    it('uses MANAGE_COURSE_TEAM action with the platform-wide and per-org course scopes', () => {
       renderHook(() => useScopePermissions({
         contextType: 'course',
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
+        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:*' },
         { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:MIT+*' },
         { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:HarvardX+*' },
       ]);
     });
 
-    it('uses MANAGE_LIBRARY_TEAM action with lib scope for library context', () => {
+    it('uses MANAGE_LIBRARY_TEAM action with the platform-wide and per-org lib scopes', () => {
       renderHook(() => useScopePermissions({
         contextType: 'library',
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
+        { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:*' },
         { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:MIT:*' },
         { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:HarvardX:*' },
       ]);
     });
 
-    it('passes empty array to useValidateUserPermissions when orderedOrgs is empty', () => {
+    it('validates only the platform-wide scope when orderedOrgs is empty', () => {
       renderHook(() => useScopePermissions({
         contextType: 'course',
         orderedOrgs: [],
       }));
 
-      expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([]);
+      expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
+        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:*' },
+      ]);
     });
 
     it('passes empty array when contextType is undefined', () => {

@@ -228,7 +228,7 @@ describe('useScopeListData', () => {
   });
 
   describe('Platform aggregate scope item', () => {
-    it('returns null platformAggregateScopeItem for library context (disabled pending backend support)', () => {
+    it('returns null platformAggregateScopeItem when the user lacks platform permission', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
@@ -241,7 +241,8 @@ describe('useScopeListData', () => {
       expect(result.current.platformAggregateScopeItem).toBeNull();
     });
 
-    it('returns null platformAggregateScopeItem for course context (disabled pending backend support)', () => {
+    it('emits the platform-wide course scope (course-v1:*) when permission is granted', () => {
+      mockUseScopePermissions.mockReturnValue({ hasPlatformPermission: true, orgHasPermission: {} });
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
@@ -251,10 +252,31 @@ describe('useScopeListData', () => {
         orgs: [],
       }), { wrapper });
 
-      expect(result.current.platformAggregateScopeItem).toBeNull();
+      expect(result.current.platformAggregateScopeItem).toMatchObject({
+        externalKey: 'course-v1:*',
+        org: null,
+      });
+    });
+
+    it('emits the platform-wide library scope (lib:*) when permission is granted', () => {
+      mockUseScopePermissions.mockReturnValue({ hasPlatformPermission: true, orgHasPermission: {} });
+      mockUseScopes.mockReturnValue(makeScopesHook());
+      mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
+
+      const { result } = renderHook(() => useScopeListData({
+        contextType: 'library',
+        search: '',
+        orgs: [],
+      }), { wrapper });
+
+      expect(result.current.platformAggregateScopeItem).toMatchObject({
+        externalKey: 'lib:*',
+        org: null,
+      });
     });
 
     it('returns null platformAggregateScopeItem when contextType is undefined', () => {
+      mockUseScopePermissions.mockReturnValue({ hasPlatformPermission: true, orgHasPermission: {} });
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 

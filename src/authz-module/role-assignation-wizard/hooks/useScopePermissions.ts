@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { getOrgAggregateScopeKey } from '@src/authz-module/constants';
+import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
+import type { ContextType } from '@src/authz-module/constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 
 interface UseScopePermissionsParams {
@@ -17,32 +18,55 @@ const useScopePermissions = ({
   contextType,
   orderedOrgs,
 }: UseScopePermissionsParams): UseScopePermissionsResult => {
-  // TODO: compute hasPlatformPermission once the backend supports validating platform-wide permissions.
-  const hasPlatformPermission = false;
+  // Validate the platform-wide aggregate (course-v1:* / lib:*) and one org-level
+  // aggregate (course-v1:Org+* / lib:Org:*) per org in a single request; `action`
+  // is the same for every scope.
+  const typedContext = contextType as ContextType;
 
-  // Validate per-organization permissions for org-level aggregate options
-  // Note: Using glob patterns (*:org:*)
-  const orgPermissionRequests = useMemo(() => {
-    if (!orderedOrgs.length || !contextType) { return []; }
-    const action = contextType === 'course'
+  // 1. Build the API request payload
+  const permissionRequests = useMemo(() => {
+    if (!typedContext) { return []; }
+
+    const action = typedContext === 'course'
       ? CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
       : CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM;
-    return orderedOrgs.map((org) => ({
+
+    const platformRequest = { action, scope: getPlatformAggregateScopeKey(typedContext) };
+    const orgRequests = orderedOrgs.map((org) => ({
       action,
-      scope: getOrgAggregateScopeKey(contextType, org),
+      scope: getOrgAggregateScopeKey(typedContext, org),
     }));
-  }, [orderedOrgs, contextType]);
 
-  const { data: orgPerms } = useValidateUserPermissions(orgPermissionRequests);
+    return [platformRequest, ...orgRequests];
+  }, [orderedOrgs, typedContext]);
 
-  // Build a map of `org: has_permission`
-  const orgHasPermission = useMemo(() => {
-    const map: Record<string, boolean> = {};
-    orderedOrgs.forEach((org, idx) => {
-      map[org] = orgPerms?.[idx]?.allowed ?? false;
+  const { data: perms } = useValidateUserPermissions(permissionRequests);
+
+  // 2. Create a lightweight index for fast lookups
+  // Indexed by the `scope` the API echoes back on each result.
+  const allowedByScope = useMemo(() => {
+    const byScope: Record<string, boolean> = Object.create(null);
+    perms?.forEach(({ scope, allowed }) => {
+      if (scope !== undefined) { byScope[scope] = allowed; }
     });
-    return map;
-  }, [orderedOrgs, orgPerms]);
+    return byScope;
+  }, [perms]);
+
+  // 3. Extract platform-wide permission
+  const hasPlatformPermission = !!typedContext
+    && (allowedByScope[getPlatformAggregateScopeKey(typedContext)] ?? false);
+
+  // 4. Map permissions back to the requested Orgs
+  const orgHasPermission = useMemo(() => {
+    const result: Record<string, boolean> = {};
+    if (typedContext) {
+      orderedOrgs.forEach((org) => {
+        const scope = getOrgAggregateScopeKey(typedContext, org);
+        result[org] = allowedByScope[scope] ?? false;
+      });
+    }
+    return result;
+  }, [orderedOrgs, typedContext, allowedByScope]);
 
   return { hasPlatformPermission, orgHasPermission };
 };
