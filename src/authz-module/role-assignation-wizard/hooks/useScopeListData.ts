@@ -4,7 +4,6 @@ import { ContextType, Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
-import type { ContextType } from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 

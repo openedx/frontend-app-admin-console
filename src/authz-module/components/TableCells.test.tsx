@@ -516,7 +516,7 @@ describe('TableCells Components', () => {
       original: {
         role: 'library_admin',
         org: 'Test Org',
-        scope: 'Test Scope',
+        scope: 'lib:Org:TestScope',
         permissionCount: 1,
         canManageScope: true,
       },
@@ -538,7 +538,7 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:Org:TestScope' });
     });
 
     it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {
@@ -586,7 +586,7 @@ describe('TableCells Components', () => {
         original: {
           role: 'django.superuser',
           org: 'Test Org',
-          scope: 'Test Scope',
+          scope: 'lib:Org:TestScope',
           permissionCount: 1,
         },
       };
@@ -610,7 +610,7 @@ describe('TableCells Components', () => {
       });
       const customRow = {
         original: {
-          ...baseRow,
+          ...baseRow.original,
           canManageScope: false,
         },
       };

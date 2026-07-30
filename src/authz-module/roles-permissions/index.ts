@@ -1,7 +1,6 @@
-import { CONTENT_COURSE_PERMISSIONS } from './course/constants';
-import { CONTENT_LIBRARY_PERMISSIONS, libraryRolesMetadata as _libraryRolesMetadata } from './library/constants';
 import type { RoleMetadata } from '@src/types';
-import { courseRolesMetadata as _courseRolesMetadata } from './course/constants';
+import { CONTENT_COURSE_PERMISSIONS, courseRolesMetadata as _courseRolesMetadata } from './course/constants';
+import { CONTENT_LIBRARY_PERMISSIONS, libraryRolesMetadata as _libraryRolesMetadata } from './library/constants';
 
 export {
   CONTENT_LIBRARY_PERMISSIONS,

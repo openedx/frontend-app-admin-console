@@ -99,7 +99,7 @@ const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewAction
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const viewPath = buildUserPath(row.original.username ?? '');
-  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
+  const isCourseScope = getScopeContextType(row.original.scope) === 'course' && !DJANGO_MANAGED_ROLES.includes(row.original.role);
   const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isDisabled) {
@@ -268,7 +268,7 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = !role?.startsWith('lib');
+  const isCourseScope = getScopeContextType(row.original.scope) === 'course';
   const isCourseAuthoringDisabled = isCourseEnabled !== undefined
     && isCourseScope && !isCourseEnabled(row.original.scope);
 
