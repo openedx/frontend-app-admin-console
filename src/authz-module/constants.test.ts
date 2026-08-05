@@ -1,5 +1,5 @@
 import {
-  buildWizardPath, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
+  buildWizardPath, getAggregateScopeType, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
 } from './constants';
 import type { ContextType } from './constants';
 
@@ -61,5 +61,39 @@ describe('getPlatformAggregateScopeKey', () => {
 
   it('throws for an unknown contextType', () => {
     expect(() => getPlatformAggregateScopeKey('unknown' as ContextType)).toThrow('Unknown contextType: "unknown"');
+  });
+});
+
+describe('getAggregateScopeType', () => {
+  it('recognizes the platform-wide course scope', () => {
+    expect(getAggregateScopeType('course-v1:*', '*')).toBe('platform');
+  });
+
+  it('recognizes the platform-wide library scope', () => {
+    expect(getAggregateScopeType('lib:*', '*')).toBe('platform');
+  });
+
+  it('recognizes an org-wide course scope', () => {
+    expect(getAggregateScopeType('course-v1:MIT+*', 'MIT')).toBe('org');
+  });
+
+  it('recognizes an org-wide library scope', () => {
+    expect(getAggregateScopeType('lib:MIT:*', 'MIT')).toBe('org');
+  });
+
+  it('returns null for a single course scope', () => {
+    expect(getAggregateScopeType('course-v1:MIT+DemoX+2024', 'MIT')).toBeNull();
+  });
+
+  it('returns null for a single library scope', () => {
+    expect(getAggregateScopeType('lib:MIT:demo', 'MIT')).toBeNull();
+  });
+
+  it('returns null for an org-wide scope when the org is unknown', () => {
+    expect(getAggregateScopeType('course-v1:MIT+*')).toBeNull();
+  });
+
+  it('returns null when the scope belongs to a different org', () => {
+    expect(getAggregateScopeType('course-v1:MIT+*', 'HarvardX')).toBeNull();
   });
 });

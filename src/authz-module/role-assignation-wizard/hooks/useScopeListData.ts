@@ -3,8 +3,9 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
+import { CONTEXT_TYPES, getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
 import type { ContextType } from '@src/authz-module/constants';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
@@ -74,13 +75,11 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
     : intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library']);
 
-  const platformAggregateLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.course'])
-    : intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.library']);
+  const labelContextType = contextType === 'course' ? CONTEXT_TYPES.COURSE : CONTEXT_TYPES.LIBRARY;
 
-  const orgAggregateLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
-    : intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library']);
+  const platformAggregateLabel = intl.formatMessage(AGGREGATE_SCOPE_LABELS.platform[labelContextType]);
+
+  const orgAggregateLabel = intl.formatMessage(AGGREGATE_SCOPE_LABELS.org[labelContextType]);
 
   const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {

@@ -30,6 +30,23 @@ export const getPlatformAggregateScopeKey = (contextType: ContextType): string =
   return scope;
 };
 
+export const getScopeContextType = (scope: string): ContextType => (
+  scope.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE
+);
+
+/**
+ * Tells whether a scope is one of the wildcard scopes, and which level it aggregates.
+ *
+ * Returns `null` for a scope pointing at a single course or library. The org slug is
+ * needed to recognize an org-level aggregate, since its key embeds the slug.
+ */
+export const getAggregateScopeType = (scope: string, org?: string | null): 'platform' | 'org' | null => {
+  const contextType = getScopeContextType(scope);
+  if (scope === getPlatformAggregateScopeKey(contextType)) { return 'platform'; }
+  if (org && scope === getOrgAggregateScopeKey(contextType, org)) { return 'org'; }
+  return null;
+};
+
 export const DEFAULT_TOAST_DELAY = 5000;
 export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
 export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({

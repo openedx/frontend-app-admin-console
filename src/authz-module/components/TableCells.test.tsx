@@ -486,7 +486,7 @@ describe('TableCells Components', () => {
       expect(screen.queryByText('*')).not.toBeInTheDocument();
     });
 
-    it('displays "All courses" for the platform-wide course scope (course-v1:*)', () => {
+    it('displays the platform-wide label for the course wildcard scope (course-v1:*)', () => {
       const props = {
         value: 'course-v1:*',
         row: {
@@ -500,11 +500,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(<ScopeCell {...props} />);
 
-      expect(screen.getByText('All courses')).toBeInTheDocument();
+      expect(screen.getByText('All courses on the platform')).toBeInTheDocument();
       expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
     });
 
-    it('displays "All libraries" for the platform-wide library scope (lib:*)', () => {
+    it('displays the platform-wide label for the library wildcard scope (lib:*)', () => {
       const props = {
         value: 'lib:*',
         row: {
@@ -518,11 +518,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(<ScopeCell {...props} />);
 
-      expect(screen.getByText('All libraries')).toBeInTheDocument();
+      expect(screen.getByText('All libraries on the platform')).toBeInTheDocument();
       expect(screen.queryByText('lib:*')).not.toBeInTheDocument();
     });
 
-    it('displays "All courses in <org>" for an organization-wide course scope', () => {
+    it('displays the org-wide label for an organization-wide course scope', () => {
       const props = {
         value: 'course-v1:TestOrg+*',
         row: {
@@ -536,11 +536,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(<ScopeCell {...props} />);
 
-      expect(screen.getByText('All courses in TestOrg')).toBeInTheDocument();
+      expect(screen.getByText('All courses in this organization')).toBeInTheDocument();
       expect(screen.queryByText('course-v1:TestOrg+*')).not.toBeInTheDocument();
     });
 
-    it('displays "All libraries in <org>" for an organization-wide library scope', () => {
+    it('displays the org-wide label for an organization-wide library scope', () => {
       const props = {
         value: 'lib:TestOrg:*',
         row: {
@@ -554,7 +554,7 @@ describe('TableCells Components', () => {
 
       renderWrapper(<ScopeCell {...props} />);
 
-      expect(screen.getByText('All libraries in TestOrg')).toBeInTheDocument();
+      expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
       expect(screen.queryByText('lib:TestOrg:*')).not.toBeInTheDocument();
     });
   });

@@ -9,8 +9,10 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType, getPlatformAggregateScopeKey,
+  getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
   type DataTableCellProps,
@@ -147,31 +149,15 @@ const ScopeCell = ({ row }: CellProps) => {
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    if (scope === getPlatformAggregateScopeKey('course')) {
+    const contextType = getScopeContextType(scope);
+    const scopeIcon = contextType === CONTEXT_TYPES.LIBRARY ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const aggregateType = getAggregateScopeType(scope, org);
+    if (aggregateType) {
       return {
-        scopeText: formatMessage(messages['authz.user.table.scope.all.courses.label']),
-        iconSrc: RESOURCE_ICONS.COURSE,
+        scopeText: formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][contextType]),
+        iconSrc: scopeIcon,
       };
     }
-    if (scope === getPlatformAggregateScopeKey('library')) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.all.libraries.label']),
-        iconSrc: RESOURCE_ICONS.LIBRARY,
-      };
-    }
-    if (org && scope === getOrgAggregateScopeKey('course', org)) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.all.org.courses.label'], { org }),
-        iconSrc: RESOURCE_ICONS.COURSE,
-      };
-    }
-    if (org && scope === getOrgAggregateScopeKey('library', org)) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.all.org.libraries.label'], { org }),
-        iconSrc: RESOURCE_ICONS.LIBRARY,
-      };
-    }
-    const scopeIcon = scope?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
       scopeText: scope,
       iconSrc: scopeIcon,

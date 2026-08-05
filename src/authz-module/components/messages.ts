@@ -66,26 +66,6 @@ const messages = defineMessages({
     defaultMessage: 'Global',
     description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
   },
-  'authz.user.table.scope.all.courses.label': {
-    id: 'authz.user.table.scope.all.courses.label',
-    defaultMessage: 'All courses',
-    description: 'Label for the scope column when a role applies to every course in the platform (course-v1:* scope).',
-  },
-  'authz.user.table.scope.all.libraries.label': {
-    id: 'authz.user.table.scope.all.libraries.label',
-    defaultMessage: 'All libraries',
-    description: 'Label for the scope column when a role applies to every library in the platform (lib:* scope).',
-  },
-  'authz.user.table.scope.all.org.courses.label': {
-    id: 'authz.user.table.scope.all.org.courses.label',
-    defaultMessage: 'All courses in {org}',
-    description: 'Label for the scope column when a role applies to every course of a single organization (course-v1:<org>+* scope).',
-  },
-  'authz.user.table.scope.all.org.libraries.label': {
-    id: 'authz.user.table.scope.all.org.libraries.label',
-    defaultMessage: 'All libraries in {org}',
-    description: 'Label for the scope column when a role applies to every library of a single organization (lib:<org>:* scope).',
-  },
   'authz.user.table.permissions.access.label': {
     id: 'authz.user.table.permissions.access.label',
     defaultMessage: '{accessType, select, total {Total Access} partial {Partial Access} other {No Access}}',
