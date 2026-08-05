@@ -393,6 +393,24 @@ describe('TableCells Components', () => {
       expect(screen.getByText('Test Organization')).toBeInTheDocument();
       expect(screen.queryByText('All Organizations')).not.toBeInTheDocument();
     });
+
+    it('displays "All Organizations" when the org value is the "*" wildcard', () => {
+      const props = {
+        value: '*',
+        row: {
+          id: '0',
+          original: {
+            role: 'course_admin', org: '*', scope: 'course-v1:*', permissionCount: 1,
+          },
+        },
+        column: { id: 'org' },
+      };
+
+      renderWrapper(<OrgCell {...props} />);
+
+      expect(screen.getByText('All Organizations')).toBeInTheDocument();
+      expect(screen.queryByText('*')).not.toBeInTheDocument();
+    });
   });
 
   describe('ScopeCell', () => {
@@ -448,6 +466,96 @@ describe('TableCells Components', () => {
 
       expect(screen.getByText('Course Scope')).toBeInTheDocument();
       expect(screen.queryByText('Global')).not.toBeInTheDocument();
+    });
+
+    it('displays "Global" when the scope is the "*" wildcard', () => {
+      const props = {
+        value: '*',
+        row: {
+          id: '0',
+          original: {
+            role: 'course_admin', org: '*', scope: '*', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('Global')).toBeInTheDocument();
+      expect(screen.queryByText('*')).not.toBeInTheDocument();
+    });
+
+    it('displays "All courses" for the platform-wide course scope (course-v1:*)', () => {
+      const props = {
+        value: 'course-v1:*',
+        row: {
+          id: '0',
+          original: {
+            role: 'course_admin', org: '*', scope: 'course-v1:*', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('All courses')).toBeInTheDocument();
+      expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
+    });
+
+    it('displays "All libraries" for the platform-wide library scope (lib:*)', () => {
+      const props = {
+        value: 'lib:*',
+        row: {
+          id: '0',
+          original: {
+            role: 'library_admin', org: '*', scope: 'lib:*', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('All libraries')).toBeInTheDocument();
+      expect(screen.queryByText('lib:*')).not.toBeInTheDocument();
+    });
+
+    it('displays "All courses in <org>" for an organization-wide course scope', () => {
+      const props = {
+        value: 'course-v1:TestOrg+*',
+        row: {
+          id: '0',
+          original: {
+            role: 'course_admin', org: 'TestOrg', scope: 'course-v1:TestOrg+*', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('All courses in TestOrg')).toBeInTheDocument();
+      expect(screen.queryByText('course-v1:TestOrg+*')).not.toBeInTheDocument();
+    });
+
+    it('displays "All libraries in <org>" for an organization-wide library scope', () => {
+      const props = {
+        value: 'lib:TestOrg:*',
+        row: {
+          id: '0',
+          original: {
+            role: 'library_admin', org: 'TestOrg', scope: 'lib:TestOrg:*', permissionCount: 1,
+          },
+        },
+        column: { id: 'scope' },
+      };
+
+      renderWrapper(<ScopeCell {...props} />);
+
+      expect(screen.getByText('All libraries in TestOrg')).toBeInTheDocument();
+      expect(screen.queryByText('lib:TestOrg:*')).not.toBeInTheDocument();
     });
   });
 

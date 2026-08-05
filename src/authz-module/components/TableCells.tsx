@@ -9,7 +9,7 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, DJANGO_MANAGED_ROLES, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -127,9 +127,11 @@ const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function 
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
+  // The backend returns '*' as the org wildcard, meaning the role spans every organization.
+  const isAllOrgs = DJANGO_MANAGED_ROLES.includes(row.original.role) || value === '*';
   return (
     <span>
-      {DJANGO_MANAGED_ROLES.includes(row.original.role) ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
+      {isAllOrgs ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
     </span>
   );
 };
@@ -138,18 +140,43 @@ const ScopeCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
 
   const { scopeText, iconSrc } = useMemo(() => {
-    if (DJANGO_MANAGED_ROLES.includes(row.original.role)) {
+    const { role, scope, org } = row.original;
+    if (DJANGO_MANAGED_ROLES.includes(role) || scope === getPlatformAggregateScopeKey('global')) {
       return {
         scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    if (scope === getPlatformAggregateScopeKey('course')) {
+      return {
+        scopeText: formatMessage(messages['authz.user.table.scope.all.courses.label']),
+        iconSrc: RESOURCE_ICONS.COURSE,
+      };
+    }
+    if (scope === getPlatformAggregateScopeKey('library')) {
+      return {
+        scopeText: formatMessage(messages['authz.user.table.scope.all.libraries.label']),
+        iconSrc: RESOURCE_ICONS.LIBRARY,
+      };
+    }
+    if (org && scope === getOrgAggregateScopeKey('course', org)) {
+      return {
+        scopeText: formatMessage(messages['authz.user.table.scope.all.org.courses.label'], { org }),
+        iconSrc: RESOURCE_ICONS.COURSE,
+      };
+    }
+    if (org && scope === getOrgAggregateScopeKey('library', org)) {
+      return {
+        scopeText: formatMessage(messages['authz.user.table.scope.all.org.libraries.label'], { org }),
+        iconSrc: RESOURCE_ICONS.LIBRARY,
+      };
+    }
+    const scopeIcon = scope?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
-      scopeText: row.original.scope,
+      scopeText: scope,
       iconSrc: scopeIcon,
     };
-  }, [row.original.role, row.original.scope, formatMessage]);
+  }, [row.original, formatMessage]);
 
   return (
     <span className="d-flex align-items-center">
@@ -174,7 +201,7 @@ const PermissionsCell = ({ row }: CellProps) => {
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
   return (
     <span>
-      { isDjangoRole
+      {isDjangoRole
         ? formatMessage(
           messages['authz.user.table.permissions.access.label'],
           { accessType: role === 'django.superuser' ? 'total' : 'partial' },
@@ -239,7 +266,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.djangorole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1"
@@ -257,7 +284,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1 text-light-500"

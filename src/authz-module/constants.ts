@@ -2,6 +2,7 @@
 export const CONTEXT_TYPES = {
   LIBRARY: 'library',
   COURSE: 'course',
+  GLOBAL: 'global',
 } as const;
 
 export type ContextType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
@@ -20,6 +21,7 @@ export const getOrgAggregateScopeKey = (contextType: ContextType, orgSlug: strin
 const PLATFORM_AGGREGATE_SCOPE_KEYS = {
   [CONTEXT_TYPES.COURSE]: 'course-v1:*',
   [CONTEXT_TYPES.LIBRARY]: 'lib:*',
+  [CONTEXT_TYPES.GLOBAL]: '*',
 };
 
 export const getPlatformAggregateScopeKey = (contextType: ContextType): string => {
