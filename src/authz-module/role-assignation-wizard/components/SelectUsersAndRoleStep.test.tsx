@@ -1,27 +1,28 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
+import type { RoleMetadata } from '@src/types';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
 
 jest.mock('@edx/frontend-platform', () => ({
   getConfig: () => ({ LMS_BASE_URL: 'http://localhost:8000' }),
 }));
 
-const libraryRole = {
+const libraryRole: RoleMetadata = {
   role: 'library_admin',
   name: 'Library Admin',
   description: 'Can manage the library.',
   contextType: 'library',
 };
 
-const courseRole = {
+const courseRole: RoleMetadata = {
   role: 'course_admin',
   name: 'Course Admin',
   description: 'Can manage the course team.',
   contextType: 'course',
 };
 
-const disabledRole = {
+const disabledRole: RoleMetadata = {
   role: 'course_editor',
   name: 'Course Editor',
   description: 'Can edit course content.',

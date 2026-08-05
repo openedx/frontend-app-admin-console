@@ -260,7 +260,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
+      expect(mockNavigate).toHaveBeenCalledWith(`/authz/user/${encodeURIComponent('user+with@special.chars')}`);
     });
 
     it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {
@@ -364,7 +364,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -420,7 +420,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'scope' },
@@ -476,7 +476,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff',
+            role: 'django.staff',
             permissionCount: 5,
             org: 'Test Org',
             scope: 'Test Scope',
@@ -516,7 +516,7 @@ describe('TableCells Components', () => {
       original: {
         role: 'library_admin',
         org: 'Test Org',
-        scope: 'Test Scope',
+        scope: 'lib:Org:TestScope',
         permissionCount: 1,
         canManageScope: true,
       },
@@ -538,7 +538,7 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:Org:TestScope' });
     });
 
     it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {
@@ -586,7 +586,7 @@ describe('TableCells Components', () => {
         original: {
           role: 'django.superuser',
           org: 'Test Org',
-          scope: 'Test Scope',
+          scope: 'lib:Org:TestScope',
           permissionCount: 1,
         },
       };
@@ -610,7 +610,7 @@ describe('TableCells Components', () => {
       });
       const customRow = {
         original: {
-          ...baseRow,
+          ...baseRow.original,
           canManageScope: false,
         },
       };
