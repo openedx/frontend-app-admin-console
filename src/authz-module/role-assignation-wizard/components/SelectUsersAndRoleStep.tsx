@@ -5,7 +5,7 @@ import {
   Tooltip,
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
-import { RoleMetadata } from '@src/types';
+import { ContextType, RoleMetadata } from '@src/types';
 import HighlightedUsersInput from './HighlightedUsersInput';
 import messages from '../messages';
 
@@ -19,8 +19,7 @@ interface SelectUsersAndRoleStepProps {
   inputRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
-const CONTEXT_ORDER = ['library', 'course'];
-const ADMIN_URL = `${getConfig().LMS_BASE_URL}/admin`;
+const CONTEXT_ORDER: ContextType[] = ['library', 'course'];
 
 const SelectUsersAndRoleStep = ({
   users,
@@ -123,7 +122,7 @@ const SelectUsersAndRoleStep = ({
         <p className="mb-1 font-weight-bold small">{intl.formatMessage(messages['wizard.step1.docs.heading'])}</p>
         <p className="mb-0 small">
           {intl.formatMessage(messages['wizard.step1.docs.body'])}{' '}
-          <a href={ADMIN_URL} target="_blank" rel="noopener noreferrer">
+          <a href={`${getConfig().LMS_BASE_URL}/admin`} target="_blank" rel="noopener noreferrer">
             {intl.formatMessage(messages['wizard.step1.docs.link'])}
           </a>
         </p>

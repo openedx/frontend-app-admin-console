@@ -10,7 +10,7 @@ const mockRoles: Role[] = [
     userCount: 0,
     permissions: [],
     role: '',
-    contextType: '',
+    contextType: 'course',
     scope: '',
   },
   {
@@ -19,7 +19,7 @@ const mockRoles: Role[] = [
     userCount: 0,
     permissions: [],
     role: '',
-    contextType: '',
+    contextType: 'course',
     scope: '',
   },
   {
@@ -28,7 +28,7 @@ const mockRoles: Role[] = [
     userCount: 0,
     permissions: [],
     role: '',
-    contextType: '',
+    contextType: 'course',
     scope: '',
   },
 ];
