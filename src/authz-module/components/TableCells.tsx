@@ -8,10 +8,10 @@ import {
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
+import { buildUserPath, getScopeContextType } from '@src/authz-module/constants';
 import {
-  ADMIN_ROLES, buildUserPath, DJANGO_MANAGED_ROLES, getScopeContextType,
-  MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE,
-} from '@src/authz-module/constants';
+  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE,
+} from '@src/authz-module/roles-permissions';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
   type DataTableCellProps,

@@ -1,5 +1,5 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { SUPERUSER_ROLE } from '@src/authz-module/constants';
+import { SUPERUSER_ROLE } from '@src/authz-module/roles-permissions';
 import messages from '@src/authz-module/audit-user/messages';
 
 interface RenderAdminRoleProps {

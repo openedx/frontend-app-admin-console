@@ -31,4 +31,17 @@ export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
 ];
 export const allRolesMetadata: RoleMetadata[] = [..._courseRolesMetadata, ..._libraryRolesMetadata];
 
+// Role data received from the API uses the dotted format for Django-managed roles.
+export const SUPERUSER_ROLE = 'django.superuser';
+export const GLOBAL_STAFF_ROLE = 'django.staff';
+export const DJANGO_MANAGED_ROLES = [SUPERUSER_ROLE, GLOBAL_STAFF_ROLE];
+
+export const ADMIN_ROLES = ['course_admin', 'library_admin'];
+
+export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
+  ...Object.fromEntries(allRolesMetadata.map((meta) => [meta.role, meta.name])),
+  [SUPERUSER_ROLE]: 'Super Admin',
+  [GLOBAL_STAFF_ROLE]: 'Global Staff',
+};
+
 export { buildPermissionMatrixByResource, getPermissionMetadata } from './utils';

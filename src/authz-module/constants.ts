@@ -1,5 +1,4 @@
 import type { ContextType } from '@src/types';
-import { allRolesMetadata } from './roles-permissions';
 
 // Resource Type Definitions
 export const CONTEXT_TYPES = {
@@ -53,18 +52,6 @@ export const buildWizardPath = (options?: { users?: string; from?: string }) => 
 
 export const MAX_TABLE_FILTERS_APPLIED = 10;
 
-// Role data received from the API uses the dotted format for Django-managed roles.
-export const SUPERUSER_ROLE = 'django.superuser';
-export const GLOBAL_STAFF_ROLE = 'django.staff';
-export const DJANGO_MANAGED_ROLES = [SUPERUSER_ROLE, GLOBAL_STAFF_ROLE];
-
-export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
-  ...Object.fromEntries(allRolesMetadata.map((meta) => [meta.role, meta.name])),
-  [SUPERUSER_ROLE]: 'Super Admin',
-  [GLOBAL_STAFF_ROLE]: 'Global Staff',
-};
-
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
-export const ADMIN_ROLES = ['course_admin', 'library_admin'];

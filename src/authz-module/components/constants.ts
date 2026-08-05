@@ -1,7 +1,8 @@
 import type { IntlShape } from '@edx/frontend-platform/i18n';
 import { Language, LibraryBooks, School } from '@openedx/paragon/icons';
-import { allRolesMetadata } from '@src/authz-module/roles-permissions';
-import { GLOBAL_STAFF_ROLE, MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE } from '@src/authz-module/constants';
+import {
+  allRolesMetadata, GLOBAL_STAFF_ROLE, MAP_ROLE_KEY_TO_LABEL, SUPERUSER_ROLE,
+} from '@src/authz-module/roles-permissions';
 import messages from './messages';
 
 export const RESOURCE_ICONS = {

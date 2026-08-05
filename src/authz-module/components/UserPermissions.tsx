@@ -1,6 +1,6 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
+  DJANGO_MANAGED_ROLES,
   LIBRARY_ROLE_KEYS,
   courseResourceTypes,
   coursePermissions,
