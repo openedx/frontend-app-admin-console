@@ -69,6 +69,7 @@
     "@types/jest": "^29.5.14",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-helmet": "^6.1.11",
     "ts-jest": "^29.4.5",
     "tsc-alias": "^1.9.1"
   },
@@ -76,6 +77,7 @@
     "react-intl": "6.8.9"
   },
   "dependencies": {
-    "@openedx/frontend-app-notifications": "^3.0.0"
+    "@openedx/frontend-app-notifications": "^3.0.0",
+    "react-helmet": "^6.1.0"
   }
 }
