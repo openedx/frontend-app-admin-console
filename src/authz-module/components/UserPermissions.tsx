@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
@@ -24,7 +24,7 @@ interface UserPermissionsProps {
 const UserPermissions = ({ row }: UserPermissionsProps) => {
   const intl = useIntl();
   let roleKey = row?.original?.role;
-  if (!roleKey) { return null; }
+  if (!roleKey) return null;
 
   if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
     return (
@@ -39,18 +39,18 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
   const isLibraryRole = roleKey.includes('library');
   const config = isLibraryRole
     ? {
-      resourceTypes: libraryResourceTypes,
-      permissions: libraryPermissions,
-      roles: libraryRolesWithPermissions,
-    }
+        resourceTypes: libraryResourceTypes,
+        permissions: libraryPermissions,
+        roles: libraryRolesWithPermissions,
+      }
     : {
-      resourceTypes: courseResourceTypes,
-      permissions: coursePermissions,
-      roles: courseRolesWithPermissions,
-    };
+        resourceTypes: courseResourceTypes,
+        permissions: coursePermissions,
+        roles: courseRolesWithPermissions,
+      };
 
   const roleObj = config.roles.find(r => r.role === roleKey);
-  if (!roleObj) { return null; }
+  if (!roleObj) return null;
 
   const rolePerms = new Set(roleObj.permissions.map(String));
   // Build resource list with permissions (only once). Permissions without an
@@ -75,22 +75,22 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
       {isSingleRow
         ? <RenderPermissionInLine items={resources} />
         : (
-          <div className="d-flex flex-wrap w-100">
-            {columns.map((col, index) => (
-              <div
-                key={`column-${index === 0 ? 'left' : 'right'}`}
-                className={`position-relative w-100 col-md-12 col-xl-6 py-3 ${
-                  index === 0 ? 'pr-md-3' : 'pl-md-4'
-                }`}
-              >
-                <RenderPermissionColumn items={col} />
-                {index === 0 && (
-                  <div className="d-none d-xl-block position-absolute border-right h-100" style={{ right: 0, top: 0 }} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+            <div className="d-flex flex-wrap w-100">
+              {columns.map((col, index) => (
+                <div
+                  key={`column-${index === 0 ? 'left' : 'right'}`}
+                  className={`position-relative w-100 col-md-12 col-xl-6 py-3 ${
+                    index === 0 ? 'pr-md-3' : 'pl-md-4'
+                  }`}
+                >
+                  <RenderPermissionColumn items={col} />
+                  {index === 0 && (
+                    <div className="d-none d-xl-block position-absolute border-right h-100" style={{ right: 0, top: 0 }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
     </div>
   );
 };

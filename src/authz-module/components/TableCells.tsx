@@ -1,5 +1,5 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
+import { useIntl } from '@openedx/frontend-base';
+import { SiteContext } from '@openedx/frontend-base';
 import {
   RemoveRedEye,
   Delete, ExpandMore,
@@ -19,7 +19,7 @@ import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
 
-type ViewActionCellExtraProps = {
+interface ViewActionCellExtraProps {
   isCourseEnabled: (scope: string) => boolean;
 };
 
@@ -40,7 +40,7 @@ type ExtendedCellProps = CellPropsWithValue & {
   };
 };
 
-type ActionsCellExtraProps = {
+interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
   isCourseEnabled?: (scope: string) => boolean;
@@ -80,7 +80,7 @@ const DisabledCourseActionButton = ({
 
 const NameCell = ({ row }: CellProps) => {
   const intl = useIntl();
-  const { authenticatedUser } = useContext(AppContext);
+  const { authenticatedUser } = useContext(SiteContext);
   const username = authenticatedUser?.username;
 
   if (row.original.username === username) {
@@ -176,9 +176,9 @@ const PermissionsCell = ({ row }: CellProps) => {
     <span>
       { isDjangoRole
         ? formatMessage(
-          messages['authz.user.table.permissions.access.label'],
-          { accessType: role === 'django.superuser' ? 'total' : 'partial' },
-        )
+            messages['authz.user.table.permissions.access.label'],
+            { accessType: role === 'django.superuser' ? 'total' : 'partial' },
+          )
         : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
     </span>
   );
@@ -239,7 +239,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.djangorole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1"
@@ -257,7 +257,7 @@ const ActionsCell = ({
           <Tooltip variant="light" id="tooltip-left">
             {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
           </Tooltip>
-      )}
+        )}
       >
         <Icon
           className="mx-2 pl-1 text-light-500"

@@ -1,8 +1,27 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWrapper } from '@src/setupTest';
 import * as coursesConstants from '@src/authz-module/roles-permissions';
 import UserPermissions from './UserPermissions';
+
+// ESM named exports are read-only bindings, so jest.spyOn(module, prop, 'get')
+// can't intercept them. This module mock exposes a mutable override for
+// `courseRolesWithPermissions` that individual tests can set via
+// `setMockedCourseRoles(...)`.
+let mockedCourseRoles: unknown[] | null = null;
+export const setMockedCourseRoles = (roles: unknown[] | null) => {
+  mockedCourseRoles = roles;
+};
+
+jest.mock('@src/authz-module/roles-permissions', () => {
+  const actual = jest.requireActual('@src/authz-module/roles-permissions');
+  return {
+    ...actual,
+    get courseRolesWithPermissions() {
+      return mockedCourseRoles ?? actual.courseRolesWithPermissions;
+    },
+  };
+});
 
 jest.mock('./RenderPermissionInLine', () => (
   jest.fn(({ items }) => (
@@ -19,6 +38,10 @@ describe('UserPermissions', () => {
         userId: 1,
         username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
       },
     });
   });
@@ -113,8 +136,7 @@ describe('UserPermissions', () => {
     ];
 
     const originalRolesObject = coursesConstants.courseRolesWithPermissions;
-    const courseRolesWithPermissionsSpy = jest.spyOn(coursesConstants, 'courseRolesWithPermissions', 'get')
-      .mockReturnValue([...originalRolesObject, ...mockRoleObject] as typeof originalRolesObject);
+    setMockedCourseRoles([...originalRolesObject, ...mockRoleObject]);
 
     const props = {
       row: {
@@ -126,7 +148,7 @@ describe('UserPermissions', () => {
 
     const { getByTestId } = renderWrapper(<UserPermissions {...props} />);
     expect(getByTestId('render-permission-inline')).toBeInTheDocument();
-    courseRolesWithPermissionsSpy.mockRestore();
+    setMockedCourseRoles(null);
   });
 
   it('returns null when role is not found in courseRolesWithPermissions (line 52 coverage)', () => {

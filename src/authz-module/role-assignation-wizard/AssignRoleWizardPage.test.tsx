@@ -13,7 +13,6 @@ import {
 } from '../roles-permissions';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
 
-jest.mock('@edx/frontend-platform/logging');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useSearchParams: jest.fn(),
@@ -29,10 +28,6 @@ jest.mock('../data/hooks', () => ({
     isError: false,
     isSuccess: false,
   })),
-}));
-
-jest.mock('@edx/frontend-component-header', () => ({
-  StudioHeader: () => null,
 }));
 
 jest.mock('@src/data/hooks', () => ({
@@ -62,8 +57,8 @@ const mockPermissions = (
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
   const params = new URLSearchParams();
-  if (users) { params.set('users', users); }
-  if (from) { params.set('from', from); }
+  if (users) params.set('users', users);
+  if (from) params.set('from', from);
   useSearchParams.mockReturnValue([params]);
   const navigate = jest.fn();
   useNavigate.mockReturnValue(navigate);

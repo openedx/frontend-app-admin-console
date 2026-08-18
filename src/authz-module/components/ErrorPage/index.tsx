@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { FallbackProps } from 'react-error-boundary';
-import { getConfig } from '@edx/frontend-platform';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { getAppConfig } from '@openedx/frontend-base';
+import { useIntl } from '@openedx/frontend-base';
 import {
   Button, Container, Hyperlink, Row,
 } from '@openedx/paragon';
 import {
+  appId,
   CustomErrors, ERROR_STATUS, STATUS_400, STATUS_404,
 } from '@src/constants';
 import { getHttpErrorStatus } from '@src/data/utils';
@@ -70,23 +71,23 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
       <p>{intl.formatMessage(description)}</p>
       <Row>
         {showReloadButton && (
-        <Button
-          className="m-2"
-          disabled={reloading}
-          onClick={handleReload}
-        >
-          {intl.formatMessage(messages['error.page.action.reload'])}
-        </Button>
+          <Button
+            className="m-2"
+            disabled={reloading}
+            onClick={handleReload}
+          >
+            {intl.formatMessage(messages['error.page.action.reload'])}
+          </Button>
         )}
         {showBackButton && (
-        <Button
-          as={Hyperlink}
-          destination={`${getConfig().COURSE_AUTHORING_MICROFRONTEND_URL}`}
-          className="m-2"
-          variant={showReloadButton ? 'outline-primary' : 'primary'}
-        >
-          {intl.formatMessage(messages['error.page.action.back'])}
-        </Button>
+          <Button
+            as={Hyperlink}
+            destination={`${getAppConfig(appId).COURSE_AUTHORING_MICROFRONTEND_URL}`}
+            className="m-2"
+            variant={showReloadButton ? 'outline-primary' : 'primary'}
+          >
+            {intl.formatMessage(messages['error.page.action.back'])}
+          </Button>
         )}
 
       </Row>

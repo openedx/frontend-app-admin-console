@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { mockHttpClient } from '@src/setupTest';
 import type { QuerySettings } from './api';
 import {
@@ -15,16 +15,14 @@ import {
   useCourseAuthoringFlagStates,
 } from './hooks';
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
+  camelCaseObject: (obj: unknown) => obj,
 }));
 
 jest.mock('@src/data/utils', () => ({
   getApiUrl: (path: string) => `http://localhost:8000${path}`,
-}));
-
-jest.mock('@edx/frontend-platform', () => ({
-  camelCaseObject: (obj: unknown) => obj,
 }));
 
 jest.mock('@src/constants', () => ({

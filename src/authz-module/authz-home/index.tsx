@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import TeamMembersTable from '@src/authz-module/team-members/TeamMembersTable';

@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { ArrowUpward } from '@openedx/paragon/icons';
 import { IconButton } from '@openedx/paragon';
 import { useState, useEffect } from 'react';

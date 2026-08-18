@@ -7,6 +7,26 @@ export interface PermissionValidationResponse extends PermissionValidationReques
   allowed: boolean;
 }
 
+// Libraries AuthZ types
+export interface TeamMember {
+  username: string;
+  fullName: string;
+  email: string;
+  roles: string[];
+  createdAt: string;
+  scope: { resource: string; type: 'COURSE' | 'LIBRARY' | 'GLOBAL' };
+  organization: string;
+  role: string;
+}
+
+export interface LibraryMetadata {
+  id: string;
+  org: string;
+  title: string;
+  slug: string;
+  allowPublicRead: boolean;
+}
+
 export interface RoleMetadata {
   role: string;
   name: string;
@@ -21,14 +41,14 @@ export interface Role extends RoleMetadata {
   permissions: string[];
 }
 
-export type ResourceMetadata = {
+export interface ResourceMetadata {
   key: string;
   label: string;
   description: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-export type PermissionMetadata = {
+export interface PermissionMetadata {
   key: string;
   resource: string;
   label?: string;
@@ -40,13 +60,13 @@ export type PermissionItem = ResourceMetadata & {
   perms: PermissionMetadata[];
 };
 
-export type Org = {
+export interface Org {
   id: string;
   name: string;
   shortName: string;
 };
 
-export type Scope = {
+export interface Scope {
   externalKey: string;
   displayName: string;
   description?: string;
@@ -78,7 +98,7 @@ export interface UserRole {
   email?: string;
 }
 
-export type RoleToDelete = {
+export interface RoleToDelete {
   role: string;
   name?: string;
   scope: string;

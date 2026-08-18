@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   DataTableContext,
   Stack,
@@ -48,7 +48,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
     columns,
     setAllFilters,
     state,
-  // @ts-ignore-next-line - Paragon's DataTableContext is not typed
+  // @ts-expect-error - Paragon's DataTableContext is not typed
   } = useContext<DataTableContext>(DataTableContext);
 
   useEffect(() => {
@@ -169,31 +169,30 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
       {chronologicalFilters.length > 0 && (
         <Stack gap={1} direction="horizontal" className="flex-wrap mb-2">
           <span>{intl.formatMessage(messages['authz.table.controlbar.filterby.label'])}</span>
-
-            {chronologicalFilters.map((filter) => (
-              <Chip
-                key={filter.value}
-                iconBefore={FILTER_CHIPS_ICONS[filter.groupName || '']}
-                iconAfter={Close}
-                onIconAfterClick={() => handleCloseFilter(filter.groupName, filter.value)}
-              >
-                {filter.displayName}
-              </Chip>
-            ))}
-            {chronologicalFilters.length > 1 && (
-              <Button className="py-0" variant="link" onClick={clearAllFilters}>
-                {intl.formatMessage(messages['authz.table.controlbar.clearFilters'])}
-              </Button>
-            )}
+          {chronologicalFilters.map((filter) => (
+            <Chip
+              key={filter.value}
+              iconBefore={FILTER_CHIPS_ICONS[filter.groupName || '']}
+              iconAfter={Close}
+              onIconAfterClick={() => handleCloseFilter(filter.groupName, filter.value)}
+            >
+              {filter.displayName}
+            </Chip>
+          ))}
+          {chronologicalFilters.length > 1 && (
+            <Button className="py-0" variant="link" onClick={clearAllFilters}>
+              {intl.formatMessage(messages['authz.table.controlbar.clearFilters'])}
+            </Button>
+          )}
         </Stack>
       )}
       { filtersLimitReached && (
-      <Alert variant="warning" className="mb-2">
-        <span className="d-flex flex-row">
-          <Icon src={Warning} className="text-warning-400 mr-2" />
-          {intl.formatMessage(messages['authz.table.controlbar.filters.limit.reached'])}
-        </span>
-      </Alert>
+        <Alert variant="warning" className="mb-2">
+          <span className="d-flex flex-row">
+            <Icon src={Warning} className="text-warning-400 mr-2" />
+            {intl.formatMessage(messages['authz.table.controlbar.filters.limit.reached'])}
+          </span>
+        </Alert>
       )}
 
     </div>

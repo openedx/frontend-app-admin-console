@@ -27,7 +27,7 @@ administrator efficiency.
 Getting Started
 ===============
 
-It is recomended to use it in a Tutor instalation, for adding the MFE follow the intruction in
+It is recommended to use it in a Tutor installation, for adding the frontend app follow the instruction in
 `Tutor MFE plugin <https://github.com/overhangio/tutor-mfe?tab=readme-ov-file#mfe-management>`_.
 
 Configuration
@@ -36,9 +36,9 @@ This repository works with `openedx-authz <https://github.com/openedx/openedx-au
 
 Plugins
 =======
-This MFE can be customized using `Frontend Plugin Framework <https://github.com/openedx/frontend-plugin-framework>`_.
+This frontend app can be customized using `Frontend Plugin Framework <https://github.com/openedx/frontend-plugin-framework>`_.
 
-The parts of this MFE that can be customized in that manner are documented `here </src/plugin-slots>`_.
+The parts of this frontend app that can be customized in that manner are documented `here </src/plugin-slots>`_.
 
 
 Development Roadmap

@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Button } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash.debounce';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   DataTable,
   TextFilter,
@@ -50,7 +50,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
-    if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
+    if (isCourseViewAllowed || querySettings.roles) return querySettings;
     return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
   }, [isCourseViewAllowed, querySettings]);
 
@@ -101,51 +101,51 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           },
         ]}
         columns={
-            [
-              {
-                id: 'username',
-                Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
-                accessor: 'username',
-                Cell: NameCell,
-                filter: 'text',
-                Filter: TextFilter,
-                filterOrder: 1,
-              },
-              {
-                Header: intl.formatMessage(messages['authz.team.members.table.column.email.title']),
-                accessor: 'email',
-                disableFilters: true,
-                filter: 'text',
-                Filter: TextFilter,
-              },
-              {
-                Header: getCellHeader('org', intl.formatMessage(messages['authz.team.members.table.column.organization.title']), columnsWithFiltersApplied),
-                accessor: 'org',
-                Cell: OrgCell,
-                filter: 'includesValue',
-                Filter: OrgFilter,
-                filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.organization.title']),
-                filterOrder: 2,
-              },
-              {
-                Header: getCellHeader('scope', intl.formatMessage(messages['authz.team.members.table.column.scope.title']), columnsWithFiltersApplied),
-                accessor: 'scope',
-                Cell: ScopeCell,
-                filter: 'includesValue',
-                Filter: ScopesFilter,
-                filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.scope.title']),
-                filterOrder: 4,
-              },
-              {
-                Header: getCellHeader('role', intl.formatMessage(messages['authz.team.members.table.column.role.title']), columnsWithFiltersApplied),
-                accessor: 'role',
-                filter: 'includesValue',
-                Cell: RoleCell,
-                Filter: RolesFilter,
-                filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.role.title']),
-                filterOrder: 3,
-              },
-            ]
+          [
+            {
+              id: 'username',
+              Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
+              accessor: 'username',
+              Cell: NameCell,
+              filter: 'text',
+              Filter: TextFilter,
+              filterOrder: 1,
+            },
+            {
+              Header: intl.formatMessage(messages['authz.team.members.table.column.email.title']),
+              accessor: 'email',
+              disableFilters: true,
+              filter: 'text',
+              Filter: TextFilter,
+            },
+            {
+              Header: getCellHeader('org', intl.formatMessage(messages['authz.team.members.table.column.organization.title']), columnsWithFiltersApplied),
+              accessor: 'org',
+              Cell: OrgCell,
+              filter: 'includesValue',
+              Filter: OrgFilter,
+              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.organization.title']),
+              filterOrder: 2,
+            },
+            {
+              Header: getCellHeader('scope', intl.formatMessage(messages['authz.team.members.table.column.scope.title']), columnsWithFiltersApplied),
+              accessor: 'scope',
+              Cell: ScopeCell,
+              filter: 'includesValue',
+              Filter: ScopesFilter,
+              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.scope.title']),
+              filterOrder: 4,
+            },
+            {
+              Header: getCellHeader('role', intl.formatMessage(messages['authz.team.members.table.column.role.title']), columnsWithFiltersApplied),
+              accessor: 'role',
+              filter: 'includesValue',
+              Cell: RoleCell,
+              Filter: RolesFilter,
+              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.role.title']),
+              filterOrder: 3,
+            },
+          ]
         }
       >
         <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />

@@ -1,6 +1,6 @@
-export type FilterChoice = {
+export interface FilterChoice {
   groupName?: string;
-  groupIcon?: React.ComponentType<{}>;
+  groupIcon?: React.ComponentType;
   displayName: string;
   value: string;
   description?: string;
@@ -8,12 +8,12 @@ export type FilterChoice = {
 
 export interface MultipleChoiceFilterProps {
   filterButtonText: string;
-  filterChoices: Array<FilterChoice>;
+  filterChoices: FilterChoice[];
   filterValue: string[] | undefined;
   setFilter: (value: string[], newItem: FilterChoice) => void;
   isGrouped?: boolean;
   isSearchable?: boolean;
   onSearchChange?: (value: string) => void;
-  iconSrc?: React.ComponentType<{}> | undefined;
+  iconSrc?: React.ComponentType | undefined;
   disabled?: boolean;
 }

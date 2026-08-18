@@ -1,4 +1,4 @@
-import type { IntlShape } from '@edx/frontend-platform/i18n';
+import type { IntlShape } from 'react-intl';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
 import {
   EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,
@@ -39,7 +39,7 @@ const getPermissionMetadata = (permission: PermissionMetadata, intl: IntlShape):
   return { ...permission, label, actionKey };
 };
 
-type BuildPermissionsMatrixProps = {
+interface BuildPermissionsMatrixProps {
   roles: Role[];
   permissions: PermissionMetadata[];
   resources: ResourceMetadata[];
@@ -68,7 +68,7 @@ const buildPermissionMatrixByResource = ({
   }, {} as Record<string, EnrichedPermission>);
 
   const permissionsByResource = permissions.reduce<Record<string, PermissionMetadata[]>>((acc, perm) => {
-    if (!acc[perm.resource]) { acc[perm.resource] = []; }
+    if (!acc[perm.resource]) acc[perm.resource] = [];
     acc[perm.resource].push(perm);
     return acc;
   }, {});

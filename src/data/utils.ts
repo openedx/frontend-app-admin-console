@@ -1,6 +1,7 @@
-import { getConfig } from '@edx/frontend-platform';
+import { getSiteConfig } from '@openedx/frontend-base';
 
-export const getApiUrl = (path: string) => `${getConfig().LMS_BASE_URL}${path || ''}`;
+export const getApiUrl = (path: string) => `${getSiteConfig().lmsBaseUrl}${path || ''}`;
+export const getStudioApiUrl = (path: string) => `${getSiteConfig().cmsBaseUrl}${path || ''}`;
 
 /**
  * Safely reads the HTTP status that @edx/frontend-platform's HTTP client attaches

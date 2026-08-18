@@ -119,10 +119,6 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-jest.mock('@edx/frontend-platform/logging', () => ({
-  logError: jest.fn(),
-}));
-
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: jest.fn(),
 }));
@@ -186,7 +182,7 @@ describe('TeamMembersTable', () => {
       error: new Error('Failed to fetch'),
       data: { results: [] },
     };
-    // @ts-ignore
+    // @ts-expect-error:expected
     mockApiResponses(allAsignmentsResponse);
     renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
     expect(screen.getByText(/Something went wrong on our end./)).toBeInTheDocument();

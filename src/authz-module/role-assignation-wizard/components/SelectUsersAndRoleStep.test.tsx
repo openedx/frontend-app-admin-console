@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
 
-jest.mock('@edx/frontend-platform', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getConfig: () => ({ LMS_BASE_URL: 'http://localhost:8000' }),
 }));
 

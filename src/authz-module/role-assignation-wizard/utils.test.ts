@@ -1,4 +1,4 @@
-import { createIntl } from '@edx/frontend-platform/i18n';
+import { createIntl } from '@openedx/frontend-base';
 import { formatRoleAssignmentError } from './utils';
 import { ROLE_ASSIGNMENT_ERRORS } from './constants';
 

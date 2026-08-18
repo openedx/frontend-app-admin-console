@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWrapper } from '@src/setupTest';
 import { BookOpen, Person } from '@openedx/paragon/icons';
 import RenderPermissionColumn from './RenderPermissionColumn';
@@ -11,6 +11,10 @@ describe('RenderPermissionColumn', () => {
         userId: 1,
         username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
       },
     });
   });

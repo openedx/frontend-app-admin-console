@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Person } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
@@ -18,11 +18,11 @@ const RolesFilter = ({
   const { isCourseAuthoringEnabled, isLoading: isFlagLoading } = useCourseAuthoringFlag();
 
   const rolesOptions = useMemo(() => {
-    if (isLoading || isFlagLoading) { return []; }
+    if (isLoading || isFlagLoading) return [];
     return getRolesFiltersOptions(intl).filter((option) => {
       // Authoring (course) roles require both view permission and the course-authoring flag.
-      if (option.contextType === CONTEXT_TYPES.COURSE) { return isCourseViewAllowed && isCourseAuthoringEnabled; }
-      if (option.contextType === CONTEXT_TYPES.LIBRARY) { return isLibraryViewAllowed; }
+      if (option.contextType === CONTEXT_TYPES.COURSE) return isCourseViewAllowed && isCourseAuthoringEnabled;
+      if (option.contextType === CONTEXT_TYPES.LIBRARY) return isLibraryViewAllowed;
       return false;
     });
   }, [intl, isCourseViewAllowed, isLibraryViewAllowed, isCourseAuthoringEnabled, isLoading, isFlagLoading]);

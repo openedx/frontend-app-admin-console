@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWrapper } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
@@ -28,6 +28,10 @@ describe('TableCells Components', () => {
         userId: 1,
         username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
       },
     });
   });
@@ -59,6 +63,10 @@ describe('TableCells Components', () => {
           userId: 1,
           username: 'testuser',
           email: 'testuser@example.com',
+          name: 'Test User',
+          administrator: false,
+          roles: [],
+          avatar: '',
         },
       });
     });
@@ -176,6 +184,10 @@ describe('TableCells Components', () => {
           userId: 1,
           username: 'testuser',
           email: 'testuser@example.com',
+          name: 'Test User',
+          administrator: false,
+          roles: [],
+          avatar: '',
         },
       });
       mockNavigate.mockClear();

@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { initializeMockApp } from '@openedx/frontend-base';
+import { IntlProvider } from '@openedx/frontend-base';
 import { CustomErrors } from '@src/constants';
 import AuthZModule from './index';
 
@@ -18,7 +18,15 @@ describe('AuthZModule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     initializeMockApp({
-      authenticatedUser: { username: 'testuser' },
+      authenticatedUser: {
+        userId: 1,
+        username: 'testuser',
+        email: 'testuser@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
+      },
     });
   });
 

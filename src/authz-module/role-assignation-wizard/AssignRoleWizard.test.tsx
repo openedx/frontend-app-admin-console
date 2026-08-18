@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { getAuthenticatedUser } from '@openedx/frontend-base';
 import {
   useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
 } from '../data/hooks';
@@ -12,7 +12,8 @@ import AssignRoleWizard from './AssignRoleWizard';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedUser: jest.fn(),
 }));
 
@@ -22,10 +23,6 @@ const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 (globalThis as any).IntersectionObserver = mockIntersectionObserver;
-
-jest.mock('@edx/frontend-platform/logging', () => ({
-  logError: jest.fn(),
-}));
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: () => ({

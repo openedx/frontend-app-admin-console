@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Spinner } from '@openedx/paragon';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Org, Scope } from '@src/types';
 import OrgSection from './OrgSection';
 import ScopeCheckboxItem from './ScopeCheckboxItem';
@@ -43,7 +43,7 @@ const ScopeList = ({
 
   useEffect(() => {
     const el = loadMoreRef.current;
-    if (!el) { return undefined; }
+    if (!el) return undefined;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isError) {

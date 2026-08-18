@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '../components/AuthZLayout';
@@ -28,8 +28,8 @@ const AssignRoleWizardPage = () => {
   const { isCourseAuthoringEnabled } = useCourseAuthoringFlag();
 
   const rolesAssignable = managePermissions?.flatMap((p) => {
-    if (!p.allowed) { return []; }
-    if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
+    if (!p.allowed) return [];
+    if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) return libraryRolesMetadata;
     if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) {
       // Course (authoring) roles are only assignable when the course-authoring flag is enabled.
       return isCourseAuthoringEnabled ? courseRolesMetadata : [];

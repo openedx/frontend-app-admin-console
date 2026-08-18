@@ -4,8 +4,8 @@ import { QuerySettings } from '@src/authz-module/data/api';
 interface DataTableFilters {
   pageSize: number;
   pageIndex: number;
-  sortBy: Array<{ id: string; desc: boolean }>;
-  filters: Array<{ id: string; value: any }>;
+  sortBy: { id: string; desc: boolean }[];
+  filters: { id: string; value: any }[];
 }
 
 interface UseQuerySettingsReturn {

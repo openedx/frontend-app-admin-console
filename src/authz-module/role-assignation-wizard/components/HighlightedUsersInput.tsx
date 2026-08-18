@@ -24,12 +24,12 @@ const HighlightedUsersInput = forwardRef<HTMLTextAreaElement, HighlightedUsersIn
   const hasHighlights = invalidSet.size > 0;
 
   const renderedParts = useMemo(() => {
-    if (!hasHighlights) { return null; }
+    if (!hasHighlights) return null;
     let offset = 0;
     return value.split(/(,)/).map((part) => {
       const key = offset;
       offset += part.length;
-      if (part === ',') { return <span key={`comma-${key}`}>,</span>; }
+      if (part === ',') return <span key={`comma-${key}`}>,</span>;
       const trimmed = part.trim();
       const isInvalid = trimmed.length > 0 && invalidSet.has(trimmed);
       return (

@@ -1,6 +1,9 @@
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { Org, Scope, UserRole } from '@src/types';
-import { camelCaseObject } from '@edx/frontend-platform';
+import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
+import {
+  Org, Scope, TeamMember,
+  UserRole,
+} from '@src/types';
+import { camelCaseObject } from '@openedx/frontend-base';
 import { getApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
@@ -14,6 +17,11 @@ export interface QuerySettings {
   pageIndex: number;
 }
 
+export interface GetTeamMembersResponse {
+  results: TeamMember[];
+  count: number;
+}
+
 export interface GetUserAssignmentsResponse {
   results: UserRole[];
   count: number;
@@ -21,7 +29,7 @@ export interface GetUserAssignmentsResponse {
   previous: string | null;
 }
 
-export type RevokeUserRolesRequest = {
+export interface RevokeUserRolesRequest {
   users: string;
   role: string;
   scope: string;
@@ -32,13 +40,18 @@ export interface DeleteRevokeUserRolesResponse {
   completed: {
     userIdentifiers: string;
     status: string;
-  }[],
+  }[];
   errors: {
     userIdentifiers: string;
     error: string;
-  }[],
+  }[];
 }
 
+export interface PermissionsByRole {
+  role: string;
+  permissions: string[];
+  userCount: number;
+};
 export interface PutAssignTeamMembersRoleResponse {
   completed: { userIdentifier: string; status: string }[];
   errors: { userIdentifier: string; scope: string; error: string }[];
@@ -61,20 +74,20 @@ export interface GetOrgsResponse {
   count: number;
   next: string | null;
   previous: string | null;
-  results:Array<Org>;
+  results: Org[];
 }
 
 export interface GetScopesResponse {
   count: number;
   next: string | null;
   previous: string | null;
-  results:Array<Scope>;
+  results: Scope[];
 }
-export type ValidateUsersRequest = {
+export interface ValidateUsersRequest {
   users: string[];
 };
 
-export type ValidateUsersResponse = {
+export interface ValidateUsersResponse {
   validUsers: string[];
   invalidUsers: string[];
   summary: {
@@ -139,8 +152,7 @@ export const revokeUserRoles = async (
   return camelCaseObject(res.data);
 };
 
-export const getAllRoleAssignments = async (querySettings: QuerySettings)
-: Promise<GetAllRoleAssignmentsResponse> => {
+export const getAllRoleAssignments = async (querySettings: QuerySettings): Promise<GetAllRoleAssignmentsResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/assignments/'));
 
   if (querySettings.roles) {
@@ -183,10 +195,10 @@ export const getOrgs = async (search?: string, page?: number, pageSize?: number)
 
 export const getScopes = async (params: GetScopesParams): Promise<GetScopesResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/scopes/'));
-  if (params.search) { url.searchParams.set('search', params.search); }
-  if (params.scopeType) { url.searchParams.set('scope_type', params.scopeType); }
-  if (params.orgs?.length) { url.searchParams.set('orgs', params.orgs.join(',')); }
-  if (params.managementPermissionOnly) { url.searchParams.set('management_permission_only', 'true'); }
+  if (params.search) url.searchParams.set('search', params.search);
+  if (params.scopeType) url.searchParams.set('scope_type', params.scopeType);
+  if (params.orgs?.length) url.searchParams.set('orgs', params.orgs.join(','));
+  if (params.managementPermissionOnly) url.searchParams.set('management_permission_only', 'true');
   url.searchParams.set('page', (params.page ?? 1).toString());
   url.searchParams.set('page_size', (params.pageSize ?? 10).toString());
   const { data } = await getAuthenticatedHttpClient().get(url);
@@ -198,8 +210,7 @@ export const getCourseAuthoringFlagStates = async (): Promise<CourseAuthoringFla
   return camelCaseObject(data);
 };
 
-export const getUserAssignedRoles = async (username?: string, querySettings?: QuerySettings)
-: Promise<GetUserAssignmentsResponse> => {
+export const getUserAssignedRoles = async (username?: string, querySettings?: QuerySettings): Promise<GetUserAssignmentsResponse> => {
   const url = new URL(getApiUrl(`/api/authz/v1/users/${username}/assignments/`));
 
   if (querySettings?.roles) {

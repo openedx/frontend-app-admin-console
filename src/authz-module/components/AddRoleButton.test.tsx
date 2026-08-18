@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '../roles-permissions';
@@ -36,6 +36,10 @@ describe('AddRoleButton', () => {
         userId: 1,
         username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
       },
     });
   });

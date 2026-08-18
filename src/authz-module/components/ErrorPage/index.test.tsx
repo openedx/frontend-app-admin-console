@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { renderWrapper } from '@src/setupTest';
 import ErrorFallback from './index';
 
-const ThrowError = ({ error }: { error:Error }) => {
+const ThrowError = ({ error }: { error: Error }) => {
   throw error;
   return null;
 };

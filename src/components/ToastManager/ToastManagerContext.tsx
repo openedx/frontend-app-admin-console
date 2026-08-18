@@ -1,8 +1,8 @@
 import {
   createContext, useContext, useState, useMemo, useCallback, useEffect, useRef,
 } from 'react';
-import { logError } from '@edx/frontend-platform/logging';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { logError } from '@openedx/frontend-base';
+import { useIntl } from '@openedx/frontend-base';
 import { Toast } from '@openedx/paragon';
 import messages from '@src/authz-module/messages';
 import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '@src/authz-module/constants';
@@ -32,7 +32,7 @@ export interface AppToast {
 const Bold = (chunks: React.ReactNode[]) => <b>{chunks}</b>;
 const Br = () => <br />;
 
-type ToastManagerContextType = {
+interface ToastManagerContextType {
   showToast: (toast: Omit<AppToast, 'id'>) => void;
   showErrorToast: (error: unknown, retryFn?: () => void) => void;
   Bold: (chunks: React.ReactNode[]) => JSX.Element;

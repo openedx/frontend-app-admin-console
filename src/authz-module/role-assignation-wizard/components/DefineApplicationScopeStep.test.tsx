@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
-import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { getAuthenticatedUser } from '@openedx/frontend-base';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useScopes, useOrgs } from '../../data/hooks';
 import useScopePermissions from '../hooks/useScopePermissions';
@@ -30,7 +30,8 @@ jest.mock('../../data/hooks', () => ({
 
 jest.mock('../hooks/useScopePermissions');
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedUser: jest.fn(),
 }));
 

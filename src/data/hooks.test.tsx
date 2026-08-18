@@ -1,11 +1,12 @@
 import { act, ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { mockHttpClient } from '@src/setupTest';
 import { useValidateUserPermissions, useUserAccount, useValidateUserPermissionsNonSuspense } from './hooks';
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
 }));
 

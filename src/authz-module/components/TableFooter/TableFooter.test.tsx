@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
+import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWrapper } from '@src/setupTest';
 import Footer from './TableFooter';
 
@@ -42,6 +42,10 @@ describe('TableFooter', () => {
         userId: 1,
         username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
+        administrator: false,
+        roles: [],
+        avatar: '',
       },
     });
   });
