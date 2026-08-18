@@ -5,7 +5,7 @@ import {
 
 import { adminConsoleApp } from './src';
 
-import './src/index.scss';
+import '@openedx/frontend-base/shell/style';
 
 const siteConfig: SiteConfig = {
   siteId: 'admin-console-dev',

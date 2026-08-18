@@ -29,16 +29,23 @@ detect_changed_source_translations:
 	# Checking for changed translations...
 	git diff --exit-code $(i18n)
 
-# Pulls translations using atlas.
-pull_translations:
-	mkdir src/i18n/messages
-	cd src/i18n/messages \
-	   && atlas pull $(ATLAS_OPTIONS) \
-	            translations/frontend-platform/src/i18n/messages:frontend-platform \
-	            translations/paragon/src/i18n/messages:paragon \
-	            translations/frontend-component-footer/src/i18n/messages:frontend-component-footer \
-	            translations/frontend-component-header/src/i18n/messages:frontend-component-header \
-	            translations/frontend-app-admin-console/src/i18n/messages:frontend-app-admin-console
+# Pulls translations using atlas via the openedx CLI.
+pull_translations: | requirements
+	npm run translations:pull -- --atlas-options="$(ATLAS_OPTIONS)"
 
-	$(intl_imports) frontend-platform paragon frontend-component-header frontend-component-footer frontend-app-admin-console
+clean:
+	rm -rf dist
+
+build:
+	tsc --project tsconfig.build.json
+	find src -type f \( -name '*.scss' -o -path '*/assets/*' \) -exec sh -c '\
+	  for f in "$$@"; do \
+	    d="dist/$${f#src/}"; \
+	    mkdir -p "$$(dirname "$$d")"; \
+	    cp "$$f" "$$d"; \
+	  done' sh {} +
+	tsc-alias -p tsconfig.build.json
+
+build-ci:
+	SITE_CONFIG_PATH=site.config.ci.tsx openedx build
 
