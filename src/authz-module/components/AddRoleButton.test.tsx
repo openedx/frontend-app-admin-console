@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { initializeMockApp } from '@openedx/frontend-base';
 import { renderWithAllProviders } from '@src/setupTest';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '../roles-permissions';
+import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import AddRoleButton from './AddRoleButton';
 
 // Mock react-router-dom navigation

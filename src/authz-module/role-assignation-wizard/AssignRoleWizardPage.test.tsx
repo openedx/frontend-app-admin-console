@@ -3,14 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { useValidateUsers } from '../data/hooks';
-import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
+import { useValidateUsers } from '@src/authz-module/data/hooks';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import {
   CONTENT_COURSE_PERMISSIONS,
   CONTENT_LIBRARY_PERMISSIONS,
   courseRolesMetadata,
   libraryRolesMetadata,
-} from '../roles-permissions';
+} from '@src/authz-module/roles-permissions';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
 
 jest.mock('react-router-dom', () => ({

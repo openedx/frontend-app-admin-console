@@ -34,8 +34,8 @@ import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import messages from './messages';
-import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
-import { getCellHeader, getScopeManageActionPermission } from '../utils';
+import ConfirmDeletionModal from '@src/authz-module/components/ConfirmDeletionModal';
+import { getCellHeader, getScopeManageActionPermission } from '@src/authz-module/utils';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();

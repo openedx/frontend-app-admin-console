@@ -22,7 +22,7 @@ import {
 import { useAllRoleAssignments } from '@src/authz-module/data/hooks';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import messages from './messages';
-import TableFooter from '../components/TableFooter/TableFooter';
+import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 
 interface TeamMembersTableProps {
   presetScope?: string;

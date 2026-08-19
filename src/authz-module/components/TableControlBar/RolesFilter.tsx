@@ -6,7 +6,7 @@ import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthori
 import { CONTEXT_TYPES } from '@src/authz-module/constants';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { MultipleChoiceFilterProps } from './types';
-import { getRolesFiltersOptions } from '../constants';
+import { getRolesFiltersOptions } from '@src/authz-module/components/constants';
 
 type RolesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
 

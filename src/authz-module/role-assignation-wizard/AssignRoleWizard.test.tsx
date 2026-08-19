@@ -5,9 +5,9 @@ import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerC
 import { getAuthenticatedUser } from '@openedx/frontend-base';
 import {
   useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
-} from '../data/hooks';
+} from '@src/authz-module/data/hooks';
 import useScopePermissions from './hooks/useScopePermissions';
-import { courseRolesMetadata, libraryRolesMetadata } from '../roles-permissions';
+import { courseRolesMetadata, libraryRolesMetadata } from '@src/authz-module/roles-permissions';
 import AssignRoleWizard from './AssignRoleWizard';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];

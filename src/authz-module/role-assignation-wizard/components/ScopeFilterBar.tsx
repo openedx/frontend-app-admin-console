@@ -5,7 +5,7 @@ import {
 import { Search } from '@openedx/paragon/icons';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import { ChangeEvent } from 'react';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 interface ScopeFilterBarProps {
   search: string;

@@ -4,7 +4,7 @@ import { useIntl } from '@openedx/frontend-base';
 import { Org, Scope } from '@src/types';
 import OrgSection from './OrgSection';
 import ScopeCheckboxItem from './ScopeCheckboxItem';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 interface ScopeListQueryState {
   isLoading: boolean;

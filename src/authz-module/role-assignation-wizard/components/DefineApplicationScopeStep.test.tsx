@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import { getAuthenticatedUser } from '@openedx/frontend-base';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
-import { useScopes, useOrgs } from '../../data/hooks';
-import useScopePermissions from '../hooks/useScopePermissions';
+import { useScopes, useOrgs } from '@src/authz-module/data/hooks';
+import useScopePermissions from '@src/authz-module/role-assignation-wizard/hooks/useScopePermissions';
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: () => ({

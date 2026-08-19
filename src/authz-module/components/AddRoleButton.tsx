@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import baseMessages from '@src/authz-module/messages';
 import { buildWizardPath } from '@src/authz-module/constants';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { MANAGE_TEAM_PERMISSIONS } from '../roles-permissions';
+import { MANAGE_TEAM_PERMISSIONS } from '@src/authz-module/roles-permissions';
 
 interface AddRoleButtonProps {
   presetUsername?: string;

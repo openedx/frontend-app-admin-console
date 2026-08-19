@@ -10,7 +10,7 @@ import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
+import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
 import { formatRoleAssignmentError } from './utils';
 

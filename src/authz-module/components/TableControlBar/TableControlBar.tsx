@@ -17,7 +17,7 @@ import {
 import { MAX_TABLE_FILTERS_APPLIED } from '@src/authz-module/constants';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import SearchFilter from './SearchFilter';
-import messages from '../messages';
+import messages from '@src/authz-module/components/messages';
 import RolesFilter from './RolesFilter';
 import OrgFilter from './OrgFilter';
 import ScopesFilter from './ScopesFilter';

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import { DataTableContext, Pagination, TableFooter } from '@openedx/paragon';
-import messages from '../messages';
+import messages from '@src/authz-module/components/messages';
 
 const Footer = () => {
   const { formatMessage } = useIntl();

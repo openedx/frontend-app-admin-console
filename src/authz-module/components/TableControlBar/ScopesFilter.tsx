@@ -7,8 +7,8 @@ import { useScopes } from '@src/authz-module/data/hooks';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
-import { RESOURCE_ICONS } from '../constants';
-import messages from '../messages';
+import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
+import messages from '@src/authz-module/components/messages';
 
 type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
 

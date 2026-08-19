@@ -7,7 +7,7 @@ import {
 import { getSiteConfig } from '@openedx/frontend-base';
 import { RoleMetadata } from '@src/types';
 import HighlightedUsersInput from './HighlightedUsersInput';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 interface SelectUsersAndRoleStepProps {
   users: string;

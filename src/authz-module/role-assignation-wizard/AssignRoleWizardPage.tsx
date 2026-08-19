@@ -2,14 +2,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useIntl } from '@openedx/frontend-base';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
-import AuthZLayout from '../components/AuthZLayout';
-import { ROUTES } from '../constants';
+import AuthZLayout from '@src/authz-module/components/AuthZLayout';
+import { ROUTES } from '@src/authz-module/constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
   MANAGE_TEAM_PERMISSIONS,
-} from '../roles-permissions';
-import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
+} from '@src/authz-module/roles-permissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();

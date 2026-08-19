@@ -4,7 +4,7 @@ import {
 import { useIntl } from '@openedx/frontend-base';
 import { FilterList, Info, Search } from '@openedx/paragon/icons';
 import { useState } from 'react';
-import messages from '../messages';
+import messages from '@src/authz-module/components/messages';
 import { FilterChoice, MultipleChoiceFilterProps } from './types';
 
 const MultipleChoiceFilter = ({
