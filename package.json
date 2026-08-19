@@ -12,6 +12,9 @@
   "files": [
     "/dist"
   ],
+  "workspaces": [
+    "packages/*"
+  ],
   "browserslist": [
     "extends @edx/browserslist-config"
   ],
@@ -31,7 +34,12 @@
     "dev": "PORT=2025 PUBLIC_PATH=/admin-console openedx dev",
     "test": "openedx test --coverage --passWithNoTests",
     "types": "tsc --noEmit",
-    "translations:pull": "openedx translations:pull"
+    "translations:pull": "openedx translations:pull",
+    "build:packages": "make build-packages",
+    "clean:packages": "make clean-packages",
+    "dev:site": "make dev-site",
+    "dev:packages": "make dev-packages",
+    "watch:build": "nodemon --exec 'npm run build'"
   },
   "atlasTranslations": {
     "path": "translations/frontend-app-admin-console/src/i18n/messages",
@@ -70,8 +78,10 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-helmet": "^6.1.11",
+    "nodemon": "^3.1.14",
     "ts-jest": "^29.4.5",
-    "tsc-alias": "^1.9.1"
+    "tsc-alias": "^1.9.1",
+    "turbo": "^2.10.11"
   },
   "overrides": {
     "react-intl": "6.8.9"
