@@ -366,14 +366,12 @@ export const courseRolesMetadata: RoleMetadata[] = [
     name: 'Course Editor',
     description: 'Can create and edit course content, but cannot publish or change critical course settings.',
     contextType: 'course',
-    disabled: true,
   },
   {
     role: 'course_auditor',
     name: 'Course Auditor',
     description: 'Can view course content and settings, but cannot make changes.',
     contextType: 'course',
-    disabled: true,
   },
 ];
 
