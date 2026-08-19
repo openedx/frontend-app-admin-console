@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import { DataTableContext, TextFilter } from '@openedx/paragon';
 import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';

@@ -1,6 +1,6 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import { getAuthenticatedUser } from '@openedx/frontend-base';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useScopes, useOrgs } from '@src/authz-module/data/hooks';

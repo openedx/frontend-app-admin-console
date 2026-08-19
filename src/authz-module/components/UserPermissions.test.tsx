@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@openedx/frontend-base';
-import { renderWrapper } from '@src/setupTest';
+import { initializeMocks, renderWrapper } from '@src/testUtils';
 import * as coursesConstants from '@src/authz-module/roles-permissions';
 import UserPermissions from './UserPermissions';
 
@@ -33,17 +32,7 @@ jest.mock('./RenderPermissionInLine', () => (
 
 describe('UserPermissions', () => {
   beforeAll(() => {
-    initializeMockApp({
-      authenticatedUser: {
-        userId: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        name: 'Test User',
-        administrator: false,
-        roles: [],
-        avatar: '',
-      },
-    });
+    initializeMocks();
   });
 
   beforeEach(() => {

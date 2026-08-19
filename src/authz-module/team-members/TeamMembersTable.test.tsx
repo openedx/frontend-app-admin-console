@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithAllProviders } from '@src/setupTest';
+import { renderWithAllProviders } from '@src/testUtils';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import type { GetAllRoleAssignmentsResponse } from '@src/authz-module/data/api';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';

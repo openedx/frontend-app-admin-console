@@ -1,8 +1,7 @@
-import { act, ReactNode } from 'react';
+import { act } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
-import { mockHttpClient } from '@src/setupTest';
+import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { useValidateUserPermissions, useUserAccount, useValidateUserPermissionsNonSuspense } from './hooks';
 
 jest.mock('@openedx/frontend-base', () => ({
@@ -10,23 +9,7 @@ jest.mock('@openedx/frontend-base', () => ({
   getAuthenticatedHttpClient: jest.fn(),
 }));
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-
-  return wrapper;
-};
+const createWrapper = createQueryClientWrapper;
 
 const permissions = [
   {

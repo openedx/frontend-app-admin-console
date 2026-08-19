@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { intlWrapper as wrapper } from '@src/setupTest';
+import { intlWrapper as wrapper } from '@src/testUtils';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '@src/authz-module/data/hooks';

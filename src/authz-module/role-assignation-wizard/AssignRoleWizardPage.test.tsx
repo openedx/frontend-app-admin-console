@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithAllProviders } from '@src/setupTest';
+import { renderWithAllProviders } from '@src/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useValidateUsers } from '@src/authz-module/data/hooks';

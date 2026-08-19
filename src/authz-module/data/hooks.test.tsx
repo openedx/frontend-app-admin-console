@@ -1,8 +1,7 @@
-import { ReactNode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
-import { mockHttpClient } from '@src/setupTest';
+import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import type { QuerySettings } from './api';
 import {
   useAssignTeamMembersRole,
@@ -115,24 +114,7 @@ const mockFilteredUserAssignments = {
   previous: null,
 };
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider
-      client={queryClient}
-    >{children}
-    </QueryClientProvider>
-  );
-
-  return wrapper;
-};
+const createWrapper = createQueryClientWrapper;
 
 describe('useAssignTeamMembersRole', () => {
   beforeEach(() => {
@@ -486,11 +468,7 @@ describe('useRevokeUserRoles', () => {
 
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    const wrapper = createQueryClientWrapper(queryClient);
 
     const { result } = renderHook(() => useRevokeUserRoles(), {
       wrapper,

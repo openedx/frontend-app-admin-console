@@ -1,8 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
-import { initializeMockApp } from '@openedx/frontend-base';
-import { renderWithAllProviders } from '@src/setupTest';
+import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import AddRoleButton from './AddRoleButton';
@@ -31,17 +30,7 @@ describe('AddRoleButton', () => {
   const mockNavigate = jest.fn();
 
   beforeAll(() => {
-    initializeMockApp({
-      authenticatedUser: {
-        userId: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        name: 'Test User',
-        administrator: false,
-        roles: [],
-        avatar: '',
-      },
-    });
+    initializeMocks();
   });
 
   beforeEach(() => {

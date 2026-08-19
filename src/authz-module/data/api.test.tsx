@@ -1,5 +1,5 @@
 import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
-import { mockHttpClient } from '@src/setupTest';
+import { mockHttpClient } from '@src/testUtils';
 import {
   getUserAssignedRoles,
   assignTeamMembersRole,

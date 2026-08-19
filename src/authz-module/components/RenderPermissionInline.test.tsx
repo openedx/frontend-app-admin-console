@@ -1,22 +1,11 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@openedx/frontend-base';
-import { renderWrapper } from '@src/setupTest';
+import { initializeMocks, renderWrapper } from '@src/testUtils';
 import { BookOpen } from '@openedx/paragon/icons';
 import RenderPermissionInLine from './RenderPermissionInLine';
 
 describe('RenderPermissionInLine', () => {
   beforeAll(() => {
-    initializeMockApp({
-      authenticatedUser: {
-        userId: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        name: 'Test User',
-        administrator: false,
-        roles: [],
-        avatar: '',
-      },
-    });
+    initializeMocks();
   });
 
   const mockItems = [

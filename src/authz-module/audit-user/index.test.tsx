@@ -4,7 +4,7 @@ import {
 import { SiteContext } from '@openedx/frontend-base';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { mockHttpClient, mockAppContext } from '@src/setupTest';
+import { mockHttpClient, mockAppContext } from '@src/testUtils';
 import { IntlProvider } from '@openedx/frontend-base';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
