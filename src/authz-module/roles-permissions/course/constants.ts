@@ -54,7 +54,7 @@ export const CONTENT_COURSE_PERMISSIONS = {
   MANAGE_COURSE_GROUP_CONFIGURATION: 'courses.manage_group_configurations',
 
   MANAGE_COURSE_TAGS: 'courses.manage_tags',
-  
+
   VIEW_COURSE_ADVANCED_SETTINGS: 'courses.view_advanced_settings',
   MANAGE_COURSE_ADVANCED_SETTINGS: 'courses.manage_advanced_settings',
   VIEW_COURSE_CERTIFICATES: 'courses.view_certificates',
