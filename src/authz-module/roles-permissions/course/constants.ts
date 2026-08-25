@@ -27,6 +27,7 @@ export const CONTENT_COURSE_PERMISSIONS = {
   EDIT_COURSE_CONTENT: 'courses.edit_course_content',
   PUBLISH_COURSE_CONTENT: 'courses.publish_course_content',
 
+  VIEW_COURSE_LIBRARY_UPDATES: 'courses.view_library_updates',
   MANAGE_COURSE_LIBRARY_UPDATES: 'courses.manage_library_updates',
 
   VIEW_COURSE_UPDATES: 'courses.view_course_updates',
@@ -49,11 +50,14 @@ export const CONTENT_COURSE_PERMISSIONS = {
 
   VIEW_COURSE_TEAM: 'courses.view_course_team',
   MANAGE_COURSE_TEAM: 'courses.manage_course_team',
+  VIEW_GROUP_CONFIGURATION: 'courses.view_group_configurations',
   MANAGE_COURSE_GROUP_CONFIGURATION: 'courses.manage_group_configurations',
 
   MANAGE_COURSE_TAGS: 'courses.manage_tags',
 
+  VIEW_COURSE_ADVANCED_SETTINGS: 'courses.view_advanced_settings',
   MANAGE_COURSE_ADVANCED_SETTINGS: 'courses.manage_advanced_settings',
+  VIEW_COURSE_CERTIFICATES: 'courses.view_certificates',
   MANAGE_COURSE_CERTIFICATES: 'courses.manage_certificates',
 
   IMPORT_COURSE: 'courses.import_course',
@@ -167,7 +171,13 @@ export const coursePermissions: PermissionMetadata[] = [
     label: 'Publish course content',
     icon: DownloadDone,
   },
-
+  {
+    key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_LIBRARY_UPDATES,
+    resource: 'course_library_updates',
+    description: 'View pending updates from content libraries linked to this course.',
+    label: 'View library updates',
+    icon: RemoveRedEye,
+  },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_LIBRARY_UPDATES,
     resource: 'course_library_updates',
@@ -287,10 +297,17 @@ export const coursePermissions: PermissionMetadata[] = [
     icon: Settings,
   },
   {
+    key: CONTENT_COURSE_PERMISSIONS.VIEW_GROUP_CONFIGURATION,
+    resource: 'course_team_group',
+    description: 'See the list of content groups and their configurations for this course.',
+    label: 'View group configurations',
+    icon: RemoveRedEye,
+  },
+  {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_GROUP_CONFIGURATION,
     resource: 'course_team_group',
     description: 'Create and manage content groups used to target course content to specific learners.',
-    label: 'Manage group configuration',
+    label: 'Manage group configurations',
     icon: Settings,
   },
 
@@ -301,13 +318,26 @@ export const coursePermissions: PermissionMetadata[] = [
     label: 'Manage tags',
     icon: Settings,
   },
-
+  {
+    key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_ADVANCED_SETTINGS,
+    resource: 'course_advanced_certificates',
+    description: 'Access the Advanced Settings page in Studio. This covers a wide range of technical course configurations, including proctoring, timed exams, LTI tools, enrollment limits, and custom display options.',
+    label: 'View advanced settings',
+    icon: RemoveRedEye,
+  },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_ADVANCED_SETTINGS,
     resource: 'course_advanced_certificates',
-    description: 'Access and edit the Advanced Settings page in Studio. This covers a wide range of technical course configurations, including proctoring, timed exams, LTI tools, enrollment limits, and custom display options.',
+    description: 'Edit technical course configurations in the Advanced Settings page in Studio.',
     label: 'Manage advanced settings',
     icon: Settings,
+  },
+  {
+    key: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CERTIFICATES,
+    resource: 'course_advanced_certificates',
+    description: 'See the course certificate settings.',
+    label: 'View certificates',
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_CERTIFICATES,
@@ -381,13 +411,17 @@ export const courseRolesMetadata: RoleMetadata[] = [
 const COURSE_ROLE_PERMISSIONS: Record<string, string[]> = {
   course_admin: [
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_PAGES_RESOURCES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_FILES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GRADING_SETTINGS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CHECKLISTS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM,
+    CONTENT_COURSE_PERMISSIONS.VIEW_GROUP_CONFIGURATION,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_SCHEDULE_AND_DETAILS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_ADVANCED_SETTINGS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CERTIFICATES,
     CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_CONTENT,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_UPDATES,
@@ -410,13 +444,17 @@ const COURSE_ROLE_PERMISSIONS: Record<string, string[]> = {
   ],
   course_staff: [
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_PAGES_RESOURCES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_FILES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GRADING_SETTINGS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CHECKLISTS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM,
+    CONTENT_COURSE_PERMISSIONS.VIEW_GROUP_CONFIGURATION,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_SCHEDULE_AND_DETAILS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_ADVANCED_SETTINGS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CERTIFICATES,
     CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_CONTENT,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_UPDATES,
@@ -438,13 +476,17 @@ const COURSE_ROLE_PERMISSIONS: Record<string, string[]> = {
   ],
   course_editor: [
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_PAGES_RESOURCES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_FILES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GRADING_SETTINGS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CHECKLISTS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM,
+    CONTENT_COURSE_PERMISSIONS.VIEW_GROUP_CONFIGURATION,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_SCHEDULE_AND_DETAILS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_ADVANCED_SETTINGS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CERTIFICATES,
     CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_CONTENT,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_UPDATES,
@@ -458,13 +500,17 @@ const COURSE_ROLE_PERMISSIONS: Record<string, string[]> = {
   ],
   course_auditor: [
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_LIBRARY_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_UPDATES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_PAGES_RESOURCES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_FILES,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_GRADING_SETTINGS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CHECKLISTS,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM,
+    CONTENT_COURSE_PERMISSIONS.VIEW_GROUP_CONFIGURATION,
     CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_SCHEDULE_AND_DETAILS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_ADVANCED_SETTINGS,
+    CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_CERTIFICATES,
   ],
 };
 
