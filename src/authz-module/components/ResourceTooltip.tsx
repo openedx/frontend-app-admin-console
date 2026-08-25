@@ -9,7 +9,7 @@ interface ResourceTooltipProps {
     description: string;
     permissions: PermissionMetadata[];
   };
-};
+}
 
 const ResourceTooltip = ({ resourceGroup }: ResourceTooltipProps) => (
   <OverlayTrigger

@@ -1,6 +1,5 @@
-import { notificationsApp } from '@openedx/frontend-app-notifications';
 import {
-  EnvironmentTypes, SiteConfig, footerApp, headerApp, shellApp,
+  EnvironmentTypes, SiteConfig, footerApp, headerApp, shellApp
 } from '@openedx/frontend-base';
 
 import { adminConsoleApp } from './src';
@@ -22,7 +21,6 @@ const siteConfig: SiteConfig = {
     headerApp,
     footerApp,
     adminConsoleApp,
-    notificationsApp
   ],
   externalRoutes: [
     {

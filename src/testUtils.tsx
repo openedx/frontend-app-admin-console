@@ -48,7 +48,7 @@ export const mockAppContext = {
 };
 
 interface WrapperProps {
-  children: ReactNode,
+  children: ReactNode;
 }
 
 /**

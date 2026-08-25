@@ -1,4 +1,3 @@
-import { notificationsApp } from '@openedx/frontend-app-notifications';
 import {
   EnvironmentTypes, SiteConfig, footerApp, headerApp, shellApp,
 } from '@openedx/frontend-base';
@@ -20,7 +19,6 @@ const siteConfig: SiteConfig = {
     headerApp,
     footerApp,
     adminConsoleApp,
-    notificationsApp,
   ],
 
   accessTokenCookieName: 'edx-jwt-cookie-header-payload',
