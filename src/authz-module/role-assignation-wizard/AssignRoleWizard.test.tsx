@@ -257,6 +257,21 @@ describe('AssignRoleWizard — Step 2', () => {
     expect(screen.getByRole('button', { name: /^Save$/i })).toBeDisabled();
   });
 
+  it('deselecting a previously selected scope clears it and disables Save', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await advanceToStep2(user);
+    const scopeCheckbox = screen.getByLabelText('Library One');
+
+    await user.click(scopeCheckbox);
+    expect(scopeCheckbox).toBeChecked();
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeEnabled();
+
+    await user.click(scopeCheckbox);
+    expect(scopeCheckbox).not.toBeChecked();
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeDisabled();
+  });
+
   it('saves role assignment successfully and closes the wizard', async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

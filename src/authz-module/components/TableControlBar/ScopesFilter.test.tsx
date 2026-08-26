@@ -91,6 +91,18 @@ describe('ScopesFilter', () => {
     }
   });
 
+  it('updates the scope search value when typing in the search box', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: /Scopes/i }));
+    const searchInput = await screen.findByRole('textbox');
+    await user.type(searchInput, 'lib');
+    expect(searchInput).toHaveValue('lib');
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'lib' }),
+    );
+  });
+
   it('calls setFilter when filter changes', () => {
     const mockSetFilter = jest.fn();
     renderWrapper(<ScopesFilter {...defaultProps} setFilter={mockSetFilter} />);
