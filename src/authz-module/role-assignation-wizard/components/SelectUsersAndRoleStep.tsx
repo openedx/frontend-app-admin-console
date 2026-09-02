@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import { useIntl } from '@openedx/frontend-base';
 import {
   Form, Stack, OverlayTrigger,
   Tooltip,
 } from '@openedx/paragon';
-import { getSiteConfig } from '@openedx/frontend-base';
+import { getSiteConfig, useIntl } from '@openedx/frontend-base';
 import { RoleMetadata } from '@src/types';
 import HighlightedUsersInput from './HighlightedUsersInput';
 import messages from '@src/authz-module/role-assignation-wizard/messages';

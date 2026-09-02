@@ -2,4 +2,12 @@
 React App i18n HOWTO
 ####################
 
-This document has moved to the frontend-platform repo: https://github.com/openedx/frontend-platform/blob/master/docs/how_tos/i18n.rst
+This frontend app uses the i18n exports from `frontend-base <https://github.com/openedx/frontend-base>`_ (``useIntl``, ``defineMessages``, ``FormattedMessage``, etc.).
+
+Translations are pulled with:
+
+.. code-block:: sh
+
+    npm run translations:pull
+
+which runs ``openedx translations:pull`` against the ``atlasTranslations`` config in ``package.json``.

@@ -32,6 +32,10 @@ const siteConfig: SiteConfig = {
       url: 'http://apps.local.openedx.io:1997/account/'
     },
     {
+      role: 'org.openedx.frontend.role.courseAuthoring',
+      url: 'http://apps.local.openedx.io:2001/authoring/home'
+    },
+    {
       role: 'org.openedx.frontend.role.logout',
       url: 'http://local.openedx.io:8000/logout'
     },

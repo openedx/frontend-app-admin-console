@@ -1,5 +1,4 @@
-import { useIntl } from '@openedx/frontend-base';
-import { SiteContext } from '@openedx/frontend-base';
+import { SiteContext, useIntl } from '@openedx/frontend-base';
 import {
   RemoveRedEye,
   Delete, ExpandMore,
@@ -21,7 +20,7 @@ import ViewMoreLink from './ViewMoreLink';
 
 interface ViewActionCellExtraProps {
   isCourseEnabled: (scope: string) => boolean;
-};
+}
 
 interface DataTableInstance {
   state?: {
@@ -44,7 +43,7 @@ interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
   isCourseEnabled?: (scope: string) => boolean;
-};
+}
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
 

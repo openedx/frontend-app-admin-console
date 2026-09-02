@@ -1,8 +1,7 @@
 import {
   createContext, useContext, useState, useMemo, useCallback, useEffect, useRef,
 } from 'react';
-import { logError } from '@openedx/frontend-base';
-import { useIntl } from '@openedx/frontend-base';
+import { logError, useIntl } from '@openedx/frontend-base';
 import { Toast } from '@openedx/paragon';
 import messages from '@src/authz-module/messages';
 import { DEFAULT_TOAST_DELAY, RETRY_TOAST_DELAY } from '@src/authz-module/constants';
@@ -37,7 +36,7 @@ interface ToastManagerContextType {
   showErrorToast: (error: unknown, retryFn?: () => void) => void;
   Bold: (chunks: React.ReactNode[]) => JSX.Element;
   Br: () => JSX.Element;
-};
+}
 
 const ToastManagerContext = createContext<ToastManagerContextType | undefined>(undefined);
 

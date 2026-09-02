@@ -5,8 +5,7 @@
  * Global jest setup stays in `setupTest.tsx`.
  */
 import { ReactElement, ReactNode, FunctionComponent } from 'react';
-import { initializeMockApp, IntlProvider, SiteContext } from '@openedx/frontend-base';
-import type { SiteConfig } from '@openedx/frontend-base';
+import { getSiteConfig, initializeMockApp, IntlProvider, SiteContext } from '@openedx/frontend-base';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
@@ -41,9 +40,7 @@ export function initializeMocks({ user = authenticatedUser } = {}) {
 /** Value provided to `SiteContext` in tests. */
 export const mockAppContext = {
   authenticatedUser,
-  siteConfig: {
-    ...process.env,
-  } as unknown as SiteConfig,
+  siteConfig: getSiteConfig(),
   locale: 'en',
 };
 

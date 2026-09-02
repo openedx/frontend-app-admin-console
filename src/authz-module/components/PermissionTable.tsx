@@ -13,7 +13,7 @@ interface PermissionTableProps {
   roles: Role[];
   permissionsTable: PermissionsResourceGrouped[];
   title?: string;
-};
+}
 
 const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();

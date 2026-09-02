@@ -4,7 +4,7 @@ export interface FilterChoice {
   displayName: string;
   value: string;
   description?: string;
-};
+}
 
 export interface MultipleChoiceFilterProps {
   filterButtonText: string;

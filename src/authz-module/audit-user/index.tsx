@@ -2,8 +2,7 @@ import {
   useCallback,
   useContext, useEffect, useMemo, useState,
 } from 'react';
-import { useIntl } from '@openedx/frontend-base';
-import { SiteContext } from '@openedx/frontend-base';
+import { SiteContext, useIntl } from '@openedx/frontend-base';
 import {
   Container, DataTable,
 } from '@openedx/paragon';

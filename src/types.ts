@@ -46,7 +46,7 @@ export interface ResourceMetadata {
   label: string;
   description: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-};
+}
 
 export interface PermissionMetadata {
   key: string;
@@ -54,7 +54,7 @@ export interface PermissionMetadata {
   label?: string;
   description?: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-};
+}
 
 export type PermissionItem = ResourceMetadata & {
   perms: PermissionMetadata[];
@@ -64,14 +64,14 @@ export interface Org {
   id: string;
   name: string;
   shortName: string;
-};
+}
 
 export interface Scope {
   externalKey: string;
   displayName: string;
   description?: string;
   org: Org | null;
-};
+}
 
 // Permissions Matrix
 
@@ -102,7 +102,7 @@ export interface RoleToDelete {
   role: string;
   name?: string;
   scope: string;
-};
+}
 
 export type UserRoleWithPermissions = UserRole & {
   canManageScope?: boolean;

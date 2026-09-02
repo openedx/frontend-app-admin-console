@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { screen } from '@testing-library/react';
+import { authenticatedLoader } from '@openedx/frontend-base';
 import { renderWrapper, initializeMocks } from '@src/testUtils';
 import routes from './routes';
 
@@ -19,8 +20,12 @@ describe('routes', () => {
       expect(routes[0].path).toBe('/authz/*');
     });
 
-    it('is guarded by the admin console role', () => {
-      expect(routes[0].handle).toEqual({ role: 'org.openedx.frontend.role.adminConsole' });
+    it('is labelled with the admin console role', () => {
+      expect(routes[0].handle).toEqual({ roles: ['org.openedx.frontend.role.adminConsole'] });
+    });
+
+    it('requires authentication via the authenticated loader', () => {
+      expect(routes[0].loader).toBe(authenticatedLoader);
     });
 
     it('provides a Component for the route', () => {

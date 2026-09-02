@@ -1,8 +1,7 @@
 import { renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
-import { IntlProvider } from '@openedx/frontend-base';
-import { logError } from '@openedx/frontend-base';
+import { IntlProvider, logError } from '@openedx/frontend-base';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useCourseAuthoringFlagStates } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from './useCourseAuthoringFlag';

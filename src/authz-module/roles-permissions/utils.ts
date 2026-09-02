@@ -44,7 +44,7 @@ interface BuildPermissionsMatrixProps {
   permissions: PermissionMetadata[];
   resources: ResourceMetadata[];
   intl: IntlShape;
-};
+}
 
 /**
  * Builds a permission matrix from the given roles, permissions, and resources.

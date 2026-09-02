@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FallbackProps } from 'react-error-boundary';
-import { getAppConfig } from '@openedx/frontend-base';
-import { useIntl } from '@openedx/frontend-base';
+import { getAppConfig, useIntl } from '@openedx/frontend-base';
 import {
   Button, Container, Hyperlink, Row,
 } from '@openedx/paragon';

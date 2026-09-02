@@ -36,9 +36,9 @@ This repository works with `openedx-authz <https://github.com/openedx/openedx-au
 
 Plugins
 =======
-This frontend app can be customized using `Frontend Plugin Framework <https://github.com/openedx/frontend-plugin-framework>`_.
+This frontend app can be customized using the `<Slot />` component from `frontend-base <https://github.com/openedx/frontend-base>`_. See the `slot naming and lifecycle ADR <https://github.com/openedx/frontend-base/blob/main/docs/decisions/0009-slot-naming-and-lifecycle.rst>`_ for the slot API and conventions.
 
-The parts of this frontend app that can be customized in that manner are documented `here </src/plugin-slots>`_.
+The parts of this frontend app that can be customized in that manner are documented `here </src/slots>`_.
 
 
 Development Roadmap

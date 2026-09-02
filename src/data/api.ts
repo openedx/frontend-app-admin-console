@@ -1,6 +1,5 @@
-import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { PermissionValidationRequest, PermissionValidationResponse } from '@src/types';
-import { camelCaseObject } from '@openedx/frontend-base';
+import { camelCaseObject, getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { getApiUrl } from './utils';
 import { UserAccount } from './types';
 

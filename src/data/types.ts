@@ -4,7 +4,7 @@ export interface ProfileImage {
   imageUrlLarge: string;
   imageUrlMedium: string;
   imageUrlSmall: string;
-};
+}
 
 export interface UserAccount {
   accountPrivacy: string;
@@ -36,4 +36,4 @@ export interface UserAccount {
   phoneNumber: string | null;
   activationKey: string;
   pendingNameChange: string | null;
-};
+}

@@ -1,9 +1,8 @@
-import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import {
-  Org, Scope, TeamMember,
+  Org, Scope,
   UserRole,
 } from '@src/types';
-import { camelCaseObject } from '@openedx/frontend-base';
+import { camelCaseObject, getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { getApiUrl } from '@src/data/utils';
 
 export interface QuerySettings {
@@ -15,11 +14,6 @@ export interface QuerySettings {
   sortBy: string | null;
   pageSize: number;
   pageIndex: number;
-}
-
-export interface GetTeamMembersResponse {
-  results: TeamMember[];
-  count: number;
 }
 
 export interface GetUserAssignmentsResponse {
@@ -34,7 +28,7 @@ export interface RevokeUserRolesRequest {
   role: string;
   scope: string;
   querySettings?: QuerySettings;
-};
+}
 
 export interface DeleteRevokeUserRolesResponse {
   completed: {
@@ -47,11 +41,6 @@ export interface DeleteRevokeUserRolesResponse {
   }[];
 }
 
-export interface PermissionsByRole {
-  role: string;
-  permissions: string[];
-  userCount: number;
-};
 export interface PutAssignTeamMembersRoleResponse {
   completed: { userIdentifier: string; status: string }[];
   errors: { userIdentifier: string; scope: string; error: string }[];
@@ -85,7 +74,7 @@ export interface GetScopesResponse {
 }
 export interface ValidateUsersRequest {
   users: string[];
-};
+}
 
 export interface ValidateUsersResponse {
   validUsers: string[];
@@ -95,7 +84,7 @@ export interface ValidateUsersResponse {
     validCount: number;
     invalidCount: number;
   };
-};
+}
 
 export interface GetScopesParams {
   scopeType?: string;

@@ -2,7 +2,7 @@ npm-install-%: ## install specified % npm package
 	npm install $* --save-dev
 	git add package.json
 
-TURBO = TURBO_TELEMETRY_DISABLED=1 turbo --dangerously-disable-package-manager-check
+TURBO = TURBO_TELEMETRY_DISABLED=1 turbo
 
 NPM_TESTS=build i18n_extract lint test
 
@@ -37,7 +37,7 @@ build-packages: turbo.json
 clean-packages: turbo.json
 	$(TURBO) run clean; rm -f turbo.json
 
-dev-packages: turbo.json
+dev-packages: build-packages turbo.json
 	$(TURBO) run watch:build dev:site; rm -f turbo.json
 
 dev-site: bin-link
@@ -48,7 +48,7 @@ clean:
 
 build:
 	tsc --project tsconfig.build.json
-	find src -type f \( -name '*.scss' -o \( \( -name '*.png' -o -name '*.svg' \) -path '*/assets/*' \) \) -exec sh -c '\
+	find src -type f \( -name '*.scss' -o -path '*/assets/*' \) -exec sh -c '\
 	  for f in "$$@"; do \
 	    d="dist/$${f#src/}"; \
 	    mkdir -p "$$(dirname "$$d")"; \
