@@ -1,4 +1,4 @@
-import type { IntlShape } from 'react-intl';
+import type { IntlShape } from '@openedx/frontend-base';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
 import {
   EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,

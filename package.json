@@ -76,15 +76,10 @@
     "@types/react-dom": "^18",
     "@types/react-helmet": "^6.1.11",
     "nodemon": "^3.1.14",
-    "ts-jest": "^29.4.5",
     "tsc-alias": "^1.9.1",
     "turbo": "^2.10.11"
   },
-  "overrides": {
-    "react-intl": "6.8.9"
-  },
   "dependencies": {
-    "@edx/brand": "npm:@openedx/brand-openedx@^1.2.3",
     "@edx/openedx-atlas": "^0.7.0",
     "lodash.debounce": "^4.0.8",
     "react-error-boundary": "^4.1.2",

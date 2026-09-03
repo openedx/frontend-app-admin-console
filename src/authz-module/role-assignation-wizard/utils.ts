@@ -1,4 +1,4 @@
-import type { IntlShape } from 'react-intl';
+import type { IntlShape } from '@openedx/frontend-base';
 import { PutAssignTeamMembersRoleResponse } from '@src/authz-module/data/api';
 import { ROLE_ASSIGNMENT_ERRORS } from './constants';
 import messages from './messages';

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { FallbackProps } from 'react-error-boundary';
-import { getAppConfig, useIntl } from '@openedx/frontend-base';
+import { getUrlByRouteRole, useIntl } from '@openedx/frontend-base';
 import {
   Button, Container, Hyperlink, Row,
 } from '@openedx/paragon';
 import {
-  appId,
   CustomErrors, ERROR_STATUS, STATUS_400, STATUS_404,
 } from '@src/constants';
 import { getHttpErrorStatus } from '@src/data/utils';
@@ -81,7 +80,7 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
         {showBackButton && (
           <Button
             as={Hyperlink}
-            destination={`${getAppConfig(appId).COURSE_AUTHORING_MICROFRONTEND_URL}`}
+            destination={getUrlByRouteRole('org.openedx.frontend.role.courseAuthoring') ?? undefined}
             className="m-2"
             variant={showReloadButton ? 'outline-primary' : 'primary'}
           >

@@ -14,6 +14,7 @@
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx",
     "src/__mocks__/**/*",
-    "src/setupTest.tsx"
+    "src/setupTest.tsx",
+    "src/testUtils.tsx"
   ]
 }

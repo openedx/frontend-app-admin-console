@@ -15,9 +15,7 @@ const siteConfig: SiteConfig = {
   basename: '/admin-console',
   apps: [{
     appId,
-    config: {
-      COURSE_AUTHORING_MICROFRONTEND_URL: 'http://localhost:2001',
-    },
+    config: {},
   }],
 
   accessTokenCookieName: 'edx-jwt-cookie-header-payload',
