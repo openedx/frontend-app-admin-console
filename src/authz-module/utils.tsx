@@ -1,5 +1,7 @@
 import { Icon } from '@openedx/paragon';
 import { FilterList } from '@openedx/paragon/icons';
+import { RESOURCE_ICONS } from './components/constants';
+import { DJANGO_MANAGED_ROLES } from './constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
 /**
@@ -29,6 +31,17 @@ export const getCellHeader = (columnId: string, columnTitle: string, filtersAppl
     return FilteredHeader;
   }
   return columnTitle;
+};
+
+/**
+ * Picks the resource icon for a scope from the role that grants it: Django-managed roles
+ * are platform-wide, `lib*` roles point at libraries, and everything else at courses.
+ */
+export const getScopeResourceIcon = (role: string) => {
+  if (DJANGO_MANAGED_ROLES.includes(role)) {
+    return RESOURCE_ICONS.GLOBAL;
+  }
+  return role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
 };
 
 export const getScopeManageAction = (scope: string) => {
