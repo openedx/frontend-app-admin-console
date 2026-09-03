@@ -3,7 +3,7 @@ import {
 } from '@src/types';
 import {
   Group, CollectionsBookmark, Notes, AutoAwesomeMosaic,
-  RemoveRedEye,
+  Visibility,
   Settings,
   DownloadDone,
   Plus,
@@ -91,7 +91,7 @@ export const libraryPermissions: PermissionMetadata[] = [
     resource: 'library',
     label: 'View',
     description: 'See the library in Studio and access its content in read-only mode.',
-    icon: RemoveRedEye,
+    icon: Visibility,
   },
   {
     key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TAGS,
@@ -133,7 +133,7 @@ export const libraryPermissions: PermissionMetadata[] = [
     resource: 'library_team',
     label: 'View',
     description: 'See the list of users with a role assigned to this library.',
-    icon: RemoveRedEye,
+    icon: Visibility,
   },
   {
     key: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,

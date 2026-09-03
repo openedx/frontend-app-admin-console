@@ -66,6 +66,101 @@
       line-height: 24px;
     }
   }
+
+  /*
+    Team members table truncation. The ellipsis itself comes from Paragon's `.text-truncate`
+    utility; these rules only supply what Paragon has no utility for — the `min-width: 0`
+    that lets a flex child shrink enough to clip, and the max-widths that place the cut near
+    the character counts in the design.
+  */
+  .authz-cell-username { max-width: 15rem; }  // ~24 characters
+  .authz-cell-email { max-width: 17rem; }     // ~28 characters
+
+  /*
+    Column sizing for the team members table. Auto-layout hands width to the short
+    Username/Email values and starves "Assigned roles", cutting the scope name off far
+    earlier than the design allows, so the columns are pinned explicitly. Widths follow
+    the design's character budget: ~24 for username, ~28 for email, the bulk to the role
+    summary, and just enough for the toggle and the action icon.
+  */
+  .team-members-table {
+    .pgn__data-table {
+      table-layout: fixed;
+    }
+
+    th:nth-child(1) { width: 16%; }  // Username, ~24 characters
+    th:nth-child(2) { width: 18%; }  // Email, ~28 characters
+    th:nth-child(3) { width: 46%; }  // Assigned roles: badge + scope + org subline
+    th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
+    th:nth-child(5) { width: 7%; }   // Actions
+
+    // The toggle reads as one phrase; wrapping it mid-label looks broken.
+    td:nth-child(4) {
+      white-space: nowrap;
+    }
+
+    td {
+      overflow: hidden;
+    }
+
+    // The breakdown sizes its own three columns; it must not inherit the widths above.
+    .team-members-table__subtable {
+      .pgn__data-table {
+        table-layout: auto;
+      }
+
+      th:nth-child(1),
+      th:nth-child(2),
+      th:nth-child(3) {
+        width: auto;
+      }
+    }
+  }
+
+  .team-members-table__subtable {
+    // The breakdown sits inside a padded container of its own, so the module's blanket
+    // 1rem on every data-table wrapper would double it up.
+    .pgn__data-table-wrapper {
+      padding: 0;
+    }
+
+    /*
+      Paragon stripes rows with `.pgn__data-table.is-striped tr:nth-child(2n)` — a
+      descendant selector, so the striped outer table reaches into this nested one and
+      `isStriped={false}` on the inner table cannot override it. Reset it here, scoped to
+      a nested table that actually opted out, so an inner table that wants stripes keeps them.
+    */
+    .pgn__data-table:not(.is-striped) tr {
+      background-color: transparent;
+
+      // With the stripes gone, rows need an explicit divider to stay readable.
+      &:not(:last-child) td {
+        border-bottom: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      }
+    }
+  }
+
+  /*
+    Badge labels vary in length ("Course Admin" vs "Library Contributor"), so without a
+    floor the "In" connector and the scope start at a different x on every row. Sized to
+    the widest label so the three parts line up down the column.
+  */
+  .authz-assigned-roles .authz-role-badge {
+    min-width: 11rem;
+  }
+
+  .authz-scope-cell {
+    min-width: 0;
+    max-width: 25rem;  // org subline, ~40 characters
+
+    &__name {
+      max-width: 22rem;  // ~35 characters
+    }
+
+    &__org {
+      line-height: 1.2;
+    }
+  }
   
   @media(--pgn-size-breakpoint-max-width-sm){
     .flex-column-sm {

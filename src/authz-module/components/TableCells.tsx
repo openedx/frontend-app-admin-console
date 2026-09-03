@@ -1,12 +1,10 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
-  RemoveRedEye,
   Delete, ExpandMore,
   Info,
 } from '@openedx/paragon/icons';
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
-import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
@@ -15,13 +13,9 @@ import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
   type DataTableCellProps,
 } from '@openedx/paragon';
-import { RESOURCE_ICONS } from './constants';
+import { getScopeResourceIcon } from '@src/authz-module/utils';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
-
-type ViewActionCellExtraProps = {
-  isCourseEnabled: (scope: string) => boolean;
-};
 
 interface DataTableInstance {
   state?: {
@@ -52,7 +46,7 @@ type DisabledCourseActionButtonProps = Pick<ComponentProps<typeof IconButton>, '
 
 // A disabled button can't trigger its own tooltip (Paragon sets pointer-events: none on it),
 // so the OverlayTrigger must live on a wrapper element that still receives hover events.
-const DisabledCourseActionButton = ({
+export const DisabledCourseActionButton = ({
   src, alt, size, variant,
 }: DisabledCourseActionButtonProps) => {
   const { formatMessage } = useIntl();
@@ -82,48 +76,22 @@ const NameCell = ({ row }: CellProps) => {
   const intl = useIntl();
   const { authenticatedUser } = useContext(AppContext);
   const username = authenticatedUser?.username;
+  const displayName = row.original.fullName || row.original.username || '';
 
   if (row.original.username === username) {
     return (
-      <span>
-        {row.original.fullName || row.original.username}
+      <span className="d-block text-truncate authz-cell-username" title={displayName}>
+        {displayName}
         <span className="text-gray-500">{intl.formatMessage(messages['authz.table.username.current'])}</span>
       </span>
     );
   }
-  return <span>{row.original.fullName || row.original.username || ''}</span>;
+  return <span className="d-block text-truncate authz-cell-username" title={displayName}>{displayName}</span>;
 };
 
-const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
-  const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-  const viewPath = `/authz/user/${row.original.username}`;
-  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
-  const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
-
-  if (isDisabled) {
-    return (
-      <DisabledCourseActionButton
-        src={RemoveRedEye}
-        alt={formatMessage(messages['authz.table.column.actions.view.title'])}
-        size="sm"
-      />
-    );
-  }
-
-  return (
-    <IconButton
-      src={RemoveRedEye}
-      alt={formatMessage(messages['authz.table.column.actions.view.title'])}
-      size="sm"
-      onClick={() => navigate(viewPath)}
-    />
-  );
-};
-
-const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function customViewActionCell(cellProps) {
-  return <ViewActionCell {...cellProps} {...extraProps} />;
-};
+const EmailCell = ({ value }: CellPropsWithValue) => (
+  <span className="d-block text-truncate authz-cell-email" title={value}>{value}</span>
+);
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
@@ -137,19 +105,12 @@ const OrgCell = ({ value, row }: CellPropsWithValue) => {
 const ScopeCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
 
-  const { scopeText, iconSrc } = useMemo(() => {
-    if (DJANGO_MANAGED_ROLES.includes(row.original.role)) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
-        iconSrc: RESOURCE_ICONS.GLOBAL,
-      };
-    }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
-    return {
-      scopeText: row.original.scope,
-      iconSrc: scopeIcon,
-    };
-  }, [row.original.role, row.original.scope, formatMessage]);
+  const { scopeText, iconSrc } = useMemo(() => ({
+    scopeText: DJANGO_MANAGED_ROLES.includes(row.original.role)
+      ? formatMessage(messages['authz.user.table.scope.global.label'])
+      : row.original.scope,
+    iconSrc: getScopeResourceIcon(row.original.role),
+  }), [row.original.role, row.original.scope, formatMessage]);
 
   return (
     <span className="d-flex align-items-center">
@@ -298,12 +259,11 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 
 export {
   NameCell,
-  ViewActionCell,
+  EmailCell,
   RoleCell,
   OrgCell,
   ScopeCell,
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
-  createViewActionCell,
 };

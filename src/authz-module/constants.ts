@@ -30,18 +30,14 @@ export const getPlatformAggregateScopeKey = (contextType: ContextType): string =
 
 export const DEFAULT_TOAST_DELAY = 5000;
 export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
-export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
-  username: 'skeleton',
-  name: '',
-  email: '',
-  roles: [],
-}));
 
 export const ROUTES = {
   HOME_PATH: '/authz',
   AUDIT_USER_PATH: '/user/:username',
   ASSIGN_ROLE_WIZARD_PATH: '/assign-role',
 };
+
+export const buildUserPath = (username: string) => `${ROUTES.HOME_PATH}${ROUTES.AUDIT_USER_PATH.replace(':username', encodeURIComponent(username))}`;
 
 export const buildWizardPath = (options?: { users?: string; from?: string }) => {
   const base = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
@@ -81,6 +77,13 @@ export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
 export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
+
+/**
+ * Maximum assignments nested under each user in the team members table. Sent as the
+ * `assignments_limit` query param and used as the numerator of the sub-table's
+ * "Showing 03 of 10" footer; the denominator is the user's absolute `assignmentCount`.
+ */
+export const MAX_INLINE_ASSIGNMENTS = 3;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
