@@ -66,7 +66,16 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     [allScopes],
   );
 
-  const orderedOrgs = useMemo(() => Object.keys(scopesByOrg).sort(), [scopesByOrg]);
+  const orderedOrgs = useMemo(() => {
+    const orgSlugs = new Set(Object.keys(scopesByOrg));
+    // Add orgs from the organizations list (respecting the active org filter)
+    organizations?.forEach((org) => {
+      if (!orgs.length || orgs.includes(org.shortName)) {
+        orgSlugs.add(org.shortName);
+      }
+    });
+    return [...orgSlugs].sort();
+  }, [scopesByOrg, organizations, orgs]);
 
   const { hasPlatformPermission, orgHasPermission } = useScopePermissions({ contextType, orderedOrgs });
 
