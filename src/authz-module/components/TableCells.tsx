@@ -6,13 +6,16 @@ import {
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  getPlatformAggregateScopeKey, getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
   type DataTableCellProps,
 } from '@openedx/paragon';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
+import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
 
@@ -73,9 +76,11 @@ export const DisabledCourseActionButton = ({
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
+  // The backend returns '*' as the org wildcard, meaning the role spans every organization.
+  const isAllOrgs = DJANGO_MANAGED_ROLES.includes(row.original.role) || value === ALL_ORGS_KEY;
   return (
     <span>
-      {DJANGO_MANAGED_ROLES.includes(row.original.role) ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
+      {isAllOrgs ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
     </span>
   );
 };
@@ -83,12 +88,22 @@ const OrgCell = ({ value, row }: CellPropsWithValue) => {
 const ScopeCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
 
-  const { scopeText, iconSrc } = useMemo(() => ({
-    scopeText: DJANGO_MANAGED_ROLES.includes(row.original.role)
-      ? formatMessage(messages['authz.user.table.scope.global.label'])
-      : row.original.scope,
-    iconSrc: getScopeResourceIcon(row.original.role),
-  }), [row.original.role, row.original.scope, formatMessage]);
+  const { scopeText, iconSrc } = useMemo(() => {
+    const { role, scope, org } = row.original;
+    if (DJANGO_MANAGED_ROLES.includes(role) || scope === getPlatformAggregateScopeKey(CONTEXT_TYPES.GLOBAL)) {
+      return {
+        scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
+        iconSrc: RESOURCE_ICONS.GLOBAL,
+      };
+    }
+    const aggregateType = getAggregateScopeType(scope, org);
+    return {
+      scopeText: aggregateType
+        ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+        : scope,
+      iconSrc: getScopeResourceIcon(scope),
+    };
+  }, [row.original, formatMessage]);
 
   return (
     <span className="d-flex align-items-center">
