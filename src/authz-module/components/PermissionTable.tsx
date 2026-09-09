@@ -1,5 +1,5 @@
 import React from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Check, Close } from '@openedx/paragon/icons';
 import {
   Card, Icon, OverlayTrigger, Tooltip,
@@ -9,11 +9,11 @@ import { actionsDictionary } from './RoleCard/constants';
 import ResourceTooltip from './ResourceTooltip';
 import messages from './messages';
 
-type PermissionTableProps = {
+interface PermissionTableProps {
   roles: Role[];
   permissionsTable: PermissionsResourceGrouped[];
   title?: string;
-};
+}
 
 const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();
@@ -72,32 +72,32 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                   {roles.map(role => (
                     <td key={role.name} className={`text-center ${role.disabled ? 'text-gray-200' : ''}`}>
                       {
-                      permission.roles[role.name]
-                        ? (
-                          <Icon
-                            className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-success'}`}
-                            src={Check}
-                            aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
-                              roleName: role.name,
-                            })}
-                            screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
-                              roleName: role.name,
-                            })}
-                          />
-                        )
-                        : (
-                          <Icon
-                            className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-danger'}`}
-                            src={Close}
-                            aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
-                              roleName: role.name,
-                            })}
-                            screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
-                              roleName: role.name,
-                            })}
-                          />
-                        )
-}
+                        permission.roles[role.name]
+                          ? (
+                              <Icon
+                                className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-success'}`}
+                                src={Check}
+                                aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
+                                  roleName: role.name,
+                                })}
+                                screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
+                                  roleName: role.name,
+                                })}
+                              />
+                            )
+                          : (
+                              <Icon
+                                className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-danger'}`}
+                                src={Close}
+                                aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
+                                  roleName: role.name,
+                                })}
+                                screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
+                                  roleName: role.name,
+                                })}
+                              />
+                            )
+                      }
                     </td>
                   ))}
                 </tr>

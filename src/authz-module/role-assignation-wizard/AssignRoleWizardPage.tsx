@@ -1,15 +1,15 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
-import AuthZLayout from '../components/AuthZLayout';
-import { ROUTES } from '../constants';
+import AuthZLayout from '@src/authz-module/components/AuthZLayout';
+import { ROUTES } from '@src/authz-module/constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
   MANAGE_TEAM_PERMISSIONS,
-} from '../roles-permissions';
-import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
+} from '@src/authz-module/roles-permissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
@@ -28,8 +28,8 @@ const AssignRoleWizardPage = () => {
   const { isCourseAuthoringEnabled } = useCourseAuthoringFlag();
 
   const rolesAssignable = managePermissions?.flatMap((p) => {
-    if (!p.allowed) { return []; }
-    if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) { return libraryRolesMetadata; }
+    if (!p.allowed) return [];
+    if (p.action === CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM) return libraryRolesMetadata;
     if (p.action === CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM) {
       // Course (authoring) roles are only assignable when the course-authoring flag is enabled.
       return isCourseAuthoringEnabled ? courseRolesMetadata : [];

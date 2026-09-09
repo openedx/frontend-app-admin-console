@@ -1,14 +1,18 @@
 {
-  "extends": "@openedx/frontend-build",
+  "extends": "@openedx/frontend-base/tools/tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
     "rootDir": ".",
-    // Ignore deprecation warnings for TypeScript 6.0, which will be used in the next major release of TypeScript.
-   "ignoreDeprecations": "6.0",
+    "outDir": "dist",
     "paths": {
       "@src/*": ["./src/*"]
     }
   },
-  "include": ["*.js", ".eslintrc.js", "src/**/*", "plugins/**/*"],
-  "exclude": ["dist", "node_modules"]
+  "include": [
+    "src/**/*",
+    "app.d.ts",
+    "babel.config.js",
+    "eslint.config.js",
+    "jest.config.js",
+    "site.config.*.tsx"
+  ]
 }

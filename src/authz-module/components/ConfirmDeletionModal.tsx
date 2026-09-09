@@ -2,7 +2,7 @@ import {
   ActionRow, AlertModal, Icon, ModalDialog, Stack,
   StatefulButton,
 } from '@openedx/paragon';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 
 import { SpinnerSimple } from '@openedx/paragon/icons';
 import messages from './messages';
@@ -18,7 +18,7 @@ interface ConfirmDeletionModalProps {
     role: string;
     name?: string;
     rolesCount: number;
-  }
+  };
 }
 
 const ConfirmDeletionModal = ({
@@ -62,7 +62,7 @@ const ConfirmDeletionModal = ({
         })}
         </p>
         {context.rolesCount === 1 && (
-        <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.2'])}</p>
+          <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.2'])}</p>
         )}
         <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.3'])}</p>
       </Stack>

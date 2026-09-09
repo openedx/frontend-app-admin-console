@@ -1,10 +1,13 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
-import { logError } from '@edx/frontend-platform/logging';
+import { renderWrapper } from '@src/testUtils';
+import { logError } from '@openedx/frontend-base';
 import { ToastManagerProvider, useToastManager } from './ToastManagerContext';
 
-jest.mock('@edx/frontend-platform/logging');
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  logError: jest.fn(),
+}));
 const TestComponent = () => {
   const { showToast } = useToastManager();
 

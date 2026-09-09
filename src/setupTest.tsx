@@ -1,73 +1,15 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import '@testing-library/jest-dom';
-import { ReactNode } from 'react';
-import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { AppContext } from '@edx/frontend-platform/react';
-import type { ConfigDocument } from '@edx/frontend-platform/config';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import siteConfig from 'site.config';
+import {
+  addAppConfigs, configureLogging, mergeSiteConfig, MockLoggingService,
+} from '@openedx/frontend-base';
 
-// Lazy so each test file's own `jest.mock('@edx/frontend-platform/auth', ...)`
-// (which is hoisted above this setup file's imports) is in effect by the time
-// callers do `mockHttpClient().mockReturnValue(...)`.
-export const mockHttpClient = (): jest.Mock => jest.requireMock('@edx/frontend-platform/auth').getAuthenticatedHttpClient;
-
-export const mockAppContext = {
-  authenticatedUser: {
-    userId: 1,
-    username: 'testuser',
-    email: 'testuser@example.com',
-    roles: [],
-    administrator: false,
-  },
-  config: {
-    ...process.env,
-  } as ConfigDocument,
-};
-
-interface WrapperProps {
-  children: ReactNode;
-}
-
-export const renderWithAllProviders = (ui, options = {}) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-  const Wrapper = ({ children }: WrapperProps) => (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppContext.Provider value={mockAppContext}>
-          <IntlProvider locale="en">
-            {children}
-          </IntlProvider>
-        </AppContext.Provider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  );
-
-  return render(ui, { wrapper: Wrapper, ...options });
-};
-
-export const intlWrapper = ({ children }: WrapperProps) => (
-  <IntlProvider locale="en">{children}</IntlProvider>
-);
-
-export const renderWrapper = (ui, options = {}) => {
-  const Wrapper = ({ children }: WrapperProps) => (
-    <BrowserRouter>
-      <AppContext.Provider value={mockAppContext}>
-        <IntlProvider locale="en">{children}</IntlProvider>
-      </AppContext.Provider>
-    </BrowserRouter>
-  );
-
-  return render(ui, { wrapper: Wrapper, ...options });
-};
+// Seed configuration for tests, since initialize() is not called.
+mergeSiteConfig(siteConfig);
+addAppConfigs();
+// Ensures logError/logInfo don't crash on a null `service` when tests
+// don't call initializeMockApp themselves.
+configureLogging(MockLoggingService, { config: siteConfig });
 
 class ResizeObserver {
   observe() { }

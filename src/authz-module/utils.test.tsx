@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { renderWrapper } from '@src/setupTest';
+import { initializeMocks, renderWrapper } from '@src/testUtils';
 import { getCellHeader, getScopeManageAction, getScopeManageActionPermission } from './utils';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
@@ -16,13 +15,7 @@ const renderCellHeader = (columnId: string, columnTitle: string, filtersApplied:
 describe('utils', () => {
   describe('getCellHeader', () => {
     beforeEach(() => {
-      initializeMockApp({
-        authenticatedUser: {
-          userId: 1,
-          username: 'testuser',
-          email: 'testuser@example.com',
-        },
-      });
+      initializeMocks();
     });
 
     it('displays column title without filter icon when no filters are applied', () => {

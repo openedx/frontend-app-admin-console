@@ -1,11 +1,11 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   Form, Icon, Badge, Stack,
 } from '@openedx/paragon';
 import { Search } from '@openedx/paragon/icons';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import { ChangeEvent } from 'react';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 interface ScopeFilterBarProps {
   search: string;

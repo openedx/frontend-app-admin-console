@@ -1,12 +1,12 @@
-export type ProfileImage = {
+export interface ProfileImage {
   hasImage: boolean;
   imageUrlFull: string;
   imageUrlLarge: string;
   imageUrlMedium: string;
   imageUrlSmall: string;
-};
+}
 
-export type UserAccount = {
+export interface UserAccount {
   accountPrivacy: string;
   profileImage: ProfileImage;
   username: string;
@@ -36,4 +36,4 @@ export type UserAccount = {
   phoneNumber: string | null;
   activationKey: string;
   pendingNameChange: string | null;
-};
+}

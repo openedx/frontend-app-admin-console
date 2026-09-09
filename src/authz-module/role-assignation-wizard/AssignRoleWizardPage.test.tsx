@@ -1,19 +1,18 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithAllProviders } from '@src/setupTest';
+import { renderWithAllProviders } from '@src/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { useValidateUsers } from '../data/hooks';
-import { useCourseAuthoringFlag } from '../hooks/useCourseAuthoringFlag';
+import { useValidateUsers } from '@src/authz-module/data/hooks';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import {
   CONTENT_COURSE_PERMISSIONS,
   CONTENT_LIBRARY_PERMISSIONS,
   courseRolesMetadata,
   libraryRolesMetadata,
-} from '../roles-permissions';
+} from '@src/authz-module/roles-permissions';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
 
-jest.mock('@edx/frontend-platform/logging');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useSearchParams: jest.fn(),
@@ -29,10 +28,6 @@ jest.mock('../data/hooks', () => ({
     isError: false,
     isSuccess: false,
   })),
-}));
-
-jest.mock('@edx/frontend-component-header', () => ({
-  StudioHeader: () => null,
 }));
 
 jest.mock('@src/data/hooks', () => ({
@@ -62,8 +57,8 @@ const mockPermissions = (
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
   const params = new URLSearchParams();
-  if (users) { params.set('users', users); }
-  if (from) { params.set('from', from); }
+  if (users) params.set('users', users);
+  if (from) params.set('from', from);
   useSearchParams.mockReturnValue([params]);
   const navigate = jest.fn();
   useNavigate.mockReturnValue(navigate);

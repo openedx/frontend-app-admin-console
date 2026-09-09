@@ -2,8 +2,7 @@ import {
   useCallback,
   useContext, useEffect, useMemo, useState,
 } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
+import { SiteContext, useIntl } from '@openedx/frontend-base';
 import {
   Container, DataTable,
 } from '@openedx/paragon';
@@ -34,14 +33,14 @@ import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import messages from './messages';
-import ConfirmDeletionModal from '../components/ConfirmDeletionModal';
-import { getCellHeader, getScopeManageActionPermission } from '../utils';
+import ConfirmDeletionModal from '@src/authz-module/components/ConfirmDeletionModal';
+import { getCellHeader, getScopeManageActionPermission } from '@src/authz-module/utils';
 
 const AuditUserPage = () => {
   const { formatMessage } = useIntl();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
   const { username } = useParams();
-  const { authenticatedUser } = useContext(AppContext);
+  const { authenticatedUser } = useContext(SiteContext);
   const navigate = useNavigate();
   const {
     isLoading: isLoadingUser, data: user, isError: isErrorUser, error: errorUser,
@@ -52,7 +51,7 @@ const AuditUserPage = () => {
   const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
-    if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
+    if (isCourseViewAllowed || querySettings.roles) return querySettings;
     return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
   }, [isCourseViewAllowed, querySettings]);
 
@@ -76,7 +75,7 @@ const AuditUserPage = () => {
   } = useValidateUserPermissionsNonSuspense(deletePermissions);
 
   const rowsWithPermissions = useMemo(() => {
-    if (!permissionsToManageScope) { return userAssignments; }
+    if (!permissionsToManageScope) return userAssignments;
 
     return userAssignments.map(assignment => {
       const canManageScope = permissionsToManageScope.some(
@@ -100,7 +99,7 @@ const AuditUserPage = () => {
   }, [user, isLoadingUser, navigate, isErrorUser, errorUser]);
 
   const handleShowConfirmDeletionModal = useCallback((role: RoleToDelete) => {
-    if (isRevokingUserRolePending) { return; }
+    if (isRevokingUserRolePending) return;
 
     setRoleToDelete(role);
     setShowConfirmDeletionModal(true);
@@ -172,7 +171,7 @@ const AuditUserPage = () => {
   };
 
   const handleRevokeUserRole = () => {
-    if (!user || !roleToDelete) { return; }
+    if (!user || !roleToDelete) return;
 
     const data = {
       users: user.username,

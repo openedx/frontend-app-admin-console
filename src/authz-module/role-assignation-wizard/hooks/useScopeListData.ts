@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
 import type { ContextType } from '@src/authz-module/constants';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 import useScopePermissions from './useScopePermissions';
 
 interface UseScopeListDataParams {
@@ -16,7 +16,7 @@ interface UseScopeListDataParams {
 
 const groupByOrg = (acc: Record<string, Scope[]>, scope: Scope): Record<string, Scope[]> => {
   const orgSlug = scope.org!.shortName;
-  if (!acc[orgSlug]) { acc[orgSlug] = []; }
+  if (!acc[orgSlug]) acc[orgSlug] = [];
   acc[orgSlug].push(scope);
   return acc;
 };
@@ -47,7 +47,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
       const scopes = scopesData?.pages.flatMap((page) => page.results) ?? [];
       const serverCount = scopesData?.pages[0]?.count ?? 0;
       // Course scopes are gated by the course-authoring flag; libraries always pass.
-      if (contextType !== 'course') { return { allScopes: scopes, totalCount: serverCount }; }
+      if (contextType !== 'course') return { allScopes: scopes, totalCount: serverCount };
       const enabledScopes = scopes.filter((scope) => isCourseEnabled(scope.externalKey));
       // The server count includes authoring-disabled courses this filter hides; subtract
       // the ones already loaded so the reported total converges as pages arrive.
@@ -84,11 +84,11 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
 
   const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {
-      externalKey: getPlatformAggregateScopeKey(contextType as ContextType),
-      displayName: platformAggregateLabel,
-      description: aggregateDescription,
-      org: null,
-    }
+        externalKey: getPlatformAggregateScopeKey(contextType as ContextType),
+        displayName: platformAggregateLabel,
+        description: aggregateDescription,
+        org: null,
+      }
     : null;
 
   /**
@@ -101,7 +101,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
    * Returns an empty object when `contextType` is not yet defined.
    */
   const orgAggregateScopeItems = useMemo<Record<string, Scope>>(() => {
-    if (!contextType) { return {}; }
+    if (!contextType) return {};
     return Object.fromEntries(
       orderedOrgs
         .filter((orgSlug) => orgHasPermission[orgSlug])

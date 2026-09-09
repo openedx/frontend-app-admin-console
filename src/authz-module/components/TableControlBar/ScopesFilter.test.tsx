@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
@@ -89,6 +89,18 @@ describe('ScopesFilter', () => {
       await user.type(searchInputs[0], 'test search');
       expect(searchInputs[0]).toHaveValue('test search');
     }
+  });
+
+  it('updates the scope search value when typing in the search box', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<ScopesFilter {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: /Scopes/i }));
+    const searchInput = await screen.findByRole('textbox');
+    await user.type(searchInput, 'lib');
+    expect(searchInput).toHaveValue('lib');
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'lib' }),
+    );
   });
 
   it('calls setFilter when filter changes', () => {

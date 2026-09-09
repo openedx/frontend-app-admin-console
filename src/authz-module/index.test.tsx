@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { IntlProvider } from '@openedx/frontend-base';
+import { initializeMocks } from '@src/testUtils';
 import { CustomErrors } from '@src/constants';
 import AuthZModule from './index';
 
@@ -17,9 +17,7 @@ const createTestQueryClient = () => new QueryClient({
 describe('AuthZModule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    initializeMockApp({
-      authenticatedUser: { username: 'testuser' },
-    });
+    initializeMocks();
   });
 
   it('renders error boundary fallback when accessing unknown route', async () => {

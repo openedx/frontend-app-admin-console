@@ -2,16 +2,16 @@ import { Icon, OverlayTrigger, Popover } from '@openedx/paragon';
 import { Info } from '@openedx/paragon/icons';
 import { PermissionMetadata } from '@src/types';
 
-type ResourceTooltipProps = {
+interface ResourceTooltipProps {
   resourceGroup: {
     key: string;
     label: string;
     description: string;
     permissions: PermissionMetadata[];
   };
-};
+}
 
-const ResourceTooltip = ({ resourceGroup }:ResourceTooltipProps) => (
+const ResourceTooltip = ({ resourceGroup }: ResourceTooltipProps) => (
   <OverlayTrigger
     key={`overlay-${resourceGroup.key}`}
     placement="auto"

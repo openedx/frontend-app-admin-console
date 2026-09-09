@@ -25,7 +25,7 @@ const useScopePermissions = ({
 
   // 1. Build the API request payload
   const permissionRequests = useMemo(() => {
-    if (!typedContext) { return []; }
+    if (!typedContext) return [];
 
     const action = typedContext === 'course'
       ? CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
@@ -47,7 +47,7 @@ const useScopePermissions = ({
   const allowedByScope = useMemo(() => {
     const byScope: Record<string, boolean> = Object.create(null);
     perms?.forEach(({ scope, allowed }) => {
-      if (scope !== undefined) { byScope[scope] = allowed; }
+      if (scope !== undefined) byScope[scope] = allowed;
     });
     return byScope;
   }, [perms]);

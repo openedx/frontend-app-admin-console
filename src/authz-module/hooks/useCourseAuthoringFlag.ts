@@ -47,8 +47,8 @@ export const useCourseAuthoringFlag = () => {
 
   const isCourseAuthoringEnabled = flagStates
     ? flagStates.global
-      || flagStates.orgOverrides.on.length > 0
-      || flagStates.courseOverrides.on.length > 0
+    || flagStates.orgOverrides.on.length > 0
+    || flagStates.courseOverrides.on.length > 0
     : false;
 
   const { isCourseEnabled, isOrgAuthoringEnabled } = useMemo(() => {
@@ -61,13 +61,13 @@ export const useCourseAuthoringFlag = () => {
     const courseEnabled = (courseId: string): boolean => {
       const courseFlagOverrideEnabled = courseOn.has(courseId);
       const courseFlagOverrideDisabled = courseOff.has(courseId);
-      if (courseFlagOverrideEnabled) { return true; }
-      if (courseFlagOverrideDisabled) { return false; }
+      if (courseFlagOverrideEnabled) return true;
+      if (courseFlagOverrideDisabled) return false;
       const org = orgOf(courseId);
       const orgFlagOverrideEnabled = !!org && orgOn.has(org);
       const orgFlagOverrideDisabled = !!org && orgOff.has(org);
-      if (orgFlagOverrideEnabled) { return true; }
-      if (orgFlagOverrideDisabled) { return false; }
+      if (orgFlagOverrideEnabled) return true;
+      if (orgFlagOverrideDisabled) return false;
       return global;
     };
 
@@ -75,9 +75,9 @@ export const useCourseAuthoringFlag = () => {
 
     const orgAuthoringEnabled = (org: string): boolean => {
       const orgFlagOverrideEnabled = orgOn.has(org);
-      if (orgFlagOverrideEnabled) { return true; }
-      if (orgsWithForcedOnCourse.has(org)) { return true; }
-      if (orgOff.has(org)) { return false; }
+      if (orgFlagOverrideEnabled) return true;
+      if (orgsWithForcedOnCourse.has(org)) return true;
+      if (orgOff.has(org)) return false;
       return global;
     };
 
