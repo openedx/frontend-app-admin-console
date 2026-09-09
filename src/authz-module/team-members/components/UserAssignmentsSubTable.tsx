@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Card, DataTable, Icon, TableFooter } from '@openedx/paragon';
+import {
+  Card, DataTable, Icon, TableFooter,
+} from '@openedx/paragon';
 import { ArrowForward, Business } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import {
@@ -10,7 +12,7 @@ import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
-import messages from './messages';
+import messages from '../messages';
 import { RoleBadge } from './AssignedRolesCell';
 
 interface UserAssignmentsSubTableProps {
@@ -118,7 +120,7 @@ const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
               </>
             )}
           </div>
-        </TableFooter >
+        </TableFooter>
       </DataTable>
     </Card>
   );

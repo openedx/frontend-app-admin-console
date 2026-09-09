@@ -21,12 +21,12 @@ import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import { MAX_INLINE_ASSIGNMENTS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
-import AssignedRolesCell from './AssignedRolesCell';
-import { EmailCell, NameCell } from './TeamMemberCells';
-import CollapseRowsOnChange from './CollapseRowsOnChange';
-import MoreRolesToggle from './MoreRolesToggle';
-import UserAssignmentsSubTable from './UserAssignmentsSubTable';
-import { createTeamMemberViewActionCell } from './TeamMemberViewActionCell';
+import AssignedRolesCell from './components/AssignedRolesCell';
+import { EmailCell, NameCell } from './components/TeamMemberCells';
+import CollapseRowsOnChange from './components/CollapseRowsOnChange';
+import MoreRolesToggle from './components/MoreRolesToggle';
+import UserAssignmentsSubTable from './components/UserAssignmentsSubTable';
+import { createTeamMemberViewActionCell } from './components/TeamMemberViewActionCell';
 
 interface TeamMembersTableProps {
   presetScope?: string;

@@ -8,7 +8,7 @@ import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
-import messages from './messages';
+import messages from '../messages';
 
 interface AssignedRolesCellProps {
   row: { original: TeamMember };
