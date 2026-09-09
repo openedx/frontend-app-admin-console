@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import type { TeamMember } from '@src/types';
-import messages from './messages';
+import messages from '../messages';
 
 interface NameCellProps {
   row: { original: TeamMember };
