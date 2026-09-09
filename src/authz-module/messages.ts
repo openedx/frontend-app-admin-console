@@ -42,6 +42,28 @@ const messages = defineMessages(
       defaultMessage: '<Bold>The request took too long.</Bold> <Br></Br>Please check your connection and try again.',
       description: 'Request timeout message',
     },
+    // Aggregate scope labels. Shared: the wizard offers these scopes when assigning a
+    // role, and the team members table names them when displaying one already assigned.
+    'authz.scope.aggregate.platform.course': {
+      id: 'authz.scope.aggregate.platform.course',
+      defaultMessage: 'All courses on the platform',
+      description: 'Label for the scope covering every course on the platform',
+    },
+    'authz.scope.aggregate.platform.library': {
+      id: 'authz.scope.aggregate.platform.library',
+      defaultMessage: 'All libraries on the platform',
+      description: 'Label for the scope covering every library on the platform',
+    },
+    'authz.scope.aggregate.org.course': {
+      id: 'authz.scope.aggregate.org.course',
+      defaultMessage: 'All courses in this organization',
+      description: 'Label for the scope covering every course within one organization',
+    },
+    'authz.scope.aggregate.org.library': {
+      id: 'authz.scope.aggregate.org.library',
+      defaultMessage: 'All libraries in this organization',
+      description: 'Label for the scope covering every library within one organization',
+    },
     'authz.team.toast.retry.label': {
       id: 'authz.team.toast.retry.label',
       defaultMessage: 'Retry',
