@@ -2,13 +2,12 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { Icon } from '@openedx/paragon';
 import { Business, Person } from '@openedx/paragon/icons';
 import {
-  ALL_ORGS_KEY, CONTEXT_TYPES, getOrgAggregateScopeKey,
-  getPlatformAggregateScopeKey, MAP_ROLE_KEY_TO_LABEL,
+  ALL_ORGS_KEY, getAggregateScopeType, getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
-import moduleMessages from '@src/authz-module/messages';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from './messages';
 
 interface AssignedRolesCellProps {
@@ -36,21 +35,12 @@ export const AssignmentSummary = ({ assignment }: AssignmentSummaryProps) => {
   const {
     role, scope, scopeDisplayName, org,
   } = assignment;
-  const contextType = role?.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE;
-  const isLibrary = contextType === CONTEXT_TYPES.LIBRARY;
-
   // An aggregate scope covers every course/library across the platform or within one org,
   // so it names no single resource and the API sends an empty display name for it.
-  let scopeText = scopeDisplayName || scope;
-  if (scope === getPlatformAggregateScopeKey(contextType)) {
-    scopeText = formatMessage(isLibrary
-      ? moduleMessages['authz.scope.aggregate.platform.library']
-      : moduleMessages['authz.scope.aggregate.platform.course']);
-  } else if (scope === getOrgAggregateScopeKey(contextType, org)) {
-    scopeText = formatMessage(isLibrary
-      ? moduleMessages['authz.scope.aggregate.org.library']
-      : moduleMessages['authz.scope.aggregate.org.course']);
-  }
+  const aggregateType = getAggregateScopeType(scope, org);
+  const scopeText = aggregateType
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+    : scopeDisplayName || scope;
 
   const orgText = org === ALL_ORGS_KEY
     ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
@@ -64,7 +54,7 @@ export const AssignmentSummary = ({ assignment }: AssignmentSummaryProps) => {
       </span>
       <div className="authz-scope-cell">
         <span className="d-flex align-items-center">
-          <Icon color="primary" src={getScopeResourceIcon(role)} className="mr-2 flex-shrink-0" size="xs" />
+          <Icon color="primary" src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0" size="xs" />
           <span className="text-truncate authz-scope-cell__name" title={scopeText}>{scopeText}</span>
         </span>
         <span className="d-flex align-items-center small text-gray-500 authz-scope-cell__org">

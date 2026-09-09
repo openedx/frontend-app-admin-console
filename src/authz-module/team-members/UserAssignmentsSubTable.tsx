@@ -4,13 +4,12 @@ import { Card, DataTable, Icon } from '@openedx/paragon';
 import { ArrowForward, Business } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import {
-  ALL_ORGS_KEY, buildUserPath, CONTEXT_TYPES, getOrgAggregateScopeKey,
-  getPlatformAggregateScopeKey,
+  ALL_ORGS_KEY, buildUserPath, getAggregateScopeType, getScopeContextType,
 } from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
-import moduleMessages from '@src/authz-module/messages';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from './messages';
 import { RoleBadge } from './AssignedRolesCell';
 
@@ -27,26 +26,15 @@ const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (
 
 const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
-  const {
-    role, scope, scopeDisplayName, org,
-  } = assignmentRow.original;
-  const contextType = role?.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE;
-  const isLibrary = contextType === CONTEXT_TYPES.LIBRARY;
-
-  let scopeText = scopeDisplayName || scope;
-  if (scope === getPlatformAggregateScopeKey(contextType)) {
-    scopeText = formatMessage(isLibrary
-      ? moduleMessages['authz.scope.aggregate.platform.library']
-      : moduleMessages['authz.scope.aggregate.platform.course']);
-  } else if (scope === getOrgAggregateScopeKey(contextType, org)) {
-    scopeText = formatMessage(isLibrary
-      ? moduleMessages['authz.scope.aggregate.org.library']
-      : moduleMessages['authz.scope.aggregate.org.course']);
-  }
+  const { scope, scopeDisplayName, org } = assignmentRow.original;
+  const aggregateType = getAggregateScopeType(scope, org);
+  const scopeText = aggregateType
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+    : scopeDisplayName || scope;
 
   return (
     <span className="d-flex align-items-center">
-      <Icon color="primary" src={getScopeResourceIcon(role)} className="mr-2 flex-shrink-0" size="xs" />
+      <Icon color="primary" src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0" size="xs" />
       <span className="text-truncate" title={scopeText}>{scopeText}</span>
     </span>
   );
