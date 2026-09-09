@@ -4,7 +4,6 @@ import { renderWrapper } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
 import {
-  NameCell,
   RoleCell,
   OrgCell,
   ScopeCell,
@@ -33,122 +32,6 @@ describe('TableCells Components', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('NameCell', () => {
-    const mockUserRole = {
-      isSuperadmin: false,
-      role: 'course_staff',
-      org: 'OpenedX',
-      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-      permissionCount: 27,
-      fullName: 'John Doe',
-      username: 'johndoe',
-      email: 'johndoe@example.com',
-    };
-    const mockCellProps = {
-      row: {
-        id: '0',
-        original: mockUserRole,
-      },
-    };
-    beforeEach(() => {
-      initializeMockApp({
-        authenticatedUser: {
-          userId: 1,
-          username: 'testuser',
-          email: 'testuser@example.com',
-        },
-      });
-    });
-
-    it('displays the full name when available', () => {
-      renderWrapper(<NameCell {...mockCellProps} />);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
-
-    it('displays username when full name is not available', () => {
-      const propsWithoutFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            fullName: undefined,
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...propsWithoutFullName} />);
-      expect(screen.getByText('johndoe')).toBeInTheDocument();
-    });
-
-    it('displays username when full name is empty string', () => {
-      const propsWithEmptyFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            fullName: '',
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...propsWithEmptyFullName} />);
-      expect(screen.getByText('johndoe')).toBeInTheDocument();
-    });
-
-    it('shows current user indicator when username matches authenticated user', () => {
-      const currentUserProps = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'testuser',
-            fullName: 'Test User',
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...currentUserProps} />);
-      expect(screen.getByText('Test User')).toBeInTheDocument();
-      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
-    });
-
-    it('does not show current user indicator when username does not match authenticated user', () => {
-      renderWrapper(<NameCell {...mockCellProps} />);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
-    });
-
-    it('shows current user indicator with username fallback when no full name is provided', () => {
-      const currentUserPropsNoFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'testuser',
-            fullName: undefined,
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...currentUserPropsNoFullName} />);
-      expect(screen.getByText('testuser')).toBeInTheDocument();
-      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
-    });
-
-    it('handles missing username in authenticated user gracefully', () => {
-      const contextWithoutUsername = {
-        authenticatedUser: {
-          username: undefined,
-          email: 'testuser@example.com',
-        },
-      };
-
-      renderWrapper(<NameCell {...mockCellProps} />, contextWithoutUsername);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
-    });
   });
 
   describe('RoleCell', () => {

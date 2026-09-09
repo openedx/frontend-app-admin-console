@@ -1,5 +1,4 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
 import {
   Delete, ExpandMore,
   Info,
@@ -71,27 +70,6 @@ export const DisabledCourseActionButton = ({
     </OverlayTrigger>
   );
 };
-
-const NameCell = ({ row }: CellProps) => {
-  const intl = useIntl();
-  const { authenticatedUser } = useContext(AppContext);
-  const username = authenticatedUser?.username;
-  const displayName = row.original.fullName || row.original.username || '';
-
-  if (row.original.username === username) {
-    return (
-      <span className="d-block text-truncate authz-cell-username" title={displayName}>
-        {displayName}
-        <span className="text-gray-500">{intl.formatMessage(messages['authz.table.username.current'])}</span>
-      </span>
-    );
-  }
-  return <span className="d-block text-truncate authz-cell-username" title={displayName}>{displayName}</span>;
-};
-
-const EmailCell = ({ value }: CellPropsWithValue) => (
-  <span className="d-block text-truncate authz-cell-email" title={value}>{value}</span>
-);
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
@@ -258,8 +236,6 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
-  NameCell,
-  EmailCell,
   RoleCell,
   OrgCell,
   ScopeCell,

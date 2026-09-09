@@ -40,7 +40,6 @@ const mockAssignments = {
       assignmentCount: 5,
       assignments: [
         {
-          isSuperadmin: false,
           role: 'course_staff',
           org: 'OpenedX',
           scope: 'course-v1:OpenedX+DemoX+DemoCourse',

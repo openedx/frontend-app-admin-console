@@ -203,16 +203,6 @@ const messages = defineMessages({
     defaultMessage: 'Includes current and future libraries',
     description: 'Description for the platform-wide aggregate scope item when context type is library',
   },
-  'wizard.step2.scope.aggregate.platform.label.course': {
-    id: 'wizard.step2.scope.aggregate.platform.label.course',
-    defaultMessage: 'All courses on the platform',
-    description: 'Display name for the platform-wide aggregate scope item when context type is course',
-  },
-  'wizard.step2.scope.aggregate.platform.label.library': {
-    id: 'wizard.step2.scope.aggregate.platform.label.library',
-    defaultMessage: 'All libraries on the platform',
-    description: 'Display name for the platform-wide aggregate scope item when context type is library',
-  },
 
   // ScopeList — org section header
   'wizard.step2.scopeList.orgLabel': {
@@ -222,16 +212,6 @@ const messages = defineMessages({
   },
 
   // ScopeList — org-level aggregate scope items
-  'wizard.step2.scopeList.aggregate.label.course': {
-    id: 'wizard.step2.scopeList.aggregate.label.course',
-    defaultMessage: 'All courses in this organization',
-    description: 'Display name for the org-wide aggregate scope item when context type is course',
-  },
-  'wizard.step2.scopeList.aggregate.label.library': {
-    id: 'wizard.step2.scopeList.aggregate.label.library',
-    defaultMessage: 'All libraries in this organization',
-    description: 'Display name for the org-wide aggregate scope item when context type is library',
-  },
 
   // ScopeList — loading / empty states
   'wizard.step2.scopeList.loading': {

@@ -17,11 +17,10 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
 const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
 
 const courseAssignment = {
-  isSuperadmin: false,
   role: 'course_staff',
   org: 'OpenedX',
   scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-  scopeName: 'Open edX Demo Course',
+  scopeDisplayName: 'Open edX Demo Course',
   permissionCount: 27,
 };
 
@@ -42,19 +41,17 @@ const mockedTeamMembers: {
         assignments: [
           courseAssignment,
           {
-            isSuperadmin: false,
             role: 'library_admin',
             org: 'WGU',
             scope: 'lib:WGU:CSPROB',
-            scopeName: 'Computer Science Problems',
+            scopeDisplayName: 'Computer Science Problems',
             permissionCount: 11,
           },
           {
-            isSuperadmin: false,
             role: 'library_user',
             org: 'WGU',
             scope: 'lib:WGU:MATH',
-            scopeName: 'Mathematics Problems',
+            scopeDisplayName: 'Mathematics Problems',
             permissionCount: 4,
           },
         ],
@@ -67,10 +64,10 @@ const mockedTeamMembers: {
         assignmentCount: 1,
         assignments: [
           {
-            isSuperadmin: false,
             role: 'course_auditor',
             org: 'OpenedX',
             scope: 'course-v1:OpenedX+Other+Course',
+            scopeDisplayName: 'Another Course',
             permissionCount: 3,
           },
         ],
@@ -200,8 +197,10 @@ describe('TeamMembersTable', () => {
     mockApiResponses();
     renderTable({ presetScope: 'course-v1:OpenedX+DemoX+DemoCourse' });
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Admin')).toBeInTheDocument();
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
+      expect(screen.getByText('janeadmin')).toBeInTheDocument();
+      // The column is Username: full names are carried by the API but not displayed.
+      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
       expect(screen.getByText('johndoe@example.com')).toBeInTheDocument();
       expect(screen.getByText('jane@example.com')).toBeInTheDocument();
     });
@@ -261,14 +260,14 @@ describe('TeamMembersTable', () => {
     expect(screen.queryByText('course-v1:OpenedX+DemoX+DemoCourse')).not.toBeInTheDocument();
   });
 
-  it('falls back to the scope id when the API sends no name', async () => {
+  it('falls back to the scope id when the API sends no display name', async () => {
     mockApiResponses({
       ...mockedTeamMembers,
       data: {
         ...mockedTeamMembers.data!,
         results: [{
           ...mockedTeamMembers.data!.results[0],
-          assignments: [{ ...courseAssignment, scopeName: undefined }],
+          assignments: [{ ...courseAssignment, scopeDisplayName: '' }],
           assignmentCount: 1,
         }],
         count: 1,
@@ -293,7 +292,7 @@ describe('TeamMembersTable', () => {
     mockApiResponses();
     renderTable();
     await waitFor(() => {
-      expect(screen.getByText('Jane Admin')).toBeInTheDocument();
+      expect(screen.getByText('janeadmin')).toBeInTheDocument();
     });
     expect(screen.queryByText('+0 more roles')).not.toBeInTheDocument();
     // Only John Doe's row offers an expansion.
@@ -402,7 +401,7 @@ describe('TeamMembersTable', () => {
     mockApiResponses();
     renderTable();
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
     });
     const viewButtons = screen.getAllByRole('button', { name: /view/i });
     await user.click(viewButtons[0]);
@@ -455,7 +454,7 @@ describe('TeamMembersTable', () => {
     mockApiResponses();
     const { container } = renderTable();
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
     });
     // Once on the control bar, once in the footer.
     expect(within(container).getAllByText('Showing 2 users of 2.')).toHaveLength(2);
@@ -464,7 +463,7 @@ describe('TeamMembersTable', () => {
   it('renders safely when team members data is undefined', () => {
     mockApiResponses({ ...mockedTeamMembers, data: undefined });
     renderTable();
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+    expect(screen.queryByText('johndoe')).not.toBeInTheDocument();
   });
 
   it('filters to library roles only when course view is not allowed', async () => {
@@ -497,7 +496,7 @@ describe('TeamMembersTable', () => {
     });
     renderTable();
     await waitFor(() => {
-      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+      expect(screen.queryByText('johndoe')).not.toBeInTheDocument();
     });
   });
 });

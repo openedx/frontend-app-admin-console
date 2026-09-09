@@ -13,18 +13,18 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const courseAssignment = {
-  isSuperadmin: false,
   role: 'course_staff',
   org: 'OpenedX',
   scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+  scopeDisplayName: 'Open edX Demo Course',
   permissionCount: 27,
 };
 
 const libraryAssignment = {
-  isSuperadmin: false,
   role: 'library_admin',
   org: 'WGU',
   scope: 'lib:WGU:CSPROB',
+  scopeDisplayName: 'Computer Science Problems',
   permissionCount: 11,
 };
 
@@ -96,6 +96,17 @@ describe('TeamMemberViewActionCell', () => {
 
     await user.hover(viewButton);
     expect(screen.getByText(/manage its team in Studio instead/i)).toBeInTheDocument();
+  });
+
+  it('stays enabled when the returned assignments are only part of the user total', () => {
+    // Every returned assignment sits in a disabled course, but seven more were not returned.
+    renderWrapper(
+      <TeamMemberViewActionCell
+        {...cellPropsFor({ assignments: [courseAssignment], assignmentCount: 8 })}
+        isCourseEnabled={() => false}
+      />,
+    );
+    expect(screen.getByRole('button', { name: /view/i })).not.toBeDisabled();
   });
 
   it('never calls the flag check with a missing scope', () => {

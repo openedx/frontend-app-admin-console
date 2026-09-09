@@ -1,10 +1,15 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 
 const messages = defineMessages({
-  'authz.team.members.table.column.name.title': {
-    id: 'authz.team.members.table.column.name.title',
+  'authz.team.members.table.column.username.title': {
+    id: 'authz.team.members.table.column.username.title',
     defaultMessage: 'Username',
     description: 'Team members table username column header',
+  },
+  'authz.table.username.current': {
+    id: 'authz.table.username.current',
+    defaultMessage: '(Me)',
+    description: 'Indicates the current user in the team members table',
   },
   'authz.team.members.table.column.email.title': {
     id: 'authz.team.members.table.column.email.title',
@@ -78,7 +83,7 @@ const messages = defineMessages({
   },
   'authz.team.members.table.showing.users.text': {
     id: 'authz.team.members.table.showing.users.text',
-    defaultMessage: 'Showing {pageSize} users of {itemCount}.',
+    defaultMessage: 'Showing {pageSize, plural, one {# user} other {# users}} of {itemCount}.',
     description: 'Text stating how many team members are listed on the current page out of the total count',
   },
 });

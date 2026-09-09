@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { DataTable, Icon } from '@openedx/paragon';
+import { Card, DataTable, Icon } from '@openedx/paragon';
 import { ArrowForward, Business } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
-import { buildUserPath, DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
+import {
+  ALL_ORGS_KEY, buildUserPath, CONTEXT_TYPES, getOrgAggregateScopeKey,
+  getPlatformAggregateScopeKey,
+} from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
+import moduleMessages from '@src/authz-module/messages';
 import messages from './messages';
 import { RoleBadge } from './AssignedRolesCell';
 
@@ -23,10 +27,22 @@ const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (
 
 const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
-  const { role, scope, scopeName } = assignmentRow.original;
-  const scopeText = DJANGO_MANAGED_ROLES.includes(role)
-    ? formatMessage(componentMessages['authz.user.table.scope.global.label'])
-    : scopeName || scope;
+  const {
+    role, scope, scopeDisplayName, org,
+  } = assignmentRow.original;
+  const contextType = role?.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE;
+  const isLibrary = contextType === CONTEXT_TYPES.LIBRARY;
+
+  let scopeText = scopeDisplayName || scope;
+  if (scope === getPlatformAggregateScopeKey(contextType)) {
+    scopeText = formatMessage(isLibrary
+      ? moduleMessages['authz.scope.aggregate.platform.library']
+      : moduleMessages['authz.scope.aggregate.platform.course']);
+  } else if (scope === getOrgAggregateScopeKey(contextType, org)) {
+    scopeText = formatMessage(isLibrary
+      ? moduleMessages['authz.scope.aggregate.org.library']
+      : moduleMessages['authz.scope.aggregate.org.course']);
+  }
 
   return (
     <span className="d-flex align-items-center">
@@ -36,12 +52,12 @@ const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   );
 };
 
-// Mirrors ScopeNameCell's icon treatment so all three columns read alike. Django-managed
-// roles span every org, so they show the platform-wide label instead of a single name.
+// Mirrors ScopeNameCell's icon treatment so all three columns read alike. A platform-wide
+// aggregate carries no single org, so it shows the all-organizations label instead.
 const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
-  const { role, org } = assignmentRow.original;
-  const orgText = DJANGO_MANAGED_ROLES.includes(role)
+  const { org } = assignmentRow.original;
+  const orgText = org === ALL_ORGS_KEY
     ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
     : org;
 
@@ -88,7 +104,7 @@ const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
   ], [formatMessage]);
 
   return (
-    <div className="team-members-table__subtable bg-white px-4 py-3 border border-light-200">
+    <Card className="team-members-table__subtable my-3">
       <DataTable
         columns={columns}
         data={assignments}
@@ -97,7 +113,7 @@ const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
         <DataTable.Table isStriped={false} />
       </DataTable>
 
-      <div className="d-flex align-items-center justify-content-center pt-3 small">
+      <div className="d-flex align-items-center justify-content-center small">
         <span className="text-gray-500">
           {formatMessage(messages['authz.team.members.subtable.showing.text'], {
             shown: String(assignments.length).padStart(2, '0'),
@@ -115,7 +131,7 @@ const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
           </>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

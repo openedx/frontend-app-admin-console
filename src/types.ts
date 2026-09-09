@@ -88,16 +88,20 @@ export type UserRoleWithPermissions = UserRole & {
   canManageScope?: boolean;
 };
 
-/** A single role assignment nested under a team member in the user-grouped listing. */
+/**
+ * A single role assignment nested under a team member in the user-grouped listing.
+ * Mirrors `results[].assignments[]` of `GET /api/authz/v1/users/`.
+ */
 export interface TeamMemberAssignment {
-  isSuperadmin: boolean;
   role: string;
   org: string;
   /** Scope external key (e.g. `course-v1:Org+Course+Run`). Identifies the scope and is
    *  what the scope filter sends back to the API — not shown to the user. */
   scope: string;
-  /** Human-readable scope name shown in the table; falls back to `scope` when absent. */
-  scopeName?: string;
+  /** Human-readable scope name shown in the table. The API returns an empty string for
+   *  glob scopes and for scopes whose backing course or library no longer exists, so
+   *  callers fall back to `scope`. */
+  scopeDisplayName: string;
   permissionCount: number;
 }
 

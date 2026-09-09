@@ -2,7 +2,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { IconButton } from '@openedx/paragon';
 import { Visibility } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';
-import { buildUserPath, DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
+import { buildUserPath } from '@src/authz-module/constants';
 import { DisabledCourseActionButton } from '@src/authz-module/components/TableCells';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
@@ -13,8 +13,7 @@ interface TeamMemberViewActionCellProps {
 }
 
 const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled?: (scope: string) => boolean) => {
-  const isCourseScope = !assignment.role?.startsWith('lib')
-    && !DJANGO_MANAGED_ROLES.includes(assignment.role);
+  const isCourseScope = !assignment.role?.startsWith('lib');
   if (!isCourseScope || isCourseEnabled === undefined) {
     return true;
   }
@@ -27,15 +26,17 @@ const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled?: (scope: 
  * Rows are users rather than single assignments, so the course-authoring flag is evaluated
  * across the user's assignments: the action stays enabled while at least one of them is
  * viewable, and is only disabled when every one sits in a course that hasn't moved to the
- * new roles experience. Note `assignments` is capped by `assignments_limit`, so this reads
- * the assignments actually returned, not necessarily the user's full set.
+ * new roles experience. `assignments` is capped by `assignments_limit`, so a user whose
+ * total exceeds the returned slice may hold viewable roles it does not contain; those rows
+ * stay enabled rather than being blocked on incomplete evidence.
  */
 const TeamMemberViewActionCell = ({ row, isCourseEnabled }: TeamMemberViewActionCellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const { assignments = [], username } = row.original;
+  const { assignments = [], assignmentCount, username } = row.original;
 
   const hasViewableAssignment = assignments.length === 0
+    || assignmentCount > assignments.length
     || assignments.some((assignment) => isViewable(assignment, isCourseEnabled));
 
   if (!hasViewableAssignment) {

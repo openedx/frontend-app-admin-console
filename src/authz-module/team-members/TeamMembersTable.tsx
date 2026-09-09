@@ -16,12 +16,13 @@ import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilte
 import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFilter';
 import TableControlBar from '@src/authz-module/components/TableControlBar/TableControlBar';
 import { getCellHeader } from '@src/authz-module/utils';
-import { EmailCell, NameCell } from '@src/authz-module/components/TableCells';
+
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import { MAX_INLINE_ASSIGNMENTS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
 import AssignedRolesCell from './AssignedRolesCell';
+import { EmailCell, NameCell } from './TeamMemberCells';
 import CollapseRowsOnChange from './CollapseRowsOnChange';
 import MoreRolesToggle from './MoreRolesToggle';
 import UserAssignmentsSubTable from './UserAssignmentsSubTable';
@@ -113,7 +114,9 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           hiddenColumns: HIDDEN_FILTER_COLUMNS,
         }}
         isLoading={isLoadingTeamMembers}
-        renderRowSubComponent={UserAssignmentsSubTable}
+        renderRowSubComponent={({ row }) => (
+          <UserAssignmentsSubTable row={row} />
+        )}
         additionalColumns={[
           {
             id: 'moreRoles',
@@ -130,7 +133,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
             [
               {
                 id: 'username',
-                Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
+                Header: intl.formatMessage(messages['authz.team.members.table.column.username.title']),
                 accessor: 'username',
                 Cell: NameCell,
                 filter: 'text',

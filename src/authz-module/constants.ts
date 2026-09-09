@@ -28,6 +28,9 @@ export const getPlatformAggregateScopeKey = (contextType: ContextType): string =
   return scope;
 };
 
+/** The `org` an assignment carries when it spans every organization. */
+export const ALL_ORGS_KEY = '*';
+
 export const DEFAULT_TOAST_DELAY = 5000;
 export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
 
