@@ -4,7 +4,7 @@ import { DataTableContext } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
 import ViewMoreLink from '@src/authz-module/components/ViewMoreLink';
 import type { TeamMember } from '@src/types';
-import messages from './messages';
+import messages from '../messages';
 
 interface DataTableInstance {
   state?: {
