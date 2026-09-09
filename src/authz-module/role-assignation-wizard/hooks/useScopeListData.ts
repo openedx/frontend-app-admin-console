@@ -5,7 +5,8 @@ import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
 import type { ContextType } from '@src/authz-module/constants';
-import messages from '@src/authz-module/role-assignation-wizard/messages';
+import moduleMessages from '@src/authz-module/messages';
+import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
 interface UseScopeListDataParams {
@@ -84,12 +85,12 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     : intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library']);
 
   const platformAggregateLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.course'])
-    : intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.library']);
+    ? intl.formatMessage(moduleMessages['authz.scope.aggregate.platform.course'])
+    : intl.formatMessage(moduleMessages['authz.scope.aggregate.platform.library']);
 
   const orgAggregateLabel = contextType === 'course'
-    ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
-    : intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library']);
+    ? intl.formatMessage(moduleMessages['authz.scope.aggregate.org.course'])
+    : intl.formatMessage(moduleMessages['authz.scope.aggregate.org.library']);
 
   const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
     ? {

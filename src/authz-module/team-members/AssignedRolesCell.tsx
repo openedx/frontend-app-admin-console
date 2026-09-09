@@ -1,10 +1,14 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Icon } from '@openedx/paragon';
 import { Business, Person } from '@openedx/paragon/icons';
-import { DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL } from '@src/authz-module/constants';
+import {
+  ALL_ORGS_KEY, CONTEXT_TYPES, getOrgAggregateScopeKey,
+  getPlatformAggregateScopeKey, MAP_ROLE_KEY_TO_LABEL,
+} from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
+import moduleMessages from '@src/authz-module/messages';
 import messages from './messages';
 
 interface AssignedRolesCellProps {
@@ -30,14 +34,25 @@ export const RoleBadge = ({ role }: { role: string }) => (
 export const AssignmentSummary = ({ assignment }: AssignmentSummaryProps) => {
   const { formatMessage } = useIntl();
   const {
-    role, scope, scopeName, org,
+    role, scope, scopeDisplayName, org,
   } = assignment;
-  const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
+  const contextType = role?.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE;
+  const isLibrary = contextType === CONTEXT_TYPES.LIBRARY;
 
-  const scopeText = isDjangoRole
-    ? formatMessage(componentMessages['authz.user.table.scope.global.label'])
-    : scopeName || scope;
-  const orgText = isDjangoRole
+  // An aggregate scope covers every course/library across the platform or within one org,
+  // so it names no single resource and the API sends an empty display name for it.
+  let scopeText = scopeDisplayName || scope;
+  if (scope === getPlatformAggregateScopeKey(contextType)) {
+    scopeText = formatMessage(isLibrary
+      ? moduleMessages['authz.scope.aggregate.platform.library']
+      : moduleMessages['authz.scope.aggregate.platform.course']);
+  } else if (scope === getOrgAggregateScopeKey(contextType, org)) {
+    scopeText = formatMessage(isLibrary
+      ? moduleMessages['authz.scope.aggregate.org.library']
+      : moduleMessages['authz.scope.aggregate.org.course']);
+  }
+
+  const orgText = org === ALL_ORGS_KEY
     ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
     : org;
 

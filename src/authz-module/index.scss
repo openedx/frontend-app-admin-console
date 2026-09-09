@@ -83,7 +83,7 @@
     the design's character budget: ~24 for username, ~28 for email, the bulk to the role
     summary, and just enough for the toggle and the action icon.
   */
-  .team-members-table {
+  &.team-members-table {
     .pgn__data-table {
       table-layout: fixed;
     }
@@ -122,6 +122,17 @@
     // 1rem on every data-table wrapper would double it up.
     .pgn__data-table-wrapper {
       padding: 0;
+    }
+
+    /*
+      Header band matching the resource-category rows of the roles & permissions matrix
+      (`bg-info-100 text-primary` in PermissionTable), so the two nested tables in the
+      module read as the same component. Paragon's DataTable renders its own `thead`, so
+      the utilities cannot be passed as a className and the tokens behind them are used.
+    */
+    thead th {
+      background-color: var(--pgn-color-info-100);
+      color: var(--pgn-color-primary-base);
     }
 
     /*
