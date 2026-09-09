@@ -76,7 +76,7 @@ const ScopeList = ({
             <OrgSection
               key={org}
               orgName={organizations?.find((o) => o.shortName === org)?.name || org}
-              scopes={scopesByOrg[org]}
+              scopes={scopesByOrg[org] ?? []}
               selectedScopes={selectedScopes}
               onScopeToggle={onScopeToggle}
               aggregateScopeItem={orgAggregateScopeItems[org]}

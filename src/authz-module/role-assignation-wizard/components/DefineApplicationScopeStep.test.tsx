@@ -144,7 +144,12 @@ describe('DefineApplicationScopeStep', () => {
   });
 
   describe('Empty state', () => {
-    it('shows "No scopes found." when there are no results', () => {
+    it('shows "No scopes found." when there are no results and no organizations', () => {
+      (useOrgs as jest.Mock).mockReturnValue({ data: { results: [] } });
+      (useScopePermissions as jest.Mock).mockReturnValue({
+        hasPlatformPermission: false,
+        orgHasPermission: {},
+      });
       renderComponent();
       expect(screen.getByText('No scopes found.')).toBeInTheDocument();
     });
@@ -288,9 +293,27 @@ describe('DefineApplicationScopeStep', () => {
           },
         }),
       );
-      // org1 is in managedOrgs (Set(['org1', 'org2']))
+      // org1 and org2 are both in managedOrgs — org2 has no scopes but still
+      // shows an aggregate option.
       renderComponent({ selectedRole: 'library_admin' });
-      expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
+      expect(screen.getAllByText('All libraries in this organization')).toHaveLength(2);
+    });
+
+    it('renders OrgSection with only the aggregate option for an org with zero scopes', () => {
+      // API returns no scopes at all — both orgs come purely from useOrgs
+      (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
+      renderComponent({ selectedRole: 'library_admin' });
+
+      // Both org sections render even though neither has individual scopes
+      expect(screen.getByText('Org: Organization One')).toBeInTheDocument();
+      expect(screen.getByText('Org: Organization Two')).toBeInTheDocument();
+
+      // Each shows its aggregate checkbox
+      expect(screen.getAllByText('All libraries in this organization')).toHaveLength(2);
+
+      // No individual scope checkboxes exist (only the two aggregate ones)
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes).toHaveLength(2);
     });
 
     // Org aggregate is always shown when contextType is set - backend filters orgs by permissions
