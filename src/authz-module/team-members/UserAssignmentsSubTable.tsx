@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Card, DataTable, Icon } from '@openedx/paragon';
+import { Card, DataTable, Icon, TableFooter } from '@openedx/paragon';
 import { ArrowForward, Business } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import {
@@ -99,26 +99,27 @@ const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
         itemCount={assignments.length}
       >
         <DataTable.Table isStriped={false} />
+        <TableFooter>
+          <div className="d-flex align-items-center justify-content-center w-100">
+            <span className="text-gray-500">
+              {formatMessage(messages['authz.team.members.subtable.showing.text'], {
+                shown: String(assignments.length).padStart(2, '0'),
+                total: String(assignmentCount).padStart(2, '0'),
+              })}
+            </span>
+            {hasMoreAssignments && (
+              <>
+                {/* Reuses the module's vertical `hr` divider (see index.scss). */}
+                <hr className="mx-3" />
+                <Link className="d-inline-flex align-items-center" to={buildUserPath(username)}>
+                  {formatMessage(messages['authz.team.members.subtable.view.all.roles'])}
+                  <Icon src={ArrowForward} size="xs" className="ml-1" />
+                </Link>
+              </>
+            )}
+          </div>
+        </TableFooter >
       </DataTable>
-
-      <div className="d-flex align-items-center justify-content-center small">
-        <span className="text-gray-500">
-          {formatMessage(messages['authz.team.members.subtable.showing.text'], {
-            shown: String(assignments.length).padStart(2, '0'),
-            total: String(assignmentCount).padStart(2, '0'),
-          })}
-        </span>
-        {hasMoreAssignments && (
-          <>
-            {/* Reuses the module's vertical `hr` divider (see index.scss). */}
-            <hr className="mx-3" />
-            <Link className="d-inline-flex align-items-center" to={buildUserPath(username)}>
-              {formatMessage(messages['authz.team.members.subtable.view.all.roles'])}
-              <Icon src={ArrowForward} size="xs" className="ml-1" />
-            </Link>
-          </>
-        )}
-      </div>
     </Card>
   );
 };
