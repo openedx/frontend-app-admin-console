@@ -41,7 +41,7 @@ const siteConfig: SiteConfig = {
     },
   ],
 
-  accessTokenCookieName: 'edx-jwt-cookie-header-payload', // check this
+  accessTokenCookieName: 'edx-jwt-cookie-header-payload',
 };
 
 export default siteConfig;

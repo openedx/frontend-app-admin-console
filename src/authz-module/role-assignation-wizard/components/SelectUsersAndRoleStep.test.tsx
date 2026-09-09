@@ -3,11 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/testUtils';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
 
-jest.mock('@openedx/frontend-base', () => ({
-  ...jest.requireActual('@openedx/frontend-base'),
-  getConfig: () => ({ LMS_BASE_URL: 'http://localhost:8000' }),
-}));
-
 const libraryRole = {
   role: 'library_admin',
   name: 'Library Admin',

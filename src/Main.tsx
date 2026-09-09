@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import { appId } from './constants';
 import messages from './messages';
 import AuthZModule from './authz-module';
+import './style.scss';
 
 const Main = () => {
   const { formatMessage } = useIntl();
