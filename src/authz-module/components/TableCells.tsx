@@ -1,30 +1,24 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
-  Delete, ExpandMore,
+  Delete, ExpandLess, ExpandMore,
   Info,
 } from '@openedx/paragon/icons';
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
-import { useContext, useMemo, type ComponentProps } from 'react';
+import { useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
-  Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
+  Icon, IconButton, OverlayTrigger, Tooltip,
   type DataTableCellProps,
 } from '@openedx/paragon';
+import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
-
-interface DataTableInstance {
-  state?: {
-    expanded?: Record<string, boolean>;
-  };
-  toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
-}
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
 type CellPropsWithValue = CellProps & {
@@ -140,20 +134,7 @@ const PermissionsCell = ({ row }: CellProps) => {
 
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
-  const instance = useContext(DataTableContext) as DataTableInstance;
-  const handleToggleExpanded = () => {
-    if (!row.isExpanded && instance) {
-      // Close all other expanded rows first
-      const expanded = instance.state?.expanded || {};
-      Object.keys(expanded).forEach(rowId => {
-        if (rowId !== row.id && expanded[rowId]) {
-          instance.toggleRowExpanded?.(rowId, false);
-        }
-      });
-    }
-    // Toggle the current row
-    row.toggleRowExpanded?.();
-  };
+  const toggleExpanded = useExclusiveRowExpansion(row);
 
   return (
     <ViewMoreLink
@@ -162,8 +143,8 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
           ? messages['authz.user.table.view_all_permissions.link.text.close']
           : messages['authz.user.table.view_all_permissions.link.text.open'],
       )}
-      onClick={handleToggleExpanded}
-      iconSrc={ExpandMore}
+      onClick={toggleExpanded}
+      iconSrc={row.isExpanded ? ExpandLess : ExpandMore}
     />
   );
 };
