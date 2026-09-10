@@ -3,18 +3,18 @@ import { IconButton } from '@openedx/paragon';
 import { Visibility } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';
 import { buildUserPath } from '@src/authz-module/constants';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { DisabledCourseActionButton } from '@src/authz-module/components/TableCells';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 
 interface TeamMemberViewActionCellProps {
   row: { original: TeamMember };
-  isCourseEnabled?: (scope: string) => boolean;
 }
 
-const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled?: (scope: string) => boolean) => {
+const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled: (scope: string) => boolean) => {
   const isCourseScope = !assignment.role?.startsWith('lib');
-  if (!isCourseScope || isCourseEnabled === undefined) {
+  if (!isCourseScope) {
     return true;
   }
   return isCourseEnabled(assignment.scope);
@@ -30,9 +30,12 @@ const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled?: (scope: 
  * total exceeds the returned slice may hold viewable roles it does not contain; those rows
  * stay enabled rather than being blocked on incomplete evidence.
  */
-const TeamMemberViewActionCell = ({ row, isCourseEnabled }: TeamMemberViewActionCellProps) => {
+const TeamMemberViewActionCell = ({ row }: TeamMemberViewActionCellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  // Read here rather than threaded down from the table: the flag is a react-query query,
+  // so every row shares one request no matter how many cells ask for it.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const { assignments = [], assignmentCount, username } = row.original;
 
   const hasViewableAssignment = assignments.length === 0
@@ -57,12 +60,6 @@ const TeamMemberViewActionCell = ({ row, isCourseEnabled }: TeamMemberViewAction
       onClick={() => navigate(buildUserPath(username))}
     />
   );
-};
-
-export const createTeamMemberViewActionCell = (
-  extraProps: { isCourseEnabled: (scope: string) => boolean },
-) => function customTeamMemberViewActionCell(cellProps) {
-  return <TeamMemberViewActionCell {...cellProps} {...extraProps} />;
 };
 
 export default TeamMemberViewActionCell;

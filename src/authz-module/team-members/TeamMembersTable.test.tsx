@@ -399,29 +399,6 @@ describe('TeamMembersTable', () => {
     expect(toggles[1]).toHaveTextContent('Hide roles');
   });
 
-  it('collapses expanded rows when a filter is applied', async () => {
-    const user = userEvent.setup();
-    mockApiResponses();
-    renderTable();
-    await waitFor(() => {
-      expect(screen.getByText('+9 more roles')).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByText('+9 more roles'));
-    await waitFor(() => {
-      expect(screen.getByText('Hide roles')).toBeInTheDocument();
-    });
-
-    const orgFilter = screen.getByRole('button', { name: /Organization/ });
-    await user.click(orgFilter);
-    const option = await screen.findByText('Organization 1');
-    await user.click(option);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Hide roles')).not.toBeInTheDocument();
-    });
-  });
-
   it('renders view action buttons for each user', async () => {
     mockApiResponses();
     renderTable();

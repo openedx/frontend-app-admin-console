@@ -9,7 +9,6 @@ import {
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
-import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import OrgFilter from '@src/authz-module/components/TableControlBar/OrgFilter';
 import RolesFilter from '@src/authz-module/components/TableControlBar/RolesFilter';
@@ -24,10 +23,9 @@ import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
 import AssignedRolesCell from './components/AssignedRolesCell';
 import { EmailCell, NameCell } from './components/TeamMemberCells';
-import CollapseRowsOnChange from './components/CollapseRowsOnChange';
 import MoreRolesToggle from './components/MoreRolesToggle';
 import UserAssignmentsSubTable from './components/UserAssignmentsSubTable';
-import { createTeamMemberViewActionCell } from './components/TeamMemberViewActionCell';
+import TeamMemberViewActionCell from './components/TeamMemberViewActionCell';
 
 interface TeamMembersTableProps {
   presetScope?: string;
@@ -70,7 +68,6 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   const { querySettings, handleTableFetch } = useQuerySettings(initialQuerySettings);
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
-  const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
@@ -83,8 +80,6 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
     error,
     refetch,
   } = useTeamMembersAssignments(effectiveQuerySettings, MAX_INLINE_ASSIGNMENTS);
-
-  const viewActionCell = useMemo(() => createTeamMemberViewActionCell({ isCourseEnabled }), [isCourseEnabled]);
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
@@ -142,7 +137,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           {
             id: 'action',
             Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
-            Cell: viewActionCell,
+            Cell: TeamMemberViewActionCell,
           },
         ]}
         columns={
@@ -201,7 +196,6 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
             ]
         }
       >
-        <CollapseRowsOnChange />
         <TableControlBar onFilterChange={setColumnsWithFiltersApplied} countLabel={showingUsersLabel} />
         <DataTable.Table />
         <TableFooter showingMessage={messages['authz.team.members.table.showing.users.text']} />

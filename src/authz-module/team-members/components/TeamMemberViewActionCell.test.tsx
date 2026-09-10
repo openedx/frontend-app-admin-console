@@ -3,7 +3,20 @@ import { initializeMockApp } from '@edx/frontend-platform/testing';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/setupTest';
 import type { TeamMember } from '@src/types';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import TeamMemberViewActionCell from './TeamMemberViewActionCell';
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
+const mockCourseAuthoringFlag = (isCourseEnabled: (scope: string) => boolean) => {
+  (useCourseAuthoringFlag as jest.Mock).mockReturnValue({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled,
+    isLoading: false,
+  });
+};
 
 const mockNavigate = jest.fn();
 
@@ -42,6 +55,7 @@ const cellPropsFor = (overrides: Partial<TeamMember> = {}) => ({
 
 describe('TeamMemberViewActionCell', () => {
   beforeEach(() => {
+    mockCourseAuthoringFlag(() => true);
     initializeMockApp({
       authenticatedUser: {
         userId: 1,
@@ -78,10 +92,10 @@ describe('TeamMemberViewActionCell', () => {
   });
 
   it('stays enabled when at least one assignment is viewable', () => {
+    mockCourseAuthoringFlag(() => false);
     renderWrapper(
       <TeamMemberViewActionCell
         {...cellPropsFor({ assignments: [courseAssignment, libraryAssignment], assignmentCount: 2 })}
-        isCourseEnabled={() => false}
       />,
     );
     expect(screen.getByRole('button', { name: /view/i })).not.toBeDisabled();
@@ -89,7 +103,8 @@ describe('TeamMemberViewActionCell', () => {
 
   it('disables the action with a tooltip when every assignment sits in a disabled course', async () => {
     const user = userEvent.setup();
-    renderWrapper(<TeamMemberViewActionCell {...cellPropsFor()} isCourseEnabled={() => false} />);
+    mockCourseAuthoringFlag(() => false);
+    renderWrapper(<TeamMemberViewActionCell {...cellPropsFor()} />);
 
     const viewButton = screen.getByRole('button', { name: /view/i });
     expect(viewButton).toBeDisabled();
@@ -100,10 +115,10 @@ describe('TeamMemberViewActionCell', () => {
 
   it('stays enabled when the returned assignments are only part of the user total', () => {
     // Every returned assignment sits in a disabled course, but seven more were not returned.
+    mockCourseAuthoringFlag(() => false);
     renderWrapper(
       <TeamMemberViewActionCell
         {...cellPropsFor({ assignments: [courseAssignment], assignmentCount: 8 })}
-        isCourseEnabled={() => false}
       />,
     );
     expect(screen.getByRole('button', { name: /view/i })).not.toBeDisabled();
@@ -111,9 +126,8 @@ describe('TeamMemberViewActionCell', () => {
 
   it('never calls the flag check with a missing scope', () => {
     const isCourseEnabled = jest.fn(() => true);
-    renderWrapper(
-      <TeamMemberViewActionCell {...cellPropsFor({ assignments: [] })} isCourseEnabled={isCourseEnabled} />,
-    );
+    mockCourseAuthoringFlag(isCourseEnabled);
+    renderWrapper(<TeamMemberViewActionCell {...cellPropsFor({ assignments: [] })} />);
 
     expect(isCourseEnabled).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: /view/i })).not.toBeDisabled();
