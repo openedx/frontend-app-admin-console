@@ -7,7 +7,7 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeContextType, GLOBAL_SCOPE_KEY, MAP_ROLE_KEY_TO_LABEL,
+  getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -90,7 +90,7 @@ const ScopeCell = ({ row }: CellProps) => {
 
   const { scopeText, iconSrc } = useMemo(() => {
     const { role, scope, org } = row.original;
-    if (DJANGO_MANAGED_ROLES.includes(role) || scope === GLOBAL_SCOPE_KEY) {
+    if (DJANGO_MANAGED_ROLES.includes(role)) {
       return {
         scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
         iconSrc: RESOURCE_ICONS.GLOBAL,
