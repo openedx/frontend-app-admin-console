@@ -1,25 +1,13 @@
-import { useContext } from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { DataTableContext } from '@openedx/paragon';
+import type { DataTableRow } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
 import ViewMoreLink from '@src/authz-module/components/ViewMoreLink';
+import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import type { TeamMember } from '@src/types';
 import messages from '../messages';
 
-interface DataTableInstance {
-  state?: {
-    expanded?: Record<string, boolean>;
-  };
-  toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
-}
-
 interface MoreRolesToggleProps {
-  row: {
-    id: string;
-    isExpanded?: boolean;
-    original: TeamMember;
-    toggleRowExpanded?: () => void;
-  };
+  row: DataTableRow<TeamMember>;
 }
 
 /**
@@ -31,32 +19,19 @@ interface MoreRolesToggleProps {
  */
 const MoreRolesToggle = ({ row }: MoreRolesToggleProps) => {
   const { formatMessage } = useIntl();
-  const instance = useContext(DataTableContext) as DataTableInstance;
+  const toggleExpanded = useExclusiveRowExpansion(row);
   const { assignmentCount } = row.original;
 
   if (!assignmentCount || assignmentCount <= 1) {
     return null;
   }
 
-  const handleToggleExpanded = () => {
-    if (!row.isExpanded && instance) {
-      // Close any other expanded row first, so only one breakdown is open at a time.
-      const expanded = instance.state?.expanded || {};
-      Object.keys(expanded).forEach((rowId) => {
-        if (rowId !== row.id && expanded[rowId]) {
-          instance.toggleRowExpanded?.(rowId, false);
-        }
-      });
-    }
-    row.toggleRowExpanded?.();
-  };
-
   return (
     <ViewMoreLink
       label={row.isExpanded
         ? formatMessage(messages['authz.team.members.table.hide.roles'])
         : formatMessage(messages['authz.team.members.table.more.roles'], { count: assignmentCount - 1 })}
-      onClick={handleToggleExpanded}
+      onClick={toggleExpanded}
       iconSrc={row.isExpanded ? ExpandLess : ExpandMore}
     />
   );
