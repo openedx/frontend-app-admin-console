@@ -10,7 +10,7 @@ import {
   Download,
   DrawShapes,
   CheckCircle,
-  Visibility,
+  RemoveRedEye,
   Plus,
   EditOutline,
   DownloadDone,
@@ -148,7 +148,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_access_content',
     description: 'See the course in the Studio home and access the course outline in read-only mode. Includes the "View Live" option to preview the course as a learner in the LMS.',
     label: 'View course',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.CREATE_COURSE,
@@ -176,7 +176,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_library_updates',
     description: 'View pending updates from content libraries linked to this course.',
     label: 'View library updates',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_LIBRARY_UPDATES,
@@ -191,7 +191,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_updates_handouts',
     description: 'See course announcements and handouts visible to learners.',
     label: 'View course updates',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_UPDATES,
@@ -206,7 +206,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_pages_resources',
     description: 'See the Pages & Resources section in Studio.',
     label: 'View pages & resources',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_PAGES_RESOURCES,
@@ -221,7 +221,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_files',
     description: 'See the list of files and assets uploaded to the course.',
     label: 'View files',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.CREATE_COURSE_FILES,
@@ -250,7 +250,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_schedule_details',
     description: 'See the course schedule (start and end dates, enrollment dates, and pacing settings) and course details (summary, pacing, and prerequisites).',
     label: 'View schedule & details',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_SCHEDULE,
@@ -272,7 +272,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_grading',
     description: 'See the grading configuration for the course, including assignment types and grading scale.',
     label: 'View grading settings',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.EDIT_COURSE_GRADING_SETTINGS,
@@ -287,7 +287,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_team_group',
     description: 'See the list of users with a role assigned to this course.',
     label: 'View course team',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
@@ -301,7 +301,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_team_group',
     description: 'See the list of content groups and their configurations for this course.',
     label: 'View group configurations',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_GROUP_CONFIGURATION,
@@ -323,7 +323,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_advanced_certificates',
     description: 'Access the Advanced Settings page in Studio. This covers a wide range of technical course configurations, including proctoring, timed exams, LTI tools, enrollment limits, and custom display options.',
     label: 'View advanced settings',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_ADVANCED_SETTINGS,
@@ -337,7 +337,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_advanced_certificates',
     description: 'See the course certificate settings.',
     label: 'View certificates',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
   {
     key: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_CERTIFICATES,
@@ -374,7 +374,7 @@ export const coursePermissions: PermissionMetadata[] = [
     resource: 'course_other',
     description: 'See the course launch checklist in Studio.',
     label: 'View checklists',
-    icon: Visibility,
+    icon: RemoveRedEye,
   },
 ];
 
