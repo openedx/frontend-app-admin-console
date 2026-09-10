@@ -16,48 +16,43 @@ describe('ViewMoreLink', () => {
   });
 
   describe('rendering', () => {
-    it('renders the link with the provided label', () => {
+    it('exposes the label as a button, not a link, since it triggers an action in place', () => {
       renderWrapper(<ViewMoreLink {...defaultProps} />);
 
-      expect(screen.getByText('View more details')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'View more details' })).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
     it('renders without an icon when iconSrc is not provided', () => {
       renderWrapper(<ViewMoreLink {...defaultProps} />);
 
-      const link = screen.getByText('View more details');
-      expect(link).toBeInTheDocument();
-      // The icon should not be present when iconSrc is not provided
-      expect(link.querySelector('svg')).not.toBeInTheDocument();
+      const button = screen.getByRole('button', { name: 'View more details' });
+      expect(button.querySelector('svg')).not.toBeInTheDocument();
     });
 
     it('renders with an icon when iconSrc is provided', () => {
       renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
 
-      const link = screen.getByText('View more details');
-      expect(link).toBeInTheDocument();
-      // The icon should be present when iconSrc is provided
-      expect(link.querySelector('svg')).toBeInTheDocument();
+      const button = screen.getByRole('button', { name: 'View more details' });
+      expect(button.querySelector('svg')).toBeInTheDocument();
     });
   });
 
   describe('user interactions', () => {
-    it('calls onClick handler when user clicks the link', async () => {
+    it('calls onClick handler when user clicks the button', async () => {
       const user = userEvent.setup();
       renderWrapper(<ViewMoreLink {...defaultProps} />);
 
-      const link = screen.getByText('View more details');
-      await user.click(link);
+      await user.click(screen.getByRole('button', { name: 'View more details' }));
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onClick handler when user clicks the link with an icon', async () => {
+    it('calls onClick handler when user clicks the button with an icon', async () => {
       const user = userEvent.setup();
       renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
 
-      const link = screen.getByText('View more details');
-      await user.click(link);
+      await user.click(screen.getByRole('button', { name: 'View more details' }));
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
@@ -66,12 +61,26 @@ describe('ViewMoreLink', () => {
       const user = userEvent.setup();
       renderWrapper(<ViewMoreLink {...defaultProps} />);
 
-      const link = screen.getByText('View more details');
-      await user.click(link);
-      await user.click(link);
-      await user.click(link);
+      const button = screen.getByRole('button', { name: 'View more details' });
+      await user.click(button);
+      await user.click(button);
+      await user.click(button);
 
       expect(mockOnClick).toHaveBeenCalledTimes(3);
+    });
+
+    it('can be reached and activated with the keyboard alone', async () => {
+      const user = userEvent.setup();
+      renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
+
+      await user.tab();
+      expect(screen.getByRole('button', { name: 'View more details' })).toHaveFocus();
+
+      await user.keyboard('{Enter}');
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+
+      await user.keyboard(' ');
+      expect(mockOnClick).toHaveBeenCalledTimes(2);
     });
   });
 });
