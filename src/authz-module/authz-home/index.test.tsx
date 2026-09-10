@@ -44,6 +44,17 @@ const emptyScopesResponse = {
   isFetchingNextPage: false,
 };
 
+// Nothing is allowed while the check is in flight; cases override only what they are about.
+const permissionsInFlight = {
+  isCourseViewAllowed: false,
+  isLibraryViewAllowed: false,
+  isLoading: true,
+};
+
+const mockViewTeamPermissions = (overrides: Partial<typeof permissionsInFlight> = {}) => {
+  (useViewTeamPermissions as jest.Mock).mockReturnValue({ ...permissionsInFlight, ...overrides });
+};
+
 const renderAuthzHome = () => renderWithAllProviders(
   <ToastManagerProvider>
     <AuthzHome />
@@ -54,11 +65,7 @@ describe('AuthzHome', () => {
   beforeEach(() => {
     // Call history is asserted on below, so it must not carry over between cases.
     jest.clearAllMocks();
-    (useViewTeamPermissions as jest.Mock).mockReturnValue({
-      isCourseViewAllowed: true,
-      isLibraryViewAllowed: true,
-      isLoading: false,
-    });
+    mockViewTeamPermissions({ isCourseViewAllowed: true, isLibraryViewAllowed: true, isLoading: false });
     (useTeamMembersAssignments as jest.Mock).mockReturnValue(emptyResponse);
     (useOrgs as jest.Mock).mockReturnValue(emptyResponse);
     (useScopes as jest.Mock).mockReturnValue(emptyScopesResponse);
@@ -91,22 +98,14 @@ describe('AuthzHome', () => {
   });
 
   it('denies access to the whole page when the user may view neither courses nor libraries', () => {
-    (useViewTeamPermissions as jest.Mock).mockReturnValue({
-      isCourseViewAllowed: false,
-      isLibraryViewAllowed: false,
-      isLoading: false,
-    });
+    mockViewTeamPermissions({ isLoading: false });
 
     // Neither tab has anything to show, so the page hands off to the error boundary.
     expect(() => renderAuthzHome()).toThrow(CustomErrors.NO_ACCESS);
   });
 
   it('shows a loader instead of the page while the permission check is in flight', () => {
-    (useViewTeamPermissions as jest.Mock).mockReturnValue({
-      isCourseViewAllowed: false,
-      isLibraryViewAllowed: false,
-      isLoading: true,
-    });
+    mockViewTeamPermissions();
 
     renderAuthzHome();
 
@@ -119,11 +118,7 @@ describe('AuthzHome', () => {
   });
 
   it('renders the page when only library roles may be viewed', () => {
-    (useViewTeamPermissions as jest.Mock).mockReturnValue({
-      isCourseViewAllowed: false,
-      isLibraryViewAllowed: true,
-      isLoading: false,
-    });
+    mockViewTeamPermissions({ isLibraryViewAllowed: true, isLoading: false });
 
     renderAuthzHome();
 
