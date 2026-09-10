@@ -6,8 +6,8 @@ import {
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getPlatformAggregateScopeKey, getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  getScopeContextType, GLOBAL_SCOPE_KEY, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -90,7 +90,7 @@ const ScopeCell = ({ row }: CellProps) => {
 
   const { scopeText, iconSrc } = useMemo(() => {
     const { role, scope, org } = row.original;
-    if (DJANGO_MANAGED_ROLES.includes(role) || scope === getPlatformAggregateScopeKey(CONTEXT_TYPES.GLOBAL)) {
+    if (DJANGO_MANAGED_ROLES.includes(role) || scope === GLOBAL_SCOPE_KEY) {
       return {
         scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
         iconSrc: RESOURCE_ICONS.GLOBAL,
@@ -156,17 +156,15 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   };
 
   return (
-    <div role="button">
-      <ViewMoreLink
-        label={formatMessage(
-          row.isExpanded
-            ? messages['authz.user.table.view_all_permissions.link.text.close']
-            : messages['authz.user.table.view_all_permissions.link.text.open'],
-        )}
-        onClick={handleToggleExpanded}
-        iconSrc={ExpandMore}
-      />
-    </div>
+    <ViewMoreLink
+      label={formatMessage(
+        row.isExpanded
+          ? messages['authz.user.table.view_all_permissions.link.text.close']
+          : messages['authz.user.table.view_all_permissions.link.text.open'],
+      )}
+      onClick={handleToggleExpanded}
+      iconSrc={ExpandMore}
+    />
   );
 };
 
