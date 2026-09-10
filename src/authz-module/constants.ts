@@ -2,7 +2,6 @@
 export const CONTEXT_TYPES = {
   LIBRARY: 'library',
   COURSE: 'course',
-  GLOBAL: 'global',
 } as const;
 
 export type ContextType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
@@ -21,7 +20,6 @@ export const getOrgAggregateScopeKey = (contextType: ContextType, orgSlug: strin
 const PLATFORM_AGGREGATE_SCOPE_KEYS = {
   [CONTEXT_TYPES.COURSE]: 'course-v1:*',
   [CONTEXT_TYPES.LIBRARY]: 'lib:*',
-  [CONTEXT_TYPES.GLOBAL]: '*',
 };
 
 export const getPlatformAggregateScopeKey = (contextType: ContextType): string => {
@@ -105,9 +103,8 @@ export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 /**
- * Maximum assignments nested under each user in the team members table. Sent as the
- * `assignments_limit` query param and used as the numerator of the sub-table's
- * "Showing 03 of 10" footer; the denominator is the user's absolute `assignmentCount`.
+ * Cap on the assignments nested under each user in the team members table, sent as the
+ * `assignments_limit` query param. The sub-table footer counts what actually came back.
  */
 export const MAX_INLINE_ASSIGNMENTS = 3;
 

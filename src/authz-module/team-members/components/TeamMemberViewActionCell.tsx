@@ -2,7 +2,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { IconButton } from '@openedx/paragon';
 import { Visibility } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';
-import { buildUserPath } from '@src/authz-module/constants';
+import { buildUserPath, CONTEXT_TYPES, getScopeContextType } from '@src/authz-module/constants';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { DisabledCourseActionButton } from '@src/authz-module/components/TableCells';
 import componentMessages from '@src/authz-module/components/messages';
@@ -13,8 +13,7 @@ interface TeamMemberViewActionCellProps {
 }
 
 const isViewable = (assignment: TeamMemberAssignment, isCourseEnabled: (scope: string) => boolean) => {
-  const isCourseScope = !assignment.role?.startsWith('lib');
-  if (!isCourseScope) {
+  if (getScopeContextType(assignment.scope) === CONTEXT_TYPES.LIBRARY) {
     return true;
   }
   return isCourseEnabled(assignment.scope);

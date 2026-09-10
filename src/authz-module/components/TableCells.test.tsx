@@ -199,12 +199,6 @@ describe('TableCells Components', () => {
       column: { id: 'scope' },
     });
 
-    it('displays "Global" for the platform-wide superadmin scope', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: '*', org: '*' })} />);
-
-      expect(screen.getByText('Global')).toBeInTheDocument();
-    });
-
     it('names a platform-wide course scope instead of showing its wildcard key', () => {
       renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:*', org: '*' })} />);
 

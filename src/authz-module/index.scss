@@ -67,57 +67,37 @@
     }
   }
 
-  /*
-    Team members table truncation. The ellipsis itself comes from Paragon's `.text-truncate`
-    utility; these rules only supply what Paragon has no utility for — the `min-width: 0`
-    that lets a flex child shrink enough to clip, and the max-widths that place the cut near
-    the character counts in the design.
-  */
+  // Where `.text-truncate` cuts; sized to the design's character budget.
   .authz-cell-username { max-width: 15rem; }  // ~24 characters
   .authz-cell-email { max-width: 17rem; }     // ~28 characters
 
-  /*
-    Column sizing for the team members table. Auto-layout hands width to the short
-    Username/Email values and starves "Assigned roles", cutting the scope name off far
-    earlier than the design allows, so the columns are pinned explicitly. Widths follow
-    the design's character budget: ~24 for username, ~28 for email, the bulk to the role
-    summary, and just enough for the toggle and the action icon.
-  */
   &.team-members-table {
-    /*
-      Roomier rows. Paragon's 8px is tight here because the assigned-roles cell stacks a
-      scope name over its organization, so every row is two lines tall.
-    */
+    // Every row is two lines tall: the assigned-roles cell stacks scope over org.
     th,
     td {
       padding-top: var(--pgn-spacing-spacer-3);
       padding-bottom: var(--pgn-spacing-spacer-3);
     }
 
-    // The toggle reads as one phrase; wrapping it mid-label looks broken.
+    // Keep the "+N more roles" label on one line.
     td:nth-child(4) {
       white-space: nowrap;
     }
 
     /*
-      Column sizing, from `md` up only. Auto-layout hands width to the short Username and
-      Email values and starves "Assigned roles", cutting the scope name off far earlier
-      than the design allows, so the columns are pinned explicitly. Widths follow the
-      design's character budget: ~24 for username, ~28 for email, the bulk to the role
-      summary, and just enough for the toggle and the action icon.
-
-      Below `md` these percentages would squeeze the toggle and action columns to a few
-      pixels, so the table falls back to content sizing and scrolls sideways inside
-      Paragon's `.pgn__data-table-container`, which is already `overflow-x: auto`.
+      Auto-layout starves "Assigned roles" in favour of the short Username/Email values,
+      so widths are pinned. Below `md` these percentages would crush the toggle and action
+      columns, so the table falls back to content sizing and scrolls inside Paragon's
+      `.pgn__data-table-container`.
     */
     @media (--pgn-size-breakpoint-min-width-md) {
       .pgn__data-table {
         table-layout: fixed;
       }
 
-      th:nth-child(1) { width: 16%; }  // Username, ~24 characters
-      th:nth-child(2) { width: 18%; }  // Email, ~28 characters
-      th:nth-child(3) { width: 46%; }  // Assigned roles: badge + scope + org subline
+      th:nth-child(1) { width: 16%; }  // Username
+      th:nth-child(2) { width: 18%; }  // Email
+      th:nth-child(3) { width: 46%; }  // Assigned roles
       th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
       th:nth-child(5) { width: 7%; }   // Actions
 
@@ -125,7 +105,7 @@
         overflow: hidden;
       }
 
-      // The breakdown sizes its own three columns; it must not inherit the widths above.
+      // The nested table sizes its own columns; it must not inherit the widths above.
       .team-members-table__subtable {
         .pgn__data-table {
           table-layout: auto;
@@ -139,7 +119,7 @@
       }
     }
 
-    // The breakdown is one line per row, so it keeps the tighter default rhythm.
+    // One line per row, so it keeps tighter padding.
     .team-members-table__subtable {
       th,
       td {
@@ -150,12 +130,7 @@
   }
 
   .team-members-table__subtable {
-    /*
-      The module turns `hr` into a horizontal rule below `sm`, for the page actions that
-      stack there. This one separates two labels in a footer that stays a row at every
-      width, so it keeps the vertical treatment — and is sized to the small text beside
-      it rather than to the page-header actions.
-    */
+    // The module turns `hr` horizontal below `sm`; this footer divider stays vertical.
     hr {
       border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
       border-top: none;
@@ -163,28 +138,22 @@
       width: 0;
     }
 
-    // The breakdown sits inside a padded container of its own, so the module's blanket
-    // 1rem on every data-table wrapper would double it up.
+    // The Card already pads; the module's blanket 1rem would double it up.
     .pgn__data-table-wrapper {
       padding: 0;
     }
 
-    /*
-      Header band matching the resource-category rows of the roles & permissions matrix
-      (`bg-info-100 text-primary` in PermissionTable), so the two nested tables in the
-      module read as the same component. Paragon's DataTable renders its own `thead`, so
-      the utilities cannot be passed as a className and the tokens behind them are used.
-    */
+    // Matches PermissionTable's `bg-info-100 text-primary` band. Paragon renders its own
+    // `thead`, so the tokens are used rather than the utility classes.
     thead th {
       background-color: var(--pgn-color-info-100);
       color: var(--pgn-color-primary-base);
     }
 
     /*
-      Paragon stripes rows with `.pgn__data-table.is-striped tr:nth-child(2n)` — a
-      descendant selector, so the striped outer table reaches into this nested one and
-      `isStriped={false}` on the inner table cannot override it. Reset it here, scoped to
-      a nested table that actually opted out, so an inner table that wants stripes keeps them.
+      Paragon stripes with `.pgn__data-table.is-striped tr:nth-child(2n)` — a descendant
+      selector, so the striped outer table reaches in and `isStriped={false}` on the inner
+      one cannot override it. The `:not()` keeps a nested table that wants stripes.
     */
     .pgn__data-table:not(.is-striped) tr {
       background-color: transparent;
@@ -196,20 +165,15 @@
     }
   }
 
-  /*
-    Badge labels vary in length ("Course Admin" vs "Library Contributor"), so without a
-    floor the "In" connector and the scope start at a different x on every row. Sized to
-    the widest label so the three parts line up down the column.
-  */
+  // Floor the badge to the widest label, so "in" and the scope align down the column.
   .authz-assigned-roles .authz-role-badge {
     min-width: 11rem;
-    // The row is muted so the bare "in" reads as a connector; the badge is content.
-    color: var(--pgn-color-gray-700);
+    color: var(--pgn-color-gray-700);  // Undo the muted row color; the badge is content.
     margin-right: var(--pgn-spacing-spacer-3);
   }
 
   .authz-scope-cell {
-    min-width: 0;
+    min-width: 0;      // Lets the flex child shrink far enough for `.text-truncate` to cut.
     max-width: 25rem;  // org subline, ~40 characters
 
     &__name {
