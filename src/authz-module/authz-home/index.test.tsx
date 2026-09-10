@@ -3,6 +3,8 @@ import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module
 import { renderWithAllProviders } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { CustomErrors } from '@src/constants';
 import AuthzHome from './index';
 import messages from './messages';
 
@@ -12,6 +14,10 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
     isCourseEnabled: () => true,
     isLoading: false,
   }),
+}));
+
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -46,6 +52,13 @@ const renderAuthzHome = () => renderWithAllProviders(
 
 describe('AuthzHome', () => {
   beforeEach(() => {
+    // Call history is asserted on below, so it must not carry over between cases.
+    jest.clearAllMocks();
+    (useViewTeamPermissions as jest.Mock).mockReturnValue({
+      isCourseViewAllowed: true,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
     (useTeamMembersAssignments as jest.Mock).mockReturnValue(emptyResponse);
     (useOrgs as jest.Mock).mockReturnValue(emptyResponse);
     (useScopes as jest.Mock).mockReturnValue(emptyScopesResponse);
@@ -75,6 +88,46 @@ describe('AuthzHome', () => {
     await user.click(screen.getByText(messages['authz.tabs.permissionsRoles'].defaultMessage));
     expect(screen.getByRole('button', { name: 'Courses' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Libraries' })).toBeInTheDocument();
+  });
+
+  it('denies access to the whole page when the user may view neither courses nor libraries', () => {
+    (useViewTeamPermissions as jest.Mock).mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: false,
+      isLoading: false,
+    });
+
+    // Neither tab has anything to show, so the page hands off to the error boundary.
+    expect(() => renderAuthzHome()).toThrow(CustomErrors.NO_ACCESS);
+  });
+
+  it('shows a loader instead of the page while the permission check is in flight', () => {
+    (useViewTeamPermissions as jest.Mock).mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: false,
+      isLoading: true,
+    });
+
+    renderAuthzHome();
+
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByText('Loading')).toBeInTheDocument();
+    // Nothing behind the gate renders yet, so no listing request is fired for a user
+    // who may turn out to be denied.
+    expect(screen.queryByText(messages['authz.manage.page.title'].defaultMessage)).not.toBeInTheDocument();
+    expect(useTeamMembersAssignments).not.toHaveBeenCalled();
+  });
+
+  it('renders the page when only library roles may be viewed', () => {
+    (useViewTeamPermissions as jest.Mock).mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+
+    renderAuthzHome();
+
+    expect(screen.getByText(messages['authz.manage.page.title'].defaultMessage)).toBeInTheDocument();
   });
 
   it('renders the TeamMembersTable component in the team members tab', () => {

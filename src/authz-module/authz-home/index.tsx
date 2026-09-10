@@ -3,6 +3,9 @@ import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { TeamMembersTable } from '@src/authz-module/team-members';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
+import { CustomErrors } from '@src/constants';
+import LoadingPage from '@src/components/LoadingPage';
 import RolesPermissions from '../roles-permissions/RolesPermissions';
 import AuthZLayout from '../components/AuthZLayout';
 
@@ -19,6 +22,27 @@ const AuthzHome = () => {
   const presetScope = searchParams.get('scope')?.replace(/\s/g, '+') || undefined;
 
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
+
+  const {
+    isCourseViewAllowed, isLibraryViewAllowed, isLoading: isLoadingPermissions,
+  } = useViewTeamPermissions();
+
+  /**
+   * It gates the whole page whether the user is allowed to view the team members. If
+   * the user is not allowed, an error is thrown to display the access denied message.
+   *
+   * Rendering is held until the check settles rather than started optimistically, so a
+   * user who turns out to be denied never fires the listing and filter requests behind
+   * the page. Both flags read false while it is in flight, which would otherwise deny
+   * everyone for a frame.
+   */
+  if (isLoadingPermissions) {
+    return <LoadingPage />;
+  }
+
+  if (!isCourseViewAllowed && !isLibraryViewAllowed) {
+    throw new Error(CustomErrors.NO_ACCESS);
+  }
 
   return (
     <div className="authz-module">

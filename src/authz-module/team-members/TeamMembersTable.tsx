@@ -18,6 +18,7 @@ import TableControlBar from '@src/authz-module/components/TableControlBar/TableC
 import { getCellHeader } from '@src/authz-module/utils';
 
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
+import type { GetTeamMembersAssignmentsResponse } from '@src/authz-module/data/api';
 import { MAX_INLINE_ASSIGNMENTS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import messages from './messages';
 import TableFooter from '../components/TableFooter/TableFooter';
@@ -31,6 +32,17 @@ import { createTeamMemberViewActionCell } from './components/TeamMemberViewActio
 interface TeamMembersTableProps {
   presetScope?: string;
 }
+
+const toastedErrors = new WeakSet<Error>();
+
+/**
+ * Stable stand-in for a query that has not resolved. A fresh object literal here would
+ * hand `DataTable` a new `data` array on every render, and react-table resets its
+ * expanded-row state whenever `data` changes identity.
+ */
+const EMPTY_ASSIGNMENTS: GetTeamMembersAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};
 
 // Org, scope and role stay in the column set — TableControlBar derives its filter
 // controls from the columns — but are hidden, since the design surfaces them inside
@@ -66,7 +78,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   }, [isCourseViewAllowed, querySettings]);
 
   const {
-    data: { results: teamMembers, count } = { results: [], count: 0 },
+    data: { results: teamMembers, count } = EMPTY_ASSIGNMENTS,
     isLoading: isLoadingTeamMembers,
     error,
     refetch,
@@ -76,8 +88,12 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
+  /**
+   * Only transient failures reach here.
+   */
   useEffect(() => {
-    if (error) {
+    if (error && !toastedErrors.has(error)) {
+      toastedErrors.add(error);
       showErrorToast(error, refetch);
     }
   }, [error, showErrorToast, refetch]);

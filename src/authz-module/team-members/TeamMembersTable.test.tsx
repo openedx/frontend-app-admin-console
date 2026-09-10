@@ -517,6 +517,19 @@ describe('TeamMembersTable', () => {
     });
   });
 
+  it('announces a failure once, not once per effect pass', () => {
+    const serverError = Object.assign(new Error('Boom'), {
+      customAttributes: { httpErrorStatus: 500 },
+    });
+    mockApiResponses({
+      ...mockedTeamMembers, isLoading: false, error: serverError, data: undefined,
+    });
+
+    renderTable();
+
+    expect(screen.getAllByText(/We're experiencing technical difficulties./)).toHaveLength(1);
+  });
+
   it('handles empty data gracefully', async () => {
     mockApiResponses({
       data: {
