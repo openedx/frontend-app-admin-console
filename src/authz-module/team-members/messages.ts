@@ -6,9 +6,9 @@ const messages = defineMessages({
     defaultMessage: 'Username',
     description: 'Team members table username column header',
   },
-  'authz.table.username.current': {
-    id: 'authz.table.username.current',
-    defaultMessage: '(Me)',
+  'authz.team.members.table.username.current': {
+    id: 'authz.team.members.table.username.current',
+    defaultMessage: '{username} <Marker>(Me)</Marker>',
     description: 'Indicates the current user in the team members table',
   },
   'authz.team.members.table.column.email.title': {
@@ -41,10 +41,10 @@ const messages = defineMessages({
     defaultMessage: 'Assigned roles',
     description: 'Team members table assigned roles column header',
   },
-  'authz.team.members.table.assigned.roles.connector': {
-    id: 'authz.team.members.table.assigned.roles.connector',
-    defaultMessage: 'In',
-    description: 'Connector word placed between a role badge and the scope it applies to, e.g. "Course Admin In Introduction to Data Analysis"',
+  'authz.team.members.table.assigned.roles': {
+    id: 'authz.team.members.table.assigned.roles',
+    defaultMessage: '{role} in {scope}',
+    description: 'One role assignment on a team member row, e.g. "Course Admin in Introduction to Data Analysis". {role} is the role badge and {scope} the course or library it applies to, so both the order and the connecting word can be changed per language.',
   },
   'authz.team.members.table.more.roles': {
     id: 'authz.team.members.table.more.roles',

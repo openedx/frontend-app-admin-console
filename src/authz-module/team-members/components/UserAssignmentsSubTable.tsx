@@ -36,7 +36,7 @@ const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
 
   return (
     <span className="d-flex align-items-center">
-      <Icon color="primary" src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0" size="xs" />
+      <Icon src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0 text-primary" size="xs" />
       <span className="text-truncate" title={scopeText}>{scopeText}</span>
     </span>
   );
@@ -53,7 +53,7 @@ const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
 
   return (
     <span className="d-flex align-items-center">
-      <Icon color="primary" src={Business} className="mr-2 flex-shrink-0" size="xs" />
+      <Icon src={Business} className="mr-2 flex-shrink-0 text-primary" size="xs" />
       <span className="text-truncate" title={orgText}>{orgText}</span>
     </span>
   );
