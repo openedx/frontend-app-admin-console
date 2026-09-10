@@ -8,7 +8,7 @@ const messages = defineMessages({
   },
   'authz.team.members.table.username.current': {
     id: 'authz.team.members.table.username.current',
-    defaultMessage: '{username} <Marker>(Me)</Marker>',
+    defaultMessage: '{username} (Me)',
     description: 'Indicates the current user in the team members table',
   },
   'authz.team.members.table.column.email.title': {

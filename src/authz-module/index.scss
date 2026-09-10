@@ -166,11 +166,7 @@
   }
 
   // Floor the badge to the widest label, so "in" and the scope align down the column.
-  .authz-assigned-roles .authz-role-badge {
-    min-width: 11rem;
-    color: var(--pgn-color-gray-700);  // Undo the muted row color; the badge is content.
-    margin-right: var(--pgn-spacing-spacer-3);
-  }
+  .authz-assigned-roles .authz-role-badge { min-width: 11rem; }
 
   .authz-scope-cell {
     min-width: 0;      // Lets the flex child shrink far enough for `.text-truncate` to cut.
@@ -178,7 +174,6 @@
 
     &__name {
       max-width: 22rem;  // ~35 characters
-      color: var(--pgn-color-gray-700);
     }
 
     &__org {
