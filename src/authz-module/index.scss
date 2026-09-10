@@ -84,40 +84,85 @@
     summary, and just enough for the toggle and the action icon.
   */
   &.team-members-table {
-    .pgn__data-table {
-      table-layout: fixed;
+    /*
+      Roomier rows. Paragon's 8px is tight here because the assigned-roles cell stacks a
+      scope name over its organization, so every row is two lines tall.
+    */
+    th,
+    td {
+      padding-top: var(--pgn-spacing-spacer-3);
+      padding-bottom: var(--pgn-spacing-spacer-3);
     }
-
-    th:nth-child(1) { width: 16%; }  // Username, ~24 characters
-    th:nth-child(2) { width: 18%; }  // Email, ~28 characters
-    th:nth-child(3) { width: 46%; }  // Assigned roles: badge + scope + org subline
-    th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
-    th:nth-child(5) { width: 7%; }   // Actions
 
     // The toggle reads as one phrase; wrapping it mid-label looks broken.
     td:nth-child(4) {
       white-space: nowrap;
     }
 
-    td {
-      overflow: hidden;
-    }
+    /*
+      Column sizing, from `md` up only. Auto-layout hands width to the short Username and
+      Email values and starves "Assigned roles", cutting the scope name off far earlier
+      than the design allows, so the columns are pinned explicitly. Widths follow the
+      design's character budget: ~24 for username, ~28 for email, the bulk to the role
+      summary, and just enough for the toggle and the action icon.
 
-    // The breakdown sizes its own three columns; it must not inherit the widths above.
-    .team-members-table__subtable {
+      Below `md` these percentages would squeeze the toggle and action columns to a few
+      pixels, so the table falls back to content sizing and scrolls sideways inside
+      Paragon's `.pgn__data-table-container`, which is already `overflow-x: auto`.
+    */
+    @media (--pgn-size-breakpoint-min-width-md) {
       .pgn__data-table {
-        table-layout: auto;
+        table-layout: fixed;
       }
 
-      th:nth-child(1),
-      th:nth-child(2),
-      th:nth-child(3) {
-        width: auto;
+      th:nth-child(1) { width: 16%; }  // Username, ~24 characters
+      th:nth-child(2) { width: 18%; }  // Email, ~28 characters
+      th:nth-child(3) { width: 46%; }  // Assigned roles: badge + scope + org subline
+      th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
+      th:nth-child(5) { width: 7%; }   // Actions
+
+      td {
+        overflow: hidden;
+      }
+
+      // The breakdown sizes its own three columns; it must not inherit the widths above.
+      .team-members-table__subtable {
+        .pgn__data-table {
+          table-layout: auto;
+        }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3) {
+          width: auto;
+        }
+      }
+    }
+
+    // The breakdown is one line per row, so it keeps the tighter default rhythm.
+    .team-members-table__subtable {
+      th,
+      td {
+        padding-top: var(--pgn-spacing-spacer-2);
+        padding-bottom: var(--pgn-spacing-spacer-2);
       }
     }
   }
 
   .team-members-table__subtable {
+    /*
+      The module turns `hr` into a horizontal rule below `sm`, for the page actions that
+      stack there. This one separates two labels in a footer that stays a row at every
+      width, so it keeps the vertical treatment — and is sized to the small text beside
+      it rather than to the page-header actions.
+    */
+    hr {
+      border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      border-top: none;
+      height: 1rem;
+      width: 0;
+    }
+
     // The breakdown sits inside a padded container of its own, so the module's blanket
     // 1rem on every data-table wrapper would double it up.
     .pgn__data-table-wrapper {
