@@ -1,7 +1,7 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import TeamMembersTable from '@src/authz-module/team-members/TeamMembersTable';
+import { TeamMembersTable } from '@src/authz-module/team-members';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import RolesPermissions from '../roles-permissions/RolesPermissions';
 import AuthZLayout from '../components/AuthZLayout';
