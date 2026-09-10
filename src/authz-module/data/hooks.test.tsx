@@ -7,7 +7,7 @@ import type { QuerySettings } from './api';
 import {
   useAssignTeamMembersRole,
   useRevokeUserRoles,
-  useAllRoleAssignments,
+  useTeamMembersAssignments,
   useOrgs,
   useScopes,
   useUserAssignedRoles,
@@ -34,14 +34,18 @@ jest.mock('@src/constants', () => ({
 const mockAssignments = {
   results: [
     {
-      isSuperadmin: false,
-      role: 'course_staff',
-      org: 'OpenedX',
-      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-      permissionCount: 27,
-      fullName: 'John Doe',
       username: 'johndoe',
+      fullName: 'John Doe',
       email: 'johndoe@example.com',
+      assignmentCount: 5,
+      assignments: [
+        {
+          role: 'course_staff',
+          org: 'OpenedX',
+          scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+          permissionCount: 27,
+        },
+      ],
     },
   ],
   count: 1,
@@ -534,19 +538,19 @@ describe('useRevokeUserRoles', () => {
   if (userRolesCall) {
     const { predicate } = userRolesCall;
     expect(predicate({ queryKey: ['test-app', 'authz', 'userRoles'] })).toBe(true);
-    expect(predicate({ queryKey: ['test-app', 'authz', 'teamMembers'] })).toBe(false);
+    expect(predicate({ queryKey: ['test-app', 'authz', 'teamMembersAssignments'] })).toBe(false);
   }
 
-  const allRoleAssignmentsCall = predicateCalls.find(call => {
+  const teamMembersAssignmentsCall = predicateCalls.find(call => {
     const { predicate } = call;
-    return predicate({ queryKey: ['test-app', 'authz', 'allRoleAssignments', {}] });
+    return predicate({ queryKey: ['test-app', 'authz', 'teamMembersAssignments', {}] });
   });
 
-  expect(allRoleAssignmentsCall).toBeDefined();
+  expect(teamMembersAssignmentsCall).toBeDefined();
 
-  if (allRoleAssignmentsCall) {
-    const { predicate } = allRoleAssignmentsCall;
-    expect(predicate({ queryKey: ['test-app', 'authz', 'allRoleAssignments'] })).toBe(true);
+  if (teamMembersAssignmentsCall) {
+    const { predicate } = teamMembersAssignmentsCall;
+    expect(predicate({ queryKey: ['test-app', 'authz', 'teamMembersAssignments'] })).toBe(true);
     expect(predicate({ queryKey: ['test-app', 'authz', 'userRoles'] })).toBe(false);
   }
 
@@ -554,21 +558,23 @@ describe('useRevokeUserRoles', () => {
   });
 });
 
-describe('useAllRoleAssignments', () => {
+describe('useTeamMembersAssignments', () => {
   beforeEach(() => {
     mockHttpClient().mockReturnValue({
       get: jest.fn(() => Promise.resolve({ data: mockAssignments })),
     });
   });
 
-  it('fetches and returns role assignments', async () => {
+  it('fetches and returns team members with their nested assignments', async () => {
     const { result } = renderHook(
-      () => useAllRoleAssignments(mockQuerySettings),
+      () => useTeamMembersAssignments(mockQuerySettings, 3),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
       expect(result.current.data?.results).toHaveLength(1);
       expect(result.current.data?.results[0].username).toBe('johndoe');
+      expect(result.current.data?.results[0].assignmentCount).toBe(5);
+      expect(result.current.data?.results[0].assignments).toHaveLength(1);
       expect(result.current.data?.count).toBe(1);
     });
   });
@@ -582,7 +588,7 @@ describe('useAllRoleAssignments', () => {
       })),
     });
     const { result } = renderHook(
-      () => useAllRoleAssignments(mockQuerySettings),
+      () => useTeamMembersAssignments(mockQuerySettings, 3),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {

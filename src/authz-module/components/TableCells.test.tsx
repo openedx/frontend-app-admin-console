@@ -4,8 +4,6 @@ import { renderWrapper } from '@src/setupTest';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
 import {
-  NameCell,
-  ViewActionCell,
   RoleCell,
   OrgCell,
   ScopeCell,
@@ -34,245 +32,6 @@ describe('TableCells Components', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('NameCell', () => {
-    const mockUserRole = {
-      isSuperadmin: false,
-      role: 'course_staff',
-      org: 'OpenedX',
-      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-      permissionCount: 27,
-      fullName: 'John Doe',
-      username: 'johndoe',
-      email: 'johndoe@example.com',
-    };
-    const mockCellProps = {
-      row: {
-        id: '0',
-        original: mockUserRole,
-      },
-    };
-    beforeEach(() => {
-      initializeMockApp({
-        authenticatedUser: {
-          userId: 1,
-          username: 'testuser',
-          email: 'testuser@example.com',
-        },
-      });
-    });
-
-    it('displays the full name when available', () => {
-      renderWrapper(<NameCell {...mockCellProps} />);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
-
-    it('displays username when full name is not available', () => {
-      const propsWithoutFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            fullName: undefined,
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...propsWithoutFullName} />);
-      expect(screen.getByText('johndoe')).toBeInTheDocument();
-    });
-
-    it('displays username when full name is empty string', () => {
-      const propsWithEmptyFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            fullName: '',
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...propsWithEmptyFullName} />);
-      expect(screen.getByText('johndoe')).toBeInTheDocument();
-    });
-
-    it('shows current user indicator when username matches authenticated user', () => {
-      const currentUserProps = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'testuser',
-            fullName: 'Test User',
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...currentUserProps} />);
-      expect(screen.getByText('Test User')).toBeInTheDocument();
-      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
-    });
-
-    it('does not show current user indicator when username does not match authenticated user', () => {
-      renderWrapper(<NameCell {...mockCellProps} />);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
-    });
-
-    it('shows current user indicator with username fallback when no full name is provided', () => {
-      const currentUserPropsNoFullName = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'testuser',
-            fullName: undefined,
-          },
-        },
-      };
-
-      renderWrapper(<NameCell {...currentUserPropsNoFullName} />);
-      expect(screen.getByText('testuser')).toBeInTheDocument();
-      expect(screen.getByText(/\(Me\)/)).toBeInTheDocument();
-    });
-
-    it('handles missing username in authenticated user gracefully', () => {
-      const contextWithoutUsername = {
-        authenticatedUser: {
-          username: undefined,
-          email: 'testuser@example.com',
-        },
-      };
-
-      renderWrapper(<NameCell {...mockCellProps} />, contextWithoutUsername);
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.queryByText(/\(Me\)/)).not.toBeInTheDocument();
-    });
-  });
-
-  describe('ViewActionCell', () => {
-    const mockUserRole = {
-      isSuperadmin: false,
-      role: 'course_staff',
-      org: 'OpenedX',
-      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-      permissionCount: 27,
-      fullName: 'John Doe',
-      username: 'johndoe',
-      email: 'johndoe@example.com',
-    };
-
-    const mockCellProps = {
-      row: {
-        id: '0',
-        original: mockUserRole,
-      },
-    };
-    beforeEach(() => {
-      initializeMockApp({
-        authenticatedUser: {
-          userId: 1,
-          username: 'testuser',
-          email: 'testuser@example.com',
-        },
-      });
-      mockNavigate.mockClear();
-    });
-
-    it('renders view action button', () => {
-      renderWrapper(<ViewActionCell {...mockCellProps} />);
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      expect(viewButton).toBeInTheDocument();
-    });
-
-    it('has correct accessibility attributes', () => {
-      renderWrapper(<ViewActionCell {...mockCellProps} />);
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      expect(viewButton).toHaveAttribute('aria-label');
-    });
-
-    it('navigates to user profile when clicked', async () => {
-      const user = userEvent.setup();
-      renderWrapper(<ViewActionCell {...mockCellProps} />);
-
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      await user.click(viewButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
-    });
-
-    it('navigates with correct username for different user', async () => {
-      const user = userEvent.setup();
-      const differentUserProps = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'janedoe',
-          },
-        },
-      };
-
-      renderWrapper(<ViewActionCell {...differentUserProps} />);
-
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      await user.click(viewButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/janedoe');
-    });
-
-    it('handles empty username gracefully', async () => {
-      const user = userEvent.setup();
-      const emptyUsernameProps = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: '',
-          },
-        },
-      };
-
-      renderWrapper(<ViewActionCell {...emptyUsernameProps} />);
-
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      await user.click(viewButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/');
-    });
-
-    it('handles special characters in username', async () => {
-      const user = userEvent.setup();
-      const specialUsernameProps = {
-        row: {
-          id: '0',
-          original: {
-            ...mockUserRole,
-            username: 'user+with@special.chars',
-          },
-        },
-      };
-
-      renderWrapper(<ViewActionCell {...specialUsernameProps} />);
-
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      await user.click(viewButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
-    });
-
-    it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {
-      const user = userEvent.setup();
-      renderWrapper(<ViewActionCell {...mockCellProps} isCourseEnabled={() => false} />);
-
-      const viewButton = screen.getByRole('button', { name: /view/i });
-      expect(viewButton).toBeDisabled();
-
-      await user.hover(viewButton);
-      expect(screen.getByText(/manage its team in Studio instead/i)).toBeInTheDocument();
-    });
   });
 
   describe('RoleCell', () => {
@@ -430,6 +189,45 @@ describe('TableCells Components', () => {
 
       expect(screen.getByText('Global')).toBeInTheDocument();
       expect(screen.queryByText('course')).not.toBeInTheDocument();
+    });
+
+    const scopeProps = (
+      original: { role: string; scope: string; org: string },
+    ) => ({
+      value: 'unused',
+      row: { id: '0', original: { permissionCount: 1, ...original } },
+      column: { id: 'scope' },
+    });
+
+    it('names a platform-wide course scope instead of showing its wildcard key', () => {
+      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:*', org: '*' })} />);
+
+      expect(screen.getByText('All courses on the platform')).toBeInTheDocument();
+      expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
+    });
+
+    it('names a platform-wide library scope', () => {
+      renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:*', org: '*' })} />);
+
+      expect(screen.getByText('All libraries on the platform')).toBeInTheDocument();
+    });
+
+    it('names an organization-wide course scope', () => {
+      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'MathDept' })} />);
+
+      expect(screen.getByText('All courses in this organization')).toBeInTheDocument();
+    });
+
+    it('names an organization-wide library scope', () => {
+      renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:MathDept:*', org: 'MathDept' })} />);
+
+      expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
+    });
+
+    it('shows the scope key when a wildcard belongs to a different organization', () => {
+      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'OtherOrg' })} />);
+
+      expect(screen.getByText('course-v1:MathDept+*')).toBeInTheDocument();
     });
 
     it('displays the actual scope value for non-Django roles', () => {

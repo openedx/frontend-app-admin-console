@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import {
+  useContext, useEffect, useState, type ReactNode,
+} from 'react';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   DataTableContext,
@@ -37,9 +39,11 @@ const FILTER_GROUP_TO_ID = {
 
 interface TableControlBarProps {
   onFilterChange?: (filters: string[]) => void;
+  /** Optional count rendered right-aligned on the filter row, e.g. "Showing 10 users of 100." */
+  countLabel?: ReactNode;
 }
 
-const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
+const TableControlBar = ({ onFilterChange, countLabel }: TableControlBarProps) => {
   const intl = useIntl();
   // applied filters in the order they were selected by the user, to display on the control bar as chips
   const [chronologicalFilters, setChronologicalFilters] = useState<FilterChoice[]>([]);
@@ -164,6 +168,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           }
           return null;
         })}
+        {countLabel && <span className="ml-auto text-gray-500">{countLabel}</span>}
       </Stack>
 
       {chronologicalFilters.length > 0 && (

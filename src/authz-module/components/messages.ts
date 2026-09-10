@@ -86,11 +86,6 @@ const messages = defineMessages({
     defaultMessage: 'View all permissions',
     description: 'Text for the link to view all permissions in the user table',
   },
-  'authz.table.username.current': {
-    id: 'authz.table.username.current',
-    defaultMessage: '(Me)',
-    description: 'Indicates the current user in the team members table',
-  },
 
   'authz.table.column.actions.view.title': {
     id: 'authz.table.column.actions.view.title',

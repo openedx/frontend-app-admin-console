@@ -3,8 +3,8 @@ import {
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
 import {
-  assignTeamMembersRole, AssignTeamMembersRoleRequest, getAllRoleAssignments,
-  GetAllRoleAssignmentsResponse, getOrgs, GetOrgsResponse,
+  assignTeamMembersRole, AssignTeamMembersRoleRequest, getTeamMembersAssignments,
+  GetTeamMembersAssignmentsResponse, getOrgs, GetOrgsResponse,
   getScopes, GetScopesResponse, QuerySettings, revokeUserRoles,
   RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
   validateUsers, ValidateUsersRequest, GetScopesParams,
@@ -13,7 +13,7 @@ import {
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
-  allRoleAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'allRoleAssignments', querySettings] as const,
+  teamMembersAssignments: (querySettings?: QuerySettings, assignmentsLimit?: number) => [...authzQueryKeys.all, 'teamMembersAssignments', querySettings, assignmentsLimit] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (params?: Omit<GetScopesParams, 'page'>) => [...authzQueryKeys.all, 'scopes', params] as const,
   userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
@@ -38,7 +38,7 @@ export const useAssignTeamMembersRole = () => {
       if (!error) {
         queryClient.invalidateQueries({ queryKey: [...authzQueryKeys.all, 'userRoles'] });
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey.includes('allRoleAssignments'),
+          predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
         });
       }
     },
@@ -77,28 +77,28 @@ export const useRevokeUserRoles = () => {
         predicate: (query) => query.queryKey.includes('userRoles'),
       });
       queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes('allRoleAssignments'),
+        predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
       });
     },
   });
 };
 
 /**
- * React Query hook to fetch all role assignments across scopes and roles,
- * with support for filtering, sorting, and pagination.
- * It retrieves a comprehensive list of user-role assignments based
- * on the provided query settings.
+ * React Query hook to fetch team members grouped by user, with support for
+ * filtering, sorting, and pagination. Each result is one user carrying up to
+ * `assignmentsLimit` of their role assignments plus their absolute total.
  *
- * @param querySettings - Optional parameters for filtering by roles, scopes,
+ * @param querySettings - Parameters for filtering by roles, scopes,
  * organizations, search term, sorting, and pagination.
+ * @param assignmentsLimit - Maximum assignments to nest under each user.
  *
  * @example
- * const { data: roleAssignments } = useAllRoleAssignments({ roles: 'editor', pageSize: 20 });
+ * const { data: teamMembers } = useTeamMembersAssignments({ roles: 'editor', pageSize: 20 }, 3);
  */
-export const useAllRoleAssignments = (querySettings: QuerySettings) => {
-  const result = useQuery<GetAllRoleAssignmentsResponse, Error>({
-    queryKey: authzQueryKeys.allRoleAssignments(querySettings),
-    queryFn: () => getAllRoleAssignments(querySettings),
+export const useTeamMembersAssignments = (querySettings: QuerySettings, assignmentsLimit: number) => {
+  const result = useQuery<GetTeamMembersAssignmentsResponse, Error>({
+    queryKey: authzQueryKeys.teamMembersAssignments(querySettings, assignmentsLimit),
+    queryFn: () => getTeamMembersAssignments(querySettings, assignmentsLimit),
     staleTime: 1000 * 60 * 30, // refetch after 30 minutes
     retry: false,
     refetchOnWindowFocus: false,

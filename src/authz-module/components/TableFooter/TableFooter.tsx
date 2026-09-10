@@ -3,7 +3,18 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { DataTableContext, Pagination, TableFooter } from '@openedx/paragon';
 import messages from '../messages';
 
-const Footer = () => {
+const defaultShowingMessage = messages['authz.table.footer.items.showing.text'];
+
+interface FooterProps {
+  /**
+   * Overrides the "Showing X of Y." text — used by tables whose rows are not
+   * assignments (e.g. the team members table counts users). Receives `pageSize`
+   * and `itemCount`.
+   */
+  showingMessage?: typeof defaultShowingMessage;
+}
+
+const Footer = ({ showingMessage }: FooterProps) => {
   const { formatMessage } = useIntl();
   const {
     pageCount, gotoPage, state, itemCount, rows,
@@ -13,7 +24,7 @@ const Footer = () => {
   return (
     <TableFooter>
       <span>
-        {formatMessage(messages['authz.table.footer.items.showing.text'], { pageSize: rows.length, itemCount })}
+        {formatMessage(showingMessage ?? defaultShowingMessage, { pageSize: rows.length, itemCount })}
       </span>
       <Pagination
         variant="reduced"

@@ -87,3 +87,33 @@ export type RoleToDelete = {
 export type UserRoleWithPermissions = UserRole & {
   canManageScope?: boolean;
 };
+
+/**
+ * A single role assignment nested under a team member in the user-grouped listing.
+ * Mirrors `results[].assignments[]` of `GET /api/authz/v1/users/`.
+ */
+export interface TeamMemberAssignment {
+  role: string;
+  org: string;
+  /** Scope external key (e.g. `course-v1:Org+Course+Run`). Identifies the scope and is
+   *  what the scope filter sends back to the API — not shown to the user. */
+  scope: string;
+  /** Human-readable scope name shown in the table. The API returns an empty string for
+   *  glob scopes and for scopes whose backing course or library no longer exists, so
+   *  callers fall back to `scope`. */
+  scopeDisplayName: string;
+  permissionCount: number;
+}
+
+/**
+ * A team member as returned by the user-grouped assignments endpoint: one entry per
+ * user, carrying up to `assignments_limit` of their assignments. `assignmentCount` is
+ * the user's absolute total, so it can exceed `assignments.length`.
+ */
+export interface TeamMember {
+  username: string;
+  fullName: string;
+  email: string;
+  assignmentCount: number;
+  assignments: TeamMemberAssignment[];
+}

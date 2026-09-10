@@ -42,6 +42,28 @@ const messages = defineMessages(
       defaultMessage: '<Bold>The request took too long.</Bold> <Br></Br>Please check your connection and try again.',
       description: 'Request timeout message',
     },
+    // Aggregate scope labels. Shared: the wizard offers these scopes when assigning a
+    // role, and the team members table names them when displaying one already assigned.
+    'authz.scope.aggregate.platform.course': {
+      id: 'authz.scope.aggregate.platform.course',
+      defaultMessage: 'All courses on the platform',
+      description: 'Label for the aggregate scope covering every course in the platform (course-v1:* scope).',
+    },
+    'authz.scope.aggregate.platform.library': {
+      id: 'authz.scope.aggregate.platform.library',
+      defaultMessage: 'All libraries on the platform',
+      description: 'Label for the aggregate scope covering every library in the platform (lib:* scope).',
+    },
+    'authz.scope.aggregate.org.course': {
+      id: 'authz.scope.aggregate.org.course',
+      defaultMessage: 'All courses in this organization',
+      description: 'Label for the aggregate scope covering every course of a single organization (course-v1:<org>+* scope).',
+    },
+    'authz.scope.aggregate.org.library': {
+      id: 'authz.scope.aggregate.org.library',
+      defaultMessage: 'All libraries in this organization',
+      description: 'Label for the aggregate scope covering every library of a single organization (lib:<org>:* scope).',
+    },
     'authz.team.toast.retry.label': {
       id: 'authz.team.toast.retry.label',
       defaultMessage: 'Retry',
@@ -49,5 +71,22 @@ const messages = defineMessages(
     },
   },
 );
+
+/**
+ * Labels for the aggregate (wildcard) scopes, keyed by aggregate type and context type.
+ *
+ * Shared so the scope list in the assignment wizard and the scope column in the
+ * assignments tables name the same scope the same way.
+ */
+export const AGGREGATE_SCOPE_LABELS = {
+  platform: {
+    course: messages['authz.scope.aggregate.platform.course'],
+    library: messages['authz.scope.aggregate.platform.library'],
+  },
+  org: {
+    course: messages['authz.scope.aggregate.org.course'],
+    library: messages['authz.scope.aggregate.org.library'],
+  },
+};
 
 export default messages;

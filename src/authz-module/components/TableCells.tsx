@@ -1,34 +1,24 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
 import {
-  RemoveRedEye,
-  Delete, ExpandMore,
+  Delete, ExpandLess, ExpandMore,
   Info,
 } from '@openedx/paragon/icons';
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
-import { useNavigate } from 'react-router-dom';
-import { useContext, useMemo, type ComponentProps } from 'react';
+import { useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
-  Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
+  Icon, IconButton, OverlayTrigger, Tooltip,
   type DataTableCellProps,
 } from '@openedx/paragon';
+import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
+import { getScopeResourceIcon } from '@src/authz-module/utils';
+import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
-
-type ViewActionCellExtraProps = {
-  isCourseEnabled: (scope: string) => boolean;
-};
-
-interface DataTableInstance {
-  state?: {
-    expanded?: Record<string, boolean>;
-  };
-  toggleRowExpanded?: (rowId: string, expanded: boolean) => void;
-}
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
 type CellPropsWithValue = CellProps & {
@@ -52,7 +42,7 @@ type DisabledCourseActionButtonProps = Pick<ComponentProps<typeof IconButton>, '
 
 // A disabled button can't trigger its own tooltip (Paragon sets pointer-events: none on it),
 // so the OverlayTrigger must live on a wrapper element that still receives hover events.
-const DisabledCourseActionButton = ({
+export const DisabledCourseActionButton = ({
   src, alt, size, variant,
 }: DisabledCourseActionButtonProps) => {
   const { formatMessage } = useIntl();
@@ -78,58 +68,13 @@ const DisabledCourseActionButton = ({
   );
 };
 
-const NameCell = ({ row }: CellProps) => {
-  const intl = useIntl();
-  const { authenticatedUser } = useContext(AppContext);
-  const username = authenticatedUser?.username;
-
-  if (row.original.username === username) {
-    return (
-      <span>
-        {row.original.fullName || row.original.username}
-        <span className="text-gray-500">{intl.formatMessage(messages['authz.table.username.current'])}</span>
-      </span>
-    );
-  }
-  return <span>{row.original.fullName || row.original.username || ''}</span>;
-};
-
-const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
-  const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-  const viewPath = `/authz/user/${row.original.username}`;
-  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
-  const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
-
-  if (isDisabled) {
-    return (
-      <DisabledCourseActionButton
-        src={RemoveRedEye}
-        alt={formatMessage(messages['authz.table.column.actions.view.title'])}
-        size="sm"
-      />
-    );
-  }
-
-  return (
-    <IconButton
-      src={RemoveRedEye}
-      alt={formatMessage(messages['authz.table.column.actions.view.title'])}
-      size="sm"
-      onClick={() => navigate(viewPath)}
-    />
-  );
-};
-
-const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function customViewActionCell(cellProps) {
-  return <ViewActionCell {...cellProps} {...extraProps} />;
-};
-
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
   const { formatMessage } = useIntl();
+  // The backend returns '*' as the org wildcard, meaning the role spans every organization.
+  const isAllOrgs = DJANGO_MANAGED_ROLES.includes(row.original.role) || value === ALL_ORGS_KEY;
   return (
     <span>
-      {DJANGO_MANAGED_ROLES.includes(row.original.role) ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
+      {isAllOrgs ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
     </span>
   );
 };
@@ -138,18 +83,21 @@ const ScopeCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
 
   const { scopeText, iconSrc } = useMemo(() => {
-    if (DJANGO_MANAGED_ROLES.includes(row.original.role)) {
+    const { role, scope, org } = row.original;
+    if (DJANGO_MANAGED_ROLES.includes(role)) {
       return {
         scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const aggregateType = getAggregateScopeType(scope, org);
     return {
-      scopeText: row.original.scope,
-      iconSrc: scopeIcon,
+      scopeText: aggregateType
+        ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+        : scope,
+      iconSrc: getScopeResourceIcon(scope),
     };
-  }, [row.original.role, row.original.scope, formatMessage]);
+  }, [row.original, formatMessage]);
 
   return (
     <span className="d-flex align-items-center">
@@ -186,33 +134,18 @@ const PermissionsCell = ({ row }: CellProps) => {
 
 const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
-  const instance = useContext(DataTableContext) as DataTableInstance;
-  const handleToggleExpanded = () => {
-    if (!row.isExpanded && instance) {
-      // Close all other expanded rows first
-      const expanded = instance.state?.expanded || {};
-      Object.keys(expanded).forEach(rowId => {
-        if (rowId !== row.id && expanded[rowId]) {
-          instance.toggleRowExpanded?.(rowId, false);
-        }
-      });
-    }
-    // Toggle the current row
-    row.toggleRowExpanded?.();
-  };
+  const toggleExpanded = useExclusiveRowExpansion(row);
 
   return (
-    <div role="button">
-      <ViewMoreLink
-        label={formatMessage(
-          row.isExpanded
-            ? messages['authz.user.table.view_all_permissions.link.text.close']
-            : messages['authz.user.table.view_all_permissions.link.text.open'],
-        )}
-        onClick={handleToggleExpanded}
-        iconSrc={ExpandMore}
-      />
-    </div>
+    <ViewMoreLink
+      label={formatMessage(
+        row.isExpanded
+          ? messages['authz.user.table.view_all_permissions.link.text.close']
+          : messages['authz.user.table.view_all_permissions.link.text.open'],
+      )}
+      onClick={toggleExpanded}
+      iconSrc={row.isExpanded ? ExpandLess : ExpandMore}
+    />
   );
 };
 
@@ -297,13 +230,10 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
-  NameCell,
-  ViewActionCell,
   RoleCell,
   OrgCell,
   ScopeCell,
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
-  createViewActionCell,
 };

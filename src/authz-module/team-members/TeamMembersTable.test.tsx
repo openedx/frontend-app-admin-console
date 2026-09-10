@@ -1,11 +1,12 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/setupTest';
-import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
-import type { GetAllRoleAssignmentsResponse } from '@src/authz-module/data/api';
+import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
+import type { GetTeamMembersAssignmentsResponse } from '@src/authz-module/data/api';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
+import { MAX_INLINE_ASSIGNMENTS } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
 
@@ -15,8 +16,16 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
 
 const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
 
-const mockedAllRoleAssignments: {
-  data: GetAllRoleAssignmentsResponse | undefined;
+const courseAssignment = {
+  role: 'course_staff',
+  org: 'OpenedX',
+  scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+  scopeDisplayName: 'Open edX Demo Course',
+  permissionCount: 27,
+};
+
+const mockedTeamMembers: {
+  data: GetTeamMembersAssignmentsResponse | undefined;
   error: Error | null;
   isLoading: boolean;
   refetch: jest.Mock;
@@ -24,24 +33,44 @@ const mockedAllRoleAssignments: {
   data: {
     results: [
       {
-        isSuperadmin: false,
-        role: 'course_staff',
-        org: 'OpenedX',
-        scope: 'course-v1:OpenedX+DemoX+DemoCourse',
-        permissionCount: 27,
-        fullName: 'John Doe',
         username: 'johndoe',
+        fullName: 'John Doe',
         email: 'johndoe@example.com',
+        // More roles than the three returned, so the row advertises the remainder.
+        assignmentCount: 10,
+        assignments: [
+          courseAssignment,
+          {
+            role: 'library_admin',
+            org: 'WGU',
+            scope: 'lib:WGU:CSPROB',
+            scopeDisplayName: 'Computer Science Problems',
+            permissionCount: 11,
+          },
+          {
+            role: 'library_user',
+            org: 'WGU',
+            scope: 'lib:WGU:MATH',
+            scopeDisplayName: 'Mathematics Problems',
+            permissionCount: 4,
+          },
+        ],
       },
       {
-        isSuperadmin: true,
-        role: 'super_admin',
-        org: 'Global',
-        scope: 'system',
-        permissionCount: 100,
-        fullName: 'Jane Admin',
         username: 'janeadmin',
+        fullName: 'Jane Admin',
         email: 'jane@example.com',
+        // A single role: nothing further to reveal.
+        assignmentCount: 1,
+        assignments: [
+          {
+            role: 'course_auditor',
+            org: 'OpenedX',
+            scope: 'course-v1:OpenedX+Other+Course',
+            scopeDisplayName: 'Another Course',
+            permissionCount: 3,
+          },
+        ],
       },
     ],
     count: 2,
@@ -130,20 +159,24 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
 jest.mock('@src/authz-module/data/hooks', () => ({
-  useAllRoleAssignments: jest.fn(),
+  useTeamMembersAssignments: jest.fn(),
   useOrgs: jest.fn(),
   useScopes: jest.fn(),
 }));
 
 const mockApiResponses = (
-  allAsignmentsResponse = mockedAllRoleAssignments,
+  teamMembersResponse = mockedTeamMembers,
   orgResponse = mockedOrgs,
   scopesResponse = mockedScopes,
 ) => {
-  (useAllRoleAssignments as jest.Mock).mockReturnValue(allAsignmentsResponse);
+  (useTeamMembersAssignments as jest.Mock).mockReturnValue(teamMembersResponse);
   (useOrgs as jest.Mock).mockReturnValue(orgResponse);
   (useScopes as jest.Mock).mockReturnValue(scopesResponse);
 };
+
+const renderTable = (props = {}) => renderWithAllProviders(
+  <ToastManagerProvider><TeamMembersTable {...props} /></ToastManagerProvider>,
+);
 
 describe('TeamMembersTable', () => {
   beforeEach(() => {
@@ -160,53 +193,215 @@ describe('TeamMembersTable', () => {
     });
   });
 
-  it('renders table with role assignments data', async () => {
-    const presetScope = 'course-v1:OpenedX+DemoX+DemoCourse';
+  it('renders one row per user', async () => {
     mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable presetScope={presetScope} /></ToastManagerProvider>);
+    renderTable({ presetScope: 'course-v1:OpenedX+DemoX+DemoCourse' });
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Admin')).toBeInTheDocument();
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
+      expect(screen.getByText('janeadmin')).toBeInTheDocument();
+      // The column is Username: full names are carried by the API but not displayed.
+      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
       expect(screen.getByText('johndoe@example.com')).toBeInTheDocument();
       expect(screen.getByText('jane@example.com')).toBeInTheDocument();
     });
   });
 
+  it('requests the nested assignments capped at MAX_INLINE_ASSIGNMENTS', async () => {
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(useTeamMembersAssignments).toHaveBeenCalledWith(
+        expect.any(Object),
+        MAX_INLINE_ASSIGNMENTS,
+      );
+    });
+  });
+
   it('shows loading state initially', () => {
-    const allAsignmentsResponse = { ...mockedAllRoleAssignments, isLoading: true };
-    mockApiResponses(allAsignmentsResponse);
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    mockApiResponses({ ...mockedTeamMembers, isLoading: true });
+    renderTable();
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('shows error toast message', () => {
-    const allAsignmentsResponse = {
-      ...mockedAllRoleAssignments,
+    mockApiResponses({
+      ...mockedTeamMembers,
       isLoading: false,
       error: new Error('Failed to fetch'),
+      // @ts-ignore - deliberately partial payload alongside the error
       data: { results: [] },
-    };
-    // @ts-ignore
-    mockApiResponses(allAsignmentsResponse);
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    });
+    renderTable();
     expect(screen.getByText(/Something went wrong on our end./)).toBeInTheDocument();
   });
-  it('renders table headers correctly', async () => {
+
+  it('renders the user-grouped headers, keeping org, scope and role as filters only', async () => {
     mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    renderTable();
     await waitFor(() => {
-      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Username')).toBeInTheDocument();
       expect(screen.getByText('Email')).toBeInTheDocument();
-      expect(screen.getAllByText('Organization').length).toBe(2); // Header and org filter;
-      expect(screen.getAllByText('Scope').length).toBe(2); // Header and scope filter;
-      expect(screen.getAllByText('Role').length).toBe(2); // Header and role filter;
+      expect(screen.getByText('Assigned roles')).toBeInTheDocument();
       expect(screen.getByText('Actions')).toBeInTheDocument();
     });
+    // Only the filter buttons remain — these are no longer column headers.
+    expect(screen.getAllByText('Organization')).toHaveLength(1);
+    expect(screen.getAllByText('Scope')).toHaveLength(1);
+    expect(screen.getAllByText('Role')).toHaveLength(1);
+  });
+
+  it('renders the first assignment in the collapsed row, showing the scope name not its id', async () => {
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('Course Staff')).toBeInTheDocument();
+      expect(screen.getByText('Open edX Demo Course')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('course-v1:OpenedX+DemoX+DemoCourse')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the scope id when the API sends no display name', async () => {
+    mockApiResponses({
+      ...mockedTeamMembers,
+      data: {
+        ...mockedTeamMembers.data!,
+        results: [{
+          ...mockedTeamMembers.data!.results[0],
+          assignments: [{ ...courseAssignment, scopeDisplayName: '' }],
+          assignmentCount: 1,
+        }],
+        count: 1,
+      },
+    });
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('course-v1:OpenedX+DemoX+DemoCourse')).toBeInTheDocument();
+    });
+  });
+
+  it('counts the roles beyond the one already shown', async () => {
+    mockApiResponses();
+    renderTable();
+    // 10 total roles, one of them already on the row.
+    await waitFor(() => {
+      expect(screen.getByText('+9 more roles')).toBeInTheDocument();
+    });
+  });
+
+  it('omits the toggle for a user with a single role', async () => {
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('janeadmin')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('+0 more roles')).not.toBeInTheDocument();
+    // Only John Doe's row offers an expansion.
+    expect(screen.getAllByText(/more roles?$/)).toHaveLength(1);
+  });
+
+  it('expands into a breakdown whose first row matches the collapsed badge', async () => {
+    const user = userEvent.setup();
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('+9 more roles')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('+9 more roles'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Hide roles')).toBeInTheDocument();
+    });
+    // The badge stays put, so the role now appears both on the row and in the breakdown.
+    expect(screen.getAllByText('Course Staff')).toHaveLength(2);
+    expect(screen.getByText('Library Admin')).toBeInTheDocument();
+    expect(screen.getByText('Library User')).toBeInTheDocument();
+  });
+
+  it('reports the absolute role total in the breakdown footer', async () => {
+    const user = userEvent.setup();
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('+9 more roles')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('+9 more roles'));
+
+    // Three assignments returned out of the user's ten.
+    await waitFor(() => {
+      expect(screen.getByText('Showing 03 of 10')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('link', { name: /View all roles/ })).toHaveAttribute(
+      'href',
+      '/authz/user/johndoe',
+    );
+  });
+
+  it('hides "View all roles" when nothing is truncated', async () => {
+    const user = userEvent.setup();
+    mockApiResponses({
+      ...mockedTeamMembers,
+      data: {
+        ...mockedTeamMembers.data!,
+        results: [{
+          ...mockedTeamMembers.data!.results[0],
+          assignmentCount: 3,
+        }],
+        count: 1,
+      },
+    });
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('+2 more roles')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('+2 more roles'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Showing 03 of 03')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('link', { name: /View all roles/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps only one breakdown open, collapsing the previous row', async () => {
+    const user = userEvent.setup();
+    // Both users need something to reveal, so either row can be expanded.
+    mockApiResponses({
+      ...mockedTeamMembers,
+      data: {
+        ...mockedTeamMembers.data!,
+        results: mockedTeamMembers.data!.results.map((member) => ({
+          ...member,
+          assignmentCount: 5,
+          assignments: [courseAssignment],
+        })),
+      },
+    });
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getAllByText('+4 more roles')).toHaveLength(2);
+    });
+
+    await user.click(screen.getAllByText('+4 more roles')[0]);
+    await waitFor(() => {
+      expect(screen.getAllByText('Hide roles')).toHaveLength(1);
+    });
+
+    await user.click(screen.getByText('+4 more roles'));
+
+    // The second row took over: exactly one breakdown is open, and it is not the first.
+    await waitFor(() => {
+      expect(screen.getAllByText('Hide roles')).toHaveLength(1);
+    });
+    const toggles = screen.getAllByText(/Hide roles|more roles?$/);
+    expect(toggles[0]).toHaveTextContent('+4 more roles');
+    expect(toggles[1]).toHaveTextContent('Hide roles');
   });
 
   it('renders view action buttons for each user', async () => {
     mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    renderTable();
     await waitFor(() => {
       const viewButtons = screen.getAllByRole('button', { name: /view/i });
       expect(viewButtons).toHaveLength(2);
@@ -216,19 +411,71 @@ describe('TeamMembersTable', () => {
   it('navigates to user profile when view button is clicked', async () => {
     const user = userEvent.setup();
     mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    renderTable();
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
     });
     const viewButtons = screen.getAllByRole('button', { name: /view/i });
     await user.click(viewButtons[0]);
     expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
   });
 
-  it('renders safely when role assignments data is undefined', () => {
-    mockApiResponses({ ...mockedAllRoleAssignments, data: undefined });
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  it('keeps the view action enabled while any assignment is viewable', async () => {
+    // John Doe's course is disabled but his library roles are not; Jane Admin is library-only.
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: (scope: string) => scope !== 'course-v1:OpenedX+DemoX+DemoCourse',
+      isLoading: false,
+    });
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      expect(viewButtons[0]).not.toBeDisabled();
+      expect(viewButtons[1]).not.toBeDisabled();
+    });
+  });
+
+  it('disables the view action when every assignment sits in a disabled course', async () => {
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => false,
+      isLoading: false,
+    });
+    mockApiResponses({
+      ...mockedTeamMembers,
+      data: {
+        ...mockedTeamMembers.data!,
+        results: [{
+          username: 'johndoe',
+          fullName: 'John Doe',
+          email: 'johndoe@example.com',
+          assignmentCount: 1,
+          assignments: [courseAssignment],
+        }],
+        count: 1,
+      },
+    });
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /view/i })).toBeDisabled();
+    });
+  });
+
+  it('reports the count in users', async () => {
+    mockApiResponses();
+    const { container } = renderTable();
+    await waitFor(() => {
+      expect(screen.getByText('johndoe')).toBeInTheDocument();
+    });
+    // Once on the control bar, once in the footer.
+    expect(within(container).getAllByText('Showing 2 users of 2.')).toHaveLength(2);
+  });
+
+  it('renders safely when team members data is undefined', () => {
+    mockApiResponses({ ...mockedTeamMembers, data: undefined });
+    renderTable();
+    expect(screen.queryByText('johndoe')).not.toBeInTheDocument();
   });
 
   it('filters to library roles only when course view is not allowed', async () => {
@@ -238,31 +485,30 @@ describe('TeamMembersTable', () => {
       isLoading: false,
     });
     mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    renderTable();
     await waitFor(() => {
-      expect(useAllRoleAssignments).toHaveBeenCalledWith(
+      expect(useTeamMembersAssignments).toHaveBeenCalledWith(
         expect.objectContaining({ roles: LIBRARY_ROLE_KEYS }),
+        MAX_INLINE_ASSIGNMENTS,
       );
     });
   });
 
-  it('disables the view action for course assignments in disabled scopes', async () => {
-    mockUseCourseAuthoringFlag.mockReturnValue({
-      isCourseAuthoringEnabled: true,
-      isCourseEnabled: (scope: string) => scope !== 'course-v1:OpenedX+DemoX+DemoCourse',
-      isLoading: false,
+  it('announces a failure once, not once per effect pass', () => {
+    const serverError = Object.assign(new Error('Boom'), {
+      customAttributes: { httpErrorStatus: 500 },
     });
-    mockApiResponses();
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
-    await waitFor(() => {
-      const viewButtons = screen.getAllByRole('button', { name: /view/i });
-      expect(viewButtons[0]).toBeDisabled();
-      expect(viewButtons[1]).not.toBeDisabled();
+    mockApiResponses({
+      ...mockedTeamMembers, isLoading: false, error: serverError, data: undefined,
     });
+
+    renderTable();
+
+    expect(screen.getAllByText(/We're experiencing technical difficulties./)).toHaveLength(1);
   });
 
   it('handles empty data gracefully', async () => {
-    const allAsignmentsResponse = {
+    mockApiResponses({
       data: {
         results: [],
         count: 0,
@@ -272,11 +518,10 @@ describe('TeamMembersTable', () => {
       error: null,
       isLoading: false,
       refetch: jest.fn(),
-    };
-    mockApiResponses(allAsignmentsResponse);
-    renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    });
+    renderTable();
     await waitFor(() => {
-      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+      expect(screen.queryByText('johndoe')).not.toBeInTheDocument();
     });
   });
 });

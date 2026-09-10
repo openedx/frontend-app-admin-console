@@ -28,20 +28,40 @@ export const getPlatformAggregateScopeKey = (contextType: ContextType): string =
   return scope;
 };
 
+/** The `org` an assignment carries when it spans every organization. */
+export const ALL_ORGS_KEY = '*';
+
+/**
+ * The kind of resource a scope points at, read from the scope key itself rather than from
+ * the role that grants it, so it does not depend on role naming staying conventional.
+ */
+export const getScopeContextType = (scope: string): ContextType => (
+  scope.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE
+);
+
+/**
+ * Tells whether a scope is one of the wildcard scopes, and which level it aggregates.
+ *
+ * Returns `null` for a scope pointing at a single course or library. The org slug is
+ * needed to recognize an org-level aggregate, since its key embeds the slug.
+ */
+export const getAggregateScopeType = (scope: string, org?: string | null): 'platform' | 'org' | null => {
+  const contextType = getScopeContextType(scope);
+  if (scope === getPlatformAggregateScopeKey(contextType)) { return 'platform'; }
+  if (org && scope === getOrgAggregateScopeKey(contextType, org)) { return 'org'; }
+  return null;
+};
+
 export const DEFAULT_TOAST_DELAY = 5000;
 export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
-export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
-  username: 'skeleton',
-  name: '',
-  email: '',
-  roles: [],
-}));
 
 export const ROUTES = {
   HOME_PATH: '/authz',
   AUDIT_USER_PATH: '/user/:username',
   ASSIGN_ROLE_WIZARD_PATH: '/assign-role',
 };
+
+export const buildUserPath = (username: string) => `${ROUTES.HOME_PATH}${ROUTES.AUDIT_USER_PATH.replace(':username', encodeURIComponent(username))}`;
 
 export const buildWizardPath = (options?: { users?: string; from?: string }) => {
   const base = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
@@ -81,6 +101,12 @@ export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
 export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
+
+/**
+ * Cap on the assignments nested under each user in the team members table, sent as the
+ * `assignments_limit` query param. The sub-table footer counts what actually came back.
+ */
+export const MAX_INLINE_ASSIGNMENTS = 3;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
