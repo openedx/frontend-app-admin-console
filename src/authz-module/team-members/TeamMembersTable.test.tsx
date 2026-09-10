@@ -364,6 +364,41 @@ describe('TeamMembersTable', () => {
     expect(screen.queryByRole('link', { name: /View all roles/ })).not.toBeInTheDocument();
   });
 
+  it('keeps only one breakdown open, collapsing the previous row', async () => {
+    const user = userEvent.setup();
+    // Both users need something to reveal, so either row can be expanded.
+    mockApiResponses({
+      ...mockedTeamMembers,
+      data: {
+        ...mockedTeamMembers.data!,
+        results: mockedTeamMembers.data!.results.map((member) => ({
+          ...member,
+          assignmentCount: 5,
+          assignments: [courseAssignment],
+        })),
+      },
+    });
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getAllByText('+4 more roles')).toHaveLength(2);
+    });
+
+    await user.click(screen.getAllByText('+4 more roles')[0]);
+    await waitFor(() => {
+      expect(screen.getAllByText('Hide roles')).toHaveLength(1);
+    });
+
+    await user.click(screen.getByText('+4 more roles'));
+
+    // The second row took over: exactly one breakdown is open, and it is not the first.
+    await waitFor(() => {
+      expect(screen.getAllByText('Hide roles')).toHaveLength(1);
+    });
+    const toggles = screen.getAllByText(/Hide roles|more roles?$/);
+    expect(toggles[0]).toHaveTextContent('+4 more roles');
+    expect(toggles[1]).toHaveTextContent('Hide roles');
+  });
+
   it('collapses expanded rows when a filter is applied', async () => {
     const user = userEvent.setup();
     mockApiResponses();

@@ -1,7 +1,10 @@
 import { screen } from '@testing-library/react';
 import { initializeMockApp } from '@edx/frontend-platform/testing';
 import { renderWrapper } from '@src/setupTest';
-import { getCellHeader, getScopeManageAction, getScopeManageActionPermission } from './utils';
+import {
+  getCellHeader, getScopeManageAction, getScopeManageActionPermission, getScopeResourceIcon,
+} from './utils';
+import { RESOURCE_ICONS } from './components/constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
 const renderCellHeader = (columnId: string, columnTitle: string, filtersApplied: string[]) => {
@@ -85,6 +88,24 @@ describe('utils', () => {
 
       const container = screen.getByText('Role').closest('span');
       expect(container).toHaveClass('d-flex', 'flex-row', 'align-items-center');
+    });
+  });
+
+  describe('getScopeResourceIcon', () => {
+    it('picks the library icon for a library scope', () => {
+      expect(getScopeResourceIcon('lib:MathDept:ALGEBRA')).toBe(RESOURCE_ICONS.LIBRARY);
+    });
+
+    it('picks the library icon for an aggregate library scope', () => {
+      expect(getScopeResourceIcon('lib:*')).toBe(RESOURCE_ICONS.LIBRARY);
+    });
+
+    it('picks the course icon for a course scope', () => {
+      expect(getScopeResourceIcon('course-v1:MathDept+ALG101+2026')).toBe(RESOURCE_ICONS.COURSE);
+    });
+
+    it('picks the course icon for an aggregate course scope', () => {
+      expect(getScopeResourceIcon('course-v1:*')).toBe(RESOURCE_ICONS.COURSE);
     });
   });
 
