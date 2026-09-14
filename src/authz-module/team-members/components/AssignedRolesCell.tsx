@@ -2,12 +2,12 @@ import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Icon } from '@openedx/paragon';
 import { Business, Person } from '@openedx/paragon/icons';
 import {
-  ALL_ORGS_KEY, getAggregateScopeType, getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
+  ALL_ORGS_KEY, getAggregateScopeType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
+import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
 import type { TeamMember } from '@src/types';
-import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from '../messages';
 
 interface AssignedRolesCellProps {
@@ -43,10 +43,22 @@ const AssignedRolesCell = ({ row }: AssignedRolesCellProps) => {
   } = assignment;
   // An aggregate scope covers every course/library across the platform or within one org,
   // so it names no single resource and the API sends an empty display name for it.
+  /*
+   * A wildcard scope names no single resource, so the row summarises it by reach alone:
+   * the organization it covers, or the whole platform. The kind of resource ("All
+   * courses in this organization") is left to the breakdown, and the organization line
+   * is dropped since the scope line already says it.
+   */
   const aggregateType = getAggregateScopeType(scope, org);
-  const scopeText = aggregateType
-    ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
-    : scopeDisplayName || scope;
+  let scopeIcon = getScopeResourceIcon(scope);
+  let scopeText = scopeDisplayName || scope;
+  if (aggregateType === 'platform') {
+    scopeIcon = RESOURCE_ICONS.GLOBAL;
+    scopeText = formatMessage(componentMessages['authz.user.table.org.all.organizations.label']);
+  } else if (aggregateType === 'org') {
+    scopeIcon = Business;
+    scopeText = org;
+  }
 
   const orgText = org === ALL_ORGS_KEY
     ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
@@ -61,13 +73,15 @@ const AssignedRolesCell = ({ row }: AssignedRolesCellProps) => {
           scope: (
             <div className="authz-scope-cell ml-3">
               <span className="d-flex align-items-center">
-                <Icon src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+                <Icon src={scopeIcon} className="mr-2 flex-shrink-0 text-primary" size="xs" />
                 <span className="text-truncate text-gray-700 authz-scope-cell__name" title={scopeText}>{scopeText}</span>
               </span>
-              <span className="d-flex align-items-center small text-gray-500 authz-scope-cell__org">
-                <Icon src={Business} className="mr-2 flex-shrink-0" size="xs" />
-                <span className="text-truncate" title={orgText}>{orgText}</span>
-              </span>
+              {!aggregateType && (
+                <span className="d-flex align-items-center small text-gray-500 authz-scope-cell__org ml-4">
+                  <Icon src={Business} className="mr-2 flex-shrink-0" size="xs" />
+                  <span className="text-truncate" title={orgText}>{orgText}</span>
+                </span>
+              )}
             </div>
           ),
         }}

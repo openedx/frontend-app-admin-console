@@ -10,6 +10,7 @@ import {
 } from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
+import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from '../messages';
@@ -31,7 +32,7 @@ const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { scope, scopeDisplayName, org } = assignmentRow.original;
   const aggregateType = getAggregateScopeType(scope, org);
   const scopeText = aggregateType
-    ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
     : scopeDisplayName || scope;
 
   return (
@@ -42,18 +43,19 @@ const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   );
 };
 
-// Mirrors ScopeNameCell's icon treatment so all three columns read alike. A platform-wide
-// aggregate carries no single org, so it shows the all-organizations label instead.
+// Mirrors ScopeNameCell's icon treatment so all three columns read alike. A wildcard org
+// reaches past any one organization, so it gets the same globe and label as the row above.
 const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
   const { org } = assignmentRow.original;
-  const orgText = org === ALL_ORGS_KEY
+  const isAllOrgs = org === ALL_ORGS_KEY;
+  const orgText = isAllOrgs
     ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
     : org;
 
   return (
     <span className="d-flex align-items-center">
-      <Icon src={Business} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : Business} className="mr-2 flex-shrink-0 text-primary" size="xs" />
       <span className="text-truncate" title={orgText}>{orgText}</span>
     </span>
   );

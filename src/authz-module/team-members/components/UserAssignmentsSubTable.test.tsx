@@ -71,11 +71,12 @@ describe('UserAssignmentsSubTable', () => {
     ])}
     />);
 
-    expect(screen.getByText('All courses on the platform')).toBeInTheDocument();
-    expect(screen.getByText('All libraries on the platform')).toBeInTheDocument();
-    expect(screen.getByText('All courses in this organization')).toBeInTheDocument();
-    expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
-    expect(screen.getAllByText('All Organizations')).toHaveLength(2);
+    // The scope column names only the kind of resource...
+    expect(screen.getAllByText('All courses')).toHaveLength(2);
+    expect(screen.getAllByText('All libraries')).toHaveLength(2);
+    // ...and the organization column says how far it reaches.
+    expect(screen.getAllByText('All platform')).toHaveLength(2);
+    expect(screen.getAllByText('MathDept')).toHaveLength(2);
     expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
   });
 
