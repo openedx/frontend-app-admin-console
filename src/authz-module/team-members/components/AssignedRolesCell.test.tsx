@@ -53,43 +53,48 @@ describe('AssignedRolesCell', () => {
     expect(screen.getByText('course-v1:OpenedX+DemoX+DemoCourse')).toBeInTheDocument();
   });
 
-  it('names a platform-wide course scope instead of showing its wildcard key', () => {
+  it('summarises a platform-wide course scope as the whole platform', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([{
       ...courseAssignment, role: 'course_admin', org: '*', scope: 'course-v1:*', scopeDisplayName: '',
     }])}
     />);
 
-    expect(screen.getByText('All courses on the platform')).toBeInTheDocument();
-    expect(screen.getByText('All Organizations')).toBeInTheDocument();
+    // Named once, on the scope line: the organization line is dropped rather than repeating it.
+    expect(screen.getAllByText('All platform')).toHaveLength(1);
+    // The resource kind belongs to the breakdown.
+    expect(screen.queryByText('All courses')).not.toBeInTheDocument();
     expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
   });
 
-  it('names a platform-wide library scope', () => {
+  it('summarises a platform-wide library scope the same way', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([{
       ...courseAssignment, role: 'library_admin', org: '*', scope: 'lib:*', scopeDisplayName: '',
     }])}
     />);
 
-    expect(screen.getByText('All libraries on the platform')).toBeInTheDocument();
+    expect(screen.getByText('All platform')).toBeInTheDocument();
+    expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
   });
 
-  it('names an organization-wide course scope, keeping the organization on its own line', () => {
+  it('summarises an organization-wide scope as just the organization', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([{
       ...courseAssignment, role: 'course_admin', org: 'MathDept', scope: 'course-v1:MathDept+*', scopeDisplayName: '',
     }])}
     />);
 
-    expect(screen.getByText('All courses in this organization')).toBeInTheDocument();
-    expect(screen.getByText('MathDept')).toBeInTheDocument();
+    // Named once, on the scope line, rather than repeated on an organization line below.
+    expect(screen.getAllByText('MathDept')).toHaveLength(1);
+    expect(screen.queryByText('All courses in this organization')).not.toBeInTheDocument();
   });
 
-  it('names an organization-wide library scope', () => {
+  it('summarises an organization-wide library scope the same way', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([{
       ...courseAssignment, role: 'library_admin', org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '',
     }])}
     />);
 
-    expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
+    expect(screen.getAllByText('MathDept')).toHaveLength(1);
+    expect(screen.queryByText('All libraries in this organization')).not.toBeInTheDocument();
   });
 
   it('shows the raw role key when the API sends a role the UI has no label for', () => {

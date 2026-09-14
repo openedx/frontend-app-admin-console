@@ -92,7 +92,7 @@ describe('TableCells Components', () => {
   });
 
   describe('OrgCell', () => {
-    it('displays "All Organizations" for Django superuser role', () => {
+    it('displays "All platform" for Django superuser role', () => {
       const props = {
         value: 'Test Org',
         row: {
@@ -106,11 +106,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(<OrgCell {...props} />);
 
-      expect(screen.getByText('All Organizations')).toBeInTheDocument();
+      expect(screen.getByText('All platform')).toBeInTheDocument();
       expect(screen.queryByText('Test Org')).not.toBeInTheDocument();
     });
 
-    it('displays "All Organizations" for Django global staff role', () => {
+    it('displays "All platform" for Django global staff role', () => {
       const props = {
         value: 'Test Org',
         row: {
@@ -124,8 +124,28 @@ describe('TableCells Components', () => {
 
       renderWrapper(<OrgCell {...props} />);
 
-      expect(screen.getByText('All Organizations')).toBeInTheDocument();
+      expect(screen.getByText('All platform')).toBeInTheDocument();
       expect(screen.queryByText('Test Org')).not.toBeInTheDocument();
+    });
+
+    const orgProps = (original: { role: string; scope: string; org: string }) => ({
+      value: original.org,
+      row: { id: '0', original: { permissionCount: 1, ...original } },
+      column: { id: 'org' },
+    });
+
+    it('displays "All platform" for a wildcard organization', () => {
+      renderWrapper(<OrgCell {...orgProps({ role: 'course_admin', scope: 'course-v1:*', org: '*' })} />);
+
+      expect(screen.getByText('All platform')).toBeInTheDocument();
+      expect(screen.queryByText('*')).not.toBeInTheDocument();
+    });
+
+    it('shows the organization for an organization-wide scope', () => {
+      renderWrapper(<OrgCell {...orgProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'MathDept' })} />);
+
+      expect(screen.getByText('MathDept')).toBeInTheDocument();
+      expect(screen.queryByText('All platform')).not.toBeInTheDocument();
     });
 
     it('displays the actual org value for non-Django roles', () => {
@@ -143,7 +163,7 @@ describe('TableCells Components', () => {
       renderWrapper(<OrgCell {...props} />);
 
       expect(screen.getByText('Test Organization')).toBeInTheDocument();
-      expect(screen.queryByText('All Organizations')).not.toBeInTheDocument();
+      expect(screen.queryByText('All platform')).not.toBeInTheDocument();
     });
   });
 
@@ -195,26 +215,26 @@ describe('TableCells Components', () => {
     it('names a platform-wide course scope instead of showing its wildcard key', () => {
       renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:*', org: '*' })} />);
 
-      expect(screen.getByText('All courses on the platform')).toBeInTheDocument();
+      expect(screen.getByText('All courses')).toBeInTheDocument();
       expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
     });
 
     it('names a platform-wide library scope', () => {
       renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:*', org: '*' })} />);
 
-      expect(screen.getByText('All libraries on the platform')).toBeInTheDocument();
+      expect(screen.getByText('All libraries')).toBeInTheDocument();
     });
 
     it('names an organization-wide course scope', () => {
       renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'MathDept' })} />);
 
-      expect(screen.getByText('All courses in this organization')).toBeInTheDocument();
+      expect(screen.getByText('All courses')).toBeInTheDocument();
     });
 
     it('names an organization-wide library scope', () => {
       renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:MathDept:*', org: 'MathDept' })} />);
 
-      expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
+      expect(screen.getByText('All libraries')).toBeInTheDocument();
     });
 
     it('shows the scope key when a wildcard belongs to a different organization', () => {

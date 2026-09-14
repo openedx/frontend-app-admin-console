@@ -93,7 +93,7 @@ const ScopeCell = ({ row }: CellProps) => {
     const aggregateType = getAggregateScopeType(scope, org);
     return {
       scopeText: aggregateType
-        ? formatMessage(AGGREGATE_SCOPE_LABELS[aggregateType][getScopeContextType(scope)])
+        ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
         : scope,
       iconSrc: getScopeResourceIcon(scope),
     };

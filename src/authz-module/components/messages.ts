@@ -58,8 +58,8 @@ const messages = defineMessages({
   },
   'authz.user.table.org.all.organizations.label': {
     id: 'authz.user.table.org.all.organizations.label',
-    defaultMessage: 'All Organizations',
-    description: 'Label for the "All Organizations" message on the user assignments table when a user has a django managed role assigned.',
+    defaultMessage: 'All platform',
+    description: 'Shown in place of an organization for a role that is not limited to one organization: a wildcard org, or a Django-managed role.',
   },
   'authz.user.table.scope.global.label': {
     id: 'authz.user.table.scope.global.label',
