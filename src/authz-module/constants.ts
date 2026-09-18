@@ -103,11 +103,5 @@ export const DJANGO_MANAGED_ROLES = ['django.superuser', 'django.globalstaff'];
 
 export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
-/**
- * Cap on the assignments nested under each user in the team members table, sent as the
- * `assignments_limit` query param. The sub-table footer counts what actually came back.
- */
-export const MAX_INLINE_ASSIGNMENTS = 3;
-
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];

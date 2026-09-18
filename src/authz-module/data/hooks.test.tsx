@@ -543,7 +543,7 @@ describe('useTeamMembersAssignments', () => {
 
   it('fetches and returns team members with their nested assignments', async () => {
     const { result } = renderHook(
-      () => useTeamMembersAssignments(mockQuerySettings, 3),
+      () => useTeamMembersAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {
@@ -564,7 +564,7 @@ describe('useTeamMembersAssignments', () => {
       })),
     });
     const { result } = renderHook(
-      () => useTeamMembersAssignments(mockQuerySettings, 3),
+      () => useTeamMembersAssignments(mockQuerySettings),
       { wrapper: createWrapper() },
     );
     await waitFor(() => {

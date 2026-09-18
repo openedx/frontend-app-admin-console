@@ -127,8 +127,9 @@ export interface TeamMemberAssignment {
 
 /**
  * A team member as returned by the user-grouped assignments endpoint: one entry per
- * user, carrying up to `assignments_limit` of their assignments. `assignmentCount` is
- * the user's absolute total, so it can exceed `assignments.length`.
+ * user, carrying the first few of their assignments. `assignmentCount` counts every
+ * assignment behind that slice, so it can exceed `assignments.length`. Both are scoped
+ * to the active role, org and scope filters and to what the caller may view.
  */
 export interface TeamMember {
   username: string;

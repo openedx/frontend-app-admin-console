@@ -18,7 +18,7 @@ import { getCellHeader } from '@src/authz-module/utils';
 
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import type { GetTeamMembersAssignmentsResponse } from '@src/authz-module/data/api';
-import { MAX_INLINE_ASSIGNMENTS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import messages from './messages';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import AssignedRolesCell from './components/AssignedRolesCell';
@@ -79,7 +79,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
     isLoading: isLoadingTeamMembers,
     error,
     refetch,
-  } = useTeamMembersAssignments(effectiveQuerySettings, MAX_INLINE_ASSIGNMENTS);
+  } = useTeamMembersAssignments(effectiveQuerySettings);
 
   const initialFilters = presetScope ? [{ id: 'scope', value: [presetScope] }] : [];
 
