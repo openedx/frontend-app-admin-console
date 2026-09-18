@@ -13,7 +13,7 @@ import {
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
-  teamMembersAssignments: (querySettings?: QuerySettings, assignmentsLimit?: number) => [...authzQueryKeys.all, 'teamMembersAssignments', querySettings, assignmentsLimit] as const,
+  teamMembersAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'teamMembersAssignments', querySettings] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (params?: Omit<GetScopesParams, 'page'>) => [...authzQueryKeys.all, 'scopes', params] as const,
   userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
@@ -85,26 +85,23 @@ export const useRevokeUserRoles = () => {
 
 /**
  * React Query hook to fetch team members grouped by user, with support for
- * filtering, sorting, and pagination. Each result is one user carrying up to
- * `assignmentsLimit` of their role assignments plus their absolute total.
+ * filtering, sorting, and pagination. Each result is one user carrying the first few of
+ * their role assignments plus how many there are; see `getTeamMembersAssignments` for
+ * how filters narrow both.
  *
  * @param querySettings - Parameters for filtering by roles, scopes,
  * organizations, search term, sorting, and pagination.
- * @param assignmentsLimit - Maximum assignments to nest under each user.
  *
  * @example
- * const { data: teamMembers } = useTeamMembersAssignments({ roles: 'editor', pageSize: 20 }, 3);
+ * const { data: teamMembers } = useTeamMembersAssignments({ roles: 'editor', pageSize: 20 });
  */
-export const useTeamMembersAssignments = (querySettings: QuerySettings, assignmentsLimit: number) => {
-  const result = useQuery<GetTeamMembersAssignmentsResponse, Error>({
-    queryKey: authzQueryKeys.teamMembersAssignments(querySettings, assignmentsLimit),
-    queryFn: () => getTeamMembersAssignments(querySettings, assignmentsLimit),
+export const useTeamMembersAssignments = (querySettings: QuerySettings) => (
+  useQuery<GetTeamMembersAssignmentsResponse, Error>({
+    queryKey: authzQueryKeys.teamMembersAssignments(querySettings),
+    queryFn: () => getTeamMembersAssignments(querySettings),
     staleTime: 1000 * 60 * 30, // refetch after 30 minutes
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-  return result;
-};
+  })
+);
 
 /**
  * React Query hook to fetch a paginated, searchable list of organizations.

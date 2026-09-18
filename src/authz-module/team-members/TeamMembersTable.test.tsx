@@ -6,7 +6,7 @@ import type { GetTeamMembersAssignmentsResponse } from '@src/authz-module/data/a
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
-import { AUTHZ_HOME_PATH, MAX_INLINE_ASSIGNMENTS } from '@src/authz-module/constants';
+import { AUTHZ_HOME_PATH } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
 
@@ -202,17 +202,6 @@ describe('TeamMembersTable', () => {
     });
   });
 
-  it('requests the nested assignments capped at MAX_INLINE_ASSIGNMENTS', async () => {
-    mockApiResponses();
-    renderTable();
-    await waitFor(() => {
-      expect(useTeamMembersAssignments).toHaveBeenCalledWith(
-        expect.any(Object),
-        MAX_INLINE_ASSIGNMENTS,
-      );
-    });
-  });
-
   it('shows loading state initially', () => {
     mockApiResponses({ ...mockedTeamMembers, isLoading: true });
     renderTable();
@@ -314,7 +303,7 @@ describe('TeamMembersTable', () => {
     expect(screen.getByText('Library User')).toBeInTheDocument();
   });
 
-  it('reports the absolute role total in the breakdown footer', async () => {
+  it('reports how many roles the listed rows were taken from in the breakdown footer', async () => {
     const user = userEvent.setup();
     mockApiResponses();
     renderTable();
@@ -485,7 +474,6 @@ describe('TeamMembersTable', () => {
     await waitFor(() => {
       expect(useTeamMembersAssignments).toHaveBeenCalledWith(
         expect.objectContaining({ roles: LIBRARY_ROLE_KEYS }),
-        MAX_INLINE_ASSIGNMENTS,
       );
     });
   });

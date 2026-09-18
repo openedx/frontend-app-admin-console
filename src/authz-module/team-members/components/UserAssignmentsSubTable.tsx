@@ -65,9 +65,9 @@ const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
  * Role breakdown revealed when a team member row is expanded.
  *
  * Lists the assignments the API returned, in order, so the first entry matches the badge
- * still shown in the collapsed row above. The footer total is the user's absolute role
- * count, which is unaffected by any active filter and may exceed the rows listed here —
- * `View all roles` leads to the audit page when it does.
+ * still shown in the collapsed row above. The footer total is `assignmentCount`, which
+ * may exceed the rows listed here — `View all roles` leads to the audit page when it
+ * does.
  */
 const UserAssignmentsSubTable = ({ row }: UserAssignmentsSubTableProps) => {
   const { formatMessage } = useIntl();
