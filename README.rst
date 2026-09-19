@@ -4,7 +4,7 @@ frontend-app-admin-console
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
 .. |license-badge| image:: https://img.shields.io/github/license/openedx/frontend-app-admin-console.svg
-    :target: https://github.com/openedx/frontend-app-admin-console/blob/main/LICENSE
+    :target: https://github.com/openedx/frontend-app-admin-console/blob/master/LICENSE
     :alt: License
 
 .. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
@@ -13,22 +13,72 @@ frontend-app-admin-console
     :target: https://github.com/openedx/frontend-app-admin-console/actions/workflows/ci.yml
     :alt: Continuous Integration
 
-.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-app-admin-console/coverage.svg?branch=main
-    :target: https://codecov.io/github/openedx/frontend-app-admin-console?branch=main
+.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-app-admin-console/coverage.svg?branch=master
+    :target: https://codecov.io/github/openedx/frontend-app-admin-console?branch=master
     :alt: Codecov
 
 Purpose
 =======
 
-The console aims to centralize platform-level settings and administrative tasks—including authorization (AuthZ) and, 
-eventually, other key configurations—into a single, extensible UI. It reduces platform fragmentation and improves 
+The console aims to centralize platform-level settings and administrative tasks—including authorization (AuthZ) and,
+eventually, other key configurations—into a single, extensible UI. It reduces platform fragmentation and improves
 administrator efficiency.
+
+Branches and Releases
+=====================
+
+This app is published to NPM by ``semantic-release``, and its branches
+follow `OEP-10 ADR 0002`_:
+
+``master``
+  Unstable.  Every merge publishes a prerelease on the ``alpha``
+  dist-tag.  Breaking changes land here with no DEPR process and no
+  warning, so it is not supported in production.  All changes, including
+  bug fixes, should target this branch first.
+
+``stable``
+  Carries the newest stable major and owns the ``latest`` dist-tag.
+  Changes arrive here as backports from ``master``, and no breaking
+  change lands after publication.
+
+``n.x`` and ``n.m.x``
+  Maintenance branches for majors and minors that ``stable`` has moved
+  past.  Each owns the dist-tag matching its own name, so consumers
+  select a maintained line by semver range, e.g. ``"1.x"``.
+
+``stable`` has not been cut yet: until this app is first ready for
+production use, ``master`` and its alphas are all there is.  Both
+``.releaserc`` and the ``Release CI`` workflow already know the whole
+layout, including the maintenance branch patterns, so a new line starts
+publishing as soon as it is pushed.
+
+This repository is no longer branched or tagged for Open edX releases in
+its own right.  It participates by published version instead, per
+`OEP-10 ADR 0003`_.
+
+The micro-frontend this app replaces goes on living on `legacy-mfe`_,
+which is where any further ``release/RELEASENAME`` branches for it are
+cut, for as long as a supported release still ships it.  Ulmo and
+Verawood both do.
+
+.. _OEP-10 ADR 0002: https://docs.openedx.org/projects/openedx-proposals/en/latest/processes/oep-0010/decisions/0002-frontend-stable-branches.html
+.. _OEP-10 ADR 0003: https://docs.openedx.org/projects/openedx-proposals/en/latest/processes/oep-0010/decisions/0003-frontend-release-strategy.html
+.. _legacy-mfe: https://github.com/openedx/frontend-app-admin-console/tree/legacy-mfe
 
 Getting Started
 ===============
 
-It is recommended to use it in a Tutor installation, for adding the frontend app follow the instruction in
-`Tutor MFE plugin <https://github.com/overhangio/tutor-mfe?tab=readme-ov-file#mfe-management>`_.
+A running Open edX instance is needed to serve this app's backend APIs.
+`Tutor`_ in development mode is the usual choice, and
+``site.config.dev.tsx`` already points at its default hostnames.
+
+Unlike a micro-frontend, this app is neither built nor served by
+``tutor-mfe``.  Install dependencies with ``npm ci`` (using the Node
+version in ``.nvmrc``), then start the dev server on the host with
+``npm run dev``; it serves the app at
+`http://apps.local.openedx.io:2025/admin-console <http://apps.local.openedx.io:2025/admin-console>`_.
+
+.. _Tutor: https://github.com/overhangio/tutor
 
 Configuration
 -------------
@@ -61,7 +111,7 @@ channel`_.
 For anything non-trivial, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/openedx/frontend-app-[PLACEHOLDER]/issues
+https://github.com/openedx/frontend-app-admin-console/issues
 
 For more information about these options, see the `Getting Help`_ page.
 
@@ -106,7 +156,7 @@ The assigned maintainers for this component and other project details may be
 found in `Backstage`_. Backstage pulls this data from the ``catalog-info.yaml``
 file in this repo.
 
-.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-[PLACEHOLDER]
+.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-admin-console
 
 Reporting Security Issues
 =========================
