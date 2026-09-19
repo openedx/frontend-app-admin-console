@@ -1,29 +1,20 @@
 import {
   render, screen, waitFor, act,
 } from '@testing-library/react';
-import { AppContext } from '@edx/frontend-platform/react';
+import { IntlProvider, SiteContext } from '@openedx/frontend-base';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { mockHttpClient, mockAppContext } from '@src/setupTest';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { mockHttpClient, mockAppContext } from '@src/testUtils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import AuditUserPage from './index';
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
   configure: jest.fn(),
-}));
-
-jest.mock('@edx/frontend-platform/logging', () => ({
-  logError: jest.fn(),
-}));
-
-// Mock StudioHeader to avoid prop validation errors in tests
-jest.mock('@edx/frontend-component-header', () => ({
-  StudioHeader: ({ children, ...props }: any) => <div data-testid="mocked-studio-header" {...props}>{children}</div>,
 }));
 
 // Mock data hooks
@@ -95,7 +86,7 @@ const renderWithRouter = (route = '/audit/johndoe') => {
   });
 
   return render(
-    <AppContext.Provider value={mockAppContext}>
+    <SiteContext.Provider value={mockAppContext}>
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">
           <ToastManagerProvider>
@@ -108,7 +99,7 @@ const renderWithRouter = (route = '/audit/johndoe') => {
           </ToastManagerProvider>
         </IntlProvider>
       </QueryClientProvider>
-    </AppContext.Provider>,
+    </SiteContext.Provider>,
   );
 };
 
@@ -121,11 +112,6 @@ describe('AuditUserPage', () => {
       // Simulate successful deletion by default
       onSuccess({ errors: [], completed: ['role1'] });
     });
-  });
-
-  beforeAll(() => {
-  // @ts-ignore
-    global.logError = jest.fn();
   });
 
   it('renders user info and table when data is loaded', async () => {

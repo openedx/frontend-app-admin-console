@@ -1,13 +1,12 @@
 import { useMemo } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Form, Stack, OverlayTrigger,
   Tooltip,
 } from '@openedx/paragon';
-import { getConfig } from '@edx/frontend-platform';
+import { getSiteConfig, useIntl } from '@openedx/frontend-base';
 import { RoleMetadata } from '@src/types';
 import HighlightedUsersInput from './HighlightedUsersInput';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 interface SelectUsersAndRoleStepProps {
   users: string;
@@ -20,7 +19,7 @@ interface SelectUsersAndRoleStepProps {
 }
 
 const CONTEXT_ORDER = ['library', 'course'];
-const ADMIN_URL = `${getConfig().LMS_BASE_URL}/admin`;
+const ADMIN_URL = `${getSiteConfig().lmsBaseUrl}/admin`;
 
 const SelectUsersAndRoleStep = ({
   users,
@@ -40,7 +39,7 @@ const SelectUsersAndRoleStep = ({
 
   const rolesByContext = useMemo(() => roles.reduce<Record<string, RoleMetadata[]>>((acc, role) => {
     const context = role.contextType;
-    if (!acc[context]) { acc[context] = []; }
+    if (!acc[context]) acc[context] = [];
     acc[context].push(role);
     return acc;
   }, {}), [roles]);

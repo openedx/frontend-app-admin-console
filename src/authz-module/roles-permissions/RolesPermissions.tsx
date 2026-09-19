@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   Alert,
   Button,
@@ -17,8 +17,8 @@ import {
   libraryPermissions,
   libraryResourceTypes,
 } from './library/constants';
-import AnchorButton from '../components/AnchorButton';
-import PermissionTable from '../components/PermissionTable';
+import AnchorButton from '@src/authz-module/components/AnchorButton';
+import PermissionTable from '@src/authz-module/components/PermissionTable';
 
 import { buildPermissionMatrixByResource } from './utils';
 

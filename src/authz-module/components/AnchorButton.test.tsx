@@ -1,4 +1,4 @@
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AnchorButton from './AnchorButton';

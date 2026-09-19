@@ -1,11 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
-
-jest.mock('@edx/frontend-platform', () => ({
-  getConfig: () => ({ LMS_BASE_URL: 'http://localhost:8000' }),
-}));
 
 const libraryRole = {
   role: 'library_admin',

@@ -1,4 +1,4 @@
-import { createIntl } from '@edx/frontend-platform/i18n';
+import { createIntl } from '@openedx/frontend-base';
 import type { Role } from '@src/types';
 import { buildPermissionMatrixByResource } from './utils';
 

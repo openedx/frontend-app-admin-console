@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { useAllRoleAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
-import { renderWithAllProviders } from '@src/setupTest';
+import { renderWithAllProviders } from '@src/testUtils';
 import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import AuthzHome from './index';

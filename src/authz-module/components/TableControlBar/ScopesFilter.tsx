@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { LocationOn } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
@@ -7,8 +7,8 @@ import { useScopes } from '@src/authz-module/data/hooks';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
-import { RESOURCE_ICONS } from '../constants';
-import messages from '../messages';
+import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
+import messages from '@src/authz-module/components/messages';
 
 type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
 

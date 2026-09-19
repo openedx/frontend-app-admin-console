@@ -1,31 +1,15 @@
-import { act, ReactNode } from 'react';
+import { act } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { mockHttpClient } from '@src/setupTest';
+import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
+import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { useValidateUserPermissions, useUserAccount, useValidateUserPermissionsNonSuspense } from './hooks';
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
 }));
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-
-  return wrapper;
-};
+const createWrapper = createQueryClientWrapper;
 
 const permissions = [
   {

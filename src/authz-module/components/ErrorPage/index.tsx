@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FallbackProps } from 'react-error-boundary';
-import { getConfig } from '@edx/frontend-platform';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { getUrlByRouteRole, useIntl } from '@openedx/frontend-base';
 import {
   Button, Container, Hyperlink, Row,
 } from '@openedx/paragon';
@@ -70,23 +69,23 @@ const ErrorPage = ({ error, resetErrorBoundary }: FallbackProps) => {
       <p>{intl.formatMessage(description)}</p>
       <Row>
         {showReloadButton && (
-        <Button
-          className="m-2"
-          disabled={reloading}
-          onClick={handleReload}
-        >
-          {intl.formatMessage(messages['error.page.action.reload'])}
-        </Button>
+          <Button
+            className="m-2"
+            disabled={reloading}
+            onClick={handleReload}
+          >
+            {intl.formatMessage(messages['error.page.action.reload'])}
+          </Button>
         )}
         {showBackButton && (
-        <Button
-          as={Hyperlink}
-          destination={`${getConfig().COURSE_AUTHORING_MICROFRONTEND_URL}`}
-          className="m-2"
-          variant={showReloadButton ? 'outline-primary' : 'primary'}
-        >
-          {intl.formatMessage(messages['error.page.action.back'])}
-        </Button>
+          <Button
+            as={Hyperlink}
+            destination={getUrlByRouteRole('org.openedx.frontend.role.courseAuthoring') ?? undefined}
+            className="m-2"
+            variant={showReloadButton ? 'outline-primary' : 'primary'}
+          >
+            {intl.formatMessage(messages['error.page.action.back'])}
+          </Button>
         )}
 
       </Row>

@@ -1,32 +1,54 @@
 {
   "name": "@openedx/frontend-app-admin-console",
-  "version": "0.1.0",
+  "version": "0.0.0-dev",
   "description": "Frontend Admin Console",
+  "packageManager": "npm@11.12.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openedx/frontend-app-admin-console.git"
   },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "/dist"
+  ],
+  "workspaces": [
+    "packages/*"
+  ],
   "browserslist": [
     "extends @edx/browserslist-config"
   ],
+  "sideEffects": [
+    "*.css",
+    "*.scss"
+  ],
   "scripts": {
-    "build": "fedx-scripts webpack",
-    "i18n_extract": "fedx-scripts formatjs extract",
-    "lint": "fedx-scripts eslint --ext .js --ext .jsx --ext .ts --ext .tsx .",
-    "lint:fix": "fedx-scripts eslint --fix --ext .js --ext .jsx --ext .ts --ext .tsx .",
-    "snapshot": "fedx-scripts jest --updateSnapshot",
-    "start": "fedx-scripts webpack-dev-server --progress",
-    "start:with-theme": "paragon install-theme && npm start && npm install",
-    "dev": "PUBLIC_PATH=/admin-console/ MFE_CONFIG_API_URL='http://local.openedx.io:8000/api/mfe_config/v1' fedx-scripts webpack-dev-server --progress --host apps.local.openedx.io",
-    "test": "fedx-scripts jest --coverage --passWithNoTests",
-    "types": "tsc --noEmit"
+    "build": "make build",
+    "build:ci": "make build-ci",
+    "clean": "make clean",
+    "i18n_extract": "openedx formatjs extract",
+    "lint": "openedx lint .",
+    "lint:fix": "openedx lint --fix .",
+    "prepack": "npm run clean && npm run build",
+    "snapshot": "openedx test --updateSnapshot",
+    "dev": "PORT=2025 PUBLIC_PATH=/admin-console openedx dev",
+    "test": "openedx test --coverage --passWithNoTests",
+    "types": "tsc --noEmit",
+    "translations:pull": "openedx translations:pull",
+    "build:packages": "make build-packages",
+    "clean:packages": "make clean-packages",
+    "dev:site": "make dev-site",
+    "dev:packages": "make dev-packages",
+    "watch:build": "nodemon --exec 'npm run build'"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
+  "atlasTranslations": {
+    "path": "translations/frontend-app-admin-console/src/i18n/messages",
+    "dependencies": [
+      "@openedx/frontend-base"
+    ]
   },
-  "author": "Open edX Community",
+  "author": "Open edX",
   "license": "AGPL-3.0",
   "homepage": "https://github.com/openedx/frontend-app-admin-console#readme",
   "publishConfig": {
@@ -35,30 +57,32 @@
   "bugs": {
     "url": "https://github.com/openedx/frontend-app-admin-console/issues"
   },
-  "dependencies": {
-    "@edx/brand": "npm:@openedx/brand-openedx@^1.2.3",
-    "@edx/frontend-component-header": "^8.0.0",
-    "@edx/frontend-platform": "^8.7.0",
-    "@edx/openedx-atlas": "^0.7.0",
-    "@openedx/frontend-plugin-framework": "^1.7.0",
-    "@openedx/paragon": "^23.15.1",
-    "@tanstack/react-query": "5.96.2",
-    "lodash.debounce": "^4.0.8",
+  "peerDependencies": {
+    "@openedx/frontend-base": "^2.0.0-alpha.2 || 0.0.0-dev",
+    "@openedx/paragon": "^23",
+    "@tanstack/react-query": "^5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-error-boundary": "^4.1.2",
-    "react-router-dom": "^6.30.3"
+    "react-router-dom": "^6"
   },
   "devDependencies": {
     "@edx/browserslist-config": "^1.1.1",
-    "@edx/typescript-config": "1.1.0",
-    "@openedx/frontend-build": "^14.6.6",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.14",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "ts-jest": "^29.4.5"
+    "@types/react-helmet": "^6.1.11",
+    "nodemon": "^3.1.14",
+    "tsc-alias": "^1.9.1",
+    "turbo": "^2.10.11"
+  },
+  "dependencies": {
+    "@edx/openedx-atlas": "^0.7.0",
+    "lodash.debounce": "^4.0.8",
+    "react-error-boundary": "^4.1.2",
+    "react-helmet": "^6.1.0"
   }
 }

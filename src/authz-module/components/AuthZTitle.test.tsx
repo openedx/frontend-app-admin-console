@@ -5,7 +5,7 @@ import AuthZTitle from './AuthZTitle';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  Link: ({ children, to }:{ children:ReactNode, to:string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
 }));
 
 describe('AuthZTitle', () => {

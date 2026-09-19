@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 
 describe('MultipleChoiceFilter', () => {

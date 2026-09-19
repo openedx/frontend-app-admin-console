@@ -1,10 +1,10 @@
 import {
   Dropdown, Form, Icon, Stack,
 } from '@openedx/paragon';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { FilterList, Info, Search } from '@openedx/paragon/icons';
 import { useState } from 'react';
-import messages from '../messages';
+import messages from '@src/authz-module/components/messages';
 import { FilterChoice, MultipleChoiceFilterProps } from './types';
 
 const MultipleChoiceFilter = ({
@@ -49,7 +49,7 @@ const MultipleChoiceFilter = ({
         description: choice.description,
       });
       return groups;
-    }, new Map<string, { groupName: string; options: Array<FilterChoice>; icon?: any }>());
+    }, new Map<string, { groupName: string; options: FilterChoice[]; icon?: any }>());
     return Array.from(groupedFilterChoices.values());
   };
 
@@ -66,17 +66,17 @@ const MultipleChoiceFilter = ({
 
       <Dropdown.Menu>
         {isSearchable && (
-        <Form.Control
-          className="m-1"
-          type="text"
-          trailingElement={<Icon src={Search} />}
-          placeholder={formatMessage(messages['authz.table.controlbar.search'])}
-          onChange={(e) => {
-            setSearchValue(e.target.value);
-            onSearchChange?.(e.target.value);
-          }}
-          value={searchValue}
-        />
+          <Form.Control
+            className="m-1"
+            type="text"
+            trailingElement={<Icon src={Search} />}
+            placeholder={formatMessage(messages['authz.table.controlbar.search'])}
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+              onSearchChange?.(e.target.value);
+            }}
+            value={searchValue}
+          />
         )}
         <Form.CheckboxSet
           className="pgn__dropdown-filter-checkbox-group"
@@ -106,28 +106,28 @@ const MultipleChoiceFilter = ({
             </Form.Checkbox>
           ))
             : getGroupedChoices().map(({ groupName, icon, options }) => (
-              <div key={groupName}>
-                <div className="pgn__dropdown-filter-group-name text-info-700 d-flex align-items-center small m-2 ml-0">
-                  {icon && <Icon color="primary" src={icon} className="mr-2" size="xs" />}
-                  <span>{groupName}</span>
+                <div key={groupName}>
+                  <div className="pgn__dropdown-filter-group-name text-info-700 d-flex align-items-center small m-2 ml-0">
+                    {icon && <Icon color="primary" src={icon} className="mr-2" size="xs" />}
+                    <span>{groupName}</span>
+                  </div>
+                  {options.map(({ displayName, value, description }) => (
+                    <Form.Checkbox
+                      className="m-2 w-100"
+                      key={displayName}
+                      value={value}
+                      onChange={() => handleClickCheckbox(value, displayName)}
+                      disabled={checkedBoxes.includes(value) ? false : disabled}
+                      aria-label={displayName}
+                    >
+                      <div className="d-flex flex-column">
+                        <span className="small">{displayName}</span>
+                        { description && <span className="small text-muted d-block">{description}</span> }
+                      </div>
+                    </Form.Checkbox>
+                  ))}
                 </div>
-                {options.map(({ displayName, value, description }) => (
-                  <Form.Checkbox
-                    className="m-2 w-100"
-                    key={displayName}
-                    value={value}
-                    onChange={() => handleClickCheckbox(value, displayName)}
-                    disabled={checkedBoxes.includes(value) ? false : disabled}
-                    aria-label={displayName}
-                  >
-                    <div className="d-flex flex-column">
-                      <span className="small">{displayName}</span>
-                      { description && <span className="small text-muted d-block">{description}</span> }
-                    </div>
-                  </Form.Checkbox>
-                ))}
-              </div>
-            ))}
+              ))}
           { isSearchable && (
             <div className="d-flex align-items-center justify-content-between p-2">
               <span className="text-muted small">{formatMessage(messages['authz.table.controlbar.filters.more.results'])}</span>

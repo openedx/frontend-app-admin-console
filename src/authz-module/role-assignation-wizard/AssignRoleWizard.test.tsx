@@ -1,18 +1,19 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { getAuthenticatedUser } from '@openedx/frontend-base';
 import {
   useValidateUsers, useAssignTeamMembersRole, useScopes, useOrgs,
-} from '../data/hooks';
+} from '@src/authz-module/data/hooks';
 import useScopePermissions from './hooks/useScopePermissions';
-import { courseRolesMetadata, libraryRolesMetadata } from '../roles-permissions';
+import { courseRolesMetadata, libraryRolesMetadata } from '@src/authz-module/roles-permissions';
 import AssignRoleWizard from './AssignRoleWizard';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedUser: jest.fn(),
 }));
 
@@ -22,10 +23,6 @@ const mockIntersectionObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 (globalThis as any).IntersectionObserver = mockIntersectionObserver;
-
-jest.mock('@edx/frontend-platform/logging', () => ({
-  logError: jest.fn(),
-}));
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: () => ({
@@ -257,6 +254,21 @@ describe('AssignRoleWizard — Step 2', () => {
     const user = userEvent.setup();
     renderWizard();
     await advanceToStep2(user);
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeDisabled();
+  });
+
+  it('deselecting a previously selected scope clears it and disables Save', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await advanceToStep2(user);
+    const scopeCheckbox = screen.getByLabelText('Library One');
+
+    await user.click(scopeCheckbox);
+    expect(scopeCheckbox).toBeChecked();
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeEnabled();
+
+    await user.click(scopeCheckbox);
+    expect(scopeCheckbox).not.toBeChecked();
     expect(screen.getByRole('button', { name: /^Save$/i })).toBeDisabled();
   });
 

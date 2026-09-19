@@ -1,7 +1,7 @@
 import {
   useState, useCallback, useRef, useEffect,
 } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   Stepper, Button, StatefulButton, Icon,
 } from '@openedx/paragon';
@@ -10,7 +10,7 @@ import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
-import { useValidateUsers, useAssignTeamMembersRole } from '../data/hooks';
+import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
 import { formatRoleAssignmentError } from './utils';
 
@@ -76,12 +76,15 @@ const AssignRoleWizard = ({
     setAssignmentErrors([]);
   };
 
-  const handleClose = () => { resetState(); onClose(); };
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
 
   const validateUsersAndProceed = async () => {
-    if (validateUsersMutation.isPending) { return; }
+    if (validateUsersMutation.isPending) return;
     const usersList = parseUsers(users);
-    if (usersList.length === 0 || !selectedRole) { return; }
+    if (usersList.length === 0 || !selectedRole) return;
 
     setInvalidUsers([]);
 
@@ -101,13 +104,16 @@ const AssignRoleWizard = ({
   const handleScopeToggle = useCallback((scopeId: string) => {
     setSelectedScopes((prev) => {
       const next = new Set(prev);
-      if (next.has(scopeId)) { next.delete(scopeId); } else { next.add(scopeId); }
+      if (next.has(scopeId))
+        next.delete(scopeId);
+      else
+        next.add(scopeId);
       return next;
     });
   }, []);
 
   const handleSave = async () => {
-    if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) { return; }
+    if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) return;
     setAssignmentErrors([]);
 
     try {

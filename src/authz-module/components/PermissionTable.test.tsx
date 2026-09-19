@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { Role, PermissionsResourceGrouped } from '@src/types';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import PermissionTable from './PermissionTable';
 
 const mockRoles: Role[] = [

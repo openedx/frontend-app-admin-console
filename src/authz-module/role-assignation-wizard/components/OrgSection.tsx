@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Icon } from '@openedx/paragon';
 import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Scope } from '@src/types';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 import ScopeCheckboxItem from './ScopeCheckboxItem';
 
 export interface OrgSectionProps {

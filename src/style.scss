@@ -1,0 +1,15 @@
+// App-scoped runtime styles for the toast manager. Global selectors, so
+// they must not live under any component's scoped stylesheet.
+.toast-container {
+  // Ensure toast appears above modal
+  z-index: 1000;
+  // Move toast to the right
+  left: auto !important;
+  right: var(--pgn-spacing-toast-container-gutter-lg);
+}
+
+// Fix a bug with a toast on edit tags sheet component: can't click on close toast button
+// https://github.com/openedx/frontend-app-authoring/issues/1898
+#toast-root[data-focus-on-hidden] {
+  pointer-events: initial !important;
+}

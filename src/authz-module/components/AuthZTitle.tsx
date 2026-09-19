@@ -61,22 +61,22 @@ const AuthZTitle = ({
         <Col xs={12} md={5}>
           <Stack className="justify-content-end" direction={isDesktop ? 'horizontal' : 'vertical'}>
             {
-            actions.map((action, index) => {
-              const content = isValidElement(action)
-                ? action
-                : <ActionButton {...action as Action} />;
-              const key = isValidElement(action)
-                ? action.key
-                : (action as Action).label;
-              return (
-                <Fragment key={`authz-header-action-${key}`}>
-                  {content}
-                  {(index === actions.length - 1) ? null
-                    : (<hr className="mx-lg-5" />)}
-                </Fragment>
-              );
-            })
-          }
+              actions.map((action, index) => {
+                const content = isValidElement(action)
+                  ? action
+                  : <ActionButton {...action as Action} />;
+                const key = isValidElement(action)
+                  ? action.key
+                  : (action as Action).label;
+                return (
+                  <Fragment key={`authz-header-action-${key}`}>
+                    {content}
+                    {(index === actions.length - 1) ? null
+                      : (<hr className="mx-lg-5" />)}
+                  </Fragment>
+                );
+              })
+            }
           </Stack>
         </Col>
       </Row>

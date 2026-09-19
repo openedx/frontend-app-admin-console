@@ -6,9 +6,7 @@ export enum CustomErrors {
   SERVER_ERROR = 'SERVER_ERROR',
 }
 
-type ErrorStatusCode = {
-  [key in CustomErrors]: number[];
-};
+type ErrorStatusCode = Record<CustomErrors, number[]>;
 
 export const STATUS_400 = 400;
 export const STATUS_404 = 404;

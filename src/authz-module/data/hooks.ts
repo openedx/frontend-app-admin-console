@@ -32,7 +32,7 @@ export const useAssignTeamMembersRole = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ data }: {
-      data: AssignTeamMembersRoleRequest
+      data: AssignTeamMembersRoleRequest;
     }) => assignTeamMembersRole(data),
     onSettled: (_data, error) => {
       if (!error) {
@@ -55,7 +55,7 @@ export const useAssignTeamMembersRole = () => {
  */
 export const useValidateUsers = () => useMutation({
   mutationFn: async ({ data }: {
-    data: ValidateUsersRequest
+    data: ValidateUsersRequest;
   }) => validateUsers(data),
 });
 
@@ -70,7 +70,7 @@ export const useRevokeUserRoles = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ data }: {
-      data: RevokeUserRolesRequest
+      data: RevokeUserRolesRequest;
     }) => revokeUserRoles(data),
     onSettled: () => {
       queryClient.invalidateQueries({
@@ -150,7 +150,7 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
   queryKey: authzQueryKeys.scopes(params),
   queryFn: ({ pageParam }) => getScopes({ ...params, page: pageParam as number }),
   getNextPageParam: (lastPage) => {
-    if (!lastPage.next) { return undefined; }
+    if (!lastPage.next) return undefined;
     try {
       const nextUrl = new URL(lastPage.next);
       const page = nextUrl.searchParams.get('page');

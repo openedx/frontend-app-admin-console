@@ -1,5 +1,5 @@
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { mockHttpClient } from '@src/setupTest';
+import { getAuthenticatedHttpClient } from '@openedx/frontend-base';
+import { mockHttpClient } from '@src/testUtils';
 import {
   getUserAssignedRoles,
   assignTeamMembersRole,
@@ -9,7 +9,8 @@ import {
   getCourseAuthoringFlagStates,
 } from './api';
 
-jest.mock('@edx/frontend-platform/auth', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
 }));
 

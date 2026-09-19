@@ -1,13 +1,13 @@
 import { renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { logError } from '@edx/frontend-platform/logging';
+import { IntlProvider, logError } from '@openedx/frontend-base';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useCourseAuthoringFlagStates } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from './useCourseAuthoringFlag';
 
-jest.mock('@edx/frontend-platform/logging', () => ({
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
   logError: jest.fn(),
 }));
 

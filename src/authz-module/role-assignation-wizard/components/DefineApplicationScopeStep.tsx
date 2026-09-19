@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { Alert } from '@openedx/paragon';
 import { courseRolesMetadata } from '@src/authz-module/roles-permissions/course/constants';
 import { libraryRolesMetadata } from '@src/authz-module/roles-permissions/library/constants';
-import useScopeListData from '../hooks/useScopeListData';
+import useScopeListData from '@src/authz-module/role-assignation-wizard/hooks/useScopeListData';
 import ScopeFilterBar from './ScopeFilterBar';
 import ScopeList from './ScopeList';
-import messages from '../messages';
+import messages from '@src/authz-module/role-assignation-wizard/messages';
 
 const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
 
 function getContextType(role: string | null): string | undefined {
-  if (!role) { return undefined; }
+  if (!role) return undefined;
   return allRolesMetadata.find((r) => r.role === role)?.contextType;
 }
 
