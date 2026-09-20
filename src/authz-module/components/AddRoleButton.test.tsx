@@ -74,7 +74,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/assign-role');
     });
 
     it('navigates to assign role page with username query parameter when presetUsername is provided', async () => {
@@ -86,7 +86,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?users=${presetUsername}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`/admin-console/authz/assign-role?users=${presetUsername}`);
     });
 
     it('handles special characters in presetUsername correctly', async () => {
@@ -98,7 +98,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(1);
-      expect(mockNavigate).toHaveBeenCalledWith(`/authz/assign-role?${new URLSearchParams({ users: presetUsername }).toString()}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`/admin-console/authz/assign-role?${new URLSearchParams({ users: presetUsername }).toString()}`);
     });
   });
 
@@ -113,7 +113,7 @@ describe('AddRoleButton', () => {
       expect(button).toHaveFocus();
 
       await user.keyboard('{Enter}');
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/assign-role');
     });
 
     it('responds to spacebar activation', async () => {
@@ -124,7 +124,7 @@ describe('AddRoleButton', () => {
       button.focus();
 
       await user.keyboard(' ');
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/assign-role');
     });
 
     it('handles multiple clicks gracefully', async () => {
@@ -138,7 +138,7 @@ describe('AddRoleButton', () => {
       await user.click(button);
 
       expect(mockNavigate).toHaveBeenCalledTimes(3);
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/assign-role?users=testuser');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/assign-role?users=testuser');
     });
   });
 

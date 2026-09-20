@@ -3,7 +3,7 @@ import { useIntl } from '@openedx/frontend-base';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
-import { ROUTES } from '@src/authz-module/constants';
+import { AUTHZ_HOME_PATH, buildAuditUserPath } from '@src/authz-module/constants';
 import messages from './messages';
 import {
   CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, courseRolesMetadata, libraryRolesMetadata,
@@ -17,11 +17,11 @@ const AssignRoleWizardPage = () => {
   const [searchParams] = useSearchParams();
   const initialUsers = searchParams.get('users') || '';
   const raw = searchParams.get('from') ?? '';
-  const returnTo = (raw.startsWith('/') && !raw.startsWith('//')) ? raw : ROUTES.HOME_PATH;
+  const returnTo = (raw.startsWith('/') && !raw.startsWith('//')) ? raw : AUTHZ_HOME_PATH;
 
   const presetUser = initialUsers.trim();
   const destination = (presetUser && !presetUser.includes(','))
-    ? `${ROUTES.HOME_PATH}/user/${presetUser}`
+    ? buildAuditUserPath(presetUser)
     : returnTo;
 
   const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);

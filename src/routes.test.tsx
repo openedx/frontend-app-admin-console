@@ -17,7 +17,7 @@ describe('routes', () => {
 
     it('has the expected id and path', () => {
       expect(routes[0].id).toBe('org.openedx.frontend.route.adminConsole.main');
-      expect(routes[0].path).toBe('/authz/*');
+      expect(routes[0].path).toBe('/admin-console/authz/*');
     });
 
     it('is labelled with the admin console role', () => {

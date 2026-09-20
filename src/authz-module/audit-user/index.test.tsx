@@ -93,7 +93,7 @@ const renderWithRouter = (route = '/audit/johndoe') => {
             <MemoryRouter initialEntries={[route]}>
               <Routes>
                 <Route path="/audit/:username" element={<AuditUserPage />} />
-                <Route path="/authz" element={<div>Home Page</div>} />
+                <Route path="/admin-console/authz" element={<div>Home Page</div>} />
               </Routes>
             </MemoryRouter>
           </ToastManagerProvider>

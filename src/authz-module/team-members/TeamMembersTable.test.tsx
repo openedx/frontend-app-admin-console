@@ -218,7 +218,7 @@ describe('TeamMembersTable', () => {
     });
     const viewButtons = screen.getAllByRole('button', { name: /view/i });
     await user.click(viewButtons[0]);
-    expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
+    expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/user/johndoe');
   });
 
   it('renders safely when role assignments data is undefined', () => {
