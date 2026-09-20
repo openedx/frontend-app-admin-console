@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { screen } from '@testing-library/react';
 import { authenticatedLoader } from '@openedx/frontend-base';
 import { renderWrapper, initializeMocks } from '@src/testUtils';
@@ -27,24 +26,16 @@ describe('routes', () => {
     it('requires authentication via the authenticated loader', () => {
       expect(routes[0].loader).toBe(authenticatedLoader);
     });
-
-    it('provides a Component for the route', () => {
-      expect(routes[0].Component).toBeDefined();
-    });
   });
 
-  describe('Component', () => {
+  describe('lazy', () => {
     beforeEach(() => {
       initializeMocks();
     });
 
-    it('lazily loads Main', async () => {
-      const { Component } = routes[0];
-      renderWrapper(
-        <Suspense fallback={<div>loading</div>}>
-          <Component />
-        </Suspense>,
-      );
+    it('resolves Main as the route Component', async () => {
+      const { Component } = await routes[0].lazy();
+      renderWrapper(<Component />);
       expect(await screen.findByTestId('authz-module')).toBeInTheDocument();
     });
   });
