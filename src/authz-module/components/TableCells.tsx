@@ -8,7 +8,7 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
+  ADMIN_ROLES, buildAuditUserPath, DJANGO_MANAGED_ROLES, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
@@ -96,7 +96,7 @@ const NameCell = ({ row }: CellProps) => {
 const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const viewPath = `/authz/user/${row.original.username}`;
+  const viewPath = buildAuditUserPath(row.original.username ?? '');
   const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
   const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
 

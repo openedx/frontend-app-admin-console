@@ -37,14 +37,19 @@ export const SKELETON_ROWS = Array.from({ length: 10 }).map(() => ({
   roles: [],
 }));
 
+/** Absolute base path of the module; src/routes.tsx derives its route prefix from this. */
+export const AUTHZ_HOME_PATH = '/admin-console/authz';
+
+/** Segments nested under the authz splat route, relative to AUTHZ_HOME_PATH. */
 export const ROUTES = {
-  HOME_PATH: '/authz',
-  AUDIT_USER_PATH: '/user/:username',
-  ASSIGN_ROLE_WIZARD_PATH: '/assign-role',
+  AUDIT_USER_PATH: 'user/:username',
+  ASSIGN_ROLE_WIZARD_PATH: 'assign-role',
 };
 
+export const buildAuditUserPath = (username: string) => `${AUTHZ_HOME_PATH}/user/${encodeURIComponent(username)}`;
+
 export const buildWizardPath = (options?: { users?: string; from?: string }) => {
-  const base = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
+  const base = `${AUTHZ_HOME_PATH}/${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
   if (!options) return base;
   const params = new URLSearchParams();
   if (options.users) params.set('users', options.users);
@@ -62,8 +67,6 @@ export enum RoleOperationErrorStatus {
 }
 
 export const MAX_TABLE_FILTERS_APPLIED = 10;
-
-export const AUTHZ_HOME_PATH = '/authz';
 
 export const MAP_ROLE_KEY_TO_LABEL: Record<string, string> = {
   library_admin: 'Library Admin',

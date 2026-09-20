@@ -1,9 +1,9 @@
 import {
-  buildWizardPath, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
+  AUTHZ_HOME_PATH, buildAuditUserPath, buildWizardPath, getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
 } from './constants';
 import type { ContextType } from './constants';
 
-const BASE = `${ROUTES.HOME_PATH}${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
+const BASE = `${AUTHZ_HOME_PATH}/${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
 
 describe('buildWizardPath', () => {
   it('returns the base path when called with no arguments', () => {
@@ -33,6 +33,17 @@ describe('buildWizardPath', () => {
 
   it('omits the query string when users and from are both empty strings', () => {
     expect(buildWizardPath({ users: '', from: '' })).toBe(BASE);
+  });
+});
+
+describe('buildAuditUserPath', () => {
+  it('builds the absolute audit path for a username', () => {
+    expect(buildAuditUserPath('alice')).toBe(`${AUTHZ_HOME_PATH}/user/alice`);
+  });
+
+  it('URL-encodes the username', () => {
+    expect(buildAuditUserPath('user+with@special.chars'))
+      .toBe(`${AUTHZ_HOME_PATH}/user/user%2Bwith%40special.chars`);
   });
 });
 

@@ -104,15 +104,15 @@ describe('AssignRoleWizardPage', () => {
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/authz');
+    expect(navigate).toHaveBeenCalledWith('/admin-console/authz');
   });
 
   it('navigates to the from= path when Cancel is clicked and a from param is present', async () => {
-    const { navigate } = setupMocks({ from: '/authz/libraries/lib:123/alice' });
+    const { navigate } = setupMocks({ from: '/admin-console/authz/libraries/lib:123/alice' });
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/authz/libraries/lib:123/alice');
+    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/libraries/lib:123/alice');
   });
 
   it('navigates to home path when from is an external URL', async () => {
@@ -120,7 +120,7 @@ describe('AssignRoleWizardPage', () => {
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/authz');
+    expect(navigate).toHaveBeenCalledWith('/admin-console/authz');
   });
 
   it('navigates to the user-specific view when a single preset user is set', async () => {
@@ -128,15 +128,15 @@ describe('AssignRoleWizardPage', () => {
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/authz/user/alice');
+    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/user/alice');
   });
 
   it('navigates to returnTo when multiple preset users are set', async () => {
-    const { navigate } = setupMocks({ users: 'alice,bob', from: '/authz/team' });
+    const { navigate } = setupMocks({ users: 'alice,bob', from: '/admin-console/authz/team' });
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/authz/team');
+    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/team');
   });
 
   describe('assignable roles', () => {

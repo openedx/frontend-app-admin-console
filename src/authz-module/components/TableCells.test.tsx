@@ -181,7 +181,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/johndoe');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/user/johndoe');
     });
 
     it('navigates with correct username for different user', async () => {
@@ -201,7 +201,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/janedoe');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/user/janedoe');
     });
 
     it('handles empty username gracefully', async () => {
@@ -221,7 +221,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/user/');
     });
 
     it('handles special characters in username', async () => {
@@ -241,7 +241,7 @@ describe('TableCells Components', () => {
       const viewButton = screen.getByRole('button', { name: /view/i });
       await user.click(viewButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/authz/user/user+with@special.chars');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/user/user%2Bwith%40special.chars');
     });
 
     it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {
