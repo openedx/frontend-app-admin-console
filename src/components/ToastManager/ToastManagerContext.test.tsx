@@ -1,7 +1,8 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/testUtils';
 import { logError } from '@openedx/frontend-base';
+import { DEFAULT_TOAST_DELAY } from '@src/authz-module/constants';
 import { ToastManagerProvider, useToastManager } from './ToastManagerContext';
 
 jest.mock('@openedx/frontend-base', () => ({
@@ -23,6 +24,10 @@ const TestComponent = () => {
 };
 
 describe('ToastManagerContext', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   describe('ToastManagerProvider', () => {
     it('does not show toast initially', () => {
       renderWrapper(
@@ -182,7 +187,8 @@ describe('ToastManagerContext', () => {
   });
 
   it('uses default delay when delay prop is not provided', async () => {
-    const user = userEvent.setup();
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     const DefaultDelayTestComponent = () => {
       const { showToast } = useToastManager();
@@ -207,15 +213,16 @@ describe('ToastManagerContext', () => {
     const showButton = screen.getByText('Show Toast With Default Delay');
     await user.click(showButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('Default delay toast')).toBeInTheDocument();
+    expect(screen.getByText('Default delay toast')).toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(DEFAULT_TOAST_DELAY);
     });
 
-    // DEFAULT_TOAST_DELAY is 5000ms
     await waitFor(() => {
       expect(screen.queryByText('Default delay toast')).not.toBeInTheDocument();
-    }, { timeout: 5050 });
-  }, 5100);
+    });
+  });
 
   it('uses longer delay for error toasts with retry functionality', async () => {
     const user = userEvent.setup();
