@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import { renderWrapper } from '@src/testUtils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
+import { AUTHZ_HOME_PATH } from '@src/authz-module/constants';
 import UserAssignmentsSubTable from './UserAssignmentsSubTable';
 
 const courseAssignment: TeamMemberAssignment = {
@@ -92,7 +93,7 @@ describe('UserAssignmentsSubTable', () => {
     renderWrapper(<UserAssignmentsSubTable {...rowFor([courseAssignment], 7)} />);
 
     expect(screen.getByRole('link', { name: /View all roles/ }))
-      .toHaveAttribute('href', '/authz/user/johndoe');
+      .toHaveAttribute('href', `${AUTHZ_HOME_PATH}/user/johndoe`);
   });
 
   it('omits the audit link when every role is already listed', () => {
