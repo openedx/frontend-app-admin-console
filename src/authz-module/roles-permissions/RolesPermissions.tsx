@@ -51,7 +51,7 @@ const RolesPermissions = () => {
   }, [intl]);
 
   return (
-    <Container className="p-5">
+    <>
       <Container className="pb-5">
         <ButtonGroup size="lg" className="mb-2">
           <Button
@@ -106,7 +106,7 @@ const RolesPermissions = () => {
         />
       )}
       <AnchorButton />
-    </Container>
+    </>
   );
 };
 

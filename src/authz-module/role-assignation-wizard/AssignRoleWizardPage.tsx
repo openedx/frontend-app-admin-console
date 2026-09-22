@@ -39,7 +39,6 @@ const AssignRoleWizardPage = () => {
 
   return (
     <AuthZLayout
-      context={{ id: '', title: '', org: '' }}
       navLinks={[{ label: intl.formatMessage(messages['wizard.page.breadcrumb']), to: returnTo }]}
       activeLabel={intl.formatMessage(messages['wizard.page.title'])}
       pageTitle={intl.formatMessage(messages['wizard.page.title'])}

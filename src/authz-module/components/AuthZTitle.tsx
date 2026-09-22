@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Breadcrumb, Col, Container, Row, Button,
+  Breadcrumb, Col, Row, Button,
   Stack,
   useMediaQuery,
   breakpoints,
@@ -42,7 +42,7 @@ const AuthZTitle = ({
 }: AuthZTitleProps) => {
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
-    <Container className="p-5 bg-light-100">
+    <div className="page-band py-5 bg-light-100">
       <Breadcrumb
         linkAs={Link}
         links={navLinks}
@@ -53,8 +53,8 @@ const AuthZTitle = ({
           <div className="d-flex align-items-center flex-column-sm">
             <h2 className="text-primary mb-0">{pageTitle}</h2>
             {typeof pageSubtitle === 'string'
-              ? <> { pageSubtitle !== '' && <hr className="mx-lg-3" /> }<h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
-              : <>{ pageSubtitle !== '' && <hr className="mx-lg-3" /> } <div className="mb-0">{pageSubtitle}</div></>}
+              ? <> { pageSubtitle !== '' && <hr className="authz-action-divider mx-lg-3" /> }<h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
+              : <>{ pageSubtitle !== '' && <hr className="authz-action-divider mx-lg-3" /> } <div className="mb-0">{pageSubtitle}</div></>}
 
           </div>
         </Col>
@@ -72,7 +72,7 @@ const AuthZTitle = ({
                   <Fragment key={`authz-header-action-${key}`}>
                     {content}
                     {(index === actions.length - 1) ? null
-                      : (<hr className="mx-lg-5" />)}
+                      : (<hr className="authz-action-divider mx-lg-5" />)}
                   </Fragment>
                 );
               })
@@ -80,7 +80,7 @@ const AuthZTitle = ({
           </Stack>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 };
 

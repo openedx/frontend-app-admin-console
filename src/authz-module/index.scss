@@ -24,14 +24,10 @@
     min-height: 700px;
   }
 
-  hr {
+  .authz-action-divider {
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
     height: var(--height-action-divider);
     width: 0;
-  }
-
-  .tab-content {
-    background-color: var(--pgn-color-light-200);
   }
 
   .collapsible-card {
@@ -71,7 +67,7 @@
     .flex-column-sm {
       flex-direction: column;
     }
-    hr {
+    .authz-action-divider {
       border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
       border-right: none;
       width: 100%;

@@ -78,81 +78,79 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
   useEffect(() => () => fetchData.cancel(), [fetchData]);
 
   return (
-    <div className="authz-module">
-      <DataTable
-        isFilterable
-        isPaginated
-        isSortable
-        manualFilters
-        manualPagination
-        manualSortBy
-        numBreakoutFilters={4}
-        fetchData={fetchData}
-        data={roleAssignments}
-        itemCount={count}
-        pageCount={pageCount}
-        initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE, filters: initialFilters }}
-        isLoading={isLoadingAllRoleAssignments}
-        additionalColumns={[
+    <DataTable
+      isFilterable
+      isPaginated
+      isSortable
+      manualFilters
+      manualPagination
+      manualSortBy
+      numBreakoutFilters={4}
+      fetchData={fetchData}
+      data={roleAssignments}
+      itemCount={count}
+      pageCount={pageCount}
+      initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE, filters: initialFilters }}
+      isLoading={isLoadingAllRoleAssignments}
+      additionalColumns={[
+        {
+          id: 'action',
+          Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
+          Cell: viewActionCell,
+        },
+      ]}
+      columns={
+        [
           {
-            id: 'action',
-            Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
-            Cell: viewActionCell,
+            id: 'username',
+            Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
+            accessor: 'username',
+            Cell: NameCell,
+            filter: 'text',
+            Filter: TextFilter,
+            filterOrder: 1,
           },
-        ]}
-        columns={
-          [
-            {
-              id: 'username',
-              Header: intl.formatMessage(messages['authz.team.members.table.column.name.title']),
-              accessor: 'username',
-              Cell: NameCell,
-              filter: 'text',
-              Filter: TextFilter,
-              filterOrder: 1,
-            },
-            {
-              Header: intl.formatMessage(messages['authz.team.members.table.column.email.title']),
-              accessor: 'email',
-              disableFilters: true,
-              filter: 'text',
-              Filter: TextFilter,
-            },
-            {
-              Header: getCellHeader('org', intl.formatMessage(messages['authz.team.members.table.column.organization.title']), columnsWithFiltersApplied),
-              accessor: 'org',
-              Cell: OrgCell,
-              filter: 'includesValue',
-              Filter: OrgFilter,
-              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.organization.title']),
-              filterOrder: 2,
-            },
-            {
-              Header: getCellHeader('scope', intl.formatMessage(messages['authz.team.members.table.column.scope.title']), columnsWithFiltersApplied),
-              accessor: 'scope',
-              Cell: ScopeCell,
-              filter: 'includesValue',
-              Filter: ScopesFilter,
-              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.scope.title']),
-              filterOrder: 4,
-            },
-            {
-              Header: getCellHeader('role', intl.formatMessage(messages['authz.team.members.table.column.role.title']), columnsWithFiltersApplied),
-              accessor: 'role',
-              filter: 'includesValue',
-              Cell: RoleCell,
-              Filter: RolesFilter,
-              filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.role.title']),
-              filterOrder: 3,
-            },
-          ]
-        }
-      >
-        <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
-        <DataTable.Table />
-        <TableFooter />
-      </DataTable>
-    </div>
+          {
+            Header: intl.formatMessage(messages['authz.team.members.table.column.email.title']),
+            accessor: 'email',
+            disableFilters: true,
+            filter: 'text',
+            Filter: TextFilter,
+          },
+          {
+            Header: getCellHeader('org', intl.formatMessage(messages['authz.team.members.table.column.organization.title']), columnsWithFiltersApplied),
+            accessor: 'org',
+            Cell: OrgCell,
+            filter: 'includesValue',
+            Filter: OrgFilter,
+            filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.organization.title']),
+            filterOrder: 2,
+          },
+          {
+            Header: getCellHeader('scope', intl.formatMessage(messages['authz.team.members.table.column.scope.title']), columnsWithFiltersApplied),
+            accessor: 'scope',
+            Cell: ScopeCell,
+            filter: 'includesValue',
+            Filter: ScopesFilter,
+            filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.scope.title']),
+            filterOrder: 4,
+          },
+          {
+            Header: getCellHeader('role', intl.formatMessage(messages['authz.team.members.table.column.role.title']), columnsWithFiltersApplied),
+            accessor: 'role',
+            filter: 'includesValue',
+            Cell: RoleCell,
+            Filter: RolesFilter,
+            filterButtonText: intl.formatMessage(messages['authz.team.members.table.column.role.title']),
+            filterOrder: 3,
+          },
+        ]
+      }
+    >
+      <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
+      <DataTable.Table />
+      <TableFooter />
+    </DataTable>
   );
 };
 
