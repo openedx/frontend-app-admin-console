@@ -1,6 +1,5 @@
 import {
-  Org, Scope,
-  UserRole,
+  Org, Scope, TeamMember, UserRole,
 } from '@src/types';
 import { camelCaseObject, getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { getApiUrl } from '@src/data/utils';
@@ -52,8 +51,8 @@ export interface AssignTeamMembersRoleRequest {
   scopes: string[];
 }
 
-export interface GetAllRoleAssignmentsResponse {
-  results: UserRole[];
+export interface GetTeamMembersAssignmentsResponse {
+  results: TeamMember[];
   count: number;
   next: string | null;
   previous: string | null;
@@ -141,8 +140,16 @@ export const revokeUserRoles = async (
   return camelCaseObject(res.data);
 };
 
-export const getAllRoleAssignments = async (querySettings: QuerySettings): Promise<GetAllRoleAssignmentsResponse> => {
-  const url = new URL(getApiUrl('/api/authz/v1/assignments/'));
+/**
+ * Fetches team members grouped by user: one entry per user carrying the first few of
+ * their role assignments plus `assignmentCount`, the number behind that slice.
+ *
+ * The role, org and scope filters apply to assignments before they are grouped, so they
+ * decide both which users come back and which of each user's assignments are listed and
+ * counted.
+ */
+export const getTeamMembersAssignments = async (querySettings: QuerySettings): Promise<GetTeamMembersAssignmentsResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/users/'));
 
   if (querySettings.roles) {
     url.searchParams.set('roles', querySettings.roles);
@@ -160,6 +167,7 @@ export const getAllRoleAssignments = async (querySettings: QuerySettings): Promi
     url.searchParams.set('sort_by', querySettings.sortBy);
     url.searchParams.set('order', querySettings.order);
   }
+  // The endpoint defaults `assignments_limit` to 3; set it only to change that default.
   url.searchParams.set('page_size', querySettings.pageSize.toString());
   url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
 

@@ -66,6 +66,120 @@
       line-height: 24px;
     }
   }
+
+  // Where `.text-truncate` cuts; sized to the design's character budget.
+  .authz-cell-username { max-width: 15rem; }  // ~24 characters
+  .authz-cell-email { max-width: 17rem; }     // ~28 characters
+
+  &.team-members-table {
+    // Every row is two lines tall: the assigned-roles cell stacks scope over org.
+    th,
+    td {
+      padding-top: var(--pgn-spacing-spacer-3);
+      padding-bottom: var(--pgn-spacing-spacer-3);
+    }
+
+    // Keep the "+N more roles" label on one line.
+    td:nth-child(4) {
+      white-space: nowrap;
+    }
+
+    /*
+      Auto-layout starves "Assigned roles" in favour of the short Username/Email values,
+      so widths are pinned. Below `md` these percentages would crush the toggle and action
+      columns, so the table falls back to content sizing and scrolls inside Paragon's
+      `.pgn__data-table-container`.
+    */
+    @media (--pgn-size-breakpoint-min-width-md) {
+      .pgn__data-table {
+        table-layout: fixed;
+      }
+
+      th:nth-child(1) { width: 16%; }  // Username
+      th:nth-child(2) { width: 18%; }  // Email
+      th:nth-child(3) { width: 46%; }  // Assigned roles
+      th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
+      th:nth-child(5) { width: 7%; }   // Actions
+
+      td {
+        overflow: hidden;
+      }
+
+      // The nested table sizes its own columns; it must not inherit the widths above.
+      .team-members-table__subtable {
+        .pgn__data-table {
+          table-layout: auto;
+        }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3) {
+          width: auto;
+        }
+      }
+    }
+
+    // One line per row, so it keeps tighter padding.
+    .team-members-table__subtable {
+      th,
+      td {
+        padding-top: var(--pgn-spacing-spacer-2);
+        padding-bottom: var(--pgn-spacing-spacer-2);
+      }
+    }
+  }
+
+  .team-members-table__subtable {
+    // The module turns `hr` horizontal below `sm`; this footer divider stays vertical.
+    hr {
+      border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      border-top: none;
+      height: 1rem;
+      width: 0;
+    }
+
+    // The Card already pads; the module's blanket 1rem would double it up.
+    .pgn__data-table-wrapper {
+      padding: 0;
+    }
+
+    // Matches PermissionTable's `bg-info-100 text-primary` band. Paragon renders its own
+    // `thead`, so the tokens are used rather than the utility classes.
+    thead th {
+      background-color: var(--pgn-color-info-100);
+      color: var(--pgn-color-primary-base);
+    }
+
+    /*
+      Paragon stripes with `.pgn__data-table.is-striped tr:nth-child(2n)` — a descendant
+      selector, so the striped outer table reaches in and `isStriped={false}` on the inner
+      one cannot override it. The `:not()` keeps a nested table that wants stripes.
+    */
+    .pgn__data-table:not(.is-striped) tr {
+      background-color: transparent;
+
+      // With the stripes gone, rows need an explicit divider to stay readable.
+      &:not(:last-child) td {
+        border-bottom: var(--pgn-size-border-width) solid var(--pgn-color-border);
+      }
+    }
+  }
+
+  // Floor the badge to the widest label, so "in" and the scope align down the column.
+  .authz-assigned-roles .authz-role-badge { min-width: 11rem; }
+
+  .authz-scope-cell {
+    min-width: 0;      // Lets the flex child shrink far enough for `.text-truncate` to cut.
+    max-width: 25rem;  // org subline, ~40 characters
+
+    &__name {
+      max-width: 22rem;  // ~35 characters
+    }
+
+    &__org {
+      line-height: 1.2;
+    }
+  }
   
   @media(--pgn-size-breakpoint-max-width-sm){
     .flex-column-sm {

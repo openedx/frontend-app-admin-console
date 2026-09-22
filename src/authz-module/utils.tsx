@@ -1,5 +1,7 @@
 import { Icon } from '@openedx/paragon';
 import { FilterList } from '@openedx/paragon/icons';
+import { RESOURCE_ICONS } from './components/constants';
+import { CONTEXT_TYPES, getScopeContextType } from './constants';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
 
 /**
@@ -31,16 +33,19 @@ export const getCellHeader = (columnId: string, columnTitle: string, filtersAppl
   return columnTitle;
 };
 
-export const getScopeManageAction = (scope: string) => {
-  if (scope.startsWith('lib')) {
-    return CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM;
-  }
-  if (scope.startsWith('course')) {
-    return CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM;
-  }
-  // Default fallback or throw error for unknown scopes
-  return CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM;
-};
+/**
+ * Picks the course or library icon for a scope from the scope key itself.
+ */
+export const getScopeResourceIcon = (scope: string) => (
+  getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE
+);
+
+/** Unrecognised scopes fall back to the course permission, as `getScopeContextType` does. */
+export const getScopeManageAction = (scope: string) => (
+  getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
+    ? CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM
+    : CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
+);
 
 export const getScopeManageActionPermission = (scope: string) => {
   const action = getScopeManageAction(scope);
