@@ -47,8 +47,12 @@ export const getScopeContextType = (scope: string): ContextType => (
  */
 export const getAggregateScopeType = (scope: string, org?: string | null): 'platform' | 'org' | null => {
   const contextType = getScopeContextType(scope);
-  if (scope === getPlatformAggregateScopeKey(contextType)) { return 'platform'; }
-  if (org && scope === getOrgAggregateScopeKey(contextType, org)) { return 'org'; }
+  if (scope === getPlatformAggregateScopeKey(contextType)) {
+    return 'platform';
+  }
+  if (org && scope === getOrgAggregateScopeKey(contextType, org)) {
+    return 'org';
+  }
   return null;
 };
 

@@ -1,7 +1,6 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/setupTest';
+import { initializeMocks, renderWrapper } from '@src/testUtils';
 import type { TeamMember } from '@src/types';
 import { AUTHZ_HOME_PATH } from '@src/authz-module/constants';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
@@ -57,13 +56,7 @@ const cellPropsFor = (overrides: Partial<TeamMember> = {}) => ({
 describe('TeamMemberViewActionCell', () => {
   beforeEach(() => {
     mockCourseAuthoringFlag(() => true);
-    initializeMockApp({
-      authenticatedUser: {
-        userId: 1,
-        username: 'testuser',
-        email: 'testuser@example.com',
-      },
-    });
+    initializeMocks();
     mockNavigate.mockClear();
   });
 

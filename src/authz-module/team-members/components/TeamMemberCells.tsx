@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
+import { FormattedMessage, SiteContext } from '@openedx/frontend-base';
 import type { TeamMember } from '@src/types';
 import messages from '../messages';
 
@@ -18,7 +17,7 @@ interface EmailCellProps {
  * signed-in user is marked so they can find themselves in the list.
  */
 export const NameCell = ({ row }: NameCellProps) => {
-  const { authenticatedUser } = useContext(AppContext);
+  const { authenticatedUser } = useContext(SiteContext);
   const { username = '' } = row.original;
   const isCurrentUser = username === authenticatedUser?.username;
   // The cell is muted so the bare "(Me)" reads as a marker; the username is content.
@@ -28,11 +27,11 @@ export const NameCell = ({ row }: NameCellProps) => {
     <span className="d-block text-truncate authz-cell-username text-gray-500" title={username}>
       {isCurrentUser
         ? (
-          <FormattedMessage
-            {...messages['authz.team.members.table.username.current']}
-            values={{ username: name }}
-          />
-        )
+            <FormattedMessage
+              {...messages['authz.team.members.table.username.current']}
+              values={{ username: name }}
+            />
+          )
         : name}
     </span>
   );

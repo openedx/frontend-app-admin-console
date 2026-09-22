@@ -213,7 +213,7 @@ describe('TeamMembersTable', () => {
       ...mockedTeamMembers,
       isLoading: false,
       error: new Error('Failed to fetch'),
-      // @ts-ignore - deliberately partial payload alongside the error
+      // @ts-expect-error - deliberately partial payload alongside the error
       data: { results: [] },
     });
     renderTable();

@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import { IconButton } from '@openedx/paragon';
 import { Visibility } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';

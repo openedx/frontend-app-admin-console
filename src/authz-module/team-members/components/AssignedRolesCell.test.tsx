@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import AssignedRolesCell from './AssignedRolesCell';
 
@@ -54,10 +54,12 @@ describe('AssignedRolesCell', () => {
   });
 
   it('summarises a platform-wide course scope as the whole platform', () => {
-    renderWrapper(<AssignedRolesCell {...rowFor([{
-      ...courseAssignment, role: 'course_admin', org: '*', scope: 'course-v1:*', scopeDisplayName: '',
-    }])}
-    />);
+    renderWrapper(
+      <AssignedRolesCell {...rowFor([{
+        ...courseAssignment, role: 'course_admin', org: '*', scope: 'course-v1:*', scopeDisplayName: '',
+      }])}
+      />
+    );
 
     // Named once, on the scope line: the organization line is dropped rather than repeating it.
     expect(screen.getAllByText('All platform')).toHaveLength(1);
@@ -67,20 +69,24 @@ describe('AssignedRolesCell', () => {
   });
 
   it('summarises a platform-wide library scope the same way', () => {
-    renderWrapper(<AssignedRolesCell {...rowFor([{
-      ...courseAssignment, role: 'library_admin', org: '*', scope: 'lib:*', scopeDisplayName: '',
-    }])}
-    />);
+    renderWrapper(
+      <AssignedRolesCell {...rowFor([{
+        ...courseAssignment, role: 'library_admin', org: '*', scope: 'lib:*', scopeDisplayName: '',
+      }])}
+      />
+    );
 
     expect(screen.getByText('All platform')).toBeInTheDocument();
     expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
   });
 
   it('summarises an organization-wide scope as just the organization', () => {
-    renderWrapper(<AssignedRolesCell {...rowFor([{
-      ...courseAssignment, role: 'course_admin', org: 'MathDept', scope: 'course-v1:MathDept+*', scopeDisplayName: '',
-    }])}
-    />);
+    renderWrapper(
+      <AssignedRolesCell {...rowFor([{
+        ...courseAssignment, role: 'course_admin', org: 'MathDept', scope: 'course-v1:MathDept+*', scopeDisplayName: '',
+      }])}
+      />
+    );
 
     // Named once, on the scope line, rather than repeated on an organization line below.
     expect(screen.getAllByText('MathDept')).toHaveLength(1);
@@ -88,10 +94,12 @@ describe('AssignedRolesCell', () => {
   });
 
   it('summarises an organization-wide library scope the same way', () => {
-    renderWrapper(<AssignedRolesCell {...rowFor([{
-      ...courseAssignment, role: 'library_admin', org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '',
-    }])}
-    />);
+    renderWrapper(
+      <AssignedRolesCell {...rowFor([{
+        ...courseAssignment, role: 'library_admin', org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '',
+      }])}
+      />
+    );
 
     expect(screen.getAllByText('MathDept')).toHaveLength(1);
     expect(screen.queryByText('All libraries in this organization')).not.toBeInTheDocument();
