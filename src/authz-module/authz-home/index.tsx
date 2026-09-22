@@ -23,7 +23,6 @@ const AuthzHome = () => {
   return (
     <AuthZLayout
       pageTitle={pageTitle}
-      pageSubtitle=""
       actions={
         [<AddRoleButton key="add-role-button" />]
       }

@@ -42,7 +42,6 @@ const AssignRoleWizardPage = () => {
       navLinks={[{ label: intl.formatMessage(messages['wizard.page.breadcrumb']), to: returnTo }]}
       activeLabel={intl.formatMessage(messages['wizard.page.title'])}
       pageTitle={intl.formatMessage(messages['wizard.page.title'])}
-      pageSubtitle=""
       actions={[]}
     >
       <AssignRoleWizard

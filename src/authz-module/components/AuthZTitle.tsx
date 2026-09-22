@@ -23,7 +23,7 @@ interface Action {
 export interface AuthZTitleProps {
   activeLabel?: string;
   pageTitle: string;
-  pageSubtitle: string | ReactNode;
+  pageSubtitle?: string | ReactNode;
   navLinks?: BreadcrumbLink[];
   actions?: (Action | ReactNode)[];
 }
@@ -38,7 +38,7 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 );
 
 const AuthZTitle = ({
-  activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
+  activeLabel, navLinks = [], pageTitle, pageSubtitle = '', actions = [],
 }: AuthZTitleProps) => {
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
