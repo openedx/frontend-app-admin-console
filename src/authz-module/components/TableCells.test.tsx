@@ -500,6 +500,16 @@ describe('TableCells Components', () => {
       expect(screen.getByText(/view all permissions/i)).toBeInTheDocument();
     });
 
+    it('reports whether the permissions breakdown is open', () => {
+      const { rerender } = renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
+      expect(screen.getByRole('button', { name: /view all permissions/i }))
+        .toHaveAttribute('aria-expanded', 'false');
+
+      rerender(<ViewAllPermissionsCell row={{ ...mockCellProps.row, isExpanded: true }} />);
+      expect(screen.getByRole('button', { name: /hide all permissions/i }))
+        .toHaveAttribute('aria-expanded', 'true');
+    });
+
     it('handles toggle expand functionality with accordion behavior', async () => {
       const user = userEvent.setup();
       const mockToggleRowExpanded = jest.fn();

@@ -1,14 +1,14 @@
 import { screen } from '@testing-library/react';
 import { renderWrapper } from '@src/testUtils';
 import userEvent from '@testing-library/user-event';
-import { ExpandMore } from '@openedx/paragon/icons';
-import ViewMoreLink from './ViewMoreLink';
+import ExpandableButton from './ExpandableButton';
 
-describe('ViewMoreLink', () => {
+describe('ExpandableButton', () => {
   const mockOnClick = jest.fn();
   const defaultProps = {
     label: 'View more details',
     onClick: mockOnClick,
+    isExpanded: false,
   };
 
   beforeEach(() => {
@@ -17,40 +17,33 @@ describe('ViewMoreLink', () => {
 
   describe('rendering', () => {
     it('exposes the label as a button, not a link, since it triggers an action in place', () => {
-      renderWrapper(<ViewMoreLink {...defaultProps} />);
+      renderWrapper(<ExpandableButton {...defaultProps} />);
 
       expect(screen.getByRole('button', { name: 'View more details' })).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
-    it('renders without an icon when iconSrc is not provided', () => {
-      renderWrapper(<ViewMoreLink {...defaultProps} />);
-
-      const button = screen.getByRole('button', { name: 'View more details' });
-      expect(button.querySelector('svg')).not.toBeInTheDocument();
-    });
-
-    it('renders with an icon when iconSrc is provided', () => {
-      renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
+    it('shows a chevron and announces itself as closed while collapsed', () => {
+      renderWrapper(<ExpandableButton {...defaultProps} />);
 
       const button = screen.getByRole('button', { name: 'View more details' });
       expect(button.querySelector('svg')).toBeInTheDocument();
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('announces itself as open once expanded', () => {
+      renderWrapper(<ExpandableButton {...defaultProps} isExpanded />);
+
+      const button = screen.getByRole('button', { name: 'View more details' });
+      expect(button.querySelector('svg')).toBeInTheDocument();
+      expect(button).toHaveAttribute('aria-expanded', 'true');
     });
   });
 
   describe('user interactions', () => {
     it('calls onClick handler when user clicks the button', async () => {
       const user = userEvent.setup();
-      renderWrapper(<ViewMoreLink {...defaultProps} />);
-
-      await user.click(screen.getByRole('button', { name: 'View more details' }));
-
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls onClick handler when user clicks the button with an icon', async () => {
-      const user = userEvent.setup();
-      renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
+      renderWrapper(<ExpandableButton {...defaultProps} />);
 
       await user.click(screen.getByRole('button', { name: 'View more details' }));
 
@@ -59,7 +52,7 @@ describe('ViewMoreLink', () => {
 
     it('handles multiple clicks correctly', async () => {
       const user = userEvent.setup();
-      renderWrapper(<ViewMoreLink {...defaultProps} />);
+      renderWrapper(<ExpandableButton {...defaultProps} />);
 
       const button = screen.getByRole('button', { name: 'View more details' });
       await user.click(button);
@@ -71,7 +64,7 @@ describe('ViewMoreLink', () => {
 
     it('can be reached and activated with the keyboard alone', async () => {
       const user = userEvent.setup();
-      renderWrapper(<ViewMoreLink {...defaultProps} iconSrc={ExpandMore} />);
+      renderWrapper(<ExpandableButton {...defaultProps} />);
 
       await user.tab();
       expect(screen.getByRole('button', { name: 'View more details' })).toHaveFocus();

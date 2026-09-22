@@ -1,7 +1,6 @@
 import { useIntl } from '@openedx/frontend-base';
 import type { DataTableRow } from '@openedx/paragon';
-import { ExpandLess, ExpandMore } from '@openedx/paragon/icons';
-import ViewMoreLink from '@src/authz-module/components/ViewMoreLink';
+import ExpandableButton from '@src/authz-module/components/ExpandableButton';
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import type { TeamMember } from '@src/types';
 import messages from '../messages';
@@ -27,12 +26,12 @@ const MoreRolesToggle = ({ row }: MoreRolesToggleProps) => {
   }
 
   return (
-    <ViewMoreLink
+    <ExpandableButton
       label={row.isExpanded
         ? formatMessage(messages['authz.team.members.table.hide.roles'])
         : formatMessage(messages['authz.team.members.table.more.roles'], { count: assignmentCount - 1 })}
       onClick={toggleExpanded}
-      iconSrc={row.isExpanded ? ExpandLess : ExpandMore}
+      isExpanded={!!row.isExpanded}
     />
   );
 };

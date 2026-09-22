@@ -1,6 +1,6 @@
 import { useIntl } from '@openedx/frontend-base';
 import {
-  Delete, ExpandLess, ExpandMore,
+  Delete,
   Info,
 } from '@openedx/paragon/icons';
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
@@ -18,7 +18,7 @@ import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
-import ViewMoreLink from './ViewMoreLink';
+import ExpandableButton from './ExpandableButton';
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
 type CellPropsWithValue = CellProps & {
@@ -137,14 +137,14 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
   const toggleExpanded = useExclusiveRowExpansion(row);
 
   return (
-    <ViewMoreLink
+    <ExpandableButton
       label={formatMessage(
         row.isExpanded
           ? messages['authz.user.table.view_all_permissions.link.text.close']
           : messages['authz.user.table.view_all_permissions.link.text.open'],
       )}
       onClick={toggleExpanded}
-      iconSrc={row.isExpanded ? ExpandLess : ExpandMore}
+      isExpanded={!!row.isExpanded}
     />
   );
 };

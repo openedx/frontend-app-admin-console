@@ -303,6 +303,21 @@ describe('TeamMembersTable', () => {
     expect(screen.getByText('Library User')).toBeInTheDocument();
   });
 
+  it('reports whether a member\'s role breakdown is open', async () => {
+    const user = userEvent.setup();
+    mockApiResponses();
+    renderTable();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /\+9 more roles/ })).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    await user.click(screen.getByText('+9 more roles'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Hide roles/ })).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   it('reports how many roles the listed rows were taken from in the breakdown footer', async () => {
     const user = userEvent.setup();
     mockApiResponses();
