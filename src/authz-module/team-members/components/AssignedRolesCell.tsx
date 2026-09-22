@@ -1,4 +1,4 @@
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@openedx/frontend-base';
 import { Icon } from '@openedx/paragon';
 import { Business, Person } from '@openedx/paragon/icons';
 import {

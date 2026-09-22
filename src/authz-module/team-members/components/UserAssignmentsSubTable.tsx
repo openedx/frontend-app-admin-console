@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@openedx/frontend-base';
 import {
   Card, DataTable, Icon, TableFooter,
 } from '@openedx/paragon';
@@ -20,7 +20,9 @@ interface UserAssignmentsSubTableProps {
   row: { original: TeamMember };
 }
 
-type AssignmentCellProps = { row: { original: TeamMemberAssignment } };
+interface AssignmentCellProps {
+  row: { original: TeamMemberAssignment };
+}
 
 // Same badge as the collapsed row above, so the breakdown reads consistently.
 const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (

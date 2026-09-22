@@ -148,8 +148,7 @@ export const revokeUserRoles = async (
  * decide both which users come back and which of each user's assignments are listed and
  * counted.
  */
-export const getTeamMembersAssignments = async (querySettings: QuerySettings)
-: Promise<GetTeamMembersAssignmentsResponse> => {
+export const getTeamMembersAssignments = async (querySettings: QuerySettings): Promise<GetTeamMembersAssignmentsResponse> => {
   const url = new URL(getApiUrl('/api/authz/v1/users/'));
 
   if (querySettings.roles) {

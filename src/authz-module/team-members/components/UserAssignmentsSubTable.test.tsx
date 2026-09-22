@@ -1,5 +1,5 @@
 import { screen, within } from '@testing-library/react';
-import { renderWrapper } from '@src/setupTest';
+import { renderWrapper } from '@src/testUtils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import UserAssignmentsSubTable from './UserAssignmentsSubTable';
 
@@ -55,21 +55,23 @@ describe('UserAssignmentsSubTable', () => {
   });
 
   it('names wildcard scopes instead of showing their keys', () => {
-    renderWrapper(<UserAssignmentsSubTable {...rowFor([
-      {
-        ...courseAssignment, role: 'course_admin', org: '*', scope: 'course-v1:*', scopeDisplayName: '',
-      },
-      {
-        ...libraryAssignment, role: 'library_admin', org: '*', scope: 'lib:*', scopeDisplayName: '',
-      },
-      {
-        ...courseAssignment, role: 'course_admin', org: 'MathDept', scope: 'course-v1:MathDept+*', scopeDisplayName: '',
-      },
-      {
-        ...libraryAssignment, role: 'library_admin', org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '',
-      },
-    ])}
-    />);
+    renderWrapper(
+      <UserAssignmentsSubTable {...rowFor([
+        {
+          ...courseAssignment, role: 'course_admin', org: '*', scope: 'course-v1:*', scopeDisplayName: '',
+        },
+        {
+          ...libraryAssignment, role: 'library_admin', org: '*', scope: 'lib:*', scopeDisplayName: '',
+        },
+        {
+          ...courseAssignment, role: 'course_admin', org: 'MathDept', scope: 'course-v1:MathDept+*', scopeDisplayName: '',
+        },
+        {
+          ...libraryAssignment, role: 'library_admin', org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '',
+        },
+      ])}
+      />
+    );
 
     // The scope column names only the kind of resource...
     expect(screen.getAllByText('All courses')).toHaveLength(2);

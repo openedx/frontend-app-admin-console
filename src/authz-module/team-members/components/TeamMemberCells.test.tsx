@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react';
-import { initializeMockApp } from '@edx/frontend-platform/testing';
-import { renderWrapper } from '@src/setupTest';
+import { initializeMocks, renderWrapper } from '@src/testUtils';
 import { EmailCell, NameCell } from './TeamMemberCells';
 
 describe('NameCell', () => {
@@ -18,13 +17,7 @@ describe('NameCell', () => {
     },
   };
   beforeEach(() => {
-    initializeMockApp({
-      authenticatedUser: {
-        userId: 1,
-        username: 'testuser',
-        email: 'testuser@example.com',
-      },
-    });
+    initializeMocks();
   });
 
   it('displays the username, never the full name', () => {
