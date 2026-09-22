@@ -33,18 +33,16 @@ const ScopeFilterBar = ({
   return (
     <>
       <div className="d-flex align-items-center justify-content-between gap-3 mb-2 flex-wrap">
-        <div className="d-flex align-items-center gap-3">
-          <div className="scope-search-input">
-            <Form.Group controlId="scope-search" className="mb-0">
-              <Form.Control
-                type="text"
-                value={search}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
-                placeholder={intl.formatMessage(messages['wizard.step2.search.placeholder'])}
-                trailingElement={<Icon src={Search} />}
-              />
-            </Form.Group>
-          </div>
+        <div className="d-flex align-items-center gap-3 flex-wrap">
+          <Form.Group controlId="scope-search" className="mb-0">
+            <Form.Control
+              type="text"
+              value={search}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
+              placeholder={intl.formatMessage(messages['wizard.step2.search.placeholder'])}
+              trailingElement={<Icon src={Search} />}
+            />
+          </Form.Group>
 
           <OrgFilter
             filterButtonText={intl.formatMessage(messages['wizard.step2.filter.org.label'])}
