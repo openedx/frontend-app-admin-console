@@ -18,7 +18,9 @@ interface PermissionTableProps {
 const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();
   return (
-    <Card>
+    // The matrix is wider than a narrow viewport once it has a few role columns, so the
+    // card scrolls rather than letting the table overflow with no way to reach it.
+    <Card className="overflow-auto">
       <table className="permission-table w-100">
         <thead>
           <tr>
