@@ -80,15 +80,15 @@ const RolesPermissions = () => {
             variant="info"
             className="mt-5"
           >
-            <div className="row align-items-center flex-wrap">
-              <div className="col col-md-7">
+            <div className="row align-items-center">
+              <div className="col-12 col-md-7">
                 <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.title'])}</p>
                 <span>
                   <span className="font-weight-bold">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.note'])}</span>
                   {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.description'])}
                 </span>
               </div>
-              <div className="col col-md-5 mt-3 mt-md-0">
+              <div className="col-12 col-md-5 mt-3 mt-md-0">
                 <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
                   {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.link'])}
                 </Hyperlink>

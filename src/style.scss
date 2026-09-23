@@ -1,11 +1,11 @@
 // App-scoped global styles. Global selectors, so they must not live under any
 // component's scoped stylesheet.
 
-// Insets content to line up with the site header (`Container fluid size="xl"`) while the
-// element stays full width, so a background it carries still bleeds to the edges. Must
-// span the viewport: `100%` resolves against its own containing block, so nested in a
-// constrained box the overhang silently goes to zero. Pair with `py-*`, not `p-*`, and
-// not on a Paragon `Container` -- its gutter ties on specificity and wins on order.
+// Lines content up with the site header (`Container fluid size="xl"`) while the element
+// itself stays full width, so a background it carries still bleeds to the edges.
+// The overhang is measured from the element's own width, so it has to span the viewport:
+// inside a constrained box it collapses to zero. Use `py-*` for vertical padding; `p-*`
+// sets the `padding` shorthand `!important`, which wipes out the horizontal inset.
 .page-band {
   --page-band-overhang: max(
     0px,

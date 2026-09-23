@@ -38,7 +38,7 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 );
 
 const AuthZTitle = ({
-  activeLabel, navLinks = [], pageTitle, pageSubtitle = '', actions = [],
+  activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
 }: AuthZTitleProps) => {
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
@@ -52,9 +52,14 @@ const AuthZTitle = ({
         <Col xs={12} md={7} className="mb-4">
           <div className="d-flex align-items-center flex-column-sm">
             <h2 className="text-primary mb-0">{pageTitle}</h2>
-            {typeof pageSubtitle === 'string'
-              ? <> { pageSubtitle !== '' && <hr className="authz-action-divider mx-lg-3" /> }<h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3></>
-              : <>{ pageSubtitle !== '' && <hr className="authz-action-divider mx-lg-3" /> } <div className="mb-0">{pageSubtitle}</div></>}
+            {pageSubtitle && (
+              <>
+                <hr className="authz-action-divider mx-lg-3" />
+                {typeof pageSubtitle === 'string'
+                  ? <h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3>
+                  : <div className="mb-0">{pageSubtitle}</div>}
+              </>
+            )}
 
           </div>
         </Col>
