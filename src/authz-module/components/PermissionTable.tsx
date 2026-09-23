@@ -18,9 +18,10 @@ interface PermissionTableProps {
 const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();
   return (
-    // The matrix is wider than a narrow viewport once it has a few role columns, so the
-    // card scrolls rather than letting the table overflow with no way to reach it.
-    <Card className="overflow-auto">
+    // Only the narrowest viewports are too small for the matrix, so the card scrolls there
+    // (see `.permission-table-scroll`). Above that it is not a scroll container, which is
+    // what lets the header row stick to the viewport as the page scrolls.
+    <Card className="permission-table-scroll">
       <table className="permission-table w-100">
         <thead>
           <tr>

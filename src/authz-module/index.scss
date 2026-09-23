@@ -62,6 +62,17 @@
       line-height: 24px;
     }
   }
+
+  // Paragon's `.overflow-auto` lives in the `paragon` cascade layer, where its `!important`
+  // outranks anything this layer can say, so the card carries its own class instead. The
+  // matrix is 432px at min-content: only the narrowest screens need the card to scroll, and
+  // the cap is what gives the sticky header something to stick to while it is the scroller.
+  @media (--pgn-size-breakpoint-max-width-xs) {
+    .permission-table-scroll {
+      overflow: auto;
+      max-height: 80vh;
+    }
+  }
   
   @media(--pgn-size-breakpoint-max-width-sm){
     .flex-column-sm {
