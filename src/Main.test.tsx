@@ -23,9 +23,4 @@ describe('Main', () => {
     const { getByTestId } = renderWrapper(<Main />);
     expect(getByTestId('authz-module')).toBeInTheDocument();
   });
-
-  it('wraps the body in an xl container to align it with the header', () => {
-    const { getByTestId } = renderWrapper(<Main />);
-    expect(getByTestId('authz-module').closest('.container-mw-xl')).toBeInTheDocument();
-  });
 });

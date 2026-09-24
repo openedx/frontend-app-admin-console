@@ -21,29 +21,25 @@ const AuthzHome = () => {
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
 
   return (
-    <div className="authz-module">
-      <AuthZLayout
-        context={{ id: '', title: '', org: '' }}
-        pageTitle={pageTitle}
-        pageSubtitle=""
-        actions={
-          [<AddRoleButton key="add-role-button" />]
-        }
+    <AuthZLayout
+      pageTitle={pageTitle}
+      actions={
+        [<AddRoleButton key="add-role-button" />]
+      }
+    >
+      <Tabs
+        variant="tabs"
+        defaultActiveKey={hash ? 'permissionsRoles' : 'team'}
+        className="page-band bg-light-100"
       >
-        <Tabs
-          variant="tabs"
-          defaultActiveKey={hash ? 'permissionsRoles' : 'team'}
-          className="bg-light-100 px-5"
-        >
-          <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="p-5 bg-light-200">
-            <TeamMembersTable presetScope={presetScope} />
-          </Tab>
-          <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])}>
-            <RolesPermissions />
-          </Tab>
-        </Tabs>
-      </AuthZLayout>
-    </div>
+        <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="page-band py-5">
+          <TeamMembersTable presetScope={presetScope} />
+        </Tab>
+        <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])} className="page-band py-5">
+          <RolesPermissions />
+        </Tab>
+      </Tabs>
+    </AuthZLayout>
   );
 };
 

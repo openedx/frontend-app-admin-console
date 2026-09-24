@@ -24,14 +24,10 @@
     min-height: 700px;
   }
 
-  hr {
+  .authz-action-divider {
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
     height: var(--height-action-divider);
     width: 0;
-  }
-
-  .tab-content {
-    background-color: var(--pgn-color-light-200);
   }
 
   .collapsible-card {
@@ -66,12 +62,23 @@
       line-height: 24px;
     }
   }
+
+  // Paragon's `.overflow-auto` lives in the `paragon` cascade layer, where its `!important`
+  // outranks anything this layer can say, so the card carries its own class instead. The
+  // matrix is 432px at min-content: only the narrowest screens need the card to scroll, and
+  // the cap is what gives the sticky header something to stick to while it is the scroller.
+  @media (--pgn-size-breakpoint-max-width-xs) {
+    .permission-table-scroll {
+      overflow: auto;
+      max-height: 80vh;
+    }
+  }
   
   @media(--pgn-size-breakpoint-max-width-sm){
     .flex-column-sm {
       flex-direction: column;
     }
-    hr {
+    .authz-action-divider {
       border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
       border-right: none;
       width: 100%;
@@ -126,6 +133,3 @@
   max-height: 500px;
 }
 
-.scope-search-input {
-  width: 18.75rem; // 300px
-}

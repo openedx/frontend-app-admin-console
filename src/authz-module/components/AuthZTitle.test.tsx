@@ -12,14 +12,12 @@ describe('AuthZTitle', () => {
   const defaultProps = {
     activeLabel: 'Current Page',
     pageTitle: 'Page Title',
-    pageSubtitle: 'Page Subtitle',
   };
 
   it('renders without optional fields', () => {
     render(<AuthZTitle {...defaultProps} />);
     expect(screen.getByText(defaultProps.activeLabel)).toBeInTheDocument();
     expect(screen.getByText(defaultProps.pageTitle)).toBeInTheDocument();
-    expect(screen.getByText(defaultProps.pageSubtitle as string)).toBeInTheDocument();
   });
 
   it('renders breadcrumb with links and active label', () => {

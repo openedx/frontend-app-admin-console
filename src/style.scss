@@ -1,5 +1,22 @@
-// App-scoped runtime styles for the toast manager. Global selectors, so
-// they must not live under any component's scoped stylesheet.
+// App-scoped global styles. Global selectors, so they must not live under any
+// component's scoped stylesheet.
+
+// Lines content up with the site header (`Container fluid size="xl"`) while the element
+// itself stays full width, so a background it carries still bleeds to the edges.
+// The overhang is measured from the element's own width, so it has to span the viewport:
+// inside a constrained box it collapses to zero. Use `py-*` for vertical padding; `p-*`
+// sets the `padding` shorthand `!important`, which wipes out the horizontal inset.
+.page-band {
+  --page-band-overhang: max(
+    0px,
+    (100% - var(--pgn-size-container-max-width-xl) - var(--pgn-spacing-grid-gutter-width)) / 2
+  );
+
+  padding-left: calc(var(--page-band-overhang) + var(--pgn-spacing-spacer-5));
+  padding-right: calc(var(--page-band-overhang) + var(--pgn-spacing-spacer-5));
+}
+
+// Runtime styles for the toast manager.
 .toast-container {
   // Ensure toast appears above modal
   z-index: 1000;

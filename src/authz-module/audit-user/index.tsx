@@ -3,9 +3,7 @@ import {
   useContext, useEffect, useMemo, useState,
 } from 'react';
 import { SiteContext, useIntl } from '@openedx/frontend-base';
-import {
-  Container, DataTable,
-} from '@openedx/paragon';
+import { DataTable } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
   AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE,
@@ -228,7 +226,7 @@ const AuditUserPage = () => {
   };
 
   return (
-    <div className="authz-module">
+    <>
       <ConfirmDeletionModal
         isOpen={showConfirmDeletionModal}
         close={handleCloseConfirmDeletionModal}
@@ -243,11 +241,6 @@ const AuditUserPage = () => {
         }}
       />
       <AuthZLayout
-        context={{
-          id: '',
-          org: '',
-          title: '',
-        }}
         navLinks={navLinks}
         activeLabel={user?.username || ''}
         pageTitle={user?.username || ''}
@@ -258,7 +251,7 @@ const AuditUserPage = () => {
           ]
         }
       >
-        <Container className="bg-light-200 p-5">
+        <div className="page-band py-5">
           <DataTable
             isPaginated
             isFilterable
@@ -283,10 +276,9 @@ const AuditUserPage = () => {
             <DataTable.Table />
             <TableFooter />
           </DataTable>
-
-        </Container>
+        </div>
       </AuthZLayout>
-    </div>
+    </>
   );
 };
 
