@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from '@openedx/frontend-base';
 import { Icon } from '@openedx/paragon';
-import { Business, Person } from '@openedx/paragon/icons';
+import { Person } from '@openedx/paragon/icons';
 import {
   ALL_ORGS_KEY, getAggregateScopeType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
@@ -41,8 +41,6 @@ const AssignedRolesCell = ({ row }: AssignedRolesCellProps) => {
   const {
     role, scope, scopeDisplayName, org,
   } = assignment;
-  // An aggregate scope covers every course/library across the platform or within one org,
-  // so it names no single resource and the API sends an empty display name for it.
   /*
    * A wildcard scope names no single resource, so the row summarises it by reach alone:
    * the organization it covers, or the whole platform. The kind of resource ("All
@@ -56,7 +54,7 @@ const AssignedRolesCell = ({ row }: AssignedRolesCellProps) => {
     scopeIcon = RESOURCE_ICONS.GLOBAL;
     scopeText = formatMessage(componentMessages['authz.user.table.org.all.organizations.label']);
   } else if (aggregateType === 'org') {
-    scopeIcon = Business;
+    scopeIcon = RESOURCE_ICONS.ORGANIZATION;
     scopeText = org;
   }
 
@@ -78,7 +76,7 @@ const AssignedRolesCell = ({ row }: AssignedRolesCellProps) => {
               </span>
               {!aggregateType && (
                 <span className="d-flex align-items-center small text-gray-500 authz-scope-cell__org ml-4">
-                  <Icon src={Business} className="mr-2 flex-shrink-0" size="xs" />
+                  <Icon src={RESOURCE_ICONS.ORGANIZATION} className="mr-2 flex-shrink-0" size="xs" />
                   <span className="text-truncate" title={orgText}>{orgText}</span>
                 </span>
               )}

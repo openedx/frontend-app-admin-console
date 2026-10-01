@@ -3,7 +3,7 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Card, DataTable, Icon, TableFooter,
 } from '@openedx/paragon';
-import { ArrowForward, Business } from '@openedx/paragon/icons';
+import { ArrowForward } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import {
   ALL_ORGS_KEY, buildAuditUserPath, getAggregateScopeType, getScopeContextType,
@@ -57,7 +57,7 @@ const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
 
   return (
     <span className="d-flex align-items-center">
-      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : Business} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : RESOURCE_ICONS.ORGANIZATION} className="mr-2 flex-shrink-0 text-primary" size="xs" />
       <span className="text-truncate" title={orgText}>{orgText}</span>
     </span>
   );
