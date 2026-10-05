@@ -12,7 +12,7 @@ import {
   Icon,
 } from '@openedx/paragon';
 import {
-  Business, Close, LocationOn, Person,
+  AccountBalance, Close, LocationOn, Person,
   Warning,
 } from '@openedx/paragon/icons';
 
@@ -27,7 +27,7 @@ import { FilterChoice } from './types';
 
 const FILTER_CHIPS_ICONS = {
   role: Person,
-  organization: Business,
+  organization: AccountBalance,
   scope: LocationOn,
 };
 
