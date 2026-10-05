@@ -58,8 +58,8 @@ const messages = defineMessages({
   },
   'authz.user.table.org.all.organizations.label': {
     id: 'authz.user.table.org.all.organizations.label',
-    defaultMessage: 'All Organizations',
-    description: 'Label for the "All Organizations" message on the user assignments table when a user has a django managed role assigned.',
+    defaultMessage: 'All platform',
+    description: 'Shown in place of an organization for a role that is not limited to one organization: a wildcard org, or a Django-managed role.',
   },
   'authz.user.table.scope.global.label': {
     id: 'authz.user.table.scope.global.label',
@@ -85,11 +85,6 @@ const messages = defineMessages({
     id: 'authz.user.table.view_all_permissions.link.text',
     defaultMessage: 'View all permissions',
     description: 'Text for the link to view all permissions in the user table',
-  },
-  'authz.table.username.current': {
-    id: 'authz.table.username.current',
-    defaultMessage: '(Me)',
-    description: 'Indicates the current user in the team members table',
   },
 
   'authz.table.column.actions.view.title': {

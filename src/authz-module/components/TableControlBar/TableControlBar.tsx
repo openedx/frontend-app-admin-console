@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import {
+  useContext, useEffect, useState, type ReactNode,
+} from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import {
   DataTableContext,
@@ -10,7 +12,7 @@ import {
   Icon,
 } from '@openedx/paragon';
 import {
-  Business, Close, LocationOn, Person,
+  AccountBalance, Close, LocationOn, Person,
   Warning,
 } from '@openedx/paragon/icons';
 
@@ -25,7 +27,7 @@ import { FilterChoice } from './types';
 
 const FILTER_CHIPS_ICONS = {
   role: Person,
-  organization: Business,
+  organization: AccountBalance,
   scope: LocationOn,
 };
 
@@ -37,9 +39,11 @@ const FILTER_GROUP_TO_ID = {
 
 interface TableControlBarProps {
   onFilterChange?: (filters: string[]) => void;
+  /** Optional count rendered right-aligned on the filter row, e.g. "Showing 10 users of 100." */
+  countLabel?: ReactNode;
 }
 
-const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
+const TableControlBar = ({ onFilterChange, countLabel }: TableControlBarProps) => {
   const intl = useIntl();
   // applied filters in the order they were selected by the user, to display on the control bar as chips
   const [chronologicalFilters, setChronologicalFilters] = useState<FilterChoice[]>([]);
@@ -164,6 +168,7 @@ const TableControlBar = ({ onFilterChange }: TableControlBarProps) => {
           }
           return null;
         })}
+        {countLabel && <span className="ml-auto text-gray-500">{countLabel}</span>}
       </Stack>
 
       {chronologicalFilters.length > 0 && (

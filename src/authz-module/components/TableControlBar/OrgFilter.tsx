@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Business } from '@openedx/paragon/icons';
+import { AccountBalance } from '@openedx/paragon/icons';
 import { useOrgs } from '@src/authz-module/data/hooks';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
@@ -46,7 +46,7 @@ const OrgFilter = ({
       setFilter={setFilter}
       isSearchable
       onSearchChange={handleSearchChange}
-      iconSrc={Business}
+      iconSrc={AccountBalance}
       disabled={disabled}
     />
   );

@@ -1,5 +1,5 @@
 import type { IntlShape } from '@openedx/frontend-base';
-import { Language, LibraryBooks, School } from '@openedx/paragon/icons';
+import { AccountBalance, Language, LibraryBooks, School } from '@openedx/paragon/icons';
 import messages from './messages';
 
 export const getRolesFiltersOptions = (intl: IntlShape) => [
@@ -81,4 +81,5 @@ export const RESOURCE_ICONS = {
   COURSE: School,
   LIBRARY: LibraryBooks,
   GLOBAL: Language,
+  ORGANIZATION: AccountBalance,
 };

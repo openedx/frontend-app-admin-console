@@ -42,6 +42,19 @@ const messages = defineMessages(
       defaultMessage: '<Bold>The request took too long.</Bold> <Br></Br>Please check your connection and try again.',
       description: 'Request timeout message',
     },
+    // Aggregate scope labels, shared by every table that lists a scope beside its
+    // organization. The scope column names only the kind of resource; the organization
+    // column says how far it reaches. The wizard keeps its own, longer wording.
+    'authz.scope.aggregate.course': {
+      id: 'authz.scope.aggregate.course',
+      defaultMessage: 'All courses',
+      description: 'Scope column label for a role that covers every course, either across the platform or within one organization. The organization column shows which.',
+    },
+    'authz.scope.aggregate.library': {
+      id: 'authz.scope.aggregate.library',
+      defaultMessage: 'All libraries',
+      description: 'Scope column label for a role that covers every library, either across the platform or within one organization. The organization column shows which.',
+    },
     'authz.team.toast.retry.label': {
       id: 'authz.team.toast.retry.label',
       defaultMessage: 'Retry',
@@ -49,5 +62,11 @@ const messages = defineMessages(
     },
   },
 );
+
+/** Aggregate scope labels keyed by the kind of resource the scope covers. */
+export const AGGREGATE_SCOPE_LABELS = {
+  course: messages['authz.scope.aggregate.course'],
+  library: messages['authz.scope.aggregate.library'],
+};
 
 export default messages;
