@@ -30,6 +30,7 @@ export interface AuthZTitleProps {
 
 export const ActionButton = ({ label, icon, onClick }: Action) => (
   <Button
+    size="sm"
     iconBefore={icon}
     onClick={onClick}
   >
@@ -40,23 +41,27 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 const AuthZTitle = ({
   activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
 }: AuthZTitleProps) => {
+  const shouldRenderBreadcrumb = activeLabel || navLinks?.length > 0;
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
-    <div className="page-band py-5 bg-light-100">
-      <Breadcrumb
-        linkAs={Link}
-        links={navLinks}
-        activeLabel={activeLabel}
-      />
-      <Row className="mt-4">
-        <Col xs={12} md={7} className="mb-4">
-          <div className="d-flex align-items-center flex-column-sm">
+    <div className="page-band py-4 bg-light-100">
+      { shouldRenderBreadcrumb
+      && (
+        <Breadcrumb
+          linkAs={Link}
+          links={navLinks}
+          activeLabel={activeLabel}
+        />
+      )}
+      <Row>
+        <Col xs={12} md={7}>
+          <div className="d-flex align-items-center flex-column-sm mb-3 mb-md-0">
             <h2 className="text-primary mb-0">{pageTitle}</h2>
             {pageSubtitle && (
               <>
-                <hr className="authz-action-divider mx-lg-3" />
+                <hr className="authz-action-divider mx-lg-3 my-md-0 mx-md-3" />
                 {typeof pageSubtitle === 'string'
-                  ? <h3 className="mb-0 py-2 font-weight-light text-gray-700">{pageSubtitle}</h3>
+                  ? <h3 className="mb-0 font-weight-light text-gray-700">{pageSubtitle}</h3>
                   : <div className="mb-0">{pageSubtitle}</div>}
               </>
             )}

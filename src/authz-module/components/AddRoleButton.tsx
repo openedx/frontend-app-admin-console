@@ -28,6 +28,7 @@ const AddRoleButton = ({ presetUsername, from }: AddRoleButtonProps) => {
   return (
     canAssignRole ? (
       <Button
+        size="sm"
         iconBefore={Plus}
         onClick={handleClick}
       >

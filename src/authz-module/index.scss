@@ -26,7 +26,6 @@
 
   .authz-action-divider {
     border-right: var(--pgn-size-border-width) solid var(--pgn-color-border);
-    height: var(--height-action-divider);
     width: 0;
   }
 
@@ -196,6 +195,12 @@
       border-top: var(--pgn-size-border-width) solid var(--pgn-color-border);
       border-right: none;
       width: 100%;
+    }
+  }
+
+  @media (--pgn-size-breakpoint-min-width-md) {
+    .authz-action-divider {
+      height: var(--height-action-divider);
     }
   }
 }

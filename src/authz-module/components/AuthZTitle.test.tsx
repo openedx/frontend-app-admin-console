@@ -36,6 +36,13 @@ describe('AuthZTitle', () => {
     expect(screen.getByText(defaultProps.activeLabel)).toBeInTheDocument();
   });
 
+  it('does not render the breadcrumb when there is no activeLabel and no navLinks', () => {
+    render(<AuthZTitle pageTitle="Page Title" />);
+
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Page Title');
+  });
+
   it('renders page title', () => {
     render(<AuthZTitle {...defaultProps} />);
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(defaultProps.pageTitle);
