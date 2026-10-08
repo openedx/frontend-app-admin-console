@@ -2,6 +2,7 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Delete,
   Info,
+  Person,
 } from '@openedx/paragon/icons';
 import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
 import type { ComponentProps } from 'react';
@@ -16,21 +17,14 @@ import {
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
+import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
-interface ScopeNameCellProps {
-  row: { original: Pick<TeamMemberAssignment, 'scope' | 'scopeDisplayName' | 'org'> };
+interface AssignmentCellProps {
+  row: { original: Pick<TeamMemberAssignment, 'role' | 'scope' | 'scopeDisplayName' | 'org'> };
 }
-type CellPropsWithValue = CellProps & {
-  value: string;
-};
-type ExtendedCellProps = CellPropsWithValue & {
-  cell: {
-    getCellProps: (props?: Record<string, string>) => Record<string, string>;
-  };
-};
 
 interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
@@ -70,20 +64,21 @@ export const DisabledCourseActionButton = ({
   );
 };
 
-const OrgCell = ({ value, row }: CellPropsWithValue) => {
-  const { formatMessage } = useIntl();
-  // The backend returns '*' as the org wildcard, meaning the role spans every organization.
-  const isAllOrgs = DJANGO_MANAGED_ROLES.includes(row.original.role) || value === ALL_ORGS_KEY;
-  return (
-    <span>
-      {isAllOrgs ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
-    </span>
-  );
-};
+/** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
+const RoleBadge = ({ role }: { role: string }) => (
+  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-light-300 text-gray-700 mr-3 px-2 py-1">
+    <Icon src={Person} size="xs" className="mr-1" />
+    {MAP_ROLE_KEY_TO_LABEL[role] || role}
+  </div>
+);
 
-// Shared by the user assignments table and the team members role breakdown, so both
-// name a scope the same way.
-const ScopeNameCell = ({ row }: ScopeNameCellProps) => {
+// The role, scope and org cells below are shared by the user assignments table and the
+// team members role breakdown, so both tables read alike.
+const RoleBadgeCell = ({ row }: AssignmentCellProps) => (
+  <RoleBadge role={row.original.role} />
+);
+
+const ScopeNameCell = ({ row }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
   const { scope, scopeDisplayName, org } = row.original;
   const aggregateType = getAggregateScopeType(scope, org);
@@ -99,11 +94,20 @@ const ScopeNameCell = ({ row }: ScopeNameCellProps) => {
   );
 };
 
-const RoleCell = ({ value, cell }: ExtendedCellProps) => {
-  const { key, ...cellProps } = cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' });
+// Mirrors ScopeNameCell's icon treatment. A wildcard org reaches past any one
+// organization, so it gets the globe and the "All platform" label.
+const OrgIconCell = ({ row }: AssignmentCellProps) => {
+  const { formatMessage } = useIntl();
+  const { org } = row.original;
+  const isAllOrgs = org === ALL_ORGS_KEY;
+  const orgText = isAllOrgs
+    ? formatMessage(messages['authz.user.table.org.all.organizations.label'])
+    : org;
+
   return (
-    <span key={key} {...cellProps}>
-      {MAP_ROLE_KEY_TO_LABEL[value] || ''}
+    <span className="d-flex align-items-center">
+      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : RESOURCE_ICONS.ORGANIZATION} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <span className="text-truncate" title={orgText}>{orgText}</span>
     </span>
   );
 };
@@ -222,8 +226,9 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
-  RoleCell,
-  OrgCell,
+  RoleBadge,
+  RoleBadgeCell,
+  OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
   ViewAllPermissionsCell,
