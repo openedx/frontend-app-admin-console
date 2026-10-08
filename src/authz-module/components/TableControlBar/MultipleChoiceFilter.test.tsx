@@ -161,4 +161,33 @@ describe('MultipleChoiceFilter', () => {
     expect(mockOnSearchChange).toHaveBeenCalled();
     expect(mockOnSearchChange).toHaveBeenLastCalledWith('test search');
   });
+
+  describe('size prop', () => {
+    it('applies the small size to the toggle by default', () => {
+      renderWrapper(<MultipleChoiceFilter {...defaultProps} />);
+      expect(screen.getByRole('button', { name: /test filter/i })).toHaveClass('btn-sm');
+    });
+
+    it('applies the large size to the toggle when size is "lg"', () => {
+      renderWrapper(<MultipleChoiceFilter {...defaultProps} size="lg" />);
+      expect(screen.getByRole('button', { name: /test filter/i })).toHaveClass('btn-lg');
+    });
+
+    it('applies the small size to the search input by default', async () => {
+      const user = userEvent.setup();
+      renderWrapper(<MultipleChoiceFilter {...defaultProps} isSearchable onSearchChange={jest.fn()} />);
+      await user.click(screen.getByRole('button', { name: /test filter/i }));
+      expect(screen.getByRole('textbox')).toHaveClass('form-control-sm');
+    });
+
+    it('applies no size modifier to the search input when size is "md"', async () => {
+      // "md" is mapped to undefined because Paragon's Form.Control has no "md" size.
+      const user = userEvent.setup();
+      renderWrapper(<MultipleChoiceFilter {...defaultProps} size="md" isSearchable onSearchChange={jest.fn()} />);
+      await user.click(screen.getByRole('button', { name: /test filter/i }));
+      const searchInput = screen.getByRole('textbox');
+      expect(searchInput).not.toHaveClass('form-control-sm');
+      expect(searchInput).not.toHaveClass('form-control-lg');
+    });
+  });
 });

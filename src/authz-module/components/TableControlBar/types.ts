@@ -16,4 +16,5 @@ export interface MultipleChoiceFilterProps {
   onSearchChange?: (value: string) => void;
   iconSrc?: React.ComponentType | undefined;
   disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'inline';
 }

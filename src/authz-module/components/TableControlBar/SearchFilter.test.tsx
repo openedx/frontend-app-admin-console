@@ -47,4 +47,24 @@ describe('SearchFilter', () => {
     renderWrapper(<SearchFilter {...defaultProps} filterValue={undefined as any} />);
     expect(screen.getByRole('textbox')).toHaveValue('');
   });
+
+  describe('size prop', () => {
+    it('applies the small size by default', () => {
+      renderWrapper(<SearchFilter {...defaultProps} />);
+      expect(screen.getByRole('textbox')).toHaveClass('form-control-sm');
+    });
+
+    it('applies the large size when size is "lg"', () => {
+      renderWrapper(<SearchFilter {...defaultProps} size="lg" />);
+      expect(screen.getByRole('textbox')).toHaveClass('form-control-lg');
+    });
+
+    it('applies no size modifier when size is "md"', () => {
+      // "md" is mapped to undefined because Paragon's Form.Group has no "md" size.
+      renderWrapper(<SearchFilter {...defaultProps} size="md" />);
+      const input = screen.getByRole('textbox');
+      expect(input).not.toHaveClass('form-control-sm');
+      expect(input).not.toHaveClass('form-control-lg');
+    });
+  });
 });
