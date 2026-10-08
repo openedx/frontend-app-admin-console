@@ -201,7 +201,7 @@ describe('AuditUserPage', () => {
     });
   });
 
-  it('renders correct table headers', async () => {
+  it('orders the columns like the team members role breakdown', async () => {
     mockHttpClient().mockReturnValue({
       get: jest
         .fn()
@@ -212,12 +212,10 @@ describe('AuditUserPage', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      // Using columnheader role to be more specific about table headers
-      expect(screen.getByRole('columnheader', { name: /role/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /organization/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /scope/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /permissions/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /actions/i })).toBeInTheDocument();
+      const headerLabels = screen.getAllByRole('columnheader')
+        .map(header => header.textContent?.trim())
+        .filter(Boolean);
+      expect(headerLabels).toEqual(['Role', 'Scope', 'Organization', 'Permissions', 'Actions']);
     });
   });
 
