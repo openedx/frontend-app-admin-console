@@ -131,6 +131,29 @@
     }
   }
 
+  .user-assignments-table {
+    /*
+      Widths are pinned so the columns stay put across pages, with the team members
+      table's proportions: Role and Organization match its Email column and Actions its
+      Actions column; Scope takes what is left. Sized so every column fits at 1440px;
+      below `md` the table falls back to content sizing.
+
+      A fixed table takes its widths from the header cells, but Paragon puts a column's
+      `headerClassName` on a span inside the `th`, so `:has()` lifts it to the `th`.
+    */
+    @media (--pgn-size-breakpoint-min-width-md) {
+      .pgn__data-table {
+        table-layout: fixed;
+      }
+
+      th:has(> .authz-col-role) { width: 18%; }              // Role badge
+      th:has(> .authz-col-org) { width: 18%; }               // Organization
+      th:has(> .authz-col-permissions) { width: 16%; }       // "133 permissions available"
+      th:has(> .authz-col-view-permissions) { width: 15%; }  // View/Hide all permissions
+      th:has(> .authz-col-actions) { width: 7%; }            // Actions
+    }
+  }
+
   .team-members-table__subtable {
     // The module turns `hr` horizontal below `sm`; this footer divider stays vertical.
     hr {
