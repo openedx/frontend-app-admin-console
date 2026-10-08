@@ -77,7 +77,7 @@
   .authz-cell-username { max-width: 15rem; }  // ~24 characters
   .authz-cell-email { max-width: 17rem; }     // ~28 characters
 
-  &.team-members-table {
+  .team-members-table {
     // Every row is two lines tall: the assigned-roles cell stacks scope over org.
     th,
     td {
