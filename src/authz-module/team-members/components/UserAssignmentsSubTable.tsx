@@ -5,14 +5,11 @@ import {
 } from '@openedx/paragon';
 import { ArrowForward } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
-import {
-  ALL_ORGS_KEY, buildAuditUserPath, getAggregateScopeType, getScopeContextType,
-} from '@src/authz-module/constants';
-import { getScopeResourceIcon } from '@src/authz-module/utils';
+import { ALL_ORGS_KEY, buildAuditUserPath } from '@src/authz-module/constants';
+import { ScopeNameCell } from '@src/authz-module/components/TableCells';
 import componentMessages from '@src/authz-module/components/messages';
 import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
-import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import messages from '../messages';
 import { RoleBadge } from './AssignedRolesCell';
 
@@ -28,22 +25,6 @@ interface AssignmentCellProps {
 const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (
   <RoleBadge role={assignmentRow.original.role} />
 );
-
-const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
-  const { formatMessage } = useIntl();
-  const { scope, scopeDisplayName, org } = assignmentRow.original;
-  const aggregateType = getAggregateScopeType(scope, org);
-  const scopeText = aggregateType
-    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
-    : scopeDisplayName || scope;
-
-  return (
-    <span className="d-flex align-items-center">
-      <Icon src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0 text-primary" size="xs" />
-      <span className="text-truncate" title={scopeText}>{scopeText}</span>
-    </span>
-  );
-};
 
 // Mirrors ScopeNameCell's icon treatment so all three columns read alike. A wildcard org
 // reaches past any one organization, so it gets the same globe and label as the row above.

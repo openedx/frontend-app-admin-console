@@ -3,8 +3,8 @@ import {
   Delete,
   Info,
 } from '@openedx/paragon/icons';
-import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
-import { useMemo, type ComponentProps } from 'react';
+import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
+import type { ComponentProps } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
@@ -16,11 +16,13 @@ import {
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
-import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
+interface ScopeNameCellProps {
+  row: { original: Pick<TeamMemberAssignment, 'scope' | 'scopeDisplayName' | 'org'> };
+}
 type CellPropsWithValue = CellProps & {
   value: string;
 };
@@ -79,30 +81,20 @@ const OrgCell = ({ value, row }: CellPropsWithValue) => {
   );
 };
 
-const ScopeCell = ({ row }: CellProps) => {
+// Shared by the user assignments table and the team members role breakdown, so both
+// name a scope the same way.
+const ScopeNameCell = ({ row }: ScopeNameCellProps) => {
   const { formatMessage } = useIntl();
-
-  const { scopeText, iconSrc } = useMemo(() => {
-    const { role, scope, org } = row.original;
-    if (DJANGO_MANAGED_ROLES.includes(role)) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
-        iconSrc: RESOURCE_ICONS.GLOBAL,
-      };
-    }
-    const aggregateType = getAggregateScopeType(scope, org);
-    return {
-      scopeText: aggregateType
-        ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
-        : scope,
-      iconSrc: getScopeResourceIcon(scope),
-    };
-  }, [row.original, formatMessage]);
+  const { scope, scopeDisplayName, org } = row.original;
+  const aggregateType = getAggregateScopeType(scope, org);
+  const scopeText = aggregateType
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
+    : scopeDisplayName || scope;
 
   return (
     <span className="d-flex align-items-center">
-      {iconSrc && <Icon color="primary" src={iconSrc} className="mr-2" size="xs" />}
-      {scopeText}
+      <Icon src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <span className="text-truncate" title={scopeText}>{scopeText}</span>
     </span>
   );
 };
@@ -232,7 +224,7 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 export {
   RoleCell,
   OrgCell,
-  ScopeCell,
+  ScopeNameCell,
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,

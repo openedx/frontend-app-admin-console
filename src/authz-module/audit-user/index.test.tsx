@@ -69,6 +69,7 @@ const mockAssignments = {
       role: 'library_admin',
       org: 'Test Org',
       scope: 'lib:test',
+      scopeDisplayName: 'Test Library',
       permissionCount: 5,
     },
   ],
@@ -217,6 +218,26 @@ describe('AuditUserPage', () => {
         .filter(Boolean);
       expect(headerLabels).toEqual(['Role', 'Scope', 'Organization', 'Permissions', 'Actions']);
     });
+  });
+
+  it('names each scope by its display name', async () => {
+    (useUserAccount as jest.Mock).mockReturnValue({
+      data: mockUser,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({
+      data: mockAssignments,
+      isLoading: false,
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Library')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('lib:test')).not.toBeInTheDocument();
   });
 
   it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
@@ -462,6 +483,7 @@ describe('AuditUserPage', () => {
                 role: 'library_admin',
                 org: 'Test Org',
                 scope: 'lib:test',
+                scopeDisplayName: 'Test Library',
                 permissionCount: 5,
               },
             ],
@@ -567,6 +589,7 @@ describe('AuditUserPage', () => {
           role: 'course_staff',
           org: 'Test Org',
           scope: courseScope,
+          scopeDisplayName: 'Introduction to Testing',
           permissionCount: 5,
         },
       ],
