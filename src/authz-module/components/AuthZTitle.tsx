@@ -45,9 +45,10 @@ const AuthZTitle = ({
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
     <div className="page-band py-4 bg-light-100">
-      { shouldRenderBreadcrumb
+      {shouldRenderBreadcrumb
       && (
         <Breadcrumb
+          className="text-break"
           linkAs={Link}
           links={navLinks}
           activeLabel={activeLabel}
@@ -56,13 +57,13 @@ const AuthZTitle = ({
       <Row>
         <Col xs={12} md={7}>
           <div className="d-flex align-items-center flex-column-sm mb-3 mb-md-0">
-            <h2 className="text-primary mb-0">{pageTitle}</h2>
+            <h2 className="text-break text-primary mb-0">{pageTitle}</h2>
             {pageSubtitle && (
               <>
                 <hr className="authz-action-divider mx-lg-3 my-md-0 mx-md-3" />
                 {typeof pageSubtitle === 'string'
-                  ? <h3 className="mb-0 font-weight-light text-gray-700">{pageSubtitle}</h3>
-                  : <div className="mb-0">{pageSubtitle}</div>}
+                  ? <h3 className="text-break mb-0 font-weight-light text-gray-700">{pageSubtitle}</h3>
+                  : <div className="text-break mb-0">{pageSubtitle}</div>}
               </>
             )}
 
