@@ -57,8 +57,22 @@
   }
 
   .permission-table {
+    border-collapse: separate;
+    border-spacing: 0;
+
     td {
       line-height: 24px;
+    }
+    
+    thead th::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(rgba(0, 0, 0, 0.15), transparent);
+      pointer-events: none;
     }
   }
 
