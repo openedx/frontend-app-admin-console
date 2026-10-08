@@ -106,6 +106,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   return (
     <DataTable
+      className="team-members-table"
       isExpandable
       isFilterable
       isPaginated
