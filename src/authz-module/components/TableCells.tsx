@@ -66,7 +66,7 @@ export const DisabledCourseActionButton = ({
 
 /** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
 const RoleBadge = ({ role }: { role: string }) => (
-  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-light-300 text-gray-700 mr-3 px-2 py-1">
+  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-gray-100 text-gray-700 mr-3 px-2 py-1">
     <Icon src={Person} size="xs" className="mr-1" />
     {MAP_ROLE_KEY_TO_LABEL[role] || role}
   </div>
