@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgCell, RoleCell, ScopeCell, PermissionsCell, ViewAllPermissionsCell,
+  OrgCell, RoleCell, ScopeNameCell, PermissionsCell, ViewAllPermissionsCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -140,7 +140,7 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
       accessor: 'scope',
-      Cell: ScopeCell,
+      Cell: ScopeNameCell,
       disableFilters: true,
 
     },

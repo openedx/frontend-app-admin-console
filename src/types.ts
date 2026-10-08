@@ -68,10 +68,11 @@ export type PermissionsResourceGrouped = ResourceMetadata & {
 };
 
 export interface UserRole {
-  isSuperadmin?: boolean;
   role: string;
   org: string;
   scope: string;
+  /** Human-readable scope name; see `TeamMemberAssignment.scopeDisplayName`. */
+  scopeDisplayName: string;
   permissionCount: number;
   fullName?: string;
   username?: string;
