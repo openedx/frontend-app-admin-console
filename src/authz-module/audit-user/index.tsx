@@ -113,6 +113,7 @@ const AuditUserPage = () => {
       id: 'view_permissions',
       Header: '',
       Cell: ViewAllPermissionsCell,
+      headerClassName: 'authz-col-view-permissions',
     },
     {
       id: 'action',
@@ -121,6 +122,8 @@ const AuditUserPage = () => {
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser?.username,
       }),
+      cellClassName: 'text-center',
+      headerClassName: 'authz-col-actions justify-content-center',
     },
   ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username]);
 
@@ -129,6 +132,7 @@ const AuditUserPage = () => {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
       Cell: RoleBadgeCell,
+      headerClassName: 'authz-col-role',
       filter: 'includesValue',
       Filter: RolesFilter,
       filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
@@ -145,6 +149,7 @@ const AuditUserPage = () => {
       Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
       Cell: OrgIconCell,
+      headerClassName: 'authz-col-org',
       filter: 'includesValue',
       Filter: OrgFilter,
       filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
@@ -153,6 +158,8 @@ const AuditUserPage = () => {
     {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
       Cell: PermissionsCell,
+      cellClassName: 'text-nowrap',
+      headerClassName: 'authz-col-permissions',
       disableFilters: true,
       disableSortBy: true,
     },
@@ -251,6 +258,7 @@ const AuditUserPage = () => {
       >
         <div className="page-band py-3">
           <DataTable
+            className="user-assignments-table"
             isPaginated
             isFilterable
             isSortable
