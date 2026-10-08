@@ -138,6 +138,8 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           id: 'action',
           Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
           Cell: TeamMemberViewActionCell,
+          cellClassName: 'text-center',
+          headerClassName: 'justify-content-center',
         },
       ]}
       columns={
