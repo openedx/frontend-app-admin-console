@@ -3,6 +3,22 @@
 .authz-module {
   --height-action-divider: 30px;
 
+  // Paragon scrolls the layout wrapper ≤1400px, which clips the table's box-shadow;
+  // the inner .pgn__data-table-container already handles horizontal scroll.
+  .pgn__data-table-layout-wrapper {
+    overflow-x: visible;
+
+    // A flex item won't shrink below its content by default, so without this the main
+    // column grows to the table's width and the inner container never gets to scroll.
+    .pgn__data-table-layout-main {
+      min-width: 0;
+    }
+  }
+
+  .title-border-bottom {
+    border-bottom: var(--pgn-size-nav-tabs-border-width) solid var(--pgn-color-nav-tabs-base-border-base);
+  }
+
   .filters .dropdown-toggle::after {
     display: none !important;
   }
