@@ -135,6 +135,13 @@ const AuditUserPage = () => {
       filterOrder: 2,
     },
     {
+      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
+      accessor: 'scope',
+      Cell: ScopeCell,
+      disableFilters: true,
+
+    },
+    {
       Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
       Cell: OrgCell,
@@ -142,13 +149,6 @@ const AuditUserPage = () => {
       Filter: OrgFilter,
       filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
       filterOrder: 1,
-    },
-    {
-      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
-      accessor: 'scope',
-      Cell: ScopeCell,
-      disableFilters: true,
-
     },
     {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
