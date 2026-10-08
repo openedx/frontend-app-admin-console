@@ -5,44 +5,14 @@ import {
 } from '@openedx/paragon';
 import { ArrowForward } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
-import { ALL_ORGS_KEY, buildAuditUserPath } from '@src/authz-module/constants';
-import { ScopeNameCell } from '@src/authz-module/components/TableCells';
-import componentMessages from '@src/authz-module/components/messages';
-import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
-import type { TeamMember, TeamMemberAssignment } from '@src/types';
+import { buildAuditUserPath } from '@src/authz-module/constants';
+import { OrgIconCell, RoleBadgeCell, ScopeNameCell } from '@src/authz-module/components/TableCells';
+import type { TeamMember } from '@src/types';
 import messages from '../messages';
-import { RoleBadge } from './AssignedRolesCell';
 
 interface UserAssignmentsSubTableProps {
   row: { original: TeamMember };
 }
-
-interface AssignmentCellProps {
-  row: { original: TeamMemberAssignment };
-}
-
-// Same badge as the collapsed row above, so the breakdown reads consistently.
-const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (
-  <RoleBadge role={assignmentRow.original.role} />
-);
-
-// Mirrors ScopeNameCell's icon treatment so all three columns read alike. A wildcard org
-// reaches past any one organization, so it gets the same globe and label as the row above.
-const OrgIconCell = ({ row: assignmentRow }: AssignmentCellProps) => {
-  const { formatMessage } = useIntl();
-  const { org } = assignmentRow.original;
-  const isAllOrgs = org === ALL_ORGS_KEY;
-  const orgText = isAllOrgs
-    ? formatMessage(componentMessages['authz.user.table.org.all.organizations.label'])
-    : org;
-
-  return (
-    <span className="d-flex align-items-center">
-      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : RESOURCE_ICONS.ORGANIZATION} className="mr-2 flex-shrink-0 text-primary" size="xs" />
-      <span className="text-truncate" title={orgText}>{orgText}</span>
-    </span>
-  );
-};
 
 /**
  * Role breakdown revealed when a team member row is expanded.

@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgCell, RoleCell, ScopeNameCell, PermissionsCell, ViewAllPermissionsCell,
+  OrgIconCell, RoleBadgeCell, ScopeNameCell, PermissionsCell, ViewAllPermissionsCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -131,7 +131,7 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
-      Cell: RoleCell,
+      Cell: RoleBadgeCell,
       filter: 'includesValue',
       Filter: RolesFilter,
       filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
@@ -147,7 +147,7 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
-      Cell: OrgCell,
+      Cell: OrgIconCell,
       filter: 'includesValue',
       Filter: OrgFilter,
       filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
