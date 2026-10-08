@@ -5,7 +5,7 @@ import { DataTableContext } from '@openedx/paragon';
 import {
   RoleCell,
   OrgCell,
-  ScopeCell,
+  ScopeNameCell,
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
@@ -44,7 +44,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'library_admin', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'library_admin', org: 'Test Org', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'role' },
@@ -63,7 +63,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'unknown_role', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'unknown_role', org: 'Test Org', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'role' },
@@ -83,7 +83,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'course_staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'course_staff', org: 'Test Org', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'role' },
@@ -103,7 +103,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -121,7 +121,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -135,7 +135,7 @@ describe('TableCells Components', () => {
 
     const orgProps = (original: { role: string; scope: string; org: string }) => ({
       value: original.org,
-      row: { id: '0', original: { permissionCount: 1, ...original } },
+      row: { id: '0', original: { scopeDisplayName: '', permissionCount: 1, ...original } },
       column: { id: 'org' },
     });
 
@@ -159,7 +159,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'library_admin', org: 'Test Organization', scope: 'Test Scope', permissionCount: 1,
+            role: 'library_admin', org: 'Test Organization', scope: 'Test Scope', scopeDisplayName: '', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -172,98 +172,55 @@ describe('TableCells Components', () => {
     });
   });
 
-  describe('ScopeCell', () => {
-    it('displays "Global" for Django superuser role', () => {
-      const props = {
-        value: 'library',
-        row: {
-          id: '0',
-          original: {
-            role: 'django.superuser', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
-          },
-        },
-        column: { id: 'scope' },
-      };
-
-      renderWrapper(<ScopeCell {...props} />);
-
-      expect(screen.getByText('Global')).toBeInTheDocument();
-      expect(screen.queryByText('library')).not.toBeInTheDocument();
-    });
-
-    it('displays "Global" for Django global staff role', () => {
-      const props = {
-        value: 'course',
-        row: {
-          id: '0',
-          original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
-          },
-        },
-        column: { id: 'scope' },
-      };
-
-      renderWrapper(<ScopeCell {...props} />);
-
-      expect(screen.getByText('Global')).toBeInTheDocument();
-      expect(screen.queryByText('course')).not.toBeInTheDocument();
-    });
-
+  describe('ScopeNameCell', () => {
     const scopeProps = (
-      original: { role: string; scope: string; org: string },
+      original: { scope: string; org: string; scopeDisplayName?: string },
     ) => ({
-      value: 'unused',
-      row: { id: '0', original: { permissionCount: 1, ...original } },
-      column: { id: 'scope' },
+      row: { original: { scopeDisplayName: '', ...original } },
+    });
+
+    it("shows the scope's display name", () => {
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'course-v1:OpenedX+DemoX+DemoCourse', org: 'OpenedX', scopeDisplayName: 'Open edX Demo Course' })} />);
+
+      expect(screen.getByText('Open edX Demo Course')).toBeInTheDocument();
+      expect(screen.queryByText('course-v1:OpenedX+DemoX+DemoCourse')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the scope key when the API resolved no display name', () => {
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'course-v1:OpenedX+DemoX+DemoCourse', org: 'OpenedX' })} />);
+
+      expect(screen.getByText('course-v1:OpenedX+DemoX+DemoCourse')).toBeInTheDocument();
     });
 
     it('names a platform-wide course scope instead of showing its wildcard key', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:*', org: '*' })} />);
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'course-v1:*', org: '*' })} />);
 
       expect(screen.getByText('All courses')).toBeInTheDocument();
       expect(screen.queryByText('course-v1:*')).not.toBeInTheDocument();
     });
 
     it('names a platform-wide library scope', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:*', org: '*' })} />);
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'lib:*', org: '*' })} />);
 
       expect(screen.getByText('All libraries')).toBeInTheDocument();
     });
 
     it('names an organization-wide course scope', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'MathDept' })} />);
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'course-v1:MathDept+*', org: 'MathDept' })} />);
 
       expect(screen.getByText('All courses')).toBeInTheDocument();
     });
 
     it('names an organization-wide library scope', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'library_admin', scope: 'lib:MathDept:*', org: 'MathDept' })} />);
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'lib:MathDept:*', org: 'MathDept' })} />);
 
       expect(screen.getByText('All libraries')).toBeInTheDocument();
     });
 
     it('shows the scope key when a wildcard belongs to a different organization', () => {
-      renderWrapper(<ScopeCell {...scopeProps({ role: 'course_admin', scope: 'course-v1:MathDept+*', org: 'OtherOrg' })} />);
+      renderWrapper(<ScopeNameCell {...scopeProps({ scope: 'course-v1:MathDept+*', org: 'OtherOrg' })} />);
 
       expect(screen.getByText('course-v1:MathDept+*')).toBeInTheDocument();
-    });
-
-    it('displays the actual scope value for non-Django roles', () => {
-      const props = {
-        value: 'Course Scope',
-        row: {
-          id: '0',
-          original: {
-            role: 'course_admin', org: 'Test Org', scope: 'Course Scope', permissionCount: 1,
-          },
-        },
-        column: { id: 'scope' },
-      };
-
-      renderWrapper(<ScopeCell {...props} />);
-
-      expect(screen.getByText('Course Scope')).toBeInTheDocument();
-      expect(screen.queryByText('Global')).not.toBeInTheDocument();
     });
   });
 
@@ -276,6 +233,7 @@ describe('TableCells Components', () => {
             role: 'django.superuser',
             org: 'Test Org',
             scope: 'Test Scope',
+            scopeDisplayName: '',
             permissionCount: 10,
           },
         },
@@ -293,6 +251,7 @@ describe('TableCells Components', () => {
           id: '0',
           original: {
             role: 'django.globalstaff',
+            scopeDisplayName: '',
             permissionCount: 5,
             org: 'Test Org',
             scope: 'Test Scope',
@@ -312,6 +271,7 @@ describe('TableCells Components', () => {
           id: '0',
           original: {
             role: 'library_admin',
+            scopeDisplayName: '',
             permissionCount: 3,
             org: 'Test Org',
             scope: 'Test Scope',
@@ -333,6 +293,7 @@ describe('TableCells Components', () => {
         role: 'library_admin',
         org: 'Test Org',
         scope: 'lib:TestOrg:test-library',
+        scopeDisplayName: '',
         permissionCount: 1,
         canManageScope: true,
       },
@@ -364,6 +325,7 @@ describe('TableCells Components', () => {
           role: 'course_admin',
           org: 'Test Org',
           scope: 'Test Scope',
+          scopeDisplayName: '',
           permissionCount: 1,
         },
       };
@@ -383,6 +345,7 @@ describe('TableCells Components', () => {
           role: 'course_admin',
           org: 'Test Org',
           scope: 'Test Scope',
+          scopeDisplayName: '',
           permissionCount: 1,
         },
       };
@@ -404,6 +367,7 @@ describe('TableCells Components', () => {
           role: 'django.superuser',
           org: 'Test Org',
           scope: 'Test Scope',
+          scopeDisplayName: '',
           permissionCount: 1,
         },
       };
@@ -449,6 +413,7 @@ describe('TableCells Components', () => {
           role: 'course_staff',
           org: 'Test Org',
           scope: 'course-v1:TestOrg+C101+2026',
+          scopeDisplayName: '',
           permissionCount: 1,
           canManageScope: true,
         },
@@ -480,6 +445,7 @@ describe('TableCells Components', () => {
       role: 'course_admin',
       org: 'OpenedX',
       scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      scopeDisplayName: '',
       permissionCount: 5,
       fullName: 'John Doe',
       username: 'johndoe',

@@ -61,11 +61,6 @@ const messages = defineMessages({
     defaultMessage: 'All platform',
     description: 'Shown in place of an organization for a role that is not limited to one organization: a wildcard org, or a Django-managed role.',
   },
-  'authz.user.table.scope.global.label': {
-    id: 'authz.user.table.scope.global.label',
-    defaultMessage: 'Global',
-    description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
-  },
   'authz.user.table.permissions.access.label': {
     id: 'authz.user.table.permissions.access.label',
     defaultMessage: '{accessType, select, total {Total Access} partial {Partial Access} other {No Access}}',
