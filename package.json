@@ -82,7 +82,7 @@
   "dependencies": {
     "@edx/openedx-atlas": "^0.7.0",
     "lodash.debounce": "^4.0.8",
-    "react-error-boundary": "^4.1.2",
+    "react-error-boundary": "^6.0.0",
     "react-helmet": "^6.1.0"
   }
 }
