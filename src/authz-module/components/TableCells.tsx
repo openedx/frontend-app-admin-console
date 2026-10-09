@@ -2,9 +2,10 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Delete,
   Info,
+  Person,
 } from '@openedx/paragon/icons';
-import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
-import { useMemo, type ComponentProps } from 'react';
+import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
+import type { ComponentProps, ReactNode } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
@@ -21,14 +22,9 @@ import messages from './messages';
 import ExpandableButton from './ExpandableButton';
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
-type CellPropsWithValue = CellProps & {
-  value: string;
-};
-type ExtendedCellProps = CellPropsWithValue & {
-  cell: {
-    getCellProps: (props?: Record<string, string>) => Record<string, string>;
-  };
-};
+interface AssignmentCellProps {
+  row: { original: Pick<TeamMemberAssignment, 'role' | 'scope' | 'scopeDisplayName' | 'org'> };
+}
 
 interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
@@ -38,80 +34,79 @@ interface ActionsCellExtraProps {
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
 
-type DisabledCourseActionButtonProps = Pick<ComponentProps<typeof IconButton>, 'src' | 'alt' | 'size' | 'variant'>;
+type DisabledActionButtonProps = Pick<ComponentProps<typeof IconButton>, 'src' | 'alt' | 'size' | 'variant'> & {
+  tooltip: ReactNode;
+};
 
 // A disabled button can't trigger its own tooltip (Paragon sets pointer-events: none on it),
 // so the OverlayTrigger must live on a wrapper element that still receives hover events.
-export const DisabledCourseActionButton = ({
-  src, alt, size, variant,
-}: DisabledCourseActionButtonProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <OverlayTrigger
-      placement="left"
-      overlay={(
-        <Tooltip variant="light" id="tooltip-left">
-          {formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
-        </Tooltip>
-      )}
-    >
-      <span className="d-inline-block">
-        <IconButton
-          src={src}
-          alt={alt}
-          size={size}
-          variant={variant}
-          disabled
-        />
-      </span>
-    </OverlayTrigger>
-  );
-};
-
-const OrgCell = ({ value, row }: CellPropsWithValue) => {
-  const { formatMessage } = useIntl();
-  // The backend returns '*' as the org wildcard, meaning the role spans every organization.
-  const isAllOrgs = DJANGO_MANAGED_ROLES.includes(row.original.role) || value === ALL_ORGS_KEY;
-  return (
-    <span>
-      {isAllOrgs ? formatMessage(messages['authz.user.table.org.all.organizations.label']) : value}
+export const DisabledActionButton = ({
+  src, alt, size, variant, tooltip,
+}: DisabledActionButtonProps) => (
+  <OverlayTrigger
+    placement="left"
+    overlay={(
+      <Tooltip variant="light" id="tooltip-left">
+        {tooltip}
+      </Tooltip>
+    )}
+  >
+    <span className="d-inline-block">
+      <IconButton
+        src={src}
+        alt={alt}
+        size={size}
+        variant={variant}
+        disabled
+      />
     </span>
-  );
-};
+  </OverlayTrigger>
+);
 
-const ScopeCell = ({ row }: CellProps) => {
+/** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
+const RoleBadge = ({ role }: { role: string }) => (
+  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-gray-100 text-gray-700 mr-3 px-2 py-1">
+    <Icon src={Person} size="xs" className="mr-1" />
+    {MAP_ROLE_KEY_TO_LABEL[role] || role}
+  </div>
+);
+
+// The role, scope and org cells below are shared by the user assignments table and the
+// team members role breakdown, so both tables read alike.
+const RoleBadgeCell = ({ row }: AssignmentCellProps) => (
+  <RoleBadge role={row.original.role} />
+);
+
+const ScopeNameCell = ({ row }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
-
-  const { scopeText, iconSrc } = useMemo(() => {
-    const { role, scope, org } = row.original;
-    if (DJANGO_MANAGED_ROLES.includes(role)) {
-      return {
-        scopeText: formatMessage(messages['authz.user.table.scope.global.label']),
-        iconSrc: RESOURCE_ICONS.GLOBAL,
-      };
-    }
-    const aggregateType = getAggregateScopeType(scope, org);
-    return {
-      scopeText: aggregateType
-        ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
-        : scope,
-      iconSrc: getScopeResourceIcon(scope),
-    };
-  }, [row.original, formatMessage]);
+  const { scope, scopeDisplayName, org } = row.original;
+  const aggregateType = getAggregateScopeType(scope, org);
+  const scopeText = aggregateType
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
+    : scopeDisplayName || scope;
 
   return (
     <span className="d-flex align-items-center">
-      {iconSrc && <Icon color="primary" src={iconSrc} className="mr-2" size="xs" />}
-      {scopeText}
+      <Icon src={getScopeResourceIcon(scope)} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <span className="text-truncate" title={scopeText}>{scopeText}</span>
     </span>
   );
 };
 
-const RoleCell = ({ value, cell }: ExtendedCellProps) => {
-  const { key, ...cellProps } = cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' });
+// Mirrors ScopeNameCell's icon treatment. A wildcard org reaches past any one
+// organization, so it gets the globe and the "All platform" label.
+const OrgIconCell = ({ row }: AssignmentCellProps) => {
+  const { formatMessage } = useIntl();
+  const { org } = row.original;
+  const isAllOrgs = org === ALL_ORGS_KEY;
+  const orgText = isAllOrgs
+    ? formatMessage(messages['authz.user.table.org.all.organizations.label'])
+    : org;
+
   return (
-    <span key={key} {...cellProps}>
-      {MAP_ROLE_KEY_TO_LABEL[value] || ''}
+    <span className="d-flex align-items-center">
+      <Icon src={isAllOrgs ? RESOURCE_ICONS.GLOBAL : RESOURCE_ICONS.ORGANIZATION} className="mr-2 flex-shrink-0 text-primary" size="xs" />
+      <span className="text-truncate" title={orgText}>{orgText}</span>
     </span>
   );
 };
@@ -184,19 +179,13 @@ const ActionsCell = ({
 
   if (ADMIN_ROLES.includes(role) && isUserAuthenticatedPage) {
     return (
-      <OverlayTrigger
-        placement="left"
-        overlay={(
-          <Tooltip variant="light" id="tooltip-left">
-            {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
-          </Tooltip>
-        )}
-      >
-        <Icon
-          className="mx-2 pl-1 text-light-500"
-          src={Delete}
-        />
-      </OverlayTrigger>
+      <DisabledActionButton
+        src={Delete}
+        alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        size="sm"
+        variant="light"
+        tooltip={formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
+      />
     );
   }
 
@@ -206,10 +195,12 @@ const ActionsCell = ({
 
   if (isCourseAuthoringDisabled) {
     return (
-      <DisabledCourseActionButton
+      <DisabledActionButton
         src={Delete}
         alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        size="sm"
         variant="light"
+        tooltip={formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
       />
     );
   }
@@ -221,6 +212,7 @@ const ActionsCell = ({
       onClick={handleDelete}
       alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
       src={Delete}
+      size="sm"
     />
   );
 };
@@ -230,9 +222,10 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
-  RoleCell,
-  OrgCell,
-  ScopeCell,
+  RoleBadge,
+  RoleBadgeCell,
+  OrgIconCell,
+  ScopeNameCell,
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,

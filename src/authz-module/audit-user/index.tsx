@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgCell, RoleCell, ScopeCell, PermissionsCell, ViewAllPermissionsCell,
+  OrgIconCell, RoleBadgeCell, ScopeNameCell, PermissionsCell, ViewAllPermissionsCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -115,6 +115,7 @@ const AuditUserPage = () => {
       id: 'view_permissions',
       Header: '',
       Cell: ViewAllPermissionsCell,
+      headerClassName: 'authz-col-view-permissions',
     },
     {
       id: 'action',
@@ -124,6 +125,8 @@ const AuditUserPage = () => {
         isUserAuthenticatedPage: username === authenticatedUser?.username,
         isCourseEnabled,
       }),
+      cellClassName: 'text-center',
+      headerClassName: 'authz-col-actions justify-content-center',
     },
   ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username, isCourseEnabled]);
 
@@ -131,31 +134,35 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
-      Cell: RoleCell,
+      Cell: RoleBadgeCell,
+      headerClassName: 'authz-col-role',
       filter: 'includesValue',
       Filter: RolesFilter,
       filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
       filterOrder: 2,
     },
     {
+      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
+      accessor: 'scope',
+      Cell: ScopeNameCell,
+      disableFilters: true,
+
+    },
+    {
       Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
-      Cell: OrgCell,
+      Cell: OrgIconCell,
+      headerClassName: 'authz-col-org',
       filter: 'includesValue',
       Filter: OrgFilter,
       filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
       filterOrder: 1,
     },
     {
-      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
-      accessor: 'scope',
-      Cell: ScopeCell,
-      disableFilters: true,
-
-    },
-    {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
       Cell: PermissionsCell,
+      cellClassName: 'text-nowrap',
+      headerClassName: 'authz-col-permissions',
       disableFilters: true,
       disableSortBy: true,
     },
@@ -253,6 +260,7 @@ const AuditUserPage = () => {
       >
         <div className="page-band py-5">
           <DataTable
+            className="user-assignments-table"
             isPaginated
             isFilterable
             isSortable

@@ -69,6 +69,7 @@ const mockAssignments = {
       role: 'library_admin',
       org: 'Test Org',
       scope: 'lib:test',
+      scopeDisplayName: 'Test Library',
       permissionCount: 5,
     },
   ],
@@ -201,7 +202,7 @@ describe('AuditUserPage', () => {
     });
   });
 
-  it('renders correct table headers', async () => {
+  it('orders the columns like the team members role breakdown', async () => {
     mockHttpClient().mockReturnValue({
       get: jest
         .fn()
@@ -212,13 +213,31 @@ describe('AuditUserPage', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      // Using columnheader role to be more specific about table headers
-      expect(screen.getByRole('columnheader', { name: /role/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /organization/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /scope/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /permissions/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /actions/i })).toBeInTheDocument();
+      const headerLabels = screen.getAllByRole('columnheader')
+        .map(header => header.textContent?.trim())
+        .filter(Boolean);
+      expect(headerLabels).toEqual(['Role', 'Scope', 'Organization', 'Permissions', 'Actions']);
     });
+  });
+
+  it('names each scope by its display name', async () => {
+    (useUserAccount as jest.Mock).mockReturnValue({
+      data: mockUser,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({
+      data: mockAssignments,
+      isLoading: false,
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Library')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('lib:test')).not.toBeInTheDocument();
   });
 
   it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
@@ -464,6 +483,7 @@ describe('AuditUserPage', () => {
                 role: 'library_admin',
                 org: 'Test Org',
                 scope: 'lib:test',
+                scopeDisplayName: 'Test Library',
                 permissionCount: 5,
               },
             ],
@@ -569,6 +589,7 @@ describe('AuditUserPage', () => {
           role: 'course_staff',
           org: 'Test Org',
           scope: courseScope,
+          scopeDisplayName: 'Introduction to Testing',
           permissionCount: 5,
         },
       ],
