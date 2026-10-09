@@ -4,7 +4,7 @@ import { Visibility } from '@openedx/paragon/icons';
 import { useNavigate } from 'react-router-dom';
 import { buildAuditUserPath, CONTEXT_TYPES, getScopeContextType } from '@src/authz-module/constants';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { DisabledCourseActionButton } from '@src/authz-module/components/TableCells';
+import { DisabledActionButton } from '@src/authz-module/components/TableCells';
 import componentMessages from '@src/authz-module/components/messages';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 
@@ -43,10 +43,11 @@ const TeamMemberViewActionCell = ({ row }: TeamMemberViewActionCellProps) => {
 
   if (!hasViewableAssignment) {
     return (
-      <DisabledCourseActionButton
+      <DisabledActionButton
         src={Visibility}
         alt={formatMessage(componentMessages['authz.table.column.actions.view.title'])}
         size="sm"
+        tooltip={formatMessage(componentMessages['authz.table.actions.course.disabled.tooltip'])}
       />
     );
   }
