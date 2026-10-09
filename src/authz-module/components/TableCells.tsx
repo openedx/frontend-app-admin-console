@@ -5,7 +5,7 @@ import {
   Person,
 } from '@openedx/paragon/icons';
 import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
@@ -34,35 +34,34 @@ interface ActionsCellExtraProps {
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
 
-type DisabledCourseActionButtonProps = Pick<ComponentProps<typeof IconButton>, 'src' | 'alt' | 'size' | 'variant'>;
+type DisabledActionButtonProps = Pick<ComponentProps<typeof IconButton>, 'src' | 'alt' | 'size' | 'variant'> & {
+  tooltip: ReactNode;
+};
 
 // A disabled button can't trigger its own tooltip (Paragon sets pointer-events: none on it),
 // so the OverlayTrigger must live on a wrapper element that still receives hover events.
-export const DisabledCourseActionButton = ({
-  src, alt, size, variant,
-}: DisabledCourseActionButtonProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <OverlayTrigger
-      placement="left"
-      overlay={(
-        <Tooltip variant="light" id="tooltip-left">
-          {formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
-        </Tooltip>
-      )}
-    >
-      <span className="d-inline-block">
-        <IconButton
-          src={src}
-          alt={alt}
-          size={size}
-          variant={variant}
-          disabled
-        />
-      </span>
-    </OverlayTrigger>
-  );
-};
+export const DisabledActionButton = ({
+  src, alt, size, variant, tooltip,
+}: DisabledActionButtonProps) => (
+  <OverlayTrigger
+    placement="left"
+    overlay={(
+      <Tooltip variant="light" id="tooltip-left">
+        {tooltip}
+      </Tooltip>
+    )}
+  >
+    <span className="d-inline-block">
+      <IconButton
+        src={src}
+        alt={alt}
+        size={size}
+        variant={variant}
+        disabled
+      />
+    </span>
+  </OverlayTrigger>
+);
 
 /** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
 const RoleBadge = ({ role }: { role: string }) => (
@@ -180,19 +179,13 @@ const ActionsCell = ({
 
   if (ADMIN_ROLES.includes(role) && isUserAuthenticatedPage) {
     return (
-      <OverlayTrigger
-        placement="left"
-        overlay={(
-          <Tooltip variant="light" id="tooltip-left">
-            {formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
-          </Tooltip>
-        )}
-      >
-        <Icon
-          className="mx-2 pl-1 text-light-500"
-          src={Delete}
-        />
-      </OverlayTrigger>
+      <DisabledActionButton
+        src={Delete}
+        alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        size="sm"
+        variant="light"
+        tooltip={formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
+      />
     );
   }
 
@@ -202,10 +195,12 @@ const ActionsCell = ({
 
   if (isCourseAuthoringDisabled) {
     return (
-      <DisabledCourseActionButton
+      <DisabledActionButton
         src={Delete}
         alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
+        size="sm"
         variant="light"
+        tooltip={formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
       />
     );
   }
@@ -217,6 +212,7 @@ const ActionsCell = ({
       onClick={handleDelete}
       alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
       src={Delete}
+      size="sm"
     />
   );
 };
