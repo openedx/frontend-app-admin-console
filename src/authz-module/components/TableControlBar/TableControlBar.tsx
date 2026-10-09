@@ -168,7 +168,7 @@ const TableControlBar = ({ onFilterChange, countLabel }: TableControlBarProps) =
           }
           return null;
         })}
-        {countLabel && <span className="ml-auto text-gray-500">{countLabel}</span>}
+        {countLabel && <span className="ml-auto small">{countLabel}</span>}
       </Stack>
 
       {chronologicalFilters.length > 0 && (
