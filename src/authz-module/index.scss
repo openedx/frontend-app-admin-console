@@ -73,7 +73,7 @@
   .authz-cell-username { max-width: 15rem; }  // ~24 characters
   .authz-cell-email { max-width: 17rem; }     // ~28 characters
 
-  &.team-members-table {
+  .team-members-table {
     // Every row is two lines tall: the assigned-roles cell stacks scope over org.
     th,
     td {
@@ -81,43 +81,33 @@
       padding-bottom: var(--pgn-spacing-spacer-3);
     }
 
-    // Keep the "+N more roles" label on one line.
-    td:nth-child(4) {
-      white-space: nowrap;
-    }
-
     /*
       Auto-layout starves "Assigned roles" in favour of the short Username/Email values,
       so widths are pinned. Below `md` these percentages would crush the toggle and action
       columns, so the table falls back to content sizing and scrolls inside Paragon's
       `.pgn__data-table-container`.
+
+      A fixed table takes its widths from the header cells, but Paragon puts a column's
+      `headerClassName` on a span inside the `th`, so `:has()` lifts it to the `th`.
     */
     @media (--pgn-size-breakpoint-min-width-md) {
       .pgn__data-table {
         table-layout: fixed;
       }
 
-      th:nth-child(1) { width: 16%; }  // Username
-      th:nth-child(2) { width: 18%; }  // Email
-      th:nth-child(3) { width: 46%; }  // Assigned roles
-      th:nth-child(4) { width: 13%; }  // "+N more roles" toggle
-      th:nth-child(5) { width: 7%; }   // Actions
+      th:has(> .authz-col-username) { width: 16%; }
+      th:has(> .authz-col-email) { width: 18%; }
+      th:has(> .authz-col-assigned-roles) { width: 46%; }
+      th:has(> .authz-col-more-roles) { width: 13%; }
+      th:has(> .authz-col-actions) { width: 7%; }
 
       td {
         overflow: hidden;
       }
 
-      // The nested table sizes its own columns; it must not inherit the widths above.
-      .team-members-table__subtable {
-        .pgn__data-table {
-          table-layout: auto;
-        }
-
-        th:nth-child(1),
-        th:nth-child(2),
-        th:nth-child(3) {
-          width: auto;
-        }
+      // The nested table sizes its own columns; it must not inherit the fixed layout above.
+      .team-members-table__subtable .pgn__data-table {
+        table-layout: auto;
       }
     }
 

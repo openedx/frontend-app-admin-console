@@ -106,6 +106,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
 
   return (
     <DataTable
+      className="team-members-table"
       isExpandable
       isFilterable
       isPaginated
@@ -132,11 +133,14 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
           id: 'moreRoles',
           Header: '',
           Cell: MoreRolesToggle,
+          headerClassName: 'authz-col-more-roles',
         },
         {
           id: 'action',
           Header: intl.formatMessage(messages['authz.team.members.table.column.actions.title']),
           Cell: TeamMemberViewActionCell,
+          cellClassName: 'text-center',
+          headerClassName: 'authz-col-actions justify-content-center',
         },
       ]}
       columns={
@@ -146,6 +150,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
             Header: intl.formatMessage(messages['authz.team.members.table.column.username.title']),
             accessor: 'username',
             Cell: NameCell,
+            headerClassName: 'authz-col-username',
             filter: 'text',
             Filter: TextFilter,
             filterOrder: 1,
@@ -154,6 +159,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
             Header: intl.formatMessage(messages['authz.team.members.table.column.email.title']),
             accessor: 'email',
             Cell: EmailCell,
+            headerClassName: 'authz-col-email',
             disableFilters: true,
             filter: 'text',
             Filter: TextFilter,
@@ -162,6 +168,7 @@ const TeamMembersTable = ({ presetScope }: TeamMembersTableProps) => {
             id: 'assignedRoles',
             Header: intl.formatMessage(messages['authz.team.members.table.column.assigned.roles.title']),
             Cell: AssignedRolesCell,
+            headerClassName: 'authz-col-assigned-roles',
             disableFilters: true,
             disableSortBy: true,
           },
