@@ -3,17 +3,19 @@ import {
   Icon,
 } from '@openedx/paragon';
 import { Search } from '@openedx/paragon/icons';
+import { validateSizeFormControl } from '@src/authz-module/utils';
 
 interface SearchFilterProps {
   filterValue: string;
   setFilter: (value: string) => void;
   placeholder: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const SearchFilter = ({
-  filterValue, setFilter, placeholder,
+  filterValue, setFilter, placeholder, size = 'sm'
 }: SearchFilterProps) => (
-  <Form.Group className="m-0">
+  <Form.Group className="m-0" size={validateSizeFormControl(size)}>
     <Form.Control
       className="mw-xs mr-0"
       trailingElement={<Icon src={Search} />}
