@@ -61,7 +61,7 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
                 <td colSpan={roles.length + 1} className="text-start py-3 px-4">
                   <div className="d-flex align-items-center">
                     {resourceGroup.icon && <Icon className="d-inline-block mr-2" size="xs" src={resourceGroup.icon} />}
-                    <strong>{resourceGroup.label}</strong>
+                    <span className="small"> <strong>{resourceGroup.label}</strong></span>
                     <ResourceTooltip resourceGroup={resourceGroup} />
                   </div>
                 </td>

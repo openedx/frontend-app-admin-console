@@ -4,7 +4,8 @@ import {
   Alert,
   Button,
   ButtonGroup,
-  Container, Hyperlink,
+  Card,
+  Hyperlink,
 } from '@openedx/paragon';
 
 import {
@@ -52,58 +53,62 @@ const RolesPermissions = () => {
 
   return (
     <>
-      <Container className="pb-5">
-        <ButtonGroup size="lg" className="mb-2">
-          <Button
-            onClick={() => setActive('courses')}
-            variant={`${active === 'courses' ? 'primary' : 'outline-primary'}`}
-          >
-            {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab']) }
-          </Button>
-          <Button
-            onClick={() => setActive('libraries')}
-            variant={`${active === 'libraries' ? 'primary' : 'outline-primary'}`}
-          >
-            {intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab']) }
-          </Button>
-        </ButtonGroup>
-      </Container>
-      {/* Courses */}
-      { active === 'courses' && (
-        <div className="position-relative">
-          <PermissionTable
-            permissionsTable={coursePermissionsByResource}
-            roles={courseRolesWithPermissions}
-            title={intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab.title'])}
-          />
-          <Alert
-            variant="info"
-            className="mt-5"
-          >
-            <div className="row align-items-center">
-              <div className="col-12 col-md-7">
-                <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.title'])}</p>
-                <span>
-                  <span className="font-weight-bold">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.note'])}</span>
-                  {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.description'])}
-                </span>
-              </div>
-              <div className="col-12 col-md-5 mt-3 mt-md-0">
-                <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
-                  {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.link'])}
-                </Hyperlink>
-              </div>
-            </div>
-          </Alert>
+      <Card className="bg-light-200">
+        <div className="px-3 py-4">
+          <ButtonGroup size="md">
+            <Button
+              onClick={() => setActive('courses')}
+              variant={`${active === 'courses' ? 'primary' : 'outline-primary'}`}
+            >
+              {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab'])}
+            </Button>
+            <Button
+              onClick={() => setActive('libraries')}
+              variant={`${active === 'libraries' ? 'primary' : 'outline-primary'}`}
+            >
+              {intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab'])}
+            </Button>
+          </ButtonGroup>
         </div>
-      )}
-      {/*  Libraries */}
-      { active === 'libraries' && (
-        <PermissionTable
-          permissionsTable={libraryPermissionsByResource}
-          roles={libraryRolesWithPermissions}
-          title={intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab.title'])}
-        />
+        {/* Courses */}
+        {active === 'courses' && (
+          <div className="position-relative">
+            <PermissionTable
+              permissionsTable={coursePermissionsByResource}
+              roles={courseRolesWithPermissions}
+              title={intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.tab.title'])}
+            />
+          </div>
+        )}
+        {/*  Libraries */}
+        {active === 'libraries' && (
+          <PermissionTable
+            permissionsTable={libraryPermissionsByResource}
+            roles={libraryRolesWithPermissions}
+            title={intl.formatMessage(messages['authz.tabs.permissionsRoles.libraries.tab.title'])}
+          />
+        )}
+      </Card>
+      {active === 'courses' && (
+        <Alert
+          variant="info"
+          className="mt-5"
+        >
+          <div className="row align-items-center">
+            <div className="col-12 col-md-7">
+              <p className="text-primary font-weight-bold h4">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.title'])}</p>
+              <span>
+                <span className="font-weight-bold">{intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.note'])}</span>
+                {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.description'])}
+              </span>
+            </div>
+            <div className="col-12 col-md-5 mt-3 mt-md-0">
+              <Hyperlink className="d-block text-right h5 font-weight-normal" destination="https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html" target="_blank" showLaunchIcon={false} isInline>
+                {intl.formatMessage(messages['authz.tabs.permissionsRoles.courses.alert.link'])}
+              </Hyperlink>
+            </div>
+          </div>
+        </Alert>
       )}
       <AnchorButton />
     </>
