@@ -54,3 +54,7 @@ export const getScopeManageActionPermission = (scope: string) => {
     scope,
   };
 };
+
+// "md" is mapped to undefined because Paragon's Form.Control has no "md" size.
+export const validateSizeFormControl = (size) =>
+  size === 'md' ? undefined : size;

@@ -14,9 +14,7 @@ interface AuthZLayoutProps extends AuthZTitleProps {
 const AuthZLayout = ({ children, ...titleProps }: AuthZLayoutProps) => (
   <div className="authz-module">
     <AuthZTitle {...titleProps} />
-    <div>
-      {children}
-    </div>
+    {children}
   </div>
 );
 

@@ -6,6 +6,7 @@ import { FilterList, Info, Search } from '@openedx/paragon/icons';
 import { useState } from 'react';
 import messages from '@src/authz-module/components/messages';
 import { FilterChoice, MultipleChoiceFilterProps } from './types';
+import { validateSizeFormControl } from '@src/authz-module/utils';
 
 const MultipleChoiceFilter = ({
   filterButtonText,
@@ -17,6 +18,7 @@ const MultipleChoiceFilter = ({
   onSearchChange,
   iconSrc,
   disabled = false,
+  size = 'sm',
 }: MultipleChoiceFilterProps) => {
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const { formatMessage } = useIntl();
@@ -55,7 +57,7 @@ const MultipleChoiceFilter = ({
 
   return (
     <Dropdown className="no-caret-dropdown filters">
-      <Dropdown.Toggle variant={checkedBoxes.length > 0 ? 'primary' : 'outline-primary'}>
+      <Dropdown.Toggle variant={checkedBoxes.length > 0 ? 'primary' : 'outline-primary'} size={size}>
         <Stack direction="horizontal" gap={2}>
           {iconSrc && <Icon color="primary" src={iconSrc} />}
           {filterButtonText}
@@ -76,6 +78,7 @@ const MultipleChoiceFilter = ({
               onSearchChange?.(e.target.value);
             }}
             value={searchValue}
+            size={validateSizeFormControl(size)}
           />
         )}
         <Form.CheckboxSet
