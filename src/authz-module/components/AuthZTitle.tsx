@@ -26,6 +26,7 @@ export interface AuthZTitleProps {
   pageSubtitle?: string | ReactNode;
   navLinks?: BreadcrumbLink[];
   actions?: (Action | ReactNode)[];
+  showDivider?: boolean;
 }
 
 export const ActionButton = ({ label, icon, onClick }: Action) => (
@@ -39,12 +40,12 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 );
 
 const AuthZTitle = ({
-  activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [],
+  activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [], showDivider = false,
 }: AuthZTitleProps) => {
   const shouldRenderBreadcrumb = activeLabel || navLinks?.length > 0;
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
   return (
-    <div className="page-band py-4 bg-light-100">
+    <div className={`page-band py-4 bg-light-100${showDivider ? ' title-border-bottom' : ''}`}>
       { shouldRenderBreadcrumb
       && (
         <Breadcrumb
