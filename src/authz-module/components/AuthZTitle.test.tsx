@@ -100,4 +100,16 @@ describe('AuthZTitle', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'custom action area' })).toBeInTheDocument();
   });
+
+  it('does not render the bottom border by default', () => {
+    render(<AuthZTitle {...defaultProps} />);
+    const band = screen.getByRole('heading', { level: 2 }).closest('.page-band');
+    expect(band).not.toHaveClass('title-border-bottom');
+  });
+
+  it('renders the bottom border when borderBottom is true', () => {
+    render(<AuthZTitle {...defaultProps} showDivider />);
+    const band = screen.getByRole('heading', { level: 2 }).closest('.page-band');
+    expect(band).toHaveClass('title-border-bottom');
+  });
 });

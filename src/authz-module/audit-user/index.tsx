@@ -250,8 +250,9 @@ const AuditUserPage = () => {
             <AddRoleButton presetUsername={user?.username} key="add-role-button" />,
           ]
         }
+        showDivider
       >
-        <div className="page-band py-5">
+        <div className="page-band py-3">
           <DataTable
             isPaginated
             isFilterable
