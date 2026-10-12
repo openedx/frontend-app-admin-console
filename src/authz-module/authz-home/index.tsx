@@ -59,7 +59,7 @@ const AuthzHome = () => {
         <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="page-band py-3">
           <TeamMembersTable presetScope={presetScope} />
         </Tab>
-        <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])} className="page-band py-5">
+        <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])} className="page-band py-3">
           <RolesPermissions />
         </Tab>
       </Tabs>
