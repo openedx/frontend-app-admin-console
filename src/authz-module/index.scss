@@ -105,7 +105,6 @@
 
   .team-members-table {
     // Every row is two lines tall: the assigned-roles cell stacks scope over org.
-    th,
     td {
       padding-top: var(--pgn-spacing-spacer-3);
       padding-bottom: var(--pgn-spacing-spacer-3);
