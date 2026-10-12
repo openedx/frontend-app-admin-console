@@ -23,7 +23,7 @@ const Footer = ({ showingMessage }: FooterProps) => {
   const { pageIndex } = state;
   return (
     <TableFooter>
-      <span>
+      <span className="small">
         {formatMessage(showingMessage ?? defaultShowingMessage, { pageSize: rows.length, itemCount })}
       </span>
       <Pagination
