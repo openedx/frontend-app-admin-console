@@ -14,6 +14,7 @@ import {
   type DataTableCellProps,
 } from '@openedx/paragon';
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
@@ -33,7 +34,6 @@ type ExtendedCellProps = CellPropsWithValue & {
 interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
-  isCourseEnabled?: (scope: string) => boolean;
 }
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
@@ -150,9 +150,12 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
 };
 
 const ActionsCell = ({
-  row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
+  row, onClickDeleteButton, isUserAuthenticatedPage,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
+  // Read the flag here rather than through the cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const { role, canManageScope } = row.original;
 
   const handleDelete = () => {
@@ -201,8 +204,7 @@ const ActionsCell = ({
   }
 
   const isCourseScope = !role?.startsWith('lib');
-  const isCourseAuthoringDisabled = isCourseEnabled !== undefined
-    && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isCourseAuthoringDisabled) {
     return (
