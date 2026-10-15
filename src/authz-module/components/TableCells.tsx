@@ -16,6 +16,7 @@ import {
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
@@ -44,7 +45,6 @@ type ExtendedCellProps = CellPropsWithValue & {
 type ActionsCellExtraProps = {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
-  isCourseEnabled?: (scope: string) => boolean;
 };
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
@@ -218,9 +218,12 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
 };
 
 const ActionsCell = ({
-  row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
+  row, onClickDeleteButton, isUserAuthenticatedPage,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
+  // Read the flag here rather than through the cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const { role, canManageScope } = row.original;
 
   const handleDelete = () => {
@@ -269,8 +272,7 @@ const ActionsCell = ({
   }
 
   const isCourseScope = !role?.startsWith('lib');
-  const isCourseAuthoringDisabled = isCourseEnabled !== undefined
-    && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isCourseAuthoringDisabled) {
     return (
