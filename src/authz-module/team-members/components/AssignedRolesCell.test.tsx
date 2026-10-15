@@ -1,7 +1,12 @@
 import { screen } from '@testing-library/react';
 import { renderWrapper } from '@src/testUtils';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import AssignedRolesCell from './AssignedRolesCell';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 const courseAssignment: TeamMemberAssignment = {
   role: 'course_staff',
@@ -25,6 +30,10 @@ const rowFor = (assignments: TeamMemberAssignment[], overrides: Partial<TeamMemb
 });
 
 describe('AssignedRolesCell', () => {
+  beforeEach(() => {
+    mockAuthzCatalog();
+  });
+
   it('names the role, the scope it applies to, and the organization', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([courseAssignment])} />);
 
@@ -105,7 +114,7 @@ describe('AssignedRolesCell', () => {
     expect(screen.queryByText('All libraries in this organization')).not.toBeInTheDocument();
   });
 
-  it('shows the raw role key when the API sends a role the UI has no label for', () => {
+  it('shows the role id when the API sends a role the catalog does not describe', () => {
     renderWrapper(<AssignedRolesCell {...rowFor([{ ...courseAssignment, role: 'course_unmapped' }])} />);
 
     expect(screen.getByText('course_unmapped')).toBeInTheDocument();

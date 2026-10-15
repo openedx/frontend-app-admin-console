@@ -22,8 +22,8 @@
   .filters .dropdown-toggle::after {
     display: none !important;
   }
-  .pgn__data-table tr:has(span[data-role="Super Admin"]),
-  .pgn__data-table tr:has(span[data-role="Global Staff"]) {
+  .pgn__data-table tr:has(span[data-role="django.superuser"]),
+  .pgn__data-table tr:has(span[data-role="django.staff"]) {
     background-color: var(--pgn-color-primary-200);
   }
 /*

@@ -4,7 +4,7 @@ import { appId } from '@src/constants';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/constants';
 import { getAuthzCatalog } from './api';
-import type { AuthzCatalog, ScopeCatalog } from '../types';
+import type { AuthzCatalog, Role, ScopeCatalog } from '../types';
 import { getScopeCatalog } from '../utils';
 
 const catalogQueryKeys = {
@@ -28,6 +28,8 @@ const NO_SCOPE_TYPES: string[] = [];
  * - `getScopeCatalog(scopeType)`: the catalog of one scope type (see `getScopeCatalog` in utils),
  *   or `undefined` if it isn't loaded. Each scope type's catalog keeps its identity between
  *   renders, so what is memoized from it isn't rebuilt on every render.
+ * - `getRole(roleId)`: the role with that id, with its permissions in every scope type, or
+ *   `undefined` if the catalog isn't loaded or doesn't describe it.
  *
  * @example
  * ```tsx
@@ -62,10 +64,18 @@ export const useAuthzCatalog = () => {
     [scopeCatalogs],
   );
 
+  const rolesById = useMemo(
+    () => new Map<string, Role>((catalog?.roles ?? []).map((role) => [role.role, role])),
+    [catalog],
+  );
+
+  const getRole = useCallback((roleId: string) => rolesById.get(roleId), [rolesById]);
+
   return {
     ...query,
     isLoading: isLoadingPermissions || query.isLoading,
     scopeTypes: catalog?.scopeTypes ?? NO_SCOPE_TYPES,
     getScopeCatalog: getLoadedScopeCatalog,
+    getRole,
   };
 };
