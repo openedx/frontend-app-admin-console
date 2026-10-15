@@ -2,17 +2,22 @@ import { useState } from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
+import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
+import { getScopeCatalog } from '@src/authz-module/catalog/utils';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import {
   CONTENT_COURSE_PERMISSIONS,
   CONTENT_LIBRARY_PERMISSIONS,
-  courseRolesMetadata,
-  libraryRolesMetadata,
 } from '@src/authz-module/roles-permissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useValidateUsers } from '@src/authz-module/data/hooks';
 import AddRoleButton from './AddRoleButton';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 jest.mock('@src/data/hooks', () => ({
   ...jest.requireActual('@src/data/hooks'),
@@ -54,6 +59,7 @@ describe('AddRoleButton', () => {
   });
 
   beforeEach(() => {
+    mockAuthzCatalog();
     // Restated here because `mockImplementation` outlives `clearAllMocks`.
     mockUseValidateUsers.mockImplementation(() => ({ mutateAsync: jest.fn(), isPending: false }));
     mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
@@ -200,29 +206,42 @@ describe('AddRoleButton', () => {
   });
 
   describe('assignable roles', () => {
-    // Each entry maps an allowed permission to the role metadata the wizard should
-    // surface for it. Add a row here as more scopes/roles are introduced.
-    const scopeRoles = [
-      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRolesMetadata },
-      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRolesMetadata },
-    ];
-    const allRoles = scopeRoles.flatMap(({ roles }) => roles);
-
-    const openWizard = async () => {
+    const openWizard = async (props = {}) => {
       const user = userEvent.setup();
-      renderButton();
+      renderButton(props);
       await user.click(getButton());
     };
 
-    it('offers the roles for every allowed scope', async () => {
-      await openWizard();
+    // Each entry maps an allowed permission to the catalog roles the wizard should
+    // surface for it, from the catalog test fixture.
+    const libraryRoles = ['Library Admin', 'Library Author', 'Library Contributor', 'Library User'];
+    const courseRoles = ['Course Admin', 'Course Staff'];
+    const scopeRoles = [
+      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRoles },
+      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRoles },
+    ];
+    const allRoles = scopeRoles.flatMap(({ roles }) => roles);
 
+    it('shows the roles for every allowed scope type, in catalog order', async () => {
+      await openWizard();
       allRoles.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
+      expect(screen.getAllByRole('radiogroup')).toEqual([
+        screen.getByRole('radiogroup', { name: 'Courses' }),
+        screen.getByRole('radiogroup', { name: 'Libraries' }),
+      ]);
     });
 
-    it.each(scopeRoles)('offers only the roles for the allowed scope %#', async ({ action, roles }) => {
+    it('lists the roles of each scope type in the catalog order', async () => {
+      await openWizard();
+      const catalogOrder = getScopeCatalog(authzCatalog, SCOPE_TYPES.LIBRARY).roles
+        .map(({ displayName }) => displayName);
+      const roleNames = Array.from(document.querySelectorAll('.role-name')).map(({ textContent }) => textContent);
+      expect(roleNames.filter((name) => name?.startsWith('Library'))).toEqual(catalogOrder);
+    });
+
+    it.each(scopeRoles)('shows only the roles for the allowed scope type %#', async ({ action, roles }) => {
       mockUseValidatePermissions.mockReturnValue({
         data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
         isLoading: false,
@@ -230,13 +249,27 @@ describe('AddRoleButton', () => {
       await openWizard();
 
       roles.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
       allRoles
         .filter((role) => !roles.includes(role))
         .forEach((role) => {
-          expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+          expect(screen.queryByText(role)).not.toBeInTheDocument();
         });
+    });
+
+    it('announces that the roles are loading while the catalog loads', async () => {
+      mockAuthzCatalog({ isLoading: true });
+      await openWizard({ presetUsername: 'alice' });
+      expect(screen.getByRole('status')).toHaveTextContent('Loading roles...');
+      expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+    });
+
+    it('alerts that the roles could not be loaded when the catalog fails', async () => {
+      mockAuthzCatalog({ isError: true });
+      await openWizard({ presetUsername: 'alice' });
+      expect(screen.getByRole('alert')).toHaveTextContent('The roles could not be loaded. Please try again later.');
+      expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
     });
 
     it('ignores allowed permissions whose action is not a known role scope', async () => {
@@ -245,26 +278,21 @@ describe('AddRoleButton', () => {
         isLoading: false,
       });
       await openWizard();
-
-      allRoles.forEach((role) => {
-        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
-      });
+      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
     });
 
     it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', async () => {
       mockUseCourseAuthoringFlag.mockReturnValue({
         isCourseAuthoringEnabled: false,
         isCourseEnabled: () => false,
-        isOrgAuthoringEnabled: () => false,
         isLoading: false,
       });
       await openWizard();
-
-      courseRolesMetadata.forEach((role) => {
-        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      courseRoles.forEach((role) => {
+        expect(screen.queryByText(role)).not.toBeInTheDocument();
       });
-      libraryRolesMetadata.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+      libraryRoles.forEach((role) => {
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
     });
   });

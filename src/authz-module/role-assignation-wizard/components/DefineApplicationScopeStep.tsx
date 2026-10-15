@@ -1,24 +1,24 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useIntl } from '@openedx/frontend-base';
+import type { MessageDescriptor } from '@openedx/frontend-base';
 import { Alert } from '@openedx/paragon';
 import { WarningFilled, Error as ErrorIcon } from '@openedx/paragon/icons';
 import type { AssignmentFailure } from '@src/authz-module/role-assignation-wizard/utils';
-import { courseRolesMetadata } from '@src/authz-module/roles-permissions/course/constants';
-import { libraryRolesMetadata } from '@src/authz-module/roles-permissions/library/constants';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import useScopeListData from '@src/authz-module/role-assignation-wizard/hooks/useScopeListData';
 import ScopeFilterBar from './ScopeFilterBar';
 import ScopeList from './ScopeList';
 import messages from '@src/authz-module/role-assignation-wizard/messages';
 
-const allRolesMetadata = [...courseRolesMetadata, ...libraryRolesMetadata];
-
-function getContextType(role: string | null): string | undefined {
-  if (!role) return undefined;
-  return allRolesMetadata.find((r) => r.role === role)?.contextType;
-}
+// Label of the scope type the scopes are filtered by.
+const SCOPE_TYPE_LABELS: Partial<Record<string, MessageDescriptor>> = {
+  [SCOPE_TYPES.COURSE]: messages['wizard.step2.contextLabel.course'],
+  [SCOPE_TYPES.LIBRARY]: messages['wizard.step2.contextLabel.library'],
+};
 
 interface DefineApplicationScopeStepProps {
-  selectedRole: string | null;
+  // Scope type of the selected role.
+  scopeType: string | null;
   selectedScopes: Set<string>;
   onScopeToggle: (scopeId: string) => void;
   /** Reported by the last save, or null when there is nothing to report. */
@@ -26,7 +26,7 @@ interface DefineApplicationScopeStepProps {
 }
 
 const DefineApplicationScopeStep = ({
-  selectedRole,
+  scopeType,
   selectedScopes,
   onScopeToggle,
   assignmentFailure = null,
@@ -44,17 +44,8 @@ const DefineApplicationScopeStep = ({
   /** Separates "some of it worked" from "none of it did", which read differently. */
   const hasCompleted = (assignmentFailure?.completedCount ?? 0) > 0;
 
-  const contextType = useMemo(
-    () => getContextType(selectedRole),
-    [selectedRole],
-  );
-  const contextLabelMessages = {
-    course: messages['wizard.step2.contextLabel.course'],
-    library: messages['wizard.step2.contextLabel.library'],
-  };
-  const contextLabel = contextType && contextLabelMessages[contextType]
-    ? intl.formatMessage(contextLabelMessages[contextType])
-    : intl.formatMessage(messages['wizard.step2.contextLabel.default']);
+  const scopeTypeLabelMessage = scopeType ? SCOPE_TYPE_LABELS[scopeType] : undefined;
+  const scopeTypeLabel = intl.formatMessage(scopeTypeLabelMessage ?? messages['wizard.step2.contextLabel.default']);
 
   const {
     organizations,
@@ -65,7 +56,7 @@ const DefineApplicationScopeStep = ({
     queryState,
     platformAggregateScopeItem,
     orgAggregateScopeItems,
-  } = useScopeListData({ contextType, search: debouncedSearch, orgs: selectedOrgs });
+  } = useScopeListData({ scopeType: scopeType ?? undefined, search: debouncedSearch, orgs: selectedOrgs });
 
   return (
     <div className="define-application-scope-step py-4">
@@ -76,8 +67,8 @@ const DefineApplicationScopeStep = ({
         onSearchChange={setSearch}
         selectedOrgs={selectedOrgs}
         onOrgsChange={setSelectedOrgs}
-        contextType={contextType}
-        contextLabel={contextLabel}
+        scopeType={scopeType ?? undefined}
+        scopeTypeLabel={scopeTypeLabel}
         allScopesCount={allScopes.length}
         totalCount={totalCount}
       />

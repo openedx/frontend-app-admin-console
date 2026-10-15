@@ -1,6 +1,9 @@
 import { renderHook } from '@testing-library/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import {
+  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS,
+} from '@src/authz-module/roles-permissions';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import useScopePermissions from './useScopePermissions';
 
 jest.mock('@src/data/hooks', () => ({
@@ -25,7 +28,7 @@ describe('useScopePermissions', () => {
       });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT'],
       }));
 
@@ -41,16 +44,16 @@ describe('useScopePermissions', () => {
       });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT'],
       }));
 
       expect(result.current.hasPlatformPermission).toBe(false);
     });
 
-    it('is false when contextType is undefined', () => {
+    it('is false when scopeType is undefined', () => {
       const { result } = renderHook(() => useScopePermissions({
-        contextType: undefined,
+        scopeType: undefined,
         orderedOrgs: ['MIT'],
       }));
 
@@ -61,7 +64,7 @@ describe('useScopePermissions', () => {
   describe('orgHasPermission', () => {
     it('returns empty map when orderedOrgs is empty', () => {
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: [],
       }));
 
@@ -78,7 +81,7 @@ describe('useScopePermissions', () => {
       });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
@@ -95,7 +98,7 @@ describe('useScopePermissions', () => {
       });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
@@ -106,7 +109,7 @@ describe('useScopePermissions', () => {
       mockUseValidateUserPermissions.mockReturnValue({ data: [] });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT'],
       }));
 
@@ -117,7 +120,7 @@ describe('useScopePermissions', () => {
       mockUseValidateUserPermissions.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
@@ -128,7 +131,7 @@ describe('useScopePermissions', () => {
   describe('permission request construction', () => {
     it('uses MANAGE_COURSE_TEAM action with the platform-wide and per-org course scopes', () => {
       renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
@@ -141,7 +144,7 @@ describe('useScopePermissions', () => {
 
     it('uses MANAGE_LIBRARY_TEAM action with the platform-wide and per-org lib scopes', () => {
       renderHook(() => useScopePermissions({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         orderedOrgs: ['MIT', 'HarvardX'],
       }));
 
@@ -154,7 +157,7 @@ describe('useScopePermissions', () => {
 
     it('validates only the platform-wide scope when orderedOrgs is empty', () => {
       renderHook(() => useScopePermissions({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         orderedOrgs: [],
       }));
 
@@ -163,9 +166,9 @@ describe('useScopePermissions', () => {
       ]);
     });
 
-    it('passes empty array when contextType is undefined', () => {
+    it('passes empty array when scopeType is undefined', () => {
       renderHook(() => useScopePermissions({
-        contextType: undefined,
+        scopeType: undefined,
         orderedOrgs: ['MIT'],
       }));
 
