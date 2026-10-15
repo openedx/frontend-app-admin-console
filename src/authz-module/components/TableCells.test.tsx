@@ -178,6 +178,7 @@ describe('TableCells Components', () => {
         },
       });
       mockNavigate.mockClear();
+      mockIsCourseEnabled.mockReturnValue(true);
     });
 
     it('renders view action button', () => {
@@ -260,8 +261,9 @@ describe('TableCells Components', () => {
     });
 
     it('disables the view action and shows a tooltip when course authoring is disabled for the course', async () => {
+      mockIsCourseEnabled.mockReturnValue(false);
       const user = userEvent.setup();
-      renderWrapper(<ViewActionCell {...mockCellProps} isCourseEnabled={() => false} />);
+      renderWrapper(<ViewActionCell {...mockCellProps} />);
 
       const viewButton = screen.getByRole('button', { name: /view/i });
       expect(viewButton).toBeDisabled();

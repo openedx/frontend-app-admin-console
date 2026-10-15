@@ -21,10 +21,6 @@ import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
 
-type ViewActionCellExtraProps = {
-  isCourseEnabled: (scope: string) => boolean;
-};
-
 interface DataTableInstance {
   state?: {
     expanded?: Record<string, boolean>;
@@ -95,12 +91,15 @@ const NameCell = ({ row }: CellProps) => {
   return row.original.fullName || row.original.username;
 };
 
-const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
+const ViewActionCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  // Read the flag here rather than through a cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const viewPath = `/authz/user/${row.original.username}`;
   const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
-  const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isDisabled) {
     return (
@@ -120,10 +119,6 @@ const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewAction
       onClick={() => navigate(viewPath)}
     />
   );
-};
-
-const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function customViewActionCell(cellProps) {
-  return <ViewActionCell {...cellProps} {...extraProps} />;
 };
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
@@ -308,5 +303,4 @@ export {
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
-  createViewActionCell,
 };
