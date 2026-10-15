@@ -1,5 +1,6 @@
 import { screen } from '@testing-library/react';
-import { renderWrapper } from '@src/testUtils';
+import { renderWithAllProviders } from '@src/testUtils';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { DataTableContext, TextFilter } from '@openedx/paragon';
 import userEvent from '@testing-library/user-event';
 import TableControlBar from './TableControlBar';
@@ -34,6 +35,10 @@ const mockState = {
   ],
 };
 
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
+
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: () => ({
     isCourseAuthoringEnabled: true,
@@ -51,8 +56,8 @@ jest.mock('@src/authz-module/data/hooks', () => ({
   useScopes: () => ({ data: { results: [] } }),
 }));
 
-// RolesFilter validates view-team permissions to decide which role groups to show.
-// Grant both so the full course/library role set renders for these wiring tests.
+// ScopesFilter and OrgFilter read the view-team permissions to decide what to show.
+// Grant both so the full course/library filters render for these wiring tests.
 jest.mock('@src/data/hooks', () => {
   const { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } = jest.requireActual('@src/authz-module/roles-permissions');
   return {
@@ -74,7 +79,7 @@ describe('TableControlBar', () => {
 
   const renderWithContext = (component, contextOverride = {}) => {
     const context = { ...mockDataTableContext, ...contextOverride };
-    return renderWrapper(
+    return renderWithAllProviders(
       <DataTableContext.Provider value={context}>
         {component}
       </DataTableContext.Provider>,
@@ -83,6 +88,7 @@ describe('TableControlBar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthzCatalog();
     mockSetAllFilters.mockClear();
     mockOnFilterChange.mockClear();
   });
