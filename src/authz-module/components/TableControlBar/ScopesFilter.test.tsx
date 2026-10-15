@@ -4,8 +4,7 @@ import { renderWrapper } from '@src/testUtils';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
-import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import ScopesFilter from './ScopesFilter';
 
 jest.mock('@src/data/hooks', () => ({
@@ -45,8 +44,8 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 const mockUseScopes = useScopes as jest.Mock;
 
 const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => [
-  { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: !!library },
-  { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: !!course },
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: !!library },
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: !!course },
 ];
 
 describe('ScopesFilter', () => {

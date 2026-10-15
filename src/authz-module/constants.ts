@@ -4,19 +4,31 @@ export const SCOPE_TYPES = {
   LIBRARY: 'lib',
 } as const;
 
+export type ScopeType = typeof SCOPE_TYPES[keyof typeof SCOPE_TYPES];
+
 // Permission the user needs to view the teams of each scope type, and so its catalog.
 export const VIEW_TEAM_ACTIONS: Record<string, string> = {
   [SCOPE_TYPES.COURSE]: 'courses.view_course_team',
   [SCOPE_TYPES.LIBRARY]: 'content_libraries.view_library_team',
 };
 
-// Resource Type Definitions
-export const CONTEXT_TYPES = {
-  LIBRARY: 'library',
-  COURSE: 'course',
-} as const;
+// Permission the user needs to manage the teams of each scope type, and so assign its roles.
+export const MANAGE_TEAM_ACTIONS: Record<string, string> = {
+  [SCOPE_TYPES.COURSE]: 'courses.manage_course_team',
+  [SCOPE_TYPES.LIBRARY]: 'content_libraries.manage_library_team',
+};
 
-export type ContextType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
+// Validate/me requests for those permissions. Every consumer sends them in the same order
+// (libraries first), so they share one query.
+export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },
+];
+
+export const MANAGE_TEAM_PERMISSIONS: { action: string }[] = [
+  { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
+  { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },
+];
 
 const ORG_AGGREGATE_SCOPE_BUILDERS: Record<string, (orgSlug: string) => string> = {
   [SCOPE_TYPES.COURSE]: (orgSlug: string) => `course-v1:${orgSlug}+*`,
@@ -44,11 +56,12 @@ export const getPlatformAggregateScopeKey = (scopeType: string): string => {
 export const ALL_ORGS_KEY = '*';
 
 /**
- * The kind of resource a scope points at, read from the scope key itself rather than from
- * the role that grants it, so it does not depend on role naming staying conventional.
+ * The scope type a scope belongs to, read from the scope key itself rather than from the role
+ * that grants it, so it does not depend on role naming staying conventional. Unrecognised scopes
+ * fall back to courses.
  */
-export const getScopeContextType = (scope: string): ContextType => (
-  scope.startsWith('lib') ? CONTEXT_TYPES.LIBRARY : CONTEXT_TYPES.COURSE
+export const getScopeType = (scope: string): ScopeType => (
+  scope.startsWith(SCOPE_TYPES.LIBRARY) ? SCOPE_TYPES.LIBRARY : SCOPE_TYPES.COURSE
 );
 
 /**
@@ -58,8 +71,7 @@ export const getScopeContextType = (scope: string): ContextType => (
  * needed to recognize an org-level aggregate, since its key embeds the slug.
  */
 export const getAggregateScopeType = (scope: string, org?: string | null): 'platform' | 'org' | null => {
-  // Unrecognised scopes fall back to courses, as `getScopeContextType` does.
-  const scopeType = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY ? SCOPE_TYPES.LIBRARY : SCOPE_TYPES.COURSE;
+  const scopeType = getScopeType(scope);
   if (scope === getPlatformAggregateScopeKey(scopeType)) {
     return 'platform';
   }

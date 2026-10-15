@@ -1,17 +1,15 @@
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import {
-  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, VIEW_TEAM_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
+import { SCOPE_TYPES, VIEW_TEAM_ACTIONS, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/constants';
 
 export const useViewTeamPermissions = () => {
   const { data: permissions, isLoading } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
 
   const isCourseViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
+    ? permissions.some((p) => p.action === VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE] && p.allowed)
     : false;
 
   const isLibraryViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM && p.allowed)
+    ? permissions.some((p) => p.action === VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] && p.allowed)
     : false;
 
   return { isCourseViewAllowed, isLibraryViewAllowed, isLoading };

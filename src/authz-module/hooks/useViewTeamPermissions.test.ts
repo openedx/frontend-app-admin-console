@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { useViewTeamPermissions } from './useViewTeamPermissions';
 
 jest.mock('@src/data/hooks', () => ({
@@ -10,8 +10,8 @@ jest.mock('@src/data/hooks', () => ({
 const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
 
 const permissionsData = ({ course, library }: { course: boolean; library: boolean }) => [
-  { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: course },
-  { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: library },
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: course },
+  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: library },
 ];
 
 describe('useViewTeamPermissions', () => {

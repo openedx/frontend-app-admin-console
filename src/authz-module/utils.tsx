@@ -1,8 +1,7 @@
 import { Icon } from '@openedx/paragon';
 import { FilterList } from '@openedx/paragon/icons';
 import { RESOURCE_ICONS } from './components/constants';
-import { CONTEXT_TYPES, getScopeContextType } from './constants';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
+import { getScopeType, MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from './constants';
 
 /**
  * Returns a header value for a DataTable column that shows a filter icon
@@ -37,15 +36,11 @@ export const getCellHeader = (columnId: string, columnTitle: string, filtersAppl
  * Picks the course or library icon for a scope from the scope key itself.
  */
 export const getScopeResourceIcon = (scope: string) => (
-  getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE
+  getScopeType(scope) === SCOPE_TYPES.LIBRARY ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE
 );
 
-/** Unrecognised scopes fall back to the course permission, as `getScopeContextType` does. */
-export const getScopeManageAction = (scope: string) => (
-  getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
-    ? CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM
-    : CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM
-);
+/** Unrecognised scopes fall back to the course permission, as `getScopeType` does. */
+export const getScopeManageAction = (scope: string) => MANAGE_TEAM_ACTIONS[getScopeType(scope)];
 
 export const getScopeManageActionPermission = (scope: string) => {
   const action = getScopeManageAction(scope);

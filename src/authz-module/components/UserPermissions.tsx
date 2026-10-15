@@ -1,6 +1,6 @@
 import { useIntl } from '@openedx/frontend-base';
 import {
-  CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getScopeContextType, SCOPE_TYPES,
+  DJANGO_MANAGED_ROLES, getScopeType,
 } from '@src/authz-module/constants';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import type { CategoryPermissions } from '@src/authz-module/catalog';
@@ -12,11 +12,6 @@ import messages from './messages';
 
 // Category of the permissions the catalog sends without one.
 const OTHER_CATEGORY_ID = 'other';
-
-const catalogScopeTypes = {
-  [CONTEXT_TYPES.COURSE]: SCOPE_TYPES.COURSE,
-  [CONTEXT_TYPES.LIBRARY]: SCOPE_TYPES.LIBRARY,
-};
 
 interface UserPermissionsProps {
   row: {
@@ -42,7 +37,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
   }
 
   // Only the assignment's scope type describes it: a role from another scope type must not.
-  const scopeCatalog = getScopeCatalog(catalogScopeTypes[getScopeContextType(scope)]);
+  const scopeCatalog = getScopeCatalog(getScopeType(scope));
   if (!scopeCatalog) return null;
 
   const otherCategory = {

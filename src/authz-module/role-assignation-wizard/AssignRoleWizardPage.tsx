@@ -3,19 +3,12 @@ import { useIntl } from '@openedx/frontend-base';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import AssignRoleWizard from './AssignRoleWizard';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
-import { AUTHZ_HOME_PATH, buildAuditUserPath, SCOPE_TYPES } from '@src/authz-module/constants';
-import messages from './messages';
 import {
-  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, MANAGE_TEAM_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
+  AUTHZ_HOME_PATH, buildAuditUserPath, MANAGE_TEAM_ACTIONS, MANAGE_TEAM_PERMISSIONS, SCOPE_TYPES,
+} from '@src/authz-module/constants';
+import messages from './messages';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-
-// Permission that lets the user assign the roles of each scope type.
-const MANAGE_TEAM_ACTIONS: Partial<Record<string, string>> = {
-  [SCOPE_TYPES.COURSE]: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
-  [SCOPE_TYPES.LIBRARY]: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
-};
 
 const AssignRoleWizardPage = () => {
   const intl = useIntl();
