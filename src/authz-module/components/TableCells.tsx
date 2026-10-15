@@ -7,7 +7,7 @@ import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from
 import type { ComponentProps, ReactNode } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, SCOPE_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeType, MAP_ROLE_KEY_TO_LABEL,
+  getScopeType,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip,
@@ -16,7 +16,7 @@ import {
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
-import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
+import { AGGREGATE_SCOPE_LABELS, DJANGO_ROLE_LABELS } from '@src/authz-module/messages';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
@@ -99,6 +99,16 @@ const OrgIconCell = ({ row }: AssignmentCellProps) => {
   );
 };
 
+const RoleCell = ({ value }: { value: string }) => {
+  const { formatMessage } = useIntl();
+  const { getRole } = useAuthzCatalog();
+  const roleName = DJANGO_ROLE_LABELS[value]
+    ? formatMessage(DJANGO_ROLE_LABELS[value])
+    : getRole(value)?.displayName ?? value;
+
+  return <span data-role={value}>{roleName}</span>;
+};
+
 // The permissions count doubles as the toggle that expands the row's permissions breakdown.
 // A role the metadata doesn't describe has no breakdown to expand, so its count is plain text.
 const PermissionsCell = ({ row }: CellProps) => {
@@ -135,6 +145,7 @@ const ActionsCell = ({
   // Read the flag here rather than through the cell factory: DataTable never refreshes
   // `additionalColumns`, so a factory closure would keep the loading-state resolver.
   const { isCourseEnabled } = useCourseAuthoringFlag();
+  const { getRole } = useAuthzCatalog();
   const { role, scope, canManageScope, scopeDisplayName, org } = row.original;
 
   const handleDelete = () =>
@@ -143,7 +154,7 @@ const ActionsCell = ({
       scope,
       scopeDisplayName,
       org,
-      name: MAP_ROLE_KEY_TO_LABEL[role] || role,
+      name: getRole(role)?.displayName ?? role,
     });
 
   if (DJANGO_MANAGED_ROLES.includes(role)) {
@@ -208,6 +219,7 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
+  RoleCell,
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
