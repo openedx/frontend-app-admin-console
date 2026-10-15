@@ -51,6 +51,21 @@ const messages = defineMessages({
     defaultMessage: 'See full documentation',
     description: 'Libraries AuthZ link for the course roles alert',
   },
+  'authz.tabs.permissionsRoles.category.other': {
+    id: 'authz.tabs.permissionsRoles.category.other',
+    defaultMessage: 'Other',
+    description: 'Libraries AuthZ name of the category that groups the permissions without a category in the roles table',
+  },
+  'authz.tabs.permissionsRoles.loading': {
+    id: 'authz.tabs.permissionsRoles.loading',
+    defaultMessage: 'Loading roles and permissions',
+    description: 'Libraries AuthZ screen reader text while the roles and permissions are loading',
+  },
+  'authz.tabs.permissionsRoles.error': {
+    id: 'authz.tabs.permissionsRoles.error',
+    defaultMessage: 'The roles and permissions could not be loaded. Please try again later.',
+    description: 'Libraries AuthZ message shown when the roles and permissions fail to load',
+  },
   'authz.team.remove.user.toast.success.description': {
     id: 'authz.team.remove.user.toast.success.description',
     defaultMessage: 'The {role} role has been successfully removed.{rolesCount, plural, =0 { The user no longer has access to this library and has been removed from the member list.} other {}}',
