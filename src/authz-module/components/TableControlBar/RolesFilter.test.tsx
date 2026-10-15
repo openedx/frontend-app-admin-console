@@ -1,26 +1,20 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWrapper } from '@src/testUtils';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { renderWithAllProviders } from '@src/testUtils';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
 import RolesFilter from './RolesFilter';
 
-jest.mock('@src/data/hooks', () => ({
-  useValidateUserPermissionsNonSuspense: jest.fn(),
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: jest.fn(),
 }));
 
-const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
-
-const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => [
-  { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: !!library },
-  { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: !!course },
-];
 
 describe('RolesFilter', () => {
   const defaultProps = {
@@ -37,7 +31,7 @@ describe('RolesFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: true }) });
+    mockAuthzCatalog();
     mockUseCourseAuthoringFlag.mockReturnValue({
       isCourseAuthoringEnabled: true,
       isCourseEnabled: () => true,
@@ -46,26 +40,26 @@ describe('RolesFilter', () => {
   });
 
   it('renders the filter toggle', () => {
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     expect(screen.getByText('Roles')).toBeInTheDocument();
   });
 
   it('handles disabled state', () => {
-    renderWrapper(<RolesFilter {...defaultProps} disabled />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} disabled />);
     expect(screen.getByText('Roles')).toBeInTheDocument();
   });
 
   it('displays filter button text', () => {
-    renderWrapper(<RolesFilter {...defaultProps} filterButtonText="Select Roles" />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} filterButtonText="Select Roles" />);
     expect(screen.getByText('Select Roles')).toBeInTheDocument();
   });
 
   it('calls setFilter with the selected role when a role is checked', async () => {
     const user = userEvent.setup();
     const setFilter = jest.fn();
-    renderWrapper(<RolesFilter {...defaultProps} setFilter={setFilter} />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} setFilter={setFilter} />);
     const menu = await openDropdown(user);
-    await user.click(menu.getByLabelText('Course Admin'));
+    await user.click(await menu.findByLabelText('Course Admin'));
     expect(setFilter).toHaveBeenCalledWith(
       ['course_admin'],
       expect.objectContaining({ value: 'course_admin', displayName: 'Course Admin' }),
@@ -74,10 +68,10 @@ describe('RolesFilter', () => {
 
   it('shows only library roles when the user can view the library scope only', async () => {
     const user = userEvent.setup();
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true }) });
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    mockAuthzCatalog({ scopeTypes: [SCOPE_TYPES.LIBRARY] });
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
-    expect(menu.getByText('Libraries')).toBeInTheDocument();
+    expect(await menu.findByText('Libraries')).toBeInTheDocument();
     expect(menu.getByLabelText('Library Admin')).toBeInTheDocument();
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByLabelText('Course Admin')).not.toBeInTheDocument();
@@ -85,25 +79,36 @@ describe('RolesFilter', () => {
 
   it('shows both course and library roles when the user can view both scopes', async () => {
     const user = userEvent.setup();
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
-    expect(menu.getByText('Courses')).toBeInTheDocument();
+    expect(await menu.findByText('Courses')).toBeInTheDocument();
     expect(menu.getByText('Libraries')).toBeInTheDocument();
+  });
+
+  it('lists the roles of each scope type from most to fewest permissions', async () => {
+    const user = userEvent.setup();
+    mockAuthzCatalog({ scopeTypes: [SCOPE_TYPES.LIBRARY] });
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
+    const menu = await openDropdown(user);
+    await menu.findByLabelText('Library Admin');
+    expect(menu.getAllByRole('checkbox').map((checkbox) => checkbox.getAttribute('aria-label'))).toEqual([
+      'Library Admin', 'Library Author', 'Library Contributor', 'Library User',
+    ]);
   });
 
   it('shows no role options when the user cannot view any scope', async () => {
     const user = userEvent.setup();
-    mockUsePermissions.mockReturnValue({ data: permissionsData({}) });
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    mockAuthzCatalog({ scopeTypes: [] });
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
   });
 
-  it('shows no role options while permissions are still loading', async () => {
+  it('shows no role options while the catalog is still loading', async () => {
     const user = userEvent.setup();
-    mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    mockAuthzCatalog({ isLoading: true });
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
@@ -116,9 +121,9 @@ describe('RolesFilter', () => {
       isCourseEnabled: () => false,
       isLoading: false,
     });
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
-    expect(menu.getByText('Libraries')).toBeInTheDocument();
+    expect(await menu.findByText('Libraries')).toBeInTheDocument();
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByLabelText('Course Admin')).not.toBeInTheDocument();
   });
@@ -130,7 +135,7 @@ describe('RolesFilter', () => {
       isCourseEnabled: () => false,
       isLoading: true,
     });
-    renderWrapper(<RolesFilter {...defaultProps} />);
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
