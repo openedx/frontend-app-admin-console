@@ -11,6 +11,11 @@ const messages = defineMessages({
     defaultMessage: 'Permission not granted in {roleName} role',
     description: 'Label for not granted status of a permission in the permissions table',
   },
+  'authz.tabs.permissionsRoles.category.other': {
+    id: 'authz.tabs.permissionsRoles.category.other',
+    defaultMessage: 'Other',
+    description: 'Libraries AuthZ name of the category that groups the permissions without a category',
+  },
   'authz.anchor.button.alt': {
     id: 'authz.anchor.button.alt',
     defaultMessage: 'Scroll to top',
