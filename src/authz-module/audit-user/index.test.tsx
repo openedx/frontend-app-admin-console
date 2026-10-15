@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import AuditUserPage from './index';
 
 jest.mock('@openedx/frontend-base', () => ({
@@ -29,12 +30,17 @@ jest.mock('@src/data/hooks', () => ({
 
 // Mock the useRevokeUserRoles hook
 const mockRevokeUserRoles = jest.fn();
+const mockIsCourseViewAllowed = jest.fn(() => true);
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: () => ({
-    isCourseViewAllowed: true,
+    isCourseViewAllowed: mockIsCourseViewAllowed(),
     isLibraryViewAllowed: true,
     isLoading: false,
   }),
+}));
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
 }));
 
 const mockIsCourseEnabled = jest.fn(() => true);
@@ -106,6 +112,8 @@ const renderWithRouter = (route = '/audit/johndoe') => {
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthzCatalog();
+    mockIsCourseViewAllowed.mockReturnValue(true);
     mockIsCourseEnabled.mockReturnValue(true);
     // Set up default mock behavior for useRevokeUserRoles
     mockRevokeUserRoles.mockImplementation((_variables, { onSuccess }) => {
@@ -219,6 +227,19 @@ describe('AuditUserPage', () => {
       expect(screen.getByRole('columnheader', { name: /permissions/i })).toBeInTheDocument();
       expect(screen.getByRole('columnheader', { name: /actions/i })).toBeInTheDocument();
     });
+  });
+
+  it('lists only the catalog library roles to a user who can only view library teams', async () => {
+    mockIsCourseViewAllowed.mockReturnValue(false);
+    (useUserAccount as jest.Mock).mockReturnValue({ data: mockUser, isLoading: false, error: null });
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({ data: mockAssignments, isLoading: false, error: null });
+
+    renderWithRouter();
+
+    await waitFor(() => expect(useUserAssignedRoles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ roles: 'library_admin,library_author,library_contributor,library_user' }),
+    ));
   });
 
   it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
