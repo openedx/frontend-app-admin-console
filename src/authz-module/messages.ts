@@ -1,4 +1,5 @@
 import { defineMessages } from '@openedx/frontend-base';
+import { SCOPE_TYPES } from './constants';
 
 const messages = defineMessages(
   {
@@ -63,10 +64,10 @@ const messages = defineMessages(
   },
 );
 
-/** Aggregate scope labels keyed by the kind of resource the scope covers. */
+/** Aggregate scope labels keyed by the scope type the scope covers. */
 export const AGGREGATE_SCOPE_LABELS = {
-  course: messages['authz.scope.aggregate.course'],
-  library: messages['authz.scope.aggregate.library'],
+  [SCOPE_TYPES.COURSE]: messages['authz.scope.aggregate.course'],
+  [SCOPE_TYPES.LIBRARY]: messages['authz.scope.aggregate.library'],
 };
 
 export default messages;
