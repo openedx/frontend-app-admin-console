@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { initializeMocks, renderWrapper } from '@src/testUtils';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import {
   RoleCell,
   OrgCell,
@@ -13,6 +14,10 @@ import {
 
 const mockNavigate = jest.fn();
 
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
@@ -21,6 +26,10 @@ jest.mock('react-router-dom', () => ({
 describe('TableCells Components', () => {
   beforeAll(() => {
     initializeMocks();
+  });
+
+  beforeEach(() => {
+    mockAuthzCatalog();
   });
 
   afterEach(() => {
@@ -32,14 +41,14 @@ describe('TableCells Components', () => {
       getCellProps: jest.fn(() => ({ 'data-testid': 'role-cell' })),
     };
 
-    it('renders the role label for a mapped role', () => {
+    it('shows the catalog name of the role', () => {
       const props = {
         value: 'library_admin',
         cell: mockCell,
         row: {
           id: '0',
           original: {
-            role: 'library_admin', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'library_admin', org: 'Test Org', scope: 'lib:TestOrg:TestLib', permissionCount: 1,
           },
         },
         column: { id: 'role' },
@@ -48,10 +57,10 @@ describe('TableCells Components', () => {
       renderWrapper(<RoleCell {...props} />);
 
       expect(screen.getByText('Library Admin')).toBeInTheDocument();
-      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'Library Admin' });
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'library_admin' });
     });
 
-    it('renders empty string for unmapped role', () => {
+    it('shows the role id for a role the catalog does not describe', () => {
       const props = {
         value: 'unknown_role',
         cell: mockCell,
@@ -66,9 +75,27 @@ describe('TableCells Components', () => {
 
       renderWrapper(<RoleCell {...props} />);
 
-      const cellElement = screen.getByTestId('role-cell');
-      expect(cellElement).toHaveTextContent('');
-      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': '' });
+      expect(screen.getByTestId('role-cell')).toHaveTextContent('unknown_role');
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'unknown_role' });
+    });
+
+    it('shows the name of a Django managed role, which the catalog does not describe', () => {
+      const props = {
+        value: 'django.staff',
+        cell: mockCell,
+        row: {
+          id: '0',
+          original: {
+            role: 'django.staff', org: '*', scope: '*', permissionCount: 1,
+          },
+        },
+        column: { id: 'role' },
+      };
+
+      renderWrapper(<RoleCell {...props} />);
+
+      expect(screen.getByTestId('role-cell')).toHaveTextContent('Global Staff');
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'django.staff' });
     });
 
     it('applies cell props correctly', () => {
@@ -78,7 +105,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'course_staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'course_staff', org: 'Test Org', scope: 'course-v1:TestOrg+Test+Run', permissionCount: 1,
           },
         },
         column: { id: 'role' },
@@ -87,7 +114,7 @@ describe('TableCells Components', () => {
       renderWrapper(<RoleCell {...props} />);
 
       expect(screen.getByText('Course Staff')).toBeInTheDocument();
-      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'Course Staff' });
+      expect(mockCell.getCellProps).toHaveBeenCalledWith({ 'data-role': 'course_staff' });
     });
   });
 
@@ -116,7 +143,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'org' },
@@ -192,7 +219,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
+            role: 'django.staff', org: 'Test Org', scope: 'Test Scope', permissionCount: 1,
           },
         },
         column: { id: 'scope' },
@@ -287,7 +314,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff',
+            role: 'django.staff',
             permissionCount: 5,
             org: 'Test Org',
             scope: 'Test Scope',
@@ -327,7 +354,7 @@ describe('TableCells Components', () => {
       original: {
         role: 'library_admin',
         org: 'Test Org',
-        scope: 'Test Scope',
+        scope: 'lib:TestOrg:TestLib',
         permissionCount: 1,
         canManageScope: true,
       },
@@ -349,7 +376,22 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:TestOrg:TestLib' });
+    });
+
+    it('names a role the catalog does not describe by its id when deleting it', async () => {
+      const user = userEvent.setup();
+      const CustomActionsCell = createActionsCell({
+        onClickDeleteButton: mockOnClickDeleteButton,
+        isUserAuthenticatedPage: false,
+      });
+      renderWrapper(<CustomActionsCell row={{ original: { ...baseRow.original, role: 'unknown_role' } }} column={{ id: 'actions' }} />);
+
+      await user.click(screen.getByRole('button', { name: /delete role action/i }));
+
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({
+        name: 'unknown_role', role: 'unknown_role', scope: 'lib:TestOrg:TestLib',
+      });
     });
 
     it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {
