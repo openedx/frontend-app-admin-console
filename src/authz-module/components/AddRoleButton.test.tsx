@@ -4,13 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
 import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { getScopeCatalog } from '@src/authz-module/catalog/utils';
-import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import {
-  CONTENT_COURSE_PERMISSIONS,
-  CONTENT_LIBRARY_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useValidateUsers } from '@src/authz-module/data/hooks';
 import AddRoleButton from './AddRoleButton';
@@ -38,8 +34,8 @@ const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
 const allowAllPermissions = {
   data: [
-    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
-    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
   ],
   isLoading: false,
 };
@@ -217,8 +213,8 @@ describe('AddRoleButton', () => {
     const libraryRoles = ['Library Admin', 'Library Author', 'Library Contributor', 'Library User'];
     const courseRoles = ['Course Admin', 'Course Staff'];
     const scopeRoles = [
-      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRoles },
-      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRoles },
+      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], roles: libraryRoles },
+      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], roles: courseRoles },
     ];
     const allRoles = scopeRoles.flatMap(({ roles }) => roles);
 
@@ -301,8 +297,8 @@ describe('AddRoleButton', () => {
     it('does not render the button when the user cannot manage any team', () => {
       mockUseValidatePermissions.mockReturnValue({
         data: [
-          { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: false },
-          { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: false },
         ],
         isLoading: false,
       });
@@ -314,8 +310,8 @@ describe('AddRoleButton', () => {
     it('renders the button when at least one team-management permission is allowed', () => {
       mockUseValidatePermissions.mockReturnValue({
         data: [
-          { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: false },
-          { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
         ],
         isLoading: false,
       });
