@@ -572,6 +572,17 @@ describe('useTeamMembersAssignments', () => {
       expect(result.current.data?.count).toBe(0);
     });
   });
+
+  it('does not fetch while disabled', () => {
+    const get = jest.fn();
+    mockHttpClient().mockReturnValue({ get });
+    const { result } = renderHook(
+      () => useTeamMembersAssignments(mockQuerySettings, false),
+      { wrapper: createWrapper() },
+    );
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(get).not.toHaveBeenCalled();
+  });
 });
 
 describe('useUserAssignedRoles', () => {
@@ -666,6 +677,16 @@ describe('useUserAssignedRoles', () => {
     });
 
     expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fetch while disabled', () => {
+    const get = jest.fn();
+    mockHttpClient().mockReturnValue({ get });
+    const { result } = renderHook(() => useUserAssignedRoles('john.doe', mockQuerySettings, false), {
+      wrapper: createWrapper(),
+    });
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(get).not.toHaveBeenCalled();
   });
 
   it('updates when query settings change', async () => {
