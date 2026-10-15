@@ -91,13 +91,15 @@ export const useRevokeUserRoles = () => {
  *
  * @param querySettings - Parameters for filtering by roles, scopes,
  * organizations, search term, sorting, and pagination.
+ * @param enabled - Whether to fetch; false while the query settings aren't complete yet.
  *
  * @example
  * const { data: teamMembers } = useTeamMembersAssignments({ roles: 'editor', pageSize: 20 });
  */
-export const useTeamMembersAssignments = (querySettings: QuerySettings) => (
+export const useTeamMembersAssignments = (querySettings: QuerySettings, enabled = true) => (
   useQuery<GetTeamMembersAssignmentsResponse, Error>({
     queryKey: authzQueryKeys.teamMembersAssignments(querySettings),
+    enabled,
     queryFn: () => getTeamMembersAssignments(querySettings),
     staleTime: 1000 * 60 * 30, // refetch after 30 minutes
   })
@@ -166,6 +168,7 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
   * It retrieves the full list of roles with the corresponding permissions.
   * @param username - The username of the user
   * @param querySettings - Optional query parameters for filtering, sorting, and pagination
+  * @param enabled - Whether to fetch; false while the query settings aren't complete yet
   *
   * @example
   * ```tsx
@@ -175,11 +178,12 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
 export const useUserAssignedRoles = (
   username?: string,
   querySettings?: QuerySettings,
+  enabled = true,
 ) => useQuery<GetUserAssignmentsResponse, Error>({
   queryKey: authzQueryKeys.userRoles(username, querySettings),
   queryFn: () => getUserAssignedRoles(username, querySettings),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
-  enabled: !!username,
+  enabled: !!username && enabled,
   refetchOnWindowFocus: false,
 });
 
