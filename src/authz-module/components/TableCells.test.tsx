@@ -18,6 +18,11 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+const mockIsCourseEnabled = jest.fn(() => true);
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: () => ({ isCourseEnabled: mockIsCourseEnabled }),
+}));
+
 describe('TableCells Components', () => {
   beforeAll(() => {
     initializeMocks();
@@ -335,6 +340,7 @@ describe('TableCells Components', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      mockIsCourseEnabled.mockReturnValue(true);
     });
 
     it('renders a delete button and calls onClickDeleteButton when clicked', async () => {
@@ -432,11 +438,11 @@ describe('TableCells Components', () => {
     });
 
     it('renders a disabled delete button with a tooltip when course authoring is disabled for the course', async () => {
+      mockIsCourseEnabled.mockReturnValue(false);
       const user = userEvent.setup();
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
         isUserAuthenticatedPage: false,
-        isCourseEnabled: () => false,
       });
       const courseRow = {
         original: {
@@ -457,10 +463,10 @@ describe('TableCells Components', () => {
     });
 
     it('keeps the delete action enabled for library roles when course authoring is disabled', () => {
+      mockIsCourseEnabled.mockReturnValue(false);
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
         isUserAuthenticatedPage: false,
-        isCourseEnabled: () => false,
       });
       renderWrapper(<CustomActionsCell row={baseRow} column={{ id: 'actions' }} />);
 
