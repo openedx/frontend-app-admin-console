@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
 import AddRoleButton from './AddRoleButton';
 
 // Mock react-router-dom navigation
@@ -20,8 +20,8 @@ jest.mock('@src/data/hooks', () => ({
 const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
 const allowAllPermissions = {
   data: [
-    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
-    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
   ],
   isLoading: false,
 };
@@ -146,8 +146,8 @@ describe('AddRoleButton', () => {
     it('does not render the button when the user cannot manage any team', () => {
       mockUseValidatePermissions.mockReturnValue({
         data: [
-          { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: false },
-          { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: false },
         ],
         isLoading: false,
       });
@@ -159,8 +159,8 @@ describe('AddRoleButton', () => {
     it('renders the button when at least one team-management permission is allowed', () => {
       mockUseValidatePermissions.mockReturnValue({
         data: [
-          { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: false },
-          { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
+          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
         ],
         isLoading: false,
       });

@@ -6,7 +6,7 @@ import {
 import { ArrowForward } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import {
-  ALL_ORGS_KEY, buildAuditUserPath, getAggregateScopeType, getScopeContextType,
+  ALL_ORGS_KEY, buildAuditUserPath, getAggregateScopeType, getScopeType,
 } from '@src/authz-module/constants';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
@@ -34,7 +34,7 @@ const ScopeNameCell = ({ row: assignmentRow }: AssignmentCellProps) => {
   const { scope, scopeDisplayName, org } = assignmentRow.original;
   const aggregateType = getAggregateScopeType(scope, org);
   const scopeText = aggregateType
-    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeType(scope)])
     : scopeDisplayName || scope;
 
   return (
