@@ -215,7 +215,7 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:TestOrg:test-library' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:TestOrg:test-library', scopeDisplayName: '', org: 'Test Org' });
     });
 
     it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {

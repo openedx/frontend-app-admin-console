@@ -117,7 +117,7 @@ const PermissionsCell = ({ row }: CellProps) => {
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
   return (
     <span>
-      { isDjangoRole
+      {isDjangoRole
         ? formatMessage(
             messages['authz.user.table.permissions.access.label'],
             { accessType: role === 'django.superuser' ? 'total' : 'partial' },
@@ -151,16 +151,16 @@ const ActionsCell = ({
   // Read the flag here rather than through the cell factory: DataTable never refreshes
   // `additionalColumns`, so a factory closure would keep the loading-state resolver.
   const { isCourseEnabled } = useCourseAuthoringFlag();
-  const { role, scope, canManageScope } = row.original;
+  const { role, scope, canManageScope, scopeDisplayName, org } = row.original;
 
-  const handleDelete = () => {
-    const roleToDelete = {
+  const handleDelete = () =>
+    onClickDeleteButton({
       role,
       scope,
+      scopeDisplayName,
+      org,
       name: MAP_ROLE_KEY_TO_LABEL[role] || '',
-    } as RoleToDelete;
-    onClickDeleteButton(roleToDelete);
-  };
+    });
 
   if (DJANGO_MANAGED_ROLES.includes(role)) {
     return (

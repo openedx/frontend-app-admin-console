@@ -239,6 +239,8 @@ const AuditUserPage = () => {
         context={{
           userName: user?.username || '',
           scope: roleToDelete?.scope || '',
+          scopeDisplayName: roleToDelete?.scopeDisplayName,
+          org: roleToDelete?.org,
           role: roleToDelete?.role || '',
           name: roleToDelete?.name || '',
           rolesCount: count || 0,
