@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { intlWrapper as wrapper } from '@src/testUtils';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import useScopeListData from './useScopeListData';
 import { useScopes, useOrgs } from '@src/authz-module/data/hooks';
 import useScopePermissions from './useScopePermissions';
@@ -60,12 +61,12 @@ describe('useScopeListData', () => {
   });
 
   describe('Return value structure', () => {
-    it('returns expected shape when contextType is library', () => {
+    it('returns expected shape when scopeType is library', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -87,12 +88,12 @@ describe('useScopeListData', () => {
       });
     });
 
-    it('returns expected shape when contextType is course', () => {
+    it('returns expected shape when scopeType is course', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -100,12 +101,12 @@ describe('useScopeListData', () => {
       expect(result.current.platformAggregateScopeItem).toBeNull();
     });
 
-    it('returns null platformAggregateScopeItem when contextType is undefined', () => {
+    it('returns null platformAggregateScopeItem when scopeType is undefined', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: undefined,
+        scopeType: undefined,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -134,7 +135,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -162,7 +163,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -188,7 +189,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -218,7 +219,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -233,7 +234,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -247,7 +248,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -264,7 +265,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -275,13 +276,13 @@ describe('useScopeListData', () => {
       });
     });
 
-    it('returns null platformAggregateScopeItem when contextType is undefined', () => {
+    it('returns null platformAggregateScopeItem when scopeType is undefined', () => {
       mockUseScopePermissions.mockReturnValue({ hasPlatformPermission: true, orgHasPermission: {} });
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: undefined,
+        scopeType: undefined,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -296,7 +297,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -309,7 +310,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -323,7 +324,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -334,18 +335,18 @@ describe('useScopeListData', () => {
   });
 
   describe('Query parameters', () => {
-    it('passes contextType to useScopes', () => {
+    it('passes scopeType to useScopes', () => {
       mockUseScopes.mockReturnValue(makeScopesHook());
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
 
       expect(mockUseScopes).toHaveBeenCalledWith(expect.objectContaining({
-        scopeType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
       }));
     });
 
@@ -354,7 +355,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -369,7 +370,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: 'mylib',
         orgs: [],
       }), { wrapper });
@@ -384,7 +385,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: ['org1'],
       }), { wrapper });
@@ -399,7 +400,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -414,7 +415,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -441,7 +442,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -454,7 +455,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -472,7 +473,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -488,7 +489,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -505,7 +506,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: defaultOrgs } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -519,7 +520,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: undefined });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -540,7 +541,7 @@ describe('useScopeListData', () => {
       mockUseOrganizations.mockReturnValue({ data: { results: [] } });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -576,7 +577,7 @@ describe('useScopeListData', () => {
       });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -608,7 +609,7 @@ describe('useScopeListData', () => {
       });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'library',
+        scopeType: SCOPE_TYPES.LIBRARY,
         search: '',
         orgs: [],
       }), { wrapper });
@@ -627,7 +628,7 @@ describe('useScopeListData', () => {
       });
 
       const { result } = renderHook(() => useScopeListData({
-        contextType: 'course',
+        scopeType: SCOPE_TYPES.COURSE,
         search: '',
         orgs: [],
       }), { wrapper });
