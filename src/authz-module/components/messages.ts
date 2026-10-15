@@ -124,12 +124,12 @@ const messages = defineMessages({
   },
   'authz.team.remove.user.modal.body.1.org': {
     id: 'authz.team.remove.user.modal.body.1.org',
-    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, library {libraries} other {courses}} in the organization {org}?',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, lib {libraries} other {courses}} in the organization {org}?',
     description: 'AuthZ team management remove user modal body, for a role in every course or library of an organization',
   },
   'authz.team.remove.user.modal.body.1.platform': {
     id: 'authz.team.remove.user.modal.body.1.platform',
-    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, library {libraries} other {courses}} on the platform?',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, lib {libraries} other {courses}} on the platform?',
     description: 'AuthZ team management remove user modal body, for a role in every course or library of the platform',
   },
   'authz.team.remove.user.modal.body.2': {

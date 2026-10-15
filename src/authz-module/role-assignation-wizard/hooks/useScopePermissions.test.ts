@@ -1,9 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { useValidateUserPermissions } from '@src/data/hooks';
-import {
-  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
-import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
 import useScopePermissions from './useScopePermissions';
 
 jest.mock('@src/data/hooks', () => ({
@@ -136,9 +133,9 @@ describe('useScopePermissions', () => {
       }));
 
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
-        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:*' },
-        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:MIT+*' },
-        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:HarvardX+*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], scope: 'course-v1:*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], scope: 'course-v1:MIT+*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], scope: 'course-v1:HarvardX+*' },
       ]);
     });
 
@@ -149,9 +146,9 @@ describe('useScopePermissions', () => {
       }));
 
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
-        { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:*' },
-        { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:MIT:*' },
-        { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, scope: 'lib:HarvardX:*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], scope: 'lib:*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], scope: 'lib:MIT:*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], scope: 'lib:HarvardX:*' },
       ]);
     });
 
@@ -162,7 +159,7 @@ describe('useScopePermissions', () => {
       }));
 
       expect(mockUseValidateUserPermissions).toHaveBeenCalledWith([
-        { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, scope: 'course-v1:*' },
+        { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], scope: 'course-v1:*' },
       ]);
     });
 
