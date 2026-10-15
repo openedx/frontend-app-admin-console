@@ -262,6 +262,30 @@ describe('TeamMembersTable', () => {
     });
   });
 
+  it('enables the view action for a course assignment once the authoring flag finishes loading', async () => {
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isLoading: true,
+    });
+    mockApiResponses();
+    const { rerender } = renderWithAllProviders(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /view/i })[0]).toBeDisabled();
+    });
+
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isLoading: false,
+    });
+    rerender(<ToastManagerProvider><TeamMembersTable /></ToastManagerProvider>);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /view/i })[0]).toBeEnabled();
+    });
+  });
+
   it('handles empty data gracefully', async () => {
     const allAsignmentsResponse = {
       data: {

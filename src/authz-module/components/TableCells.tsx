@@ -16,13 +16,10 @@ import {
 import {
   Icon, IconButton, OverlayTrigger, Tooltip, DataTableContext,
 } from '@openedx/paragon';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ViewMoreLink from './ViewMoreLink';
-
-type ViewActionCellExtraProps = {
-  isCourseEnabled: (scope: string) => boolean;
-};
 
 interface DataTableInstance {
   state?: {
@@ -44,7 +41,6 @@ type ExtendedCellProps = CellPropsWithValue & {
 type ActionsCellExtraProps = {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
-  isCourseEnabled?: (scope: string) => boolean;
 };
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
@@ -95,12 +91,15 @@ const NameCell = ({ row }: CellProps) => {
   return row.original.fullName || row.original.username;
 };
 
-const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewActionCellExtraProps>) => {
+const ViewActionCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  // Read the flag here rather than through a cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const viewPath = `/authz/user/${row.original.username}`;
   const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
-  const isDisabled = isCourseEnabled !== undefined && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isDisabled) {
     return (
@@ -120,10 +119,6 @@ const ViewActionCell = ({ row, isCourseEnabled }: CellProps & Partial<ViewAction
       onClick={() => navigate(viewPath)}
     />
   );
-};
-
-const createViewActionCell = (extraProps: ViewActionCellExtraProps) => function customViewActionCell(cellProps) {
-  return <ViewActionCell {...cellProps} {...extraProps} />;
 };
 
 const OrgCell = ({ value, row }: CellPropsWithValue) => {
@@ -218,9 +213,12 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
 };
 
 const ActionsCell = ({
-  row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
+  row, onClickDeleteButton, isUserAuthenticatedPage,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
+  // Read the flag here rather than through the cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
   const { role, canManageScope } = row.original;
 
   const handleDelete = () => {
@@ -269,8 +267,7 @@ const ActionsCell = ({
   }
 
   const isCourseScope = !role?.startsWith('lib');
-  const isCourseAuthoringDisabled = isCourseEnabled !== undefined
-    && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isCourseAuthoringDisabled) {
     return (
@@ -306,5 +303,4 @@ export {
   PermissionsCell,
   ViewAllPermissionsCell,
   createActionsCell,
-  createViewActionCell,
 };
