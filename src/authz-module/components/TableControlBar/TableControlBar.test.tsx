@@ -59,12 +59,12 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 // ScopesFilter and OrgFilter read the view-team permissions to decide what to show.
 // Grant both so the full course/library filters render for these wiring tests.
 jest.mock('@src/data/hooks', () => {
-  const { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } = jest.requireActual('@src/authz-module/roles-permissions');
+  const { SCOPE_TYPES, VIEW_TEAM_ACTIONS } = jest.requireActual('@src/authz-module/constants');
   return {
     useValidateUserPermissionsNonSuspense: () => ({
       data: [
-        { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM, allowed: true },
-        { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM, allowed: true },
+        { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
+        { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
       ],
     }),
   };

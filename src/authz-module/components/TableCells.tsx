@@ -7,7 +7,7 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
+  getScopeType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip,
@@ -93,7 +93,7 @@ const ScopeCell = ({ row }: CellProps) => {
     const aggregateType = getAggregateScopeType(scope, org);
     return {
       scopeText: aggregateType
-        ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
+        ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeType(scope)])
         : scope,
       iconSrc: getScopeResourceIcon(scope),
     };
