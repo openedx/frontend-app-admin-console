@@ -1,6 +1,9 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/testUtils';
+import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
+import { getScopeCatalog } from '@src/authz-module/catalog/utils';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useValidateUsers } from '@src/authz-module/data/hooks';
@@ -8,10 +11,12 @@ import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthori
 import {
   CONTENT_COURSE_PERMISSIONS,
   CONTENT_LIBRARY_PERMISSIONS,
-  courseRolesMetadata,
-  libraryRolesMetadata,
 } from '@src/authz-module/roles-permissions';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -50,10 +55,6 @@ const allowAllPermissions = {
   isLoading: false,
 };
 
-const mockPermissions = (
-  manageData: typeof allowAllPermissions,
-) => () => manageData;
-
 const setupMocks = ({ users = '', from = '' } = {}) => {
   const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
   const params = new URLSearchParams();
@@ -74,11 +75,12 @@ const renderPage = () => renderWithAllProviders(
 describe('AssignRoleWizardPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthzCatalog();
     mockUseValidateUsers.mockReturnValue({
       mutateAsync: jest.fn(),
       isPending: false,
     });
-    mockUseValidatePermissions.mockImplementation(mockPermissions(allowAllPermissions));
+    mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
     mockUseCourseAuthoringFlag.mockReturnValue({
       isCourseAuthoringEnabled: true,
       isCourseEnabled: () => true,
@@ -140,65 +142,92 @@ describe('AssignRoleWizardPage', () => {
   });
 
   describe('assignable roles', () => {
-    // Each entry maps an allowed permission to the role metadata the wizard should
-    // surface for it. Add a row here as more scopes/roles are introduced.
+    // Each entry maps an allowed permission to the catalog roles the wizard should
+    // surface for it, from the catalog test fixture.
+    const libraryRoles = ['Library Admin', 'Library Author', 'Library Contributor', 'Library User'];
+    const courseRoles = ['Course Admin', 'Course Staff'];
     const scopeRoles = [
-      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRolesMetadata },
-      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRolesMetadata },
+      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRoles },
+      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRoles },
     ];
     const allRoles = scopeRoles.flatMap(({ roles }) => roles);
 
-    it('shows the roles for every allowed scope', () => {
+    it('shows the roles for every allowed scope type, in catalog order', async () => {
       setupMocks();
       renderPage();
       allRoles.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
+      expect(screen.getAllByRole('radiogroup')).toEqual([
+        screen.getByRole('radiogroup', { name: 'Courses' }),
+        screen.getByRole('radiogroup', { name: 'Libraries' }),
+      ]);
     });
 
-    it.each(scopeRoles)('shows only the roles for the allowed scope %#', ({ action, roles }) => {
-      mockUseValidatePermissions.mockImplementation(mockPermissions({
+    it('lists the roles of each scope type in the catalog order', async () => {
+      setupMocks();
+      renderPage();
+      const catalogOrder = getScopeCatalog(authzCatalog, SCOPE_TYPES.LIBRARY).roles
+        .map(({ displayName }) => displayName);
+      const roleNames = Array.from(document.querySelectorAll('.role-name')).map(({ textContent }) => textContent);
+      expect(roleNames.filter((name) => name?.startsWith('Library'))).toEqual(catalogOrder);
+    });
+
+    it.each(scopeRoles)('shows only the roles for the allowed scope type %#', async ({ action, roles }) => {
+      mockUseValidatePermissions.mockReturnValue({
         data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
         isLoading: false,
-      }));
+      });
       setupMocks();
       renderPage();
 
       roles.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
       allRoles
         .filter((role) => !roles.includes(role))
         .forEach((role) => {
-          expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+          expect(screen.queryByText(role)).not.toBeInTheDocument();
         });
     });
 
-    it('shows no roles when no scope is allowed', () => {
-      mockUseValidatePermissions.mockImplementation(mockPermissions({
+    it('announces that the roles are loading while the catalog loads', () => {
+      mockAuthzCatalog({ isLoading: true });
+      setupMocks({ users: 'alice' });
+      renderPage();
+      expect(screen.getByRole('status')).toHaveTextContent('Loading roles...');
+      expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+    });
+
+    it('alerts that the roles could not be loaded when the catalog fails', () => {
+      mockAuthzCatalog({ isError: true });
+      setupMocks({ users: 'alice' });
+      renderPage();
+      expect(screen.getByRole('alert')).toHaveTextContent('The roles could not be loaded. Please try again later.');
+      expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+    });
+
+    it('shows no roles when no scope type is allowed', async () => {
+      mockUseValidatePermissions.mockReturnValue({
         data: scopeRoles.map(({ action }) => ({ action, allowed: false })),
         isLoading: false,
-      }));
+      });
       setupMocks();
       renderPage();
-      allRoles.forEach((role) => {
-        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
-      });
+      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
     });
 
-    it('ignores allowed permissions whose action is not a known role scope', () => {
-      mockUseValidatePermissions.mockImplementation(mockPermissions({
+    it('ignores allowed permissions whose action is not a known role scope', async () => {
+      mockUseValidatePermissions.mockReturnValue({
         data: [{ action: 'some.unrelated.permission', allowed: true }],
         isLoading: false,
-      }));
+      });
       setupMocks();
       renderPage();
-      allRoles.forEach((role) => {
-        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
-      });
+      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
     });
 
-    it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', () => {
+    it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', async () => {
       mockUseCourseAuthoringFlag.mockReturnValue({
         isCourseAuthoringEnabled: false,
         isCourseEnabled: () => false,
@@ -206,11 +235,11 @@ describe('AssignRoleWizardPage', () => {
       });
       setupMocks();
       renderPage();
-      courseRolesMetadata.forEach((role) => {
-        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      courseRoles.forEach((role) => {
+        expect(screen.queryByText(role)).not.toBeInTheDocument();
       });
-      libraryRolesMetadata.forEach((role) => {
-        expect(screen.getByText(role.name)).toBeInTheDocument();
+      libraryRoles.forEach((role) => {
+        expect(screen.getByText(role)).toBeInTheDocument();
       });
     });
   });

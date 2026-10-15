@@ -1,28 +1,22 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { buildCatalogRole } from '@src/authz-module/catalog/testUtils';
 import { renderWrapper } from '@src/testUtils';
 import SelectUsersAndRoleStep from './SelectUsersAndRoleStep';
 
-const libraryRole = {
-  role: 'library_admin',
-  name: 'Library Admin',
-  description: 'Can manage the library.',
-  contextType: 'library',
+const courseGroup = {
+  scopeType: SCOPE_TYPES.COURSE,
+  roles: [buildCatalogRole('course_admin', {
+    displayName: 'Course Admin', description: 'Can manage the course team.', scopeTypes: [SCOPE_TYPES.COURSE],
+  })],
 };
 
-const courseRole = {
-  role: 'course_admin',
-  name: 'Course Admin',
-  description: 'Can manage the course team.',
-  contextType: 'course',
-};
-
-const disabledRole = {
-  role: 'course_editor',
-  name: 'Course Editor',
-  description: 'Can edit course content.',
-  contextType: 'course',
-  disabled: true,
+const libraryGroup = {
+  scopeType: SCOPE_TYPES.LIBRARY,
+  roles: [buildCatalogRole('library_admin', {
+    displayName: 'Library Admin', description: 'Can manage the library.', scopeTypes: [SCOPE_TYPES.LIBRARY],
+  })],
 };
 
 const defaultProps = {
@@ -30,10 +24,11 @@ const defaultProps = {
   setUsers: jest.fn(),
   selectedRole: null,
   setSelectedRole: jest.fn(),
-  roles: [libraryRole, courseRole],
-  validationError: null,
+  roleGroups: [courseGroup, libraryGroup],
   invalidUsers: [],
 };
+
+const roleGroup = (name: string) => screen.getByRole('radiogroup', { name });
 
 describe('SelectUsersAndRoleStep', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -64,22 +59,36 @@ describe('SelectUsersAndRoleStep', () => {
   });
 
   it('renders library roles under Libraries group', () => {
-    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roles={[libraryRole]} />);
-    expect(screen.getByText('Libraries')).toBeInTheDocument();
-    expect(screen.getByText('Library Admin')).toBeInTheDocument();
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[libraryGroup]} />);
+    expect(within(roleGroup('Libraries')).getByRole('radio', { name: /Library Admin/ })).toBeInTheDocument();
     expect(screen.getByText('Can manage the library.')).toBeInTheDocument();
   });
 
   it('renders course roles under Courses group', () => {
-    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roles={[courseRole]} />);
-    expect(screen.getByText('Courses')).toBeInTheDocument();
-    expect(screen.getByText('Course Admin')).toBeInTheDocument();
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[courseGroup]} />);
+    expect(within(roleGroup('Courses')).getByRole('radio', { name: /Course Admin/ })).toBeInTheDocument();
   });
 
-  it('renders both course and library role groups', () => {
-    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roles={[libraryRole, courseRole]} />);
-    expect(screen.getByText('Libraries')).toBeInTheDocument();
-    expect(screen.getByText('Courses')).toBeInTheDocument();
+  it('renders the role groups in the given scope type order', () => {
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} />);
+    expect(screen.getAllByRole('radiogroup')).toEqual([roleGroup('Courses'), roleGroup('Libraries')]);
+  });
+
+  it('leaves out the scope types without roles', () => {
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[courseGroup, { ...libraryGroup, roles: [] }]} />);
+    expect(screen.getAllByRole('radiogroup')).toEqual([roleGroup('Courses')]);
+  });
+
+  it('announces that the roles are loading', () => {
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[]} isLoadingRoles />);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading roles...');
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+  });
+
+  it('alerts that the roles could not be loaded', () => {
+    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[]} isRolesError />);
+    expect(screen.getByRole('alert')).toHaveTextContent('The roles could not be loaded. Please try again later.');
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
   });
 
   it('calls setSelectedRole when a role radio is selected', async () => {
@@ -88,21 +97,31 @@ describe('SelectUsersAndRoleStep', () => {
     renderWrapper(
       <SelectUsersAndRoleStep
         {...defaultProps}
-        roles={[libraryRole]}
         setSelectedRole={setSelectedRole}
       />,
     );
     const radio = screen.getByRole('radio', { name: /Library Admin/i });
     await user.click(radio);
-    expect(setSelectedRole).toHaveBeenCalledWith('library_admin');
+    expect(setSelectedRole).toHaveBeenCalledWith({ scopeType: SCOPE_TYPES.LIBRARY, role: 'library_admin' });
   });
 
-  it('renders disabled roles with tooltip wrapper', () => {
+  it('selects a role offered in several scope types only in the selected one', () => {
+    const teamViewer = buildCatalogRole('team_viewer', {
+      displayName: 'Team Viewer', scopeTypes: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY],
+    });
     renderWrapper(
-      <SelectUsersAndRoleStep {...defaultProps} roles={[disabledRole]} />,
+      <SelectUsersAndRoleStep
+        {...defaultProps}
+        roleGroups={[
+          { scopeType: SCOPE_TYPES.COURSE, roles: [teamViewer] },
+          { scopeType: SCOPE_TYPES.LIBRARY, roles: [teamViewer] },
+        ]}
+        selectedRole={{ scopeType: SCOPE_TYPES.LIBRARY, role: 'team_viewer' }}
+      />,
     );
-    const radio = screen.getByRole('radio', { name: /Course Editor/i });
-    expect(radio).toBeDisabled();
+    const [courseRadio, libraryRadio] = screen.getAllByRole('radio', { name: /Team Viewer/i });
+    expect(courseRadio).not.toBeChecked();
+    expect(libraryRadio).toBeChecked();
   });
 
   it('renders documentation link', () => {

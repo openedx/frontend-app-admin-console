@@ -1,8 +1,7 @@
 import {
   AUTHZ_HOME_PATH, buildAuditUserPath, buildWizardPath, getAggregateScopeType,
-  getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES,
+  getOrgAggregateScopeKey, getPlatformAggregateScopeKey, ROUTES, SCOPE_TYPES,
 } from './constants';
-import type { ContextType } from './constants';
 
 const BASE = `${AUTHZ_HOME_PATH}/${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
 
@@ -49,30 +48,30 @@ describe('buildAuditUserPath', () => {
 });
 
 describe('getOrgAggregateScopeKey', () => {
-  it('returns course wildcard scope for course context', () => {
-    expect(getOrgAggregateScopeKey('course', 'MIT')).toBe('course-v1:MIT+*');
+  it('returns course wildcard scope for the course scope type', () => {
+    expect(getOrgAggregateScopeKey(SCOPE_TYPES.COURSE, 'MIT')).toBe('course-v1:MIT+*');
   });
 
-  it('returns library wildcard scope for library context', () => {
-    expect(getOrgAggregateScopeKey('library', 'MIT')).toBe('lib:MIT:*');
+  it('returns library wildcard scope for the library scope type', () => {
+    expect(getOrgAggregateScopeKey(SCOPE_TYPES.LIBRARY, 'MIT')).toBe('lib:MIT:*');
   });
 
-  it('throws for an unknown contextType', () => {
-    expect(() => getOrgAggregateScopeKey('unknown' as ContextType, 'MIT')).toThrow('Unknown contextType: "unknown"');
+  it('throws for an unknown scope type', () => {
+    expect(() => getOrgAggregateScopeKey('unknown', 'MIT')).toThrow('Unknown scopeType: "unknown"');
   });
 });
 
 describe('getPlatformAggregateScopeKey', () => {
-  it('returns the platform-wide course wildcard scope for course context', () => {
-    expect(getPlatformAggregateScopeKey('course')).toBe('course-v1:*');
+  it('returns the platform-wide course wildcard scope for the course scope type', () => {
+    expect(getPlatformAggregateScopeKey(SCOPE_TYPES.COURSE)).toBe('course-v1:*');
   });
 
-  it('returns the platform-wide library wildcard scope for library context', () => {
-    expect(getPlatformAggregateScopeKey('library')).toBe('lib:*');
+  it('returns the platform-wide library wildcard scope for the library scope type', () => {
+    expect(getPlatformAggregateScopeKey(SCOPE_TYPES.LIBRARY)).toBe('lib:*');
   });
 
-  it('throws for an unknown contextType', () => {
-    expect(() => getPlatformAggregateScopeKey('unknown' as ContextType)).toThrow('Unknown contextType: "unknown"');
+  it('throws for an unknown scope type', () => {
+    expect(() => getPlatformAggregateScopeKey('unknown')).toThrow('Unknown scopeType: "unknown"');
   });
 });
 describe('getAggregateScopeType', () => {

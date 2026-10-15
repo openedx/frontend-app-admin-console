@@ -169,10 +169,15 @@ const messages = defineMessages({
     defaultMessage: 'Courses',
     description: 'Label for the course roles group',
   },
-  'wizard.step1.roles.disabled.tooltip': {
-    id: 'wizard.step1.roles.disabled.tooltip',
-    defaultMessage: 'We are expanding our permissions system. This role is currently unavailable but will be part of an upcoming update.',
-    description: 'Tooltip shown on disabled role options',
+  'wizard.step1.roles.loading': {
+    id: 'wizard.step1.roles.loading',
+    defaultMessage: 'Loading roles...',
+    description: 'Screen reader text for the loading spinner while the assignable roles are being fetched',
+  },
+  'wizard.step1.roles.error': {
+    id: 'wizard.step1.roles.error',
+    defaultMessage: 'The roles could not be loaded. Please try again later.',
+    description: 'Message shown in step 1 when the assignable roles fail to load',
   },
 
   // DefineApplicationScopeStep — context labels

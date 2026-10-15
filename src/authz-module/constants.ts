@@ -18,25 +18,25 @@ export const CONTEXT_TYPES = {
 
 export type ContextType = typeof CONTEXT_TYPES[keyof typeof CONTEXT_TYPES];
 
-const ORG_AGGREGATE_SCOPE_BUILDERS = {
-  [CONTEXT_TYPES.COURSE]: (orgSlug: string) => `course-v1:${orgSlug}+*`,
-  [CONTEXT_TYPES.LIBRARY]: (orgSlug: string) => `lib:${orgSlug}:*`,
+const ORG_AGGREGATE_SCOPE_BUILDERS: Record<string, (orgSlug: string) => string> = {
+  [SCOPE_TYPES.COURSE]: (orgSlug: string) => `course-v1:${orgSlug}+*`,
+  [SCOPE_TYPES.LIBRARY]: (orgSlug: string) => `lib:${orgSlug}:*`,
 };
 
-export const getOrgAggregateScopeKey = (contextType: ContextType, orgSlug: string): string => {
-  const builder = ORG_AGGREGATE_SCOPE_BUILDERS[contextType];
-  if (!builder) throw new Error(`Unknown contextType: "${contextType}"`);
+export const getOrgAggregateScopeKey = (scopeType: string, orgSlug: string): string => {
+  const builder = ORG_AGGREGATE_SCOPE_BUILDERS[scopeType];
+  if (!builder) throw new Error(`Unknown scopeType: "${scopeType}"`);
   return builder(orgSlug);
 };
 
-const PLATFORM_AGGREGATE_SCOPE_KEYS = {
-  [CONTEXT_TYPES.COURSE]: 'course-v1:*',
-  [CONTEXT_TYPES.LIBRARY]: 'lib:*',
+const PLATFORM_AGGREGATE_SCOPE_KEYS: Record<string, string> = {
+  [SCOPE_TYPES.COURSE]: 'course-v1:*',
+  [SCOPE_TYPES.LIBRARY]: 'lib:*',
 };
 
-export const getPlatformAggregateScopeKey = (contextType: ContextType): string => {
-  const scope = PLATFORM_AGGREGATE_SCOPE_KEYS[contextType];
-  if (!scope) throw new Error(`Unknown contextType: "${contextType}"`);
+export const getPlatformAggregateScopeKey = (scopeType: string): string => {
+  const scope = PLATFORM_AGGREGATE_SCOPE_KEYS[scopeType];
+  if (!scope) throw new Error(`Unknown scopeType: "${scopeType}"`);
   return scope;
 };
 
@@ -58,11 +58,12 @@ export const getScopeContextType = (scope: string): ContextType => (
  * needed to recognize an org-level aggregate, since its key embeds the slug.
  */
 export const getAggregateScopeType = (scope: string, org?: string | null): 'platform' | 'org' | null => {
-  const contextType = getScopeContextType(scope);
-  if (scope === getPlatformAggregateScopeKey(contextType)) {
+  // Unrecognised scopes fall back to courses, as `getScopeContextType` does.
+  const scopeType = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY ? SCOPE_TYPES.LIBRARY : SCOPE_TYPES.COURSE;
+  if (scope === getPlatformAggregateScopeKey(scopeType)) {
     return 'platform';
   }
-  if (org && scope === getOrgAggregateScopeKey(contextType, org)) {
+  if (org && scope === getOrgAggregateScopeKey(scopeType, org)) {
     return 'org';
   }
   return null;
