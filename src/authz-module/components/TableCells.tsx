@@ -154,6 +154,8 @@ const ActionsCell = ({
     const roleToDelete = {
       role,
       scope: row.original.scope,
+      scopeDisplayName: row.original.scopeDisplayName,
+      org: row.original.org,
       name: MAP_ROLE_KEY_TO_LABEL[role] || '',
     } as RoleToDelete;
     onClickDeleteButton(roleToDelete);

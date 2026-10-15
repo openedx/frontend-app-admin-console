@@ -83,6 +83,8 @@ export interface RoleToDelete {
   role: string;
   name?: string;
   scope: string;
+  scopeDisplayName?: string;
+  org?: string;
 }
 
 export type UserRoleWithPermissions = UserRole & {
