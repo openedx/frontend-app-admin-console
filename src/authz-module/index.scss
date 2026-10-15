@@ -22,6 +22,10 @@
   .filters .dropdown-toggle::after {
     display: none !important;
   }
+  .pgn__data-table tr:has(span[data-role="django.superuser"]),
+  .pgn__data-table tr:has(span[data-role="django.staff"]) {
+    background-color: var(--pgn-color-primary-200);
+  }
 /*
   This is a workaround to fix the height of the table when the dropdown menu is open,
   to prevent the table from collapsing and hiding the dropdown menu.

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
 import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import {
+  RoleCell,
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
@@ -46,6 +47,19 @@ describe('TableCells Components', () => {
         role: 'course_staff', scope: 'course-v1:OpenedX+DemoX+DemoCourse', org: 'OpenedX', scopeDisplayName: '', ...original,
       },
     },
+  });
+
+  describe('RoleCell', () => {
+    it.each([
+      ['library_admin', 'Library Admin'],
+      ['unknown_role', 'unknown_role'],
+      ['django.staff', 'Global Staff'],
+    ])('names %s using catalog metadata or its fallback', (role, name) => {
+      const { container } = renderWrapper(<RoleCell value={role} />);
+
+      expect(screen.getByText(name)).toBeInTheDocument();
+      expect(container.querySelector('[data-role]')).toHaveAttribute('data-role', role);
+    });
   });
 
   describe('OrgIconCell', () => {
@@ -141,7 +155,7 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'django.globalstaff',
+            role: 'django.staff',
             scopeDisplayName: '',
             permissionCount: 5,
             org: 'Test Org',

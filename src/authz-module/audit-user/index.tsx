@@ -6,7 +6,7 @@ import { SiteContext, useIntl } from '@openedx/frontend-base';
 import { DataTable } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
-  AUTHZ_HOME_PATH, MAP_ROLE_KEY_TO_LABEL, SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE,
+  AUTHZ_HOME_PATH, SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE,
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgIconCell, ScopeNameCell, PermissionsCell,
+  OrgIconCell, ScopeNameCell, PermissionsCell, RoleCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -131,7 +131,7 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
-      Cell: ({ value }) => MAP_ROLE_KEY_TO_LABEL[value] || value,
+      Cell: RoleCell,
       headerClassName: 'authz-col-role',
       filter: 'includesValue',
       Filter: RolesFilter,
