@@ -1,21 +1,20 @@
 import React from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import { Check, Close } from '@openedx/paragon/icons';
-import {
-  Card, Icon, OverlayTrigger, Tooltip,
-} from '@openedx/paragon';
-import { PermissionsResourceGrouped, Role } from '@src/types';
-import { actionsDictionary } from './RoleCard/constants';
-import ResourceTooltip from './ResourceTooltip';
+import { Card, Icon } from '@openedx/paragon';
+import { CatalogIcon } from '@src/authz-module/catalog';
+import type { Role } from '@src/authz-module/catalog';
+import type { MatrixCategory } from '@src/authz-module/roles-permissions';
+import CategoryTooltip from './CategoryTooltip';
 import messages from './messages';
 
 interface PermissionTableProps {
   roles: Role[];
-  permissionsTable: PermissionsResourceGrouped[];
+  matrix: MatrixCategory[];
   title?: string;
 }
 
-const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProps) => {
+const PermissionTable = ({ matrix, roles, title }: PermissionTableProps) => {
   const { formatMessage } = useIntl();
   return (
     // Only the narrowest viewports are too small for the matrix, so the card scrolls there
@@ -29,74 +28,55 @@ const PermissionTable = ({ permissionsTable, roles, title }: PermissionTableProp
               {title}
             </th>
             {roles.map(role => (
-              <th
-                key={role.name}
-                className={`text-center py-3 sticky-top bg-white ${role.disabled ? 'text-gray-200' : ''}`}
-              >
-                {role.disabled ? (
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={(
-                      <Tooltip
-                        id={`tooltip-${role.name}`}
-                        variant="light"
-                      >
-                        {formatMessage(messages['authz.role.card.permission.for.role.status.disabled'])}
-                      </Tooltip>
-                    )}
-                  >
-                    <span style={{ cursor: 'help' }}>{role.name}</span>
-                  </OverlayTrigger>
-                ) : (
-                  role.name
-                )}
+              <th key={role.role} className="text-center py-3 sticky-top bg-white">
+                {role.displayName}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {permissionsTable.map(resourceGroup => (
-            <React.Fragment key={resourceGroup.key}>
+          {matrix.map(({ category, permissions }) => (
+            <React.Fragment key={category.id}>
               <tr className="bg-info-100 text-primary">
                 <td colSpan={roles.length + 1} className="text-start py-3 px-4">
                   <div className="d-flex align-items-center">
-                    {resourceGroup.icon && <Icon className="d-inline-block mr-2" size="xs" src={resourceGroup.icon} />}
-                    <span className="small"> <strong>{resourceGroup.label}</strong></span>
-                    <ResourceTooltip resourceGroup={resourceGroup} />
+                    <CatalogIcon className="d-inline-block mr-2" size="xs" name={category.icon} />
+                    <span className="small"> <strong>{category.displayName}</strong></span>
+                    <CategoryTooltip category={category} permissions={permissions.map(({ permission }) => permission)} />
                   </div>
                 </td>
               </tr>
-              {resourceGroup.permissions.map(permission => (
-                <tr key={permission.key} className="border-top">
+              {permissions.map(({ permission, grantedTo }) => (
+                <tr key={permission.id} className="border-top">
                   <td className="text-start d-flex align-items-center small px-4 py-3">
-                    <Icon className="d-inline-block mr-2" size="sm" src={actionsDictionary[permission.actionKey]} />
-                    {permission.label}
+                    <CatalogIcon className="d-inline-block mr-2" size="xs" name={permission.icon} />
+                    {permission.displayName}
                   </td>
                   {roles.map(role => (
-                    <td key={role.name} className={`text-center ${role.disabled ? 'text-gray-200' : ''}`}>
+                    <td key={role.role} className="text-center">
                       {
-                        permission.roles[role.name]
+                        grantedTo[role.role]
                           ? (
                               <Icon
-                                className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-success'}`}
+                                className="d-inline-block text-success"
                                 src={Check}
                                 aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
-                                  roleName: role.name,
+                                  roleName: role.displayName,
                                 })}
                                 screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.granted'], {
-                                  roleName: role.name,
+                                  roleName: role.displayName,
                                 })}
                               />
                             )
                           : (
                               <Icon
-                                className={`d-inline-block ${role.disabled ? 'text-gray-200' : 'text-danger'}`}
+                                className="d-inline-block text-danger"
                                 src={Close}
                                 aria-label={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
-                                  roleName: role.name,
+                                  roleName: role.displayName,
                                 })}
                                 screenReaderText={formatMessage(messages['authz.role.card.permission.for.role.status.not.granted'], {
-                                  roleName: role.name,
+                                  roleName: role.displayName,
                                 })}
                               />
                             )
