@@ -1,155 +1,113 @@
 import { screen } from '@testing-library/react';
-import { initializeMocks, renderWrapper } from '@src/testUtils';
-import * as coursesConstants from '@src/authz-module/roles-permissions';
+import { renderWithAllProviders } from '@src/testUtils';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
+import {
+  authzCatalog, buildCatalogCategory, buildCatalogPermission, buildCatalogRole, mockAuthzCatalog,
+} from '@src/authz-module/catalog/testUtils';
 import UserPermissions from './UserPermissions';
 
-// ESM named exports are read-only bindings, so jest.spyOn(module, prop, 'get')
-// can't intercept them. This module mock exposes a mutable override for
-// `courseRolesWithPermissions` that individual tests can set via
-// `setMockedCourseRoles(...)`.
-let mockedCourseRoles: unknown[] | null = null;
-export const setMockedCourseRoles = (roles: unknown[] | null) => {
-  mockedCourseRoles = roles;
-};
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
-jest.mock('@src/authz-module/roles-permissions', () => {
-  const actual = jest.requireActual('@src/authz-module/roles-permissions');
-  return {
-    ...actual,
-    get courseRolesWithPermissions() {
-      return mockedCourseRoles ?? actual.courseRolesWithPermissions;
-    },
-  };
-});
-
-jest.mock('./RenderPermissionInLine', () => (
-  jest.fn(({ items }) => (
-    <div data-testid="render-permission-inline" data-items-count={items?.length || 0}>
-      Mocked RenderPermissionInLine
-    </div>
-  ))
-));
+const renderUserPermissions = (original: { role: string; scope?: string }) => renderWithAllProviders(
+  <UserPermissions row={{ original }} />,
+);
 
 describe('UserPermissions', () => {
-  beforeAll(() => {
-    initializeMocks();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthzCatalog();
   });
 
-  it('renders Django managed roles', () => {
-    const props = {
-      row: {
-        original: {
-          role: 'django.superuser',
-        },
-      },
-    };
+  it('describes the Django managed roles', () => {
+    const { container } = renderUserPermissions({ role: 'django.superuser' });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
-    expect(container.querySelector('.d-flex')).toBeInTheDocument();
+    expect(container).not.toBeEmptyDOMElement();
   });
 
-  it('renders regular course roles', () => {
-    const props = {
-      row: {
-        original: {
-          role: 'course_admin',
-        },
-      },
-    };
+  it('shows the permissions the role grants, grouped by category', async () => {
+    renderUserPermissions({ role: 'library_user', scope: 'lib:OpenedX:CSPROB' });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
-    expect(container.querySelector('.d-flex')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Library' })).toBeInTheDocument();
+    expect(screen.getByText('content_libraries.view_library')).toBeInTheDocument();
+    expect(screen.queryByText('content_libraries.edit_library_content')).not.toBeInTheDocument();
   });
 
-  it('renders library role permissions with their metadata labels', () => {
-    const props = {
-      row: {
-        original: {
-          role: 'library_admin',
-        },
+  it('shows the permissions of the assignment scope type for a role in several scope types', async () => {
+    mockAuthzCatalog({
+      catalog: {
+        scopeTypes: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY],
+        categories: [buildCatalogCategory('course'), buildCatalogCategory('library')],
+        permissions: [
+          buildCatalogPermission('courses.view_course_team', { categoryId: 'course', scopeTypes: [SCOPE_TYPES.COURSE] }),
+          buildCatalogPermission('content_libraries.view_library_team', {
+            categoryId: 'library', scopeTypes: [SCOPE_TYPES.LIBRARY],
+          }),
+        ],
+        roles: [buildCatalogRole('team_viewer', {
+          permissions: ['courses.view_course_team', 'content_libraries.view_library_team'],
+          scopeTypes: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY],
+        })],
       },
-    };
+    });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
+    renderUserPermissions({ role: 'team_viewer', scope: 'lib:OpenedX:CSPROB' });
 
-    // Resource group headers from libraryResourceTypes
-    expect(screen.getByText('Library')).toBeInTheDocument();
-    expect(screen.getByText('Team')).toBeInTheDocument();
-    // Explicit labels from the permission metadata
-    expect(screen.getAllByText('Manage tags').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Publish').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Reuse').length).toBeGreaterThan(0);
-    // No permission renders with an empty label
-    const labels = Array.from(container.querySelectorAll('li span.font-weight-light'));
-    expect(labels.length).toBeGreaterThan(0);
-    labels.forEach((label) => expect(label.textContent?.trim()).not.toBe(''));
+    expect(await screen.findByText('content_libraries.view_library_team')).toBeInTheDocument();
+    expect(screen.queryByText('courses.view_course_team')).not.toBeInTheDocument();
   });
 
-  it('returns null when role is empty', () => {
-    const props = {
-      row: {
-        original: {
-          role: '',
-        },
+  it('groups the permissions without a category under "Other"', async () => {
+    mockAuthzCatalog({
+      catalog: {
+        ...authzCatalog,
+        permissions: [
+          ...authzCatalog.permissions,
+          buildCatalogPermission('content_libraries.export_library', { scopeTypes: [SCOPE_TYPES.LIBRARY] }),
+        ],
+        roles: authzCatalog.roles.map((role) => (role.role === 'library_user'
+          ? { ...role, permissions: [...role.permissions, 'content_libraries.export_library'] }
+          : role)),
       },
-    };
+    });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
-    expect(container.firstChild).toBeNull();
+    renderUserPermissions({ role: 'library_user', scope: 'lib:OpenedX:CSPROB' });
+
+    expect(await screen.findByRole('heading', { name: 'Other' })).toBeInTheDocument();
+    expect(screen.getByText('content_libraries.export_library')).toBeInTheDocument();
   });
 
-  it('returns null when row data is invalid', () => {
-    const props = {
-      row: {
-        original: undefined as any,
+  it('splits the categories in two columns when there are more than three', async () => {
+    const categoryIds = ['one', 'two', 'three', 'four'];
+    mockAuthzCatalog({
+      catalog: {
+        scopeTypes: [SCOPE_TYPES.COURSE],
+        categories: categoryIds.map((id) => buildCatalogCategory(id)),
+        permissions: categoryIds.map((id) => buildCatalogPermission(`courses.${id}`, {
+          categoryId: id, scopeTypes: [SCOPE_TYPES.COURSE],
+        })),
+        roles: [buildCatalogRole('course_admin', {
+          permissions: categoryIds.map((id) => `courses.${id}`), scopeTypes: [SCOPE_TYPES.COURSE],
+        })],
       },
-    };
+    });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
-    expect(container.firstChild).toBeNull();
+    renderUserPermissions({ role: 'course_admin', scope: 'course-v1:OpenedX+DemoX+Demo' });
+
+    await screen.findByRole('heading', { name: 'one' });
+    expect(screen.getAllByRole('list')).toHaveLength(4);
   });
 
-  it('renders RenderPermissionInLine for single row layout', () => {
-    const mockRoleObject = [
-      {
-        role: 'test_viewer',
-        permissions: [1, 50, 100],
-        userCount: 1,
-        name: 'Test Viewer',
-        description: 'Test role with limited permissions',
-      },
-    ];
+  it('shows nothing for a role the catalog does not have', () => {
+    const { container } = renderUserPermissions({ role: 'unknown_role', scope: 'lib:OpenedX:CSPROB' });
 
-    const originalRolesObject = coursesConstants.courseRolesWithPermissions;
-    setMockedCourseRoles([...originalRolesObject, ...mockRoleObject]);
-
-    const props = {
-      row: {
-        original: {
-          role: 'test_viewer',
-        },
-      },
-    };
-
-    const { getByTestId } = renderWrapper(<UserPermissions {...props} />);
-    expect(getByTestId('render-permission-inline')).toBeInTheDocument();
-    setMockedCourseRoles(null);
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('returns null when role is not found in courseRolesWithPermissions (line 52 coverage)', () => {
-    const props = {
-      row: {
-        original: {
-          role: 'unknown_role',
-        },
-      },
-    };
+  it('shows nothing without a role', () => {
+    const { container } = renderUserPermissions({ role: '' });
 
-    const { container } = renderWrapper(<UserPermissions {...props} />);
-    expect(container.firstChild).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 });

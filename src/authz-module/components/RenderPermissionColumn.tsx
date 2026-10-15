@@ -1,36 +1,30 @@
-import { Icon } from '@openedx/paragon';
-import { PermissionItem } from '@src/types';
-import ResourceTooltip from './ResourceTooltip';
+import { CatalogIcon } from '@src/authz-module/catalog';
+import type { CategoryPermissions } from '@src/authz-module/catalog';
+import CategoryTooltip from './CategoryTooltip';
 
 interface RenderPermissionColumnProps {
-  items: PermissionItem[];
+  items: CategoryPermissions[];
 }
 
 const RenderPermissionColumn = ({ items }: RenderPermissionColumnProps) => (
   <>
-    {items.map(({
-      key, icon, label, description, perms,
-    }) => (
-      <div key={key} className="mb-4 col-12">
+    {items.map(({ category, permissions }) => (
+      <div key={category.id} className="mb-4 col-12">
         <div className="d-flex align-items-center mb-2">
-          <Icon src={icon} className="mr-2 text-primary" size="xs" />
-          <h5 className="text-primary m-0">{label}</h5>
-          <ResourceTooltip
-            resourceGroup={{
-              key, label, description, permissions: perms,
-            }}
-          />
+          <CatalogIcon name={category.icon} className="mr-2 text-primary" size="xs" />
+          <h5 className="text-primary m-0">{category.displayName}</h5>
+          <CategoryTooltip category={category} permissions={permissions} />
         </div>
         <ul className="mb-0 list-unstyled d-flex align-items-center">
-          {perms.map((perm, index) => (
+          {permissions.map((permission, index) => (
             <li
-              key={perm.key}
-              className={`d-flex align-items-center text-primary-400 ${index !== perms.length - 1 ? 'border-right pr-2' : ''
+              key={permission.id}
+              className={`d-flex align-items-center text-primary-400 ${index !== permissions.length - 1 ? 'border-right pr-2' : ''
               } ${index !== 0 ? 'pl-2' : ''}`}
             >
-              <Icon src={perm.icon} className="mr-2" size="xs" />
+              <CatalogIcon name={permission.icon} className="mr-2" size="xs" />
               <span className="text-primary small font-weight-light">
-                {perm.label}
+                {permission.displayName}
               </span>
             </li>
           ))}

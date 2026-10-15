@@ -51,11 +51,6 @@ const messages = defineMessages({
     defaultMessage: 'See full documentation',
     description: 'Libraries AuthZ link for the course roles alert',
   },
-  'authz.tabs.permissionsRoles.category.other': {
-    id: 'authz.tabs.permissionsRoles.category.other',
-    defaultMessage: 'Other',
-    description: 'Libraries AuthZ name of the category that groups the permissions without a category in the roles table',
-  },
   'authz.tabs.permissionsRoles.loading': {
     id: 'authz.tabs.permissionsRoles.loading',
     defaultMessage: 'Loading roles and permissions',
