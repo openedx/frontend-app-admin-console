@@ -7,7 +7,6 @@ import {
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
-  ViewAllPermissionsCell,
   createActionsCell,
 } from './TableCells';
 
@@ -181,7 +180,7 @@ describe('TableCells Components', () => {
 
       renderWrapper(<PermissionsCell {...props} />);
 
-      expect(screen.getByText('3 permissions available')).toBeInTheDocument();
+      expect(screen.getByText('3 granted')).toBeInTheDocument();
     });
   });
 
@@ -339,7 +338,7 @@ describe('TableCells Components', () => {
     });
   });
 
-  describe('ViewAllPermissionsCell', () => {
+  describe('PermissionsCell expansion', () => {
     const mockUserRole = {
       role: 'course_admin',
       org: 'OpenedX',
@@ -361,23 +360,13 @@ describe('TableCells Components', () => {
       },
     };
 
-    it('renders view more link', () => {
-      renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
-      expect(screen.getByText(/view all permissions/i)).toBeInTheDocument();
-    });
-
-    it('displays correct link text', () => {
-      renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
-      expect(screen.getByText(/view all permissions/i)).toBeInTheDocument();
-    });
-
     it('reports whether the permissions breakdown is open', () => {
-      const { rerender } = renderWrapper(<ViewAllPermissionsCell {...mockCellProps} />);
-      expect(screen.getByRole('button', { name: /view all permissions/i }))
+      const { rerender } = renderWrapper(<PermissionsCell {...mockCellProps} />);
+      expect(screen.getByRole('button', { name: /5 granted/i }))
         .toHaveAttribute('aria-expanded', 'false');
 
-      rerender(<ViewAllPermissionsCell row={{ ...mockCellProps.row, isExpanded: true }} />);
-      expect(screen.getByRole('button', { name: /hide all permissions/i }))
+      rerender(<PermissionsCell row={{ ...mockCellProps.row, isExpanded: true }} />);
+      expect(screen.getByRole('button', { name: /5 granted/i }))
         .toHaveAttribute('aria-expanded', 'true');
     });
 
@@ -403,11 +392,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(
         <DataTableContext.Provider value={mockInstance}>
-          <ViewAllPermissionsCell {...propsWithToggle} />
+          <PermissionsCell {...propsWithToggle} />
         </DataTableContext.Provider>,
       );
 
-      const toggleButton = screen.getByText(/view all permissions/i);
+      const toggleButton = screen.getByRole('button', { name: /5 granted/i });
       await user.click(toggleButton);
 
       // Should close other expanded rows first
@@ -439,11 +428,11 @@ describe('TableCells Components', () => {
 
       renderWrapper(
         <DataTableContext.Provider value={mockInstance}>
-          <ViewAllPermissionsCell {...propsWithExpandedRow} />
+          <PermissionsCell {...propsWithExpandedRow} />
         </DataTableContext.Provider>,
       );
 
-      const toggleButton = screen.getByText(/hide all permissions/i);
+      const toggleButton = screen.getByRole('button', { name: /5 granted/i });
       await user.click(toggleButton);
 
       // Should NOT close other expanded rows when current row is already expanded

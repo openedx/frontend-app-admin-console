@@ -111,33 +111,21 @@ const OrgIconCell = ({ row }: AssignmentCellProps) => {
   );
 };
 
+// The permissions count doubles as the toggle that expands the row's permissions breakdown.
 const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
+  const toggleExpanded = useExclusiveRowExpansion(row);
   const { role, permissionCount: count } = row.original;
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
+
   return (
-    <span>
-      {isDjangoRole
+    <ExpandableButton
+      label={isDjangoRole
         ? formatMessage(
             messages['authz.user.table.permissions.access.label'],
             { accessType: role === 'django.superuser' ? 'total' : 'partial' },
           )
         : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
-    </span>
-  );
-};
-
-const ViewAllPermissionsCell = ({ row }: CellProps) => {
-  const { formatMessage } = useIntl();
-  const toggleExpanded = useExclusiveRowExpansion(row);
-
-  return (
-    <ExpandableButton
-      label={formatMessage(
-        row.isExpanded
-          ? messages['authz.user.table.view_all_permissions.link.text.close']
-          : messages['authz.user.table.view_all_permissions.link.text.open'],
-      )}
       onClick={toggleExpanded}
       isExpanded={!!row.isExpanded}
     />
@@ -186,7 +174,7 @@ const ActionsCell = ({
         src={Delete}
         alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
         size="sm"
-        variant="light"
+        variant="danger"
         tooltip={formatMessage(messages['authz.user.table.delete.action.adminrole.tooltip'])}
       />
     );
@@ -201,7 +189,7 @@ const ActionsCell = ({
         src={Delete}
         alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
         size="sm"
-        variant="light"
+        variant="danger"
         tooltip={formatMessage(messages['authz.table.actions.course.disabled.tooltip'])}
       />
     );
@@ -210,7 +198,7 @@ const ActionsCell = ({
   return (
     <IconButton
       disabled={!canManageScope}
-      variant={canManageScope ? 'danger' : 'light'}
+      variant="danger"
       onClick={handleDelete}
       alt={formatMessage(messages['authz.user.table.delete.action.alt'])}
       src={Delete}
@@ -229,6 +217,5 @@ export {
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
-  ViewAllPermissionsCell,
   createActionsCell,
 };

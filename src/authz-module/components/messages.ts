@@ -68,18 +68,13 @@ const messages = defineMessages({
   },
   'authz.user.table.permissions.available.count': {
     id: 'authz.user.table.permissions.available.count',
-    defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
-    description: 'Text showing the number of permissions available, with proper pluralization',
+    defaultMessage: '{count, number} granted',
+    description: 'Text showing the number of permissions the role grants, e.g. "33 granted"',
   },
   'authz.user.table.delete.action.alt': {
     id: 'authz.user.table.delete.action.alt',
     defaultMessage: 'Delete role action',
     description: 'Alt description for delete button',
-  },
-  'authz.user.table.view_all_permissions.link.text': {
-    id: 'authz.user.table.view_all_permissions.link.text',
-    defaultMessage: 'View all permissions',
-    description: 'Text for the link to view all permissions in the user table',
   },
 
   'authz.table.column.actions.view.title': {
@@ -166,16 +161,6 @@ const messages = defineMessages({
     id: 'authz.table.actions.course.disabled.tooltip',
     defaultMessage: 'This course hasn’t moved to the new roles experience yet. Manage its team in Studio instead.',
     description: 'Tooltip for disabled action buttons on rows of courses where the course authoring flag is off, pointing users to Studio to manage the course team',
-  },
-  'authz.user.table.view_all_permissions.link.text.close': {
-    id: 'authz.user.table.view_all_permissions.link.text.close',
-    defaultMessage: 'Hide all permissions',
-    description: 'Text for the link to hide all permissions in the user table',
-  },
-  'authz.user.table.view_all_permissions.link.text.open': {
-    id: 'authz.user.table.view_all_permissions.link.text.open',
-    defaultMessage: 'View all permissions',
-    description: 'Text for the link to view all permissions in the user table',
   },
   'authz.table.footer.pagination.label': {
     id: 'authz.table.footer.pagination.label',

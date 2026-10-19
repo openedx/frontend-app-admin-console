@@ -148,10 +148,11 @@
 
   .user-assignments-table {
     /*
-      Widths are pinned so the columns stay put across pages, with the team members
-      table's proportions: Role and Organization match its Email column and Actions its
-      Actions column; Scope takes what is left. Sized so every column fits at 1440px;
-      below `md` the table falls back to content sizing.
+      Widths are pinned so the columns stay put across pages: Role matches the team
+      members table's Email column and Actions its Actions column; Organization takes
+      25.5% and Scope what is left (33.5%), splitting the room evenly between the two
+      long-text columns. Sized so every column fits at 1440px; below `md` the table
+      falls back to content sizing.
 
       A fixed table takes its widths from the header cells, but Paragon puts a column's
       `headerClassName` on a span inside the `th`, so `:has()` lifts it to the `th`.
@@ -161,10 +162,9 @@
         table-layout: fixed;
       }
 
-      th:has(> .authz-col-role) { width: 18%; }              // Role badge
-      th:has(> .authz-col-org) { width: 18%; }               // Organization
-      th:has(> .authz-col-permissions) { width: 16%; }       // "133 permissions available"
-      th:has(> .authz-col-view-permissions) { width: 15%; }  // View/Hide all permissions
+      th:has(> .authz-col-role) { width: 18%; }              // Role
+      th:has(> .authz-col-org) { width: 25.5%; }             // Organization
+      th:has(> .authz-col-permissions) { width: 16%; }       // "133 granted" and the expand chevron
       th:has(> .authz-col-actions) { width: 7%; }            // Actions
     }
   }

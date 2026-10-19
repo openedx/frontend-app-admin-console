@@ -6,7 +6,7 @@ import { SiteContext, useIntl } from '@openedx/frontend-base';
 import { DataTable } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
-  AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE,
+  AUTHZ_HOME_PATH, MAP_ROLE_KEY_TO_LABEL, TABLE_DEFAULT_PAGE_SIZE,
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgIconCell, RoleBadgeCell, ScopeNameCell, PermissionsCell, ViewAllPermissionsCell,
+  OrgIconCell, ScopeNameCell, PermissionsCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -110,12 +110,6 @@ const AuditUserPage = () => {
 
   const additionalColumns = useMemo(() => [
     {
-      id: 'view_permissions',
-      Header: '',
-      Cell: ViewAllPermissionsCell,
-      headerClassName: 'authz-col-view-permissions',
-    },
-    {
       id: 'action',
       Header: formatMessage(messages['authz.user.table.action.column.header']),
       Cell: createActionsCell({
@@ -131,7 +125,7 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
-      Cell: RoleBadgeCell,
+      Cell: ({ value }) => MAP_ROLE_KEY_TO_LABEL[value] || value,
       headerClassName: 'authz-col-role',
       filter: 'includesValue',
       Filter: RolesFilter,
@@ -282,7 +276,7 @@ const AuditUserPage = () => {
           >
             <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
             <DataTable.Table />
-            <TableFooter />
+            <TableFooter showingMessage={messages['authz.user.table.showing.roles.text']} />
           </DataTable>
         </div>
       </AuthZLayout>

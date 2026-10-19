@@ -204,7 +204,7 @@ describe('AuditUserPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('johndoe', { selector: 'li[aria-current="page"]' })).toBeInTheDocument();
-      expect(screen.queryByText('5 permissions available')).not.toBeInTheDocument();
+      expect(screen.queryByText('5 granted')).not.toBeInTheDocument();
       expect(screen.getByRole('table')).toBeInTheDocument();
     });
   });
@@ -266,8 +266,8 @@ describe('AuditUserPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Library Admin')).toBeInTheDocument();
     });
-    // Find and click the "View All Permissions" link
-    const viewAllPermissionsLink = screen.getByText(/view all permissions/i);
+    // Find and click the permissions count, which toggles the breakdown
+    const viewAllPermissionsLink = screen.getByRole('button', { name: /5 granted/i });
     expect(viewAllPermissionsLink).toBeInTheDocument();
     await user.click(viewAllPermissionsLink);
     // Verify that the UserPermissions component is rendered (it should show detailed permissions)
@@ -301,8 +301,7 @@ describe('AuditUserPage', () => {
     await waitFor(() => {
       // Look for pagination controls
       expect(screen.getByRole('navigation', { name: /table pagination/i })).toBeInTheDocument();
-      // Check that some users count is shown (format might vary)
-      expect(screen.getByText(/showing/i)).toBeInTheDocument();
+      expect(screen.getByText('Showing 1 role of 1.')).toBeInTheDocument();
     });
   });
 
