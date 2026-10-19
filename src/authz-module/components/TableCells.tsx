@@ -2,7 +2,6 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Delete,
   Info,
-  Person,
 } from '@openedx/paragon/icons';
 import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
 import type { ComponentProps, ReactNode } from 'react';
@@ -63,20 +62,8 @@ export const DisabledActionButton = ({
   </OverlayTrigger>
 );
 
-/** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
-const RoleBadge = ({ role }: { role: string }) => (
-  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-gray-100 text-gray-700 mr-3 px-2 py-1">
-    <Icon src={Person} size="xs" className="mr-1" />
-    {MAP_ROLE_KEY_TO_LABEL[role] || role}
-  </div>
-);
-
-// The role, scope and org cells below are shared by the user assignments table and the
+// The scope and org cells below are shared by the user assignments table and the
 // team members role breakdown, so both tables read alike.
-const RoleBadgeCell = ({ row }: AssignmentCellProps) => (
-  <RoleBadge role={row.original.role} />
-);
-
 const ScopeNameCell = ({ row }: AssignmentCellProps) => {
   const { formatMessage } = useIntl();
   const { scope, scopeDisplayName, org } = row.original;
@@ -212,8 +199,6 @@ const createActionsCell = (extraProps: ActionsCellExtraProps) => function custom
 };
 
 export {
-  RoleBadge,
-  RoleBadgeCell,
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,

@@ -3,7 +3,6 @@ import { initializeMocks, renderWrapper } from '@src/testUtils';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
 import {
-  RoleBadgeCell,
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
@@ -39,20 +38,6 @@ describe('TableCells Components', () => {
         role: 'course_staff', scope: 'course-v1:OpenedX+DemoX+DemoCourse', org: 'OpenedX', scopeDisplayName: '', ...original,
       },
     },
-  });
-
-  describe('RoleBadgeCell', () => {
-    it('shows the role label', () => {
-      renderWrapper(<RoleBadgeCell {...assignmentProps({ role: 'library_admin' })} />);
-
-      expect(screen.getByText('Library Admin')).toBeInTheDocument();
-    });
-
-    it('shows the role key when the role has no label', () => {
-      renderWrapper(<RoleBadgeCell {...assignmentProps({ role: 'unknown_role' })} />);
-
-      expect(screen.getByText('unknown_role')).toBeInTheDocument();
-    });
   });
 
   describe('OrgIconCell', () => {

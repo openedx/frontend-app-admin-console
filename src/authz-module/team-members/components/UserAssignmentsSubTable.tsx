@@ -6,13 +6,23 @@ import {
 import { ArrowForward } from '@openedx/paragon/icons';
 import { Link } from 'react-router-dom';
 import { buildAuditUserPath } from '@src/authz-module/constants';
-import { OrgIconCell, RoleBadgeCell, ScopeNameCell } from '@src/authz-module/components/TableCells';
-import type { TeamMember } from '@src/types';
+import { OrgIconCell, ScopeNameCell } from '@src/authz-module/components/TableCells';
+import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import messages from '../messages';
+import { RoleBadge } from './AssignedRolesCell';
 
 interface UserAssignmentsSubTableProps {
   row: { original: TeamMember };
 }
+
+interface AssignmentCellProps {
+  row: { original: TeamMemberAssignment };
+}
+
+// Same badge as the collapsed row above, so the breakdown reads consistently.
+const RoleBadgeCell = ({ row: assignmentRow }: AssignmentCellProps) => (
+  <RoleBadge role={assignmentRow.original.role} />
+);
 
 /**
  * Role breakdown revealed when a team member row is expanded.
