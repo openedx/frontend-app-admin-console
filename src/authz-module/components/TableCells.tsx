@@ -140,7 +140,7 @@ const ScopeCell = ({ row }: CellProps) => {
         iconSrc: RESOURCE_ICONS.GLOBAL,
       };
     }
-    const scopeIcon = row.original.role?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
+    const scopeIcon = row.original.scope?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
     return {
       scopeText: row.original.scope,
       iconSrc: scopeIcon,
