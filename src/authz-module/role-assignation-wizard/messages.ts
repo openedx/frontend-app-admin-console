@@ -169,11 +169,6 @@ const messages = defineMessages({
     defaultMessage: 'Courses',
     description: 'Label for the course roles group',
   },
-  'wizard.step1.roles.disabled.tooltip': {
-    id: 'wizard.step1.roles.disabled.tooltip',
-    defaultMessage: 'We are expanding our permissions system. This role is currently unavailable but will be part of an upcoming update.',
-    description: 'Tooltip shown on disabled role options',
-  },
 
   // DefineApplicationScopeStep — context labels
   'wizard.step2.contextLabel.course': {

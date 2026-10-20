@@ -6,9 +6,9 @@ import {
   Stepper, Button, StatefulButton, Icon,
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
-import { RoleMetadata } from '@src/types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
+import type { RoleGroup, SelectedRole } from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
 import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
@@ -24,7 +24,8 @@ type StepKey = typeof STEPS[keyof typeof STEPS];
 interface AssignRoleWizardProps {
   onClose: () => void;
   initialUsers?: string;
-  roles?: RoleMetadata[];
+  // The roles the user can assign, grouped by scope type.
+  roleGroups?: RoleGroup[];
 }
 
 const parseUsers = (input: string): string[] => input
@@ -35,20 +36,20 @@ const parseUsers = (input: string): string[] => input
 const getInitialState = (initialUsers: string) => ({
   activeStep: STEPS.SELECT_USERS_AND_ROLE as StepKey,
   users: initialUsers,
-  selectedRole: null as string | null,
+  selectedRole: null as SelectedRole | null,
   selectedScopes: new Set<string>(),
   invalidUsers: [] as string[],
   validatedUsers: [] as string[],
 });
 
 const AssignRoleWizard = ({
-  onClose, initialUsers = '', roles = [],
+  onClose, initialUsers = '', roleGroups = [],
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, showErrorToast } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(null);
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
@@ -120,7 +121,7 @@ const AssignRoleWizard = ({
       const result = await assignRoleMutation.mutateAsync({
         data: {
           users: validatedUsers,
-          role: selectedRole,
+          role: selectedRole.role,
           scopes: Array.from(selectedScopes),
         },
       });
@@ -171,7 +172,7 @@ const AssignRoleWizard = ({
             setUsers={handleUsersChange}
             selectedRole={selectedRole}
             setSelectedRole={setSelectedRole}
-            roles={roles}
+            roleGroups={roleGroups}
             invalidUsers={invalidUsers}
             inputRef={usersInputRef}
           />
@@ -183,7 +184,7 @@ const AssignRoleWizard = ({
           index={1}
         >
           <DefineApplicationScopeStep
-            selectedRole={selectedRole}
+            scopeType={selectedRole?.scopeType ?? null}
             selectedScopes={selectedScopes}
             onScopeToggle={handleScopeToggle}
             assignmentErrors={assignmentErrors}
