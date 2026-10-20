@@ -24,7 +24,6 @@ import {
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
-import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useRevokeUserRoles, useUserAssignedRoles } from '@src/authz-module/data/hooks';
 import { RoleToDelete } from 'types';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
@@ -48,7 +47,6 @@ const AuditUserPage = () => {
   const { querySettings, handleTableFetch } = useQuerySettings();
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
-  const { isCourseEnabled } = useCourseAuthoringFlag();
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) { return querySettings; }
@@ -125,10 +123,9 @@ const AuditUserPage = () => {
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser?.username,
-        isCourseEnabled,
       }),
     },
-  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username, isCourseEnabled]);
+  ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username]);
 
   const columns = useMemo(() => [
     {
