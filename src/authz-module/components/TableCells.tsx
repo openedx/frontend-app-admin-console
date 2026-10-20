@@ -98,7 +98,7 @@ const ViewActionCell = ({ row }: CellProps) => {
   // `additionalColumns`, so a factory closure would keep the loading-state resolver.
   const { isCourseEnabled } = useCourseAuthoringFlag();
   const viewPath = `/authz/user/${row.original.username}`;
-  const isCourseScope = !row.original.role?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
+  const isCourseScope = !row.original.scope?.startsWith('lib') && !DJANGO_MANAGED_ROLES.includes(row.original.role);
   const isDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isDisabled) {
@@ -266,7 +266,7 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = !role?.startsWith('lib');
+  const isCourseScope = !row.original.scope?.startsWith('lib');
   const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
 
   if (isCourseAuthoringDisabled) {
