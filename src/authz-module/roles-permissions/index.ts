@@ -28,5 +28,5 @@ export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
   { action: CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM },
   { action: CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM },
 ];
-export { getPermissionMetadata } from './utils';
+export { buildPermissionMatrix } from './utils';
 export type { MatrixCategory } from './utils';
