@@ -6,10 +6,7 @@ import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerC
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useValidateUsers } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import {
-  CONTENT_COURSE_PERMISSIONS,
-  CONTENT_LIBRARY_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
 import AssignRoleWizardPage from './AssignRoleWizardPage';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
@@ -47,8 +44,8 @@ const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 const allowAllPermissions = {
   data: [
-    { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
-    { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
+    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
   ],
   isLoading: false,
 };
@@ -145,8 +142,8 @@ describe('AssignRoleWizardPage', () => {
     const libraryRoles = ['Library Admin', 'Library Author', 'Library Contributor', 'Library User'];
     const courseRoles = ['Course Admin', 'Course Staff'];
     const scopeRoles = [
-      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRoles },
-      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRoles },
+      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], roles: libraryRoles },
+      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], roles: courseRoles },
     ];
     const allRoles = scopeRoles.flatMap(({ roles }) => roles);
     const groupHeaders = () => Array.from(document.querySelectorAll('.role-group-header')).map(
