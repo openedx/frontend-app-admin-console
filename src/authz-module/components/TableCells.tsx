@@ -7,7 +7,7 @@ import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useMemo, type ComponentProps } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeType, MAP_ROLE_KEY_TO_LABEL,
+  getScopeType,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip,
@@ -15,7 +15,8 @@ import {
 } from '@openedx/paragon';
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
-import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
+import { useAuthzCatalog } from '@src/authz-module/catalog';
+import { AGGREGATE_SCOPE_LABELS, DJANGO_ROLE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
@@ -108,10 +109,16 @@ const ScopeCell = ({ row }: CellProps) => {
 };
 
 const RoleCell = ({ value, cell }: ExtendedCellProps) => {
-  const { key, ...cellProps } = cell.getCellProps({ 'data-role': MAP_ROLE_KEY_TO_LABEL[value] || '' });
+  const { formatMessage } = useIntl();
+  const { getRole } = useAuthzCatalog();
+  // Django managed roles are not in the catalog.
+  const roleName = DJANGO_ROLE_LABELS[value]
+    ? formatMessage(DJANGO_ROLE_LABELS[value])
+    : getRole(value)?.displayName ?? value;
+  const { key, ...cellProps } = cell.getCellProps({ 'data-role': value });
   return (
     <span key={key} {...cellProps}>
-      {MAP_ROLE_KEY_TO_LABEL[value] || ''}
+      {roleName}
     </span>
   );
 };
@@ -153,13 +160,14 @@ const ActionsCell = ({
   row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
+  const { getRole } = useAuthzCatalog();
   const { role, canManageScope } = row.original;
 
   const handleDelete = () => {
     const roleToDelete = {
       role,
       scope: row.original.scope,
-      name: MAP_ROLE_KEY_TO_LABEL[role] || '',
+      name: getRole(role)?.displayName ?? role,
     } as RoleToDelete;
     onClickDeleteButton(roleToDelete);
   };

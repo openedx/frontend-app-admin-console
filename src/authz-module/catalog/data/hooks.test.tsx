@@ -87,6 +87,26 @@ describe('useAuthzCatalog', () => {
     expect(result.current.getScopeCatalog(SCOPE_TYPES.COURSE)?.roles.map(({ role }) => role)).toEqual(['course_admin']);
   });
 
+  it('finds a role by its id', async () => {
+    mockApi({ course: true, library: true });
+
+    const { result } = renderUseAuthzCatalog();
+
+    await waitFor(() => expect(result.current.getRole('library_admin')?.permissions).toEqual([
+      'content_libraries.view_library',
+    ]));
+    expect(result.current.getRole('course_admin')?.permissions).toEqual(['courses.view_course']);
+  });
+
+  it('finds no role the catalog does not describe', async () => {
+    mockApi({ library: true });
+
+    const { result } = renderUseAuthzCatalog();
+    await waitFor(() => expect(result.current.getRole('library_admin')).toBeDefined());
+
+    expect(result.current.getRole('unknown_role')).toBeUndefined();
+  });
+
   it('keeps the same scope type catalog between renders', async () => {
     mockApi({ library: true });
 

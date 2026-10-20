@@ -1,4 +1,5 @@
 import { defineMessages } from '@openedx/frontend-base';
+import type { MessageDescriptor } from '@openedx/frontend-base';
 import { SCOPE_TYPES } from './constants';
 
 const messages = defineMessages(
@@ -56,6 +57,16 @@ const messages = defineMessages(
       defaultMessage: 'All libraries',
       description: 'Scope column label for a role that covers every library, either across the platform or within one organization. The organization column shows which.',
     },
+    'authz.role.django.superuser': {
+      id: 'authz.role.django.superuser',
+      defaultMessage: 'Super Admin',
+      description: 'Name of the role of a Django superuser, who has every permission on the platform.',
+    },
+    'authz.role.django.staff': {
+      id: 'authz.role.django.staff',
+      defaultMessage: 'Global Staff',
+      description: 'Name of the role of a Django global staff user.',
+    },
     'authz.team.toast.retry.label': {
       id: 'authz.team.toast.retry.label',
       defaultMessage: 'Retry',
@@ -68,6 +79,12 @@ const messages = defineMessages(
 export const AGGREGATE_SCOPE_LABELS = {
   [SCOPE_TYPES.COURSE]: messages['authz.scope.aggregate.course'],
   [SCOPE_TYPES.LIBRARY]: messages['authz.scope.aggregate.library'],
+};
+
+/** Names of the Django managed roles, which the catalog does not describe. */
+export const DJANGO_ROLE_LABELS: Record<string, MessageDescriptor> = {
+  'django.superuser': messages['authz.role.django.superuser'],
+  'django.staff': messages['authz.role.django.staff'],
 };
 
 export default messages;

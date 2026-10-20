@@ -1,8 +1,13 @@
 import { screen, within } from '@testing-library/react';
 import { renderWrapper } from '@src/testUtils';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import { AUTHZ_HOME_PATH } from '@src/authz-module/constants';
 import UserAssignmentsSubTable from './UserAssignmentsSubTable';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 const courseAssignment: TeamMemberAssignment = {
   role: 'course_staff',
@@ -33,6 +38,10 @@ const rowFor = (assignments: TeamMemberAssignment[], assignmentCount = assignmen
 });
 
 describe('UserAssignmentsSubTable', () => {
+  beforeEach(() => {
+    mockAuthzCatalog();
+  });
+
   it('lists one row per returned assignment, in the order the API sent them', () => {
     renderWrapper(<UserAssignmentsSubTable {...rowFor([courseAssignment, libraryAssignment])} />);
 
