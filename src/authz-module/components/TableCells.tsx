@@ -6,7 +6,7 @@ import {
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
@@ -156,12 +156,12 @@ const ActionsCell = ({
   // Read the flag here rather than through the cell factory: DataTable never refreshes
   // `additionalColumns`, so a factory closure would keep the loading-state resolver.
   const { isCourseEnabled } = useCourseAuthoringFlag();
-  const { role, canManageScope } = row.original;
+  const { role, scope, canManageScope } = row.original;
 
   const handleDelete = () => {
     const roleToDelete = {
       role,
-      scope: row.original.scope,
+      scope,
       name: MAP_ROLE_KEY_TO_LABEL[role] || '',
     } as RoleToDelete;
     onClickDeleteButton(roleToDelete);
@@ -203,8 +203,8 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = !role?.startsWith('lib');
-  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(row.original.scope);
+  const isCourseScope = getScopeContextType(scope) === CONTEXT_TYPES.COURSE;
+  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(scope);
 
   if (isCourseAuthoringDisabled) {
     return (

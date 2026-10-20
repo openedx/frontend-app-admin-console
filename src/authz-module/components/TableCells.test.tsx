@@ -332,7 +332,7 @@ describe('TableCells Components', () => {
       original: {
         role: 'library_admin',
         org: 'Test Org',
-        scope: 'Test Scope',
+        scope: 'lib:TestOrg:test-library',
         permissionCount: 1,
         canManageScope: true,
       },
@@ -355,7 +355,7 @@ describe('TableCells Components', () => {
       expect(deleteButton).toBeInTheDocument();
 
       await user.click(deleteButton);
-      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'Test Scope' });
+      expect(mockOnClickDeleteButton).toHaveBeenCalledWith({ name: 'Library Admin', role: 'library_admin', scope: 'lib:TestOrg:test-library' });
     });
 
     it('renders a disabled delete icon for admin roles when isUserAuthenticatedPage is true', () => {
@@ -427,7 +427,7 @@ describe('TableCells Components', () => {
       });
       const customRow = {
         original: {
-          ...baseRow,
+          ...baseRow.original,
           canManageScope: false,
         },
       };
@@ -462,7 +462,7 @@ describe('TableCells Components', () => {
       expect(screen.getByText(/manage its team in Studio instead/i)).toBeInTheDocument();
     });
 
-    it('keeps the delete action enabled for library roles when course authoring is disabled', () => {
+    it('keeps the delete action enabled for library scopes when course authoring is disabled', () => {
       mockIsCourseEnabled.mockReturnValue(false);
       const CustomActionsCell = createActionsCell({
         onClickDeleteButton: mockOnClickDeleteButton,
