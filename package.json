@@ -59,7 +59,7 @@
   },
   "peerDependencies": {
     "@openedx/frontend-base": "^2.0.0-alpha.2 || 0.0.0-dev",
-    "@openedx/paragon": "^23",
+    "@openedx/paragon": "^23 || 0.0.0-dev",
     "@tanstack/react-query": "^5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -67,6 +67,8 @@
   },
   "devDependencies": {
     "@edx/browserslist-config": "^1.1.1",
+    "@openedx/frontend-base": "^2.0.0-alpha.2 || 0.0.0-dev",
+    "@openedx/paragon": "^23 || 0.0.0-dev",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
