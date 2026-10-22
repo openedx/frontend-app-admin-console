@@ -1,5 +1,5 @@
 import { useIntl } from '@openedx/frontend-base';
-import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
+import { CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getScopeContextType } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
@@ -17,13 +17,15 @@ interface UserPermissionsProps {
   row: {
     original: {
       role: string;
+      scope: string;
     };
   };
 }
 
 const UserPermissions = ({ row }: UserPermissionsProps) => {
   const intl = useIntl();
-  let roleKey = row?.original?.role;
+  const roleKey = row?.original?.role;
+  const scope = row?.original?.scope;
   if (!roleKey) return null;
 
   if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
@@ -34,10 +36,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     );
   }
 
-  // Normalize role string to match keys in constants (e.g. "Course Admin" -> "course_admin")
-  roleKey = roleKey.trim().toLowerCase().replace(/[-\s]+/g, '_');
-  const isLibraryRole = roleKey.includes('library');
-  const config = isLibraryRole
+  const config = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
     ? {
         resourceTypes: libraryResourceTypes,
         permissions: libraryPermissions,
@@ -64,6 +63,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
       return perms.length ? { ...resource, perms } : null;
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
+  if (!resources.length) return null;
 
   const isSingleRow = resources.length <= 3;
   const mid = Math.ceil(resources.length / 2);

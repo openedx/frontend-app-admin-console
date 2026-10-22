@@ -5,6 +5,7 @@ import {
 import { useIntl } from '@openedx/frontend-base';
 
 import { SpinnerSimple } from '@openedx/paragon/icons';
+import { getAggregateScopeType, getScopeContextType } from '@src/authz-module/constants';
 import messages from './messages';
 
 interface ConfirmDeletionModalProps {
@@ -15,6 +16,8 @@ interface ConfirmDeletionModalProps {
   context: {
     userName: string;
     scope: string;
+    scopeDisplayName?: string;
+    org?: string;
     role: string;
     name?: string;
     rolesCount: number;
@@ -25,6 +28,23 @@ const ConfirmDeletionModal = ({
   isOpen, close, onSave, isDeleting, context,
 }: ConfirmDeletionModalProps) => {
   const intl = useIntl();
+  const values = {
+    userName: context.userName,
+    role: context.name ?? context.role,
+    scopeType: getScopeContextType(context.scope),
+    org: context.org,
+  };
+  // A wildcard scope names no single resource, so the question says what it reaches instead.
+  const aggregateType = getAggregateScopeType(context.scope, context.org);
+  let question = intl.formatMessage(messages['authz.team.remove.user.modal.body.1'], {
+    ...values, scope: context.scopeDisplayName || context.scope,
+  });
+  if (aggregateType === 'org') {
+    question = intl.formatMessage(messages['authz.team.remove.user.modal.body.1.org'], values);
+  } else if (aggregateType === 'platform') {
+    question = intl.formatMessage(messages['authz.team.remove.user.modal.body.1.platform'], values);
+  }
+
   return (
     <AlertModal
       title={intl.formatMessage(messages['authz.team.remove.user.modal.title'])}
@@ -55,12 +75,7 @@ const ConfirmDeletionModal = ({
       isOverflowVisible={false}
     >
       <Stack gap={3}>
-        <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.1'], {
-          userName: context.userName,
-          scope: context.scope,
-          role: context.name ?? context.role,
-        })}
-        </p>
+        <p>{question}</p>
         {context.rolesCount === 1 && (
           <p>{intl.formatMessage(messages['authz.team.remove.user.modal.body.2'])}</p>
         )}

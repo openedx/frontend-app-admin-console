@@ -32,11 +32,6 @@ const messages = defineMessages(
       defaultMessage: 'Delete role action',
       description: 'Alt description for delete button',
     },
-    'authz.user.table.permissions.available.count': {
-      id: 'authz.user.table.permissions.available.count',
-      defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
-      description: 'Text showing the number of permissions available, with proper pluralization',
-    },
     'authz.user.table.permissions.total.access': {
       id: 'authz.user.table.permissions.total.access',
       defaultMessage: 'Total access',
@@ -56,6 +51,11 @@ const messages = defineMessages(
       id: 'authz.user.table.permissions.role.staff',
       defaultMessage: 'Global Staff have access to all areas of the platform, similar to Super Admin, but cannot grant or revoke Super Admin or Global Staff roles to other users. This role is managed at the platform level and cannot be changed from here. To modify it, go to Django Admin.',
       description: 'Description for the permissions of the Global Staff role',
+    },
+    'authz.user.table.showing.roles.text': {
+      id: 'authz.user.table.showing.roles.text',
+      defaultMessage: 'Showing {pageSize, plural, one {# role} other {# roles}} of {itemCount}.',
+      description: 'Text stating how many of the user roles are listed on the current page out of the total count',
     },
   },
 );
