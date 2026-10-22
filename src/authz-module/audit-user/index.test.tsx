@@ -38,14 +38,16 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
 }));
 
 const mockIsCourseEnabled = jest.fn(() => true);
+const mockUseCourseAuthoringFlag = jest.fn();
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
-  useCourseAuthoringFlag: () => ({
-    isCourseAuthoringEnabled: true,
-    isCourseEnabled: mockIsCourseEnabled,
-    isOrgAuthoringEnabled: () => true,
-    isLoading: false,
-  }),
+  useCourseAuthoringFlag: () => mockUseCourseAuthoringFlag(),
 }));
+const loadedCourseAuthoringFlag = (isCourseEnabled: (scope: string) => boolean) => ({
+  isCourseAuthoringEnabled: true,
+  isCourseEnabled,
+  isOrgAuthoringEnabled: () => true,
+  isLoading: false,
+});
 
 jest.mock('@src/authz-module/data/hooks', () => ({
   ...jest.requireActual('@src/authz-module/data/hooks'),
@@ -85,7 +87,8 @@ const renderWithRouter = (route = '/audit/johndoe') => {
     },
   });
 
-  return render(
+  // Builds a fresh element tree on each call so `rerender` actually re-renders the page.
+  const buildPage = () => (
     <SiteContext.Provider value={mockAppContext}>
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">
@@ -99,14 +102,18 @@ const renderWithRouter = (route = '/audit/johndoe') => {
           </ToastManagerProvider>
         </IntlProvider>
       </QueryClientProvider>
-    </SiteContext.Provider>,
+    </SiteContext.Provider>
   );
+
+  const result = render(buildPage());
+  return { ...result, rerender: () => result.rerender(buildPage()) };
 };
 
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsCourseEnabled.mockReturnValue(true);
+    mockUseCourseAuthoringFlag.mockReturnValue(loadedCourseAuthoringFlag(mockIsCourseEnabled));
     // Set up default mock behavior for useRevokeUserRoles
     mockRevokeUserRoles.mockImplementation((_variables, { onSuccess }) => {
       // Simulate successful deletion by default
@@ -606,6 +613,30 @@ describe('AuditUserPage', () => {
 
     it('keeps the delete action enabled for a course assignment when authoring is enabled for the course', async () => {
       renderWithRouter();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /delete role action/i })).toBeEnabled();
+      });
+    });
+
+    it('enables the delete action for a course assignment once the authoring flag finishes loading', async () => {
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: false,
+        isCourseEnabled: () => false,
+        isOrgAuthoringEnabled: () => false,
+        isLoading: true,
+      });
+
+      const { rerender } = renderWithRouter();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /delete role action/i })).toBeDisabled();
+      });
+
+      mockUseCourseAuthoringFlag.mockReturnValue(
+        loadedCourseAuthoringFlag((scope) => scope === courseScope),
+      );
+      rerender();
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /delete role action/i })).toBeEnabled();

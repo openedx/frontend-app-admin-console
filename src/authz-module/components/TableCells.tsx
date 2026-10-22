@@ -6,7 +6,7 @@ import {
 import { UserRoleWithPermissions, RoleToDelete } from '@src/types';
 import { useMemo, type ComponentProps } from 'react';
 import {
-  ADMIN_ROLES, ALL_ORGS_KEY, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
   getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
@@ -14,6 +14,7 @@ import {
   type DataTableCellProps,
 } from '@openedx/paragon';
 import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRowExpansion';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
 import { RESOURCE_ICONS } from './constants';
@@ -33,7 +34,6 @@ type ExtendedCellProps = CellPropsWithValue & {
 interface ActionsCellExtraProps {
   onClickDeleteButton: (role: RoleToDelete) => void;
   isUserAuthenticatedPage: boolean;
-  isCourseEnabled?: (scope: string) => boolean;
 }
 
 type ActionsCellProps = CellProps & ActionsCellExtraProps;
@@ -150,15 +150,18 @@ const ViewAllPermissionsCell = ({ row }: CellProps) => {
 };
 
 const ActionsCell = ({
-  row, onClickDeleteButton, isUserAuthenticatedPage, isCourseEnabled,
+  row, onClickDeleteButton, isUserAuthenticatedPage,
 }: ActionsCellProps) => {
   const { formatMessage } = useIntl();
-  const { role, canManageScope } = row.original;
+  // Read the flag here rather than through the cell factory: DataTable never refreshes
+  // `additionalColumns`, so a factory closure would keep the loading-state resolver.
+  const { isCourseEnabled } = useCourseAuthoringFlag();
+  const { role, scope, canManageScope } = row.original;
 
   const handleDelete = () => {
     const roleToDelete = {
       role,
-      scope: row.original.scope,
+      scope,
       name: MAP_ROLE_KEY_TO_LABEL[role] || '',
     } as RoleToDelete;
     onClickDeleteButton(roleToDelete);
@@ -200,9 +203,8 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = !role?.startsWith('lib');
-  const isCourseAuthoringDisabled = isCourseEnabled !== undefined
-    && isCourseScope && !isCourseEnabled(row.original.scope);
+  const isCourseScope = getScopeContextType(scope) === CONTEXT_TYPES.COURSE;
+  const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(scope);
 
   if (isCourseAuthoringDisabled) {
     return (
