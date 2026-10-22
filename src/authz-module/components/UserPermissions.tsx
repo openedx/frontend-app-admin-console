@@ -23,7 +23,7 @@ interface UserPermissionsProps {
 
 const UserPermissions = ({ row }: UserPermissionsProps) => {
   const intl = useIntl();
-  let roleKey = row?.original?.role;
+  const roleKey = row?.original?.role;
   if (!roleKey) return null;
 
   if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
@@ -34,8 +34,6 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     );
   }
 
-  // Normalize role string to match keys in constants (e.g. "Course Admin" -> "course_admin")
-  roleKey = roleKey.trim().toLowerCase().replace(/[-\s]+/g, '_');
   const isLibraryRole = roleKey.includes('library');
   const config = isLibraryRole
     ? {
@@ -64,6 +62,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
       return perms.length ? { ...resource, perms } : null;
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
+  if (!resources.length) return null;
 
   const isSingleRow = resources.length <= 3;
   const mid = Math.ceil(resources.length / 2);

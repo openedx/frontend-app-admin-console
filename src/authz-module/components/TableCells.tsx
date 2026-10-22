@@ -17,6 +17,7 @@ import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRo
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
+import { courseRolesWithPermissions, libraryRolesWithPermissions } from '@src/authz-module/roles-permissions';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
@@ -99,20 +100,29 @@ const OrgIconCell = ({ row }: AssignmentCellProps) => {
 };
 
 // The permissions count doubles as the toggle that expands the row's permissions breakdown.
+// A role the metadata doesn't describe has no breakdown to expand, so its count is plain text.
 const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const toggleExpanded = useExclusiveRowExpansion(row);
   const { role, permissionCount: count } = row.original;
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
+  const label = isDjangoRole
+    ? formatMessage(
+        messages['authz.user.table.permissions.access.label'],
+        { accessType: role === 'django.superuser' ? 'total' : 'partial' },
+      )
+    : formatMessage(messages['authz.user.table.permissions.available.count'], { count });
+
+  const isKnownRole = [...courseRolesWithPermissions, ...libraryRolesWithPermissions]
+    .some((r) => r.role === role);
+
+  if (!isDjangoRole && !isKnownRole) {
+    return <span className="px-1">{label}</span>;
+  }
 
   return (
     <ExpandableButton
-      label={isDjangoRole
-        ? formatMessage(
-            messages['authz.user.table.permissions.access.label'],
-            { accessType: role === 'django.superuser' ? 'total' : 'partial' },
-          )
-        : formatMessage(messages['authz.user.table.permissions.available.count'], { count })}
+      label={label}
       onClick={toggleExpanded}
       isExpanded={!!row.isExpanded}
     />
@@ -134,7 +144,7 @@ const ActionsCell = ({
       scope,
       scopeDisplayName,
       org,
-      name: MAP_ROLE_KEY_TO_LABEL[role] || '',
+      name: MAP_ROLE_KEY_TO_LABEL[role] || role,
     });
 
   if (DJANGO_MANAGED_ROLES.includes(role)) {

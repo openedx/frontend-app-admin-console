@@ -117,7 +117,8 @@ describe('UserPermissions', () => {
     const mockRoleObject = [
       {
         role: 'test_viewer',
-        permissions: [1, 50, 100],
+        // One real permission, so the role covers a single resource and lays out inline.
+        permissions: [coursesConstants.coursePermissions[0].key],
         userCount: 1,
         name: 'Test Viewer',
         description: 'Test role with limited permissions',
@@ -151,5 +152,16 @@ describe('UserPermissions', () => {
 
     const { container } = renderWrapper(<UserPermissions {...props} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('renders nothing when none of the role permissions are described in the metadata', () => {
+    const originalRolesObject = coursesConstants.courseRolesWithPermissions;
+    setMockedCourseRoles([...originalRolesObject, {
+      role: 'test_unlisted', permissions: ['not_a_permission'], userCount: 1, name: 'Test', description: '',
+    }]);
+
+    const { container } = renderWrapper(<UserPermissions row={{ original: { role: 'test_unlisted' } }} />);
+    expect(container.firstChild).toBeNull();
+    setMockedCourseRoles(null);
   });
 });

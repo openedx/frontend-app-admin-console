@@ -167,6 +167,27 @@ describe('TableCells Components', () => {
 
       expect(screen.getByText('3 granted')).toBeInTheDocument();
     });
+
+    it('shows the count as plain text when the role has no permissions breakdown to expand', () => {
+      const props = {
+        row: {
+          id: '0',
+          original: {
+            role: 'unknown_role',
+            scopeDisplayName: '',
+            permissionCount: 1,
+            org: 'Test Org',
+            scope: 'Test Scope',
+          },
+        },
+        column: { id: 'permissions' },
+      };
+
+      renderWrapper(<PermissionsCell {...props} />);
+
+      expect(screen.getByText('1 granted')).toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
   });
 
   describe('createActionsCell', () => {
