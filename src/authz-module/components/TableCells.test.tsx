@@ -157,7 +157,7 @@ describe('TableCells Components', () => {
             scopeDisplayName: '',
             permissionCount: 3,
             org: 'Test Org',
-            scope: 'Test Scope',
+            scope: 'lib:TestOrg:test-library',
           },
         },
         column: { id: 'permissions' },
@@ -186,6 +186,27 @@ describe('TableCells Components', () => {
       renderWrapper(<PermissionsCell {...props} />);
 
       expect(screen.getByText('1 granted')).toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('shows the count as plain text when the role is not described for the scope resource type', () => {
+      const props = {
+        row: {
+          id: '0',
+          original: {
+            role: 'library_admin',
+            scopeDisplayName: '',
+            permissionCount: 3,
+            org: 'Test Org',
+            scope: 'course-v1:TestOrg+Course+Run',
+          },
+        },
+        column: { id: 'permissions' },
+      };
+
+      renderWrapper(<PermissionsCell {...props} />);
+
+      expect(screen.getByText('3 granted')).toBeInTheDocument();
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
   });

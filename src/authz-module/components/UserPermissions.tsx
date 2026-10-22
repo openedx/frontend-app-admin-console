@@ -1,5 +1,5 @@
 import { useIntl } from '@openedx/frontend-base';
-import { DJANGO_MANAGED_ROLES } from '@src/authz-module/constants';
+import { CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getScopeContextType } from '@src/authz-module/constants';
 import {
   courseResourceTypes,
   coursePermissions,
@@ -17,6 +17,7 @@ interface UserPermissionsProps {
   row: {
     original: {
       role: string;
+      scope: string;
     };
   };
 }
@@ -24,6 +25,7 @@ interface UserPermissionsProps {
 const UserPermissions = ({ row }: UserPermissionsProps) => {
   const intl = useIntl();
   const roleKey = row?.original?.role;
+  const scope = row?.original?.scope;
   if (!roleKey) return null;
 
   if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
@@ -34,8 +36,7 @@ const UserPermissions = ({ row }: UserPermissionsProps) => {
     );
   }
 
-  const isLibraryRole = roleKey.includes('library');
-  const config = isLibraryRole
+  const config = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
     ? {
         resourceTypes: libraryResourceTypes,
         permissions: libraryPermissions,

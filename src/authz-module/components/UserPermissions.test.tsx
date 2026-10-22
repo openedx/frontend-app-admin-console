@@ -44,6 +44,7 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: 'django.superuser',
+          scope: '*',
         },
       },
     };
@@ -57,6 +58,7 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: 'course_admin',
+          scope: 'course-v1:OpenedX+DemoX+2024',
         },
       },
     };
@@ -70,6 +72,7 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: 'library_admin',
+          scope: 'lib:OpenedX:demo-lib',
         },
       },
     };
@@ -94,6 +97,7 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: '',
+          scope: '',
         },
       },
     };
@@ -132,6 +136,7 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: 'test_viewer',
+          scope: 'course-v1:OpenedX+DemoX+2024',
         },
       },
     };
@@ -146,6 +151,21 @@ describe('UserPermissions', () => {
       row: {
         original: {
           role: 'unknown_role',
+          scope: 'course-v1:OpenedX+DemoX+2024',
+        },
+      },
+    };
+
+    const { container } = renderWrapper(<UserPermissions {...props} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('looks the role up in the metadata of the scope resource type', () => {
+    const props = {
+      row: {
+        original: {
+          role: 'library_admin',
+          scope: 'course-v1:OpenedX+DemoX+2024',
         },
       },
     };
@@ -160,7 +180,7 @@ describe('UserPermissions', () => {
       role: 'test_unlisted', permissions: ['not_a_permission'], userCount: 1, name: 'Test', description: '',
     }]);
 
-    const { container } = renderWrapper(<UserPermissions row={{ original: { role: 'test_unlisted' } }} />);
+    const { container } = renderWrapper(<UserPermissions row={{ original: { role: 'test_unlisted', scope: 'course-v1:OpenedX+DemoX+2024' } }} />);
     expect(container.firstChild).toBeNull();
     setMockedCourseRoles(null);
   });

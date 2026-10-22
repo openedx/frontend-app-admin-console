@@ -104,17 +104,17 @@ const OrgIconCell = ({ row }: AssignmentCellProps) => {
 const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const toggleExpanded = useExclusiveRowExpansion(row);
-  const { role, permissionCount: count } = row.original;
+  const { role, scope, permissionCount: count } = row.original;
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
+  const accessType = role === 'django.superuser' ? 'total' : 'partial';
   const label = isDjangoRole
-    ? formatMessage(
-        messages['authz.user.table.permissions.access.label'],
-        { accessType: role === 'django.superuser' ? 'total' : 'partial' },
-      )
+    ? formatMessage(messages['authz.user.table.permissions.access.label'], { accessType })
     : formatMessage(messages['authz.user.table.permissions.available.count'], { count });
 
-  const isKnownRole = [...courseRolesWithPermissions, ...libraryRolesWithPermissions]
-    .some((r) => r.role === role);
+  const scopeRoles = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
+    ? libraryRolesWithPermissions
+    : courseRolesWithPermissions;
+  const isKnownRole = scopeRoles.some((r) => r.role === role);
 
   if (!isDjangoRole && !isKnownRole) {
     return <span className="px-1">{label}</span>;
