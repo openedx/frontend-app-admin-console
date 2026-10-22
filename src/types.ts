@@ -36,10 +36,6 @@ export interface PermissionMetadata {
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
-export type PermissionItem = ResourceMetadata & {
-  perms: PermissionMetadata[];
-};
-
 export interface Org {
   id: string;
   name: string;
@@ -52,20 +48,6 @@ export interface Scope {
   description?: string;
   org: Org | null;
 }
-
-// Permissions Matrix
-
-export type EnrichedPermission = PermissionMetadata & {
-  actionKey: string;
-};
-
-export type PermissionWithRoles = EnrichedPermission & {
-  roles: Record<string, boolean>;
-};
-
-export type PermissionsResourceGrouped = ResourceMetadata & {
-  permissions: PermissionWithRoles[];
-};
 
 export interface UserRole {
   isSuperadmin?: boolean;
