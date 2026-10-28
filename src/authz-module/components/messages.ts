@@ -61,11 +61,6 @@ const messages = defineMessages({
     defaultMessage: 'All platform',
     description: 'Shown in place of an organization for a role that is not limited to one organization: a wildcard org, or a Django-managed role.',
   },
-  'authz.user.table.scope.global.label': {
-    id: 'authz.user.table.scope.global.label',
-    defaultMessage: 'Global',
-    description: 'Label for the "Global" scope in the user assignments table when a user has a django managed role assigned.',
-  },
   'authz.user.table.permissions.access.label': {
     id: 'authz.user.table.permissions.access.label',
     defaultMessage: '{accessType, select, total {Total Access} partial {Partial Access} other {No Access}}',
@@ -73,18 +68,13 @@ const messages = defineMessages({
   },
   'authz.user.table.permissions.available.count': {
     id: 'authz.user.table.permissions.available.count',
-    defaultMessage: '{count, plural, one {# permission available} other {# permissions available}}',
-    description: 'Text showing the number of permissions available, with proper pluralization',
+    defaultMessage: '{count, number} granted',
+    description: 'Text showing the number of permissions the role grants, e.g. "33 granted"',
   },
   'authz.user.table.delete.action.alt': {
     id: 'authz.user.table.delete.action.alt',
     defaultMessage: 'Delete role action',
     description: 'Alt description for delete button',
-  },
-  'authz.user.table.view_all_permissions.link.text': {
-    id: 'authz.user.table.view_all_permissions.link.text',
-    defaultMessage: 'View all permissions',
-    description: 'Text for the link to view all permissions in the user table',
   },
 
   'authz.table.column.actions.view.title': {
@@ -135,11 +125,21 @@ const messages = defineMessages({
   'authz.team.remove.user.modal.body.1': {
     id: 'authz.team.remove.user.modal.body.1',
     defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” in the scope {scope}?',
-    description: 'AuthZ team management remove user modal body',
+    description: 'AuthZ team management remove user modal body, for a role in a single course or library',
+  },
+  'authz.team.remove.user.modal.body.1.org': {
+    id: 'authz.team.remove.user.modal.body.1.org',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, library {libraries} other {courses}} in the organization {org}?',
+    description: 'AuthZ team management remove user modal body, for a role in every course or library of an organization',
+  },
+  'authz.team.remove.user.modal.body.1.platform': {
+    id: 'authz.team.remove.user.modal.body.1.platform',
+    defaultMessage: 'Are you sure you want to remove the {role} role from the user “{userName}” for all {scopeType, select, library {libraries} other {courses}} on the platform?',
+    description: 'AuthZ team management remove user modal body, for a role in every course or library of the platform',
   },
   'authz.team.remove.user.modal.body.2': {
     id: 'authz.team.remove.user.modal.body.2',
-    defaultMessage: "This is the user's only role in this scope. Removing it will revoke their access completely, and they will no longer appear in the scope's member list.",
+    defaultMessage: "This is the user's only role. Removing it will revoke all their access, and they will no longer appear in the team members list.",
     description: 'AuthZ team management remove user modal body',
   },
   'authz.team.remove.user.modal.body.3': {
@@ -161,16 +161,6 @@ const messages = defineMessages({
     id: 'authz.table.actions.course.disabled.tooltip',
     defaultMessage: 'This course hasn’t moved to the new roles experience yet. Manage its team in Studio instead.',
     description: 'Tooltip for disabled action buttons on rows of courses where the course authoring flag is off, pointing users to Studio to manage the course team',
-  },
-  'authz.user.table.view_all_permissions.link.text.close': {
-    id: 'authz.user.table.view_all_permissions.link.text.close',
-    defaultMessage: 'Hide all permissions',
-    description: 'Text for the link to hide all permissions in the user table',
-  },
-  'authz.user.table.view_all_permissions.link.text.open': {
-    id: 'authz.user.table.view_all_permissions.link.text.open',
-    defaultMessage: 'View all permissions',
-    description: 'Text for the link to view all permissions in the user table',
   },
   'authz.table.footer.pagination.label': {
     id: 'authz.table.footer.pagination.label',

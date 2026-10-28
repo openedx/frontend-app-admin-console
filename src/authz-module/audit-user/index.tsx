@@ -6,7 +6,7 @@ import { SiteContext, useIntl } from '@openedx/frontend-base';
 import { DataTable } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
-  AUTHZ_HOME_PATH, TABLE_DEFAULT_PAGE_SIZE,
+  AUTHZ_HOME_PATH, MAP_ROLE_KEY_TO_LABEL, TABLE_DEFAULT_PAGE_SIZE,
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
 import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import {
-  OrgCell, RoleCell, ScopeCell, PermissionsCell, ViewAllPermissionsCell,
+  OrgIconCell, ScopeNameCell, PermissionsCell,
   createActionsCell,
 } from '@src/authz-module/components/TableCells';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
@@ -110,17 +110,14 @@ const AuditUserPage = () => {
 
   const additionalColumns = useMemo(() => [
     {
-      id: 'view_permissions',
-      Header: '',
-      Cell: ViewAllPermissionsCell,
-    },
-    {
       id: 'action',
       Header: formatMessage(messages['authz.user.table.action.column.header']),
       Cell: createActionsCell({
         onClickDeleteButton: handleShowConfirmDeletionModal,
         isUserAuthenticatedPage: username === authenticatedUser?.username,
       }),
+      cellClassName: 'text-center',
+      headerClassName: 'authz-col-actions justify-content-center',
     },
   ], [authenticatedUser?.username, formatMessage, handleShowConfirmDeletionModal, username]);
 
@@ -128,31 +125,35 @@ const AuditUserPage = () => {
     {
       Header: getCellHeader('role', formatMessage(messages['authz.user.table.role.column.header']), columnsWithFiltersApplied),
       accessor: 'role',
-      Cell: RoleCell,
+      Cell: ({ value }) => MAP_ROLE_KEY_TO_LABEL[value] || value,
+      headerClassName: 'authz-col-role',
       filter: 'includesValue',
       Filter: RolesFilter,
       filterButtonText: formatMessage(messages['authz.user.table.role.column.header']),
       filterOrder: 2,
     },
     {
+      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
+      accessor: 'scope',
+      Cell: ScopeNameCell,
+      disableFilters: true,
+
+    },
+    {
       Header: getCellHeader('org', formatMessage(messages['authz.user.table.organization.column.header']), columnsWithFiltersApplied),
       accessor: 'org',
-      Cell: OrgCell,
+      Cell: OrgIconCell,
+      headerClassName: 'authz-col-org',
       filter: 'includesValue',
       Filter: OrgFilter,
       filterButtonText: formatMessage(messages['authz.user.table.organization.column.header']),
       filterOrder: 1,
     },
     {
-      Header: getCellHeader('scope', formatMessage(messages['authz.user.table.scope.column.header']), columnsWithFiltersApplied),
-      accessor: 'scope',
-      Cell: ScopeCell,
-      disableFilters: true,
-
-    },
-    {
       Header: formatMessage(messages['authz.user.table.permissions.column.header']),
       Cell: PermissionsCell,
+      cellClassName: 'text-nowrap',
+      headerClassName: 'authz-col-permissions',
       disableFilters: true,
       disableSortBy: true,
     },
@@ -232,6 +233,8 @@ const AuditUserPage = () => {
         context={{
           userName: user?.username || '',
           scope: roleToDelete?.scope || '',
+          scopeDisplayName: roleToDelete?.scopeDisplayName,
+          org: roleToDelete?.org,
           role: roleToDelete?.role || '',
           name: roleToDelete?.name || '',
           rolesCount: count || 0,
@@ -251,6 +254,7 @@ const AuditUserPage = () => {
       >
         <div className="page-band py-3">
           <DataTable
+            className="user-assignments-table"
             isPaginated
             isFilterable
             isSortable
@@ -272,7 +276,7 @@ const AuditUserPage = () => {
           >
             <TableControlBar onFilterChange={setColumnsWithFiltersApplied} />
             <DataTable.Table />
-            <TableFooter />
+            <TableFooter showingMessage={messages['authz.user.table.showing.roles.text']} />
           </DataTable>
         </div>
       </AuthZLayout>
