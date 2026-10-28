@@ -81,11 +81,15 @@ Roles and permissions each keep their own ``scopeTypes`` because the catalog of 
 
 The hook memoizes each scope type's catalog, so its identity is stable between renders and the screens can memoize what they build from it, such as the matrix and the roles filter choices, without rebuilding it on every render.
 
-**6. Icons are rendered by name, downloading only the ones used.**
+**6. CatalogIcon owns the mapping from catalog identifiers to icons.**
 
-The catalog names Paragon icons (for example ``RemoveRedEye``). ``CatalogIcon`` lazy-imports ``@openedx/paragon/icons/es5/<name>.js``, keeping one ``React.lazy`` component per name, so only the icons the catalog names are downloaded and an icon added in the backend works without a frontend change. While an icon loads, or when its name is unknown, it renders an empty icon of the same size, so the layout does not shift. When the catalog sends no icon, it renders nothing.
+The backend and frontend will agree on a supported set of icon identifiers, independent of Paragon's exported names. The frontend will map each identifier to an available icon component. This keeps the catalog contract independent of the icon library and version selected by the downstream site. See the `backend icon contract discussion`_. The identifier set and its mappings have not been finalized yet.
 
-Webpack emits one small chunk per Paragon icon. ``es5/index.js``, which re-exports every icon, is excluded so it never becomes a chunk.
+Consumers pass the catalog's icon identifier to ``<CatalogIcon name={icon} />`` without interpreting it or importing the corresponding icon themselves. The component preserves an empty icon of the same size for unknown identifiers and renders nothing when the catalog sends no icon.
+
+**Temporary implementation.** ``CatalogIcon`` currently accepts Paragon icon names and lazy-imports ``@openedx/paragon/icons/es5/<name>.js``, with one ``React.lazy`` component per name. While an icon loads, it renders the same empty placeholder. Webpack emits one small chunk per Paragon icon and excludes ``es5/index.js`` from those chunks.
+
+Once the identifier set is agreed, the explicit frontend map will replace dynamic imports. The public ``name`` prop and fallback behavior remain unchanged, so consumers remain independent of how icons are resolved.
 
 **7. The catalog describes; it does not authorize.**
 
@@ -96,7 +100,7 @@ Some screens check a specific permission before showing an action, for example w
 Consequences
 ############
 
-* Roles, permissions, categories, names, descriptions and icons added or changed in the backend appear in the console without a frontend release.
+* Roles, permissions, categories, names and descriptions added or changed in the backend appear in catalog consumers without a frontend release. They can use any supported icon identifier; adding a new identifier requires agreement on the contract and an update to the frontend map.
 * The console only shows what the catalog returns. Roles that the hardcoded copy listed as disabled no longer appear until the backend returns them.
 * Names and descriptions come from the backend and are not translated by the frontend.
 * Screens depend on one more request. Until the catalog loads, they show their loading state.
@@ -114,8 +118,8 @@ Rejected Alternatives
 **Request the catalog per screen or per scope type**
   Each screen would compute its own scope types, different lists would make separate requests, and a wrong list would answer 403. One request for every viewable scope type, sliced on the client, is shared by every screen.
 
-**Map icon names to components in the frontend**
-  A static map would bundle every mapped icon and need a frontend change for each new icon, which reintroduces the copy the catalog removes.
+**Use Paragon export names as the permanent icon contract**
+  This couples backend schemas to the icon library and version selected by each downstream site. Dynamic imports remain a temporary implementation; the intended contract is an agreed set of identifiers mapped to components by the frontend (Decision 6).
 
 Future evolution
 ################
@@ -156,3 +160,5 @@ References
 .. _ADR 0021: https://github.com/openedx/openedx-authz/blob/main/docs/decisions/0021-authorization-definition-api.rst
 .. _ADR 0028: https://github.com/openedx/openedx-authz/blob/main/docs/decisions/0028-api-contract-for-role-catalog.rst
 .. _ADR 0028 - API Contract for the Role and Permission Catalog: https://github.com/openedx/openedx-authz/blob/main/docs/decisions/0028-api-contract-for-role-catalog.rst
+
+.. _backend icon contract discussion: https://github.com/openedx/openedx-authz/pull/537#issuecomment-6425395515
