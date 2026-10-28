@@ -57,7 +57,7 @@ The types mirror the API response (camelCased), without adapters to the old hard
 
 **3. One request, for the scope types the user can view.**
 
-The catalog endpoint answers 403 when the user cannot view the team of a requested scope type. So ``useAuthzCatalog`` first checks the user's view-team permissions through ``/permissions/validate/me``, then requests the catalog of every scope type the user can view, in a single call. A user who cannot view any scope type makes no catalog request.
+The catalog endpoint answers 403 when the user cannot view the team of a requested scope type. So ``useAuthzCatalog`` first checks the user's view-team permissions with ``usePermissions`` from ``@openedx/frontend-base`` (which calls ``/permissions/validate/me``), then requests the catalog of every scope type the user can view, in a single call. A user who cannot view any scope type makes no catalog request.
 
 The hook takes no arguments, so every consumer shares one cache entry and one request. ``getAuthzCatalog(scopeTypes)`` still takes the scope types, for a caller that needs a subset.
 
@@ -137,7 +137,7 @@ With that, ``useAuthzCatalog`` keeps its signature but makes one query without p
 For that step:
 
 * The manage permission would be catalog data, and the frontend would still check it through validate/me, which remains the source for any behavior the UI displays.
-* The tab labels and group names are translated in the frontend today, while the backend display names are English only. Moving them to the catalog would expect the backend to translate the scope type information as well.
+* Tab labels and group names are translated in the frontend today. Moving them to the catalog would require the backend to provide localized scope-type metadata, alongside the localized role, permission and category metadata it already returns.
 
 **Loading on demand.** The current UI displays all the roles of a scope type at once (Decision 4). Loading the roles on demand, with search or paging in the UI instead of showing every role at once, is only worth it if real cases show that the number of roles per scope type has grown too large for that, for example with user-defined roles. Until then, the current approach stays.
 
