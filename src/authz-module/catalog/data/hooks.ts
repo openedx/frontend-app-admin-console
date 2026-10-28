@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { usePermissions } from '@openedx/frontend-base';
 import { appId } from '@src/constants';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { getAuthzCatalog } from './api';
 import type { AuthzCatalog, ScopeCatalog } from '../types';
@@ -14,11 +14,9 @@ const catalogQueryKeys = {
 
 const NO_SCOPE_TYPES: string[] = [];
 
-// Requested in the same order as useViewTeamPermissions (libraries first), so both share one
-// validate/me query.
-const VIEW_TEAM_PERMISSIONS = [SCOPE_TYPES.LIBRARY, SCOPE_TYPES.COURSE].map((scopeType) => ({
-  action: VIEW_TEAM_ACTIONS[scopeType],
-}));
+const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
+  Object.entries(VIEW_TEAM_ACTIONS).map(([scopeType, action]) => [scopeType, { action }]),
+);
 
 /**
  * React Query hook to fetch the roles, permissions and categories catalog of the scope types the
@@ -42,12 +40,10 @@ const VIEW_TEAM_PERMISSIONS = [SCOPE_TYPES.LIBRARY, SCOPE_TYPES.COURSE].map((sco
  * ```
  */
 export const useAuthzCatalog = () => {
-  const {
-    data: permissions, isLoading: isLoadingPermissions,
-  } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
+  const permissions = usePermissions(VIEW_TEAM_PERMISSIONS, true);
 
   const viewableScopeTypes: string[] = [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY].filter((scopeType) => (
-    permissions?.some(({ action, allowed }) => allowed && action === VIEW_TEAM_ACTIONS[scopeType])
+    permissions[scopeType] === true
   ));
 
   const query = useQuery<AuthzCatalog, Error>({
@@ -70,7 +66,9 @@ export const useAuthzCatalog = () => {
 
   return {
     ...query,
-    isLoading: isLoadingPermissions || query.isLoading,
+    isLoading: permissions.isLoading || query.isLoading,
+    isError: permissions.isError || query.isError,
+    error: permissions.error ?? query.error,
     scopeTypes: catalog?.scopeTypes ?? NO_SCOPE_TYPES,
     getScopeCatalog: getLoadedScopeCatalog,
   };

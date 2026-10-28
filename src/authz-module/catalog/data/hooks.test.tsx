@@ -1,4 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
+import { usePermissions } from '@openedx/frontend-base';
 import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { CATALOG_PAGE_SIZE } from '../constants';
@@ -7,12 +8,14 @@ import { useAuthzCatalog } from './hooks';
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
+  usePermissions: jest.fn(),
 }));
 
-interface MockApiOptions {
+interface MockPermissionsOptions {
   course?: boolean;
   library?: boolean;
   isPermissionsPending?: boolean;
+  isPermissionsError?: boolean;
 }
 
 const buildPermission = (id: string, scopeType: string) => ({
@@ -23,15 +26,21 @@ const buildRole = (role: string, permissions: string[], scopeType: string) => ({
   role, display_name: role, description: '', icon: null, definition_kind: 'static', permissions, scope_types: [scopeType],
 });
 
-// Answers validate/me with the given view-team permissions, and the catalog endpoint with a
-// course role and a library role, for the scope types that were requested.
-const mockApi = ({ course = false, library = false, isPermissionsPending = false }: MockApiOptions) => {
-  const post = jest.fn(() => (isPermissionsPending ? new Promise(() => {}) : Promise.resolve({
-    data: [
-      { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: course },
-      { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: library },
-    ],
-  })));
+const mockPermissions = ({
+  course = false, library = false, isPermissionsPending = false, isPermissionsError = false,
+}: MockPermissionsOptions = {}) => {
+  jest.mocked(usePermissions<Record<'course-v1' | 'lib', { action: string }>>).mockReturnValue({
+    [SCOPE_TYPES.COURSE]: course,
+    [SCOPE_TYPES.LIBRARY]: library,
+    isLoading: isPermissionsPending,
+    isError: isPermissionsError,
+    isPaused: false,
+    error: isPermissionsError ? new Error('Permission validation failed') : null,
+    isAuthzEnabled: true,
+  });
+};
+
+const mockCatalogApi = () => {
   const get = jest.fn((url: URL) => Promise.resolve({
     data: {
       count: 0,
@@ -49,8 +58,8 @@ const mockApi = ({ course = false, library = false, isPermissionsPending = false
       ],
     },
   }));
-  mockHttpClient().mockReturnValue({ get, post });
-  return { get, post };
+  mockHttpClient().mockReturnValue({ get });
+  return { get };
 };
 
 const renderUseAuthzCatalog = () => renderHook(() => useAuthzCatalog(), { wrapper: createQueryClientWrapper() });
@@ -61,15 +70,21 @@ describe('useAuthzCatalog', () => {
   });
 
   it('fetches the catalog of every scope type the user can view', async () => {
-    mockApi({ course: true, library: true });
+    mockPermissions({ course: true, library: true });
+    mockCatalogApi();
 
     const { result } = renderUseAuthzCatalog();
 
     await waitFor(() => expect(result.current.scopeTypes).toEqual([SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY]));
+    expect(usePermissions).toHaveBeenCalledWith({
+      [SCOPE_TYPES.COURSE]: { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },
+      [SCOPE_TYPES.LIBRARY]: { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
+    }, true);
   });
 
   it('fetches only the library catalog when the user can only view library teams', async () => {
-    mockApi({ library: true });
+    mockPermissions({ library: true });
+    mockCatalogApi();
 
     const { result } = renderUseAuthzCatalog();
 
@@ -77,7 +92,8 @@ describe('useAuthzCatalog', () => {
   });
 
   it('gives the catalog of each scope type the user can view', async () => {
-    mockApi({ course: true, library: true });
+    mockPermissions({ course: true, library: true });
+    mockCatalogApi();
 
     const { result } = renderUseAuthzCatalog();
 
@@ -88,7 +104,8 @@ describe('useAuthzCatalog', () => {
   });
 
   it('keeps the same scope type catalog between renders', async () => {
-    mockApi({ library: true });
+    mockPermissions({ library: true });
+    mockCatalogApi();
 
     const { result, rerender } = renderUseAuthzCatalog();
     await waitFor(() => expect(result.current.getScopeCatalog(SCOPE_TYPES.LIBRARY)).toBeDefined());
@@ -100,7 +117,8 @@ describe('useAuthzCatalog', () => {
   });
 
   it('is loading while the view permissions are being resolved', () => {
-    const { get } = mockApi({ isPermissionsPending: true });
+    mockPermissions({ isPermissionsPending: true });
+    const { get } = mockCatalogApi();
 
     const { result } = renderUseAuthzCatalog();
 
@@ -109,7 +127,8 @@ describe('useAuthzCatalog', () => {
   });
 
   it('does not fetch a catalog when the user cannot view any team', async () => {
-    const { get } = mockApi({});
+    mockPermissions();
+    const { get } = mockCatalogApi();
 
     const { result } = renderUseAuthzCatalog();
 
@@ -119,8 +138,19 @@ describe('useAuthzCatalog', () => {
     expect(get).not.toHaveBeenCalled();
   });
 
+  it('exposes permission validation errors without fetching the catalog', () => {
+    mockPermissions({ isPermissionsError: true });
+    const { get } = mockCatalogApi();
+
+    const { result } = renderUseAuthzCatalog();
+
+    expect(result.current.isError).toBe(true);
+    expect(result.current.error?.message).toBe('Permission validation failed');
+    expect(get).not.toHaveBeenCalled();
+  });
+
   it('lists the roles of every page, in order, when they do not fit in one page', async () => {
-    const { post } = mockApi({ library: true });
+    mockPermissions({ library: true });
     // Three pages of roles, one role in each.
     const get = jest.fn((url: URL) => {
       const page = Number(url.searchParams.get('page'));
@@ -138,7 +168,7 @@ describe('useAuthzCatalog', () => {
         },
       });
     });
-    mockHttpClient().mockReturnValue({ get, post });
+    mockHttpClient().mockReturnValue({ get });
 
     const { result } = renderUseAuthzCatalog();
 
