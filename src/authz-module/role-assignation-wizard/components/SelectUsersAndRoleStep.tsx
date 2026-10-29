@@ -9,7 +9,7 @@ import type { ScopeCatalog } from '@src/authz-module/catalog';
 import HighlightedUsersInput from './HighlightedUsersInput';
 import messages from '@src/authz-module/role-assignation-wizard/messages';
 
-// A role is selected within a scope type, since a role can be offered in several of them.
+// The selected role and its scope type, which defines where the role can be assigned.
 export interface SelectedRole {
   scopeType: string;
   role: string;
@@ -52,6 +52,14 @@ const SelectUsersAndRoleStep = ({
 }: SelectUsersAndRoleStepProps) => {
   const intl = useIntl();
   const idPrefix = useId();
+  const rolesHeadingId = `${idPrefix}-roles`;
+  const visibleRoleGroups = roleGroups.filter(({ roles }) => roles.length > 0);
+
+  // Roles offered in several scope types aren't supported yet, so the role identifies its scope type.
+  const handleRoleChange = (role: string) => {
+    const roleGroup = visibleRoleGroups.find(({ roles }) => roles.some((r) => r.role === role));
+    if (roleGroup) setSelectedRole({ scopeType: roleGroup.scopeType, role });
+  };
 
   return (
     <div className="select-users-and-role-step">
@@ -77,7 +85,7 @@ const SelectUsersAndRoleStep = ({
       </Form.Group>
 
       {/* Roles Section */}
-      <h3 className="text-primary mt-4 mb-2">{intl.formatMessage(messages['wizard.step1.roles.heading'])}</h3>
+      <h3 id={rolesHeadingId} className="text-primary mt-4 mb-2">{intl.formatMessage(messages['wizard.step1.roles.heading'])}</h3>
       {isLoadingRoles && (
         <div className="d-flex justify-content-center p-4">
           <Spinner animation="border" screenReaderText={intl.formatMessage(messages['wizard.step1.roles.loading'])} />
@@ -88,36 +96,41 @@ const SelectUsersAndRoleStep = ({
           {intl.formatMessage(messages['wizard.step1.roles.error'])}
         </Alert>
       )}
-      {roleGroups.filter(({ roles }) => roles.length > 0).map(({ scopeType, roles }) => {
-        const label = SCOPE_TYPE_LABELS[scopeType];
-        const headerId = `${idPrefix}-${scopeType}`;
-        return (
-          <div key={scopeType} className="role-group mb-4">
-            <h4 id={headerId} className="text-gray role-group-header my-4 pl-4">
-              {label ? intl.formatMessage(label) : scopeType}
-            </h4>
-            <Form.RadioSet
-              name={`role-selection-${scopeType}`}
-              aria-labelledby={headerId}
-              value={selectedRole?.scopeType === scopeType ? selectedRole.role : ''}
-              onChange={(e) => setSelectedRole({ scopeType, role: e.target.value })}
-              aria-required
-              className="pl-4"
-            >
-              {roles.map((role) => (
-                <Form.Radio key={role.role} value={role.role}>
-                  <Stack gap={2}>
-                    <span className="role-name">
-                      {role.displayName}
-                    </span>
-                    <p className="mb-0 text-gray-500 small">{role.description}</p>
-                  </Stack>
-                </Form.Radio>
-              ))}
-            </Form.RadioSet>
-          </div>
-        );
-      })}
+      {/* A single role is assigned, so all the roles form one required radio group, split by scope type. */}
+      {visibleRoleGroups.length > 0 && (
+        <Form.RadioSet
+          name="role-selection"
+          aria-labelledby={rolesHeadingId}
+          value={selectedRole?.role ?? ''}
+          onChange={(e) => handleRoleChange(e.target.value)}
+          aria-required
+        >
+          {visibleRoleGroups.map(({ scopeType, roles }) => {
+            const label = SCOPE_TYPE_LABELS[scopeType];
+            const headerId = `${idPrefix}-${scopeType}`;
+            return (
+              <div key={scopeType} role="group" aria-labelledby={headerId} className="role-group mb-4">
+                <h4 id={headerId} className="text-gray role-group-header my-4 pl-4">
+                  {label ? intl.formatMessage(label) : scopeType}
+                </h4>
+                {/* Stacks the radios the way Form.RadioSet does when they are its direct children. */}
+                <div className="pgn__form-control-set pl-4">
+                  {roles.map((role) => (
+                    <Form.Radio key={role.role} value={role.role}>
+                      <Stack gap={2}>
+                        <span className="role-name">
+                          {role.displayName}
+                        </span>
+                        <p className="mb-0 text-gray-500 small">{role.description}</p>
+                      </Stack>
+                    </Form.Radio>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </Form.RadioSet>
+      )}
 
       {/* Documentation Link */}
       <div className="mt-3">
