@@ -8,6 +8,7 @@ import {
   getScopes,
   getCourseAuthoringFlagStates,
 } from './api';
+import { SCOPE_TYPES } from '../constants';
 
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
@@ -216,6 +217,20 @@ describe('API functions', () => {
       expect(calledUrl.toString()).toContain('search=library');
       expect(calledUrl.toString()).toContain('page=3');
       expect(calledUrl.toString()).toContain('page_size=50');
+    });
+
+    it('filters the scopes by scope type', async () => {
+      const mockGet = jest.fn().mockResolvedValue({
+        data: {
+          results: [], count: 0, next: null, previous: null,
+        },
+      });
+      mockHttpClient().mockReturnValue({ get: mockGet });
+
+      await getScopes({ scopeType: SCOPE_TYPES.LIBRARY });
+
+      const calledUrl = new URL(mockGet.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('scope_type')).toBe(SCOPE_TYPES.LIBRARY);
     });
   });
 

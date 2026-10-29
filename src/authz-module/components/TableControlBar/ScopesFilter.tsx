@@ -4,7 +4,7 @@ import { LocationOn } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useScopes } from '@src/authz-module/data/hooks';
-import { DEFAULT_FILTER_PAGE_SIZE } from '@src/authz-module/constants';
+import { DEFAULT_FILTER_PAGE_SIZE, SCOPE_TYPES } from '@src/authz-module/constants';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
@@ -24,7 +24,7 @@ const ScopesFilter = ({
   const { data: scopesData } = useScopes({
     search: searchValue,
     pageSize: DEFAULT_FILTER_PAGE_SIZE,
-    ...(isCourseViewAllowed ? {} : { scopeType: 'library' }),
+    ...(isCourseViewAllowed ? {} : { scopeType: SCOPE_TYPES.LIBRARY }),
   });
 
   const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? [])
