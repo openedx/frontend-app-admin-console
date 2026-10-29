@@ -2,8 +2,9 @@ import { FormattedMessage, useIntl } from '@openedx/frontend-base';
 import { Icon } from '@openedx/paragon';
 import { Person } from '@openedx/paragon/icons';
 import {
-  ALL_ORGS_KEY, getAggregateScopeType, MAP_ROLE_KEY_TO_LABEL,
+  ALL_ORGS_KEY, getAggregateScopeType,
 } from '@src/authz-module/constants';
+import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import componentMessages from '@src/authz-module/components/messages';
 import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
@@ -15,12 +16,15 @@ interface AssignedRolesCellProps {
 }
 
 /** The role pill: a light rounded block with the person icon, not a Paragon Chip. */
-export const RoleBadge = ({ role }: { role: string }) => (
-  <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-gray-100 text-gray-700 mr-3 px-2 py-1">
-    <Icon src={Person} size="xs" className="mr-1" />
-    {MAP_ROLE_KEY_TO_LABEL[role] || role}
-  </div>
-);
+export const RoleBadge = ({ role }: { role: string }) => {
+  const { getRole } = useAuthzCatalog();
+  return (
+    <div className="authz-role-badge d-inline-flex align-items-center flex-shrink-0 text-nowrap rounded bg-gray-100 text-gray-700 mr-3 px-2 py-1">
+      <Icon src={Person} size="xs" className="mr-1" />
+      {getRole(role)?.displayName ?? role}
+    </div>
+  );
+};
 
 /**
  * Collapsed-row cell: the user's first assignment, as "[Role] In <scope>" with the

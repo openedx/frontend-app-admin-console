@@ -78,7 +78,7 @@ export const authzCatalog: AuthzCatalog = {
 };
 
 // The part of the `useAuthzCatalog` result its consumers read.
-type AuthzCatalogResult = Pick<ReturnType<typeof useAuthzCatalog>, 'scopeTypes' | 'getScopeCatalog' | 'isLoading' | 'isError'>;
+type AuthzCatalogResult = Pick<ReturnType<typeof useAuthzCatalog>, 'scopeTypes' | 'getScopeCatalog' | 'getRole' | 'isLoading' | 'isError'>;
 
 interface MockAuthzCatalogOptions {
   catalog?: AuthzCatalog;
@@ -98,6 +98,7 @@ export const mockAuthzCatalog = ({
 }: MockAuthzCatalogOptions = {}) => {
   const loadedScopeTypes = isLoading || isError ? [] : scopeTypes;
   const scopeCatalogs = new Map(loadedScopeTypes.map((scopeType) => [scopeType, getScopeCatalog(catalog, scopeType)]));
+  const loadedRoles = isLoading || isError ? [] : catalog.roles;
 
   // Typed as the hook's result, so the mock fails to compile if the hook's API changes.
   const result: AuthzCatalogResult = {
@@ -105,6 +106,7 @@ export const mockAuthzCatalog = ({
     isError,
     scopeTypes: loadedScopeTypes,
     getScopeCatalog: (scopeType) => scopeCatalogs.get(scopeType),
+    getRole: (roleId) => loadedRoles.find(({ role }) => role === roleId),
   };
   (useAuthzCatalog as jest.Mock).mockReturnValue(result);
 };
