@@ -5,6 +5,7 @@ import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import ScopesFilter from './ScopesFilter';
 
 jest.mock('@src/data/hooks', () => ({
@@ -112,7 +113,7 @@ describe('ScopesFilter', () => {
   it('fetches all scope types when the user can view courses', () => {
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
-      expect.not.objectContaining({ scopeType: 'library' }),
+      expect.not.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
     );
   });
 
@@ -120,7 +121,7 @@ describe('ScopesFilter', () => {
     mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: false }) });
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
-      expect.objectContaining({ scopeType: 'library' }),
+      expect.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
     );
   });
 
@@ -128,7 +129,7 @@ describe('ScopesFilter', () => {
     mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
-      expect.objectContaining({ scopeType: 'library' }),
+      expect.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
     );
   });
 

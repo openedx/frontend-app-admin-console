@@ -6,12 +6,12 @@ import { SiteContext, useIntl } from '@openedx/frontend-base';
 import { DataTable } from '@openedx/paragon';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import {
-  AUTHZ_HOME_PATH, MAP_ROLE_KEY_TO_LABEL, TABLE_DEFAULT_PAGE_SIZE,
+  AUTHZ_HOME_PATH, MAP_ROLE_KEY_TO_LABEL, SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE,
 } from '@src/authz-module/constants';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
+import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { getHttpErrorStatus } from '@src/data/utils';
 import baseMessages from '@src/authz-module/messages';
@@ -45,15 +45,21 @@ const AuditUserPage = () => {
   const { querySettings, handleTableFetch } = useQuerySettings();
 
   const { isCourseViewAllowed } = useViewTeamPermissions();
+  const { getScopeCatalog, isLoading: isLoadingCatalog } = useAuthzCatalog();
+  const libraryRoleIds = getScopeCatalog(SCOPE_TYPES.LIBRARY)?.roles.map(({ role }) => role).join(',') ?? null;
 
   const effectiveQuerySettings = useMemo(() => {
     if (isCourseViewAllowed || querySettings.roles) return querySettings;
-    return { ...querySettings, roles: LIBRARY_ROLE_KEYS };
-  }, [isCourseViewAllowed, querySettings]);
+    return { ...querySettings, roles: libraryRoleIds };
+  }, [isCourseViewAllowed, libraryRoleIds, querySettings]);
+  // Waits for the catalog's library roles, so a user who can't view courses sends one filtered request
+  // instead of an unfiltered one followed by the filtered one.
+  const isRolesFilterReady = !!effectiveQuerySettings.roles || isCourseViewAllowed;
 
   const {
-    isLoading: isLoadingUserAssignments, data: { results: userAssignments, count } = { results: [], count: 0 },
-  } = useUserAssignedRoles(username, effectiveQuerySettings);
+    isLoading: isLoadingAssignments, data: { results: userAssignments, count } = { results: [], count: 0 },
+  } = useUserAssignedRoles(username, effectiveQuerySettings, isRolesFilterReady);
+  const isLoadingUserAssignments = isLoadingAssignments || (!isRolesFilterReady && isLoadingCatalog);
   const [roleToDelete, setRoleToDelete] = useState<RoleToDelete | null>(null);
   const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
   const {
