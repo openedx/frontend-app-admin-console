@@ -28,7 +28,7 @@ const defaultProps = {
   invalidUsers: [],
 };
 
-const roleGroup = (name: string) => screen.getByRole('radiogroup', { name });
+const roleGroup = (name: string) => screen.getByRole('group', { name });
 
 describe('SelectUsersAndRoleStep', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -53,9 +53,12 @@ describe('SelectUsersAndRoleStep', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders roles section heading', () => {
+  it('offers the roles of every scope type as a single required choice', () => {
     renderWrapper(<SelectUsersAndRoleStep {...defaultProps} />);
-    expect(screen.getByText('Roles')).toBeInTheDocument();
+    const roles = screen.getByRole('radiogroup', { name: 'Roles' });
+    expect(screen.getAllByRole('radiogroup')).toEqual([roles]);
+    expect(roles).toHaveAttribute('aria-required', 'true');
+    expect(within(roles).getAllByRole('radio')).toHaveLength(2);
   });
 
   it('renders library roles under Libraries group', () => {
@@ -71,12 +74,12 @@ describe('SelectUsersAndRoleStep', () => {
 
   it('renders the role groups in the given scope type order', () => {
     renderWrapper(<SelectUsersAndRoleStep {...defaultProps} />);
-    expect(screen.getAllByRole('radiogroup')).toEqual([roleGroup('Courses'), roleGroup('Libraries')]);
+    expect(screen.getAllByRole('group')).toEqual([roleGroup('Courses'), roleGroup('Libraries')]);
   });
 
   it('leaves out the scope types without roles', () => {
     renderWrapper(<SelectUsersAndRoleStep {...defaultProps} roleGroups={[courseGroup, { ...libraryGroup, roles: [] }]} />);
-    expect(screen.getAllByRole('radiogroup')).toEqual([roleGroup('Courses')]);
+    expect(screen.getAllByRole('group')).toEqual([roleGroup('Courses')]);
   });
 
   it('announces that the roles are loading', () => {
@@ -105,32 +108,9 @@ describe('SelectUsersAndRoleStep', () => {
     expect(setSelectedRole).toHaveBeenCalledWith({ scopeType: SCOPE_TYPES.LIBRARY, role: 'library_admin' });
   });
 
-  it('selects a role offered in several scope types only in the selected one', () => {
-    const teamViewer = buildCatalogRole('team_viewer', {
-      displayName: 'Team Viewer', scopeTypes: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY],
-    });
-    renderWrapper(
-      <SelectUsersAndRoleStep
-        {...defaultProps}
-        roleGroups={[
-          { scopeType: SCOPE_TYPES.COURSE, roles: [teamViewer] },
-          { scopeType: SCOPE_TYPES.LIBRARY, roles: [teamViewer] },
-        ]}
-        selectedRole={{ scopeType: SCOPE_TYPES.LIBRARY, role: 'team_viewer' }}
-      />,
-    );
-    const [courseRadio, libraryRadio] = screen.getAllByRole('radio', { name: /Team Viewer/i });
-    expect(courseRadio).not.toBeChecked();
-    expect(libraryRadio).toBeChecked();
-  });
-
-  it('renders documentation link', () => {
+  it('renders the roles managed outside the wizard, pointing to the Django admin', () => {
     renderWrapper(<SelectUsersAndRoleStep {...defaultProps} />);
-    expect(screen.getByRole('link', { name: /View roles managed in LMS and Django Admin/i })).toBeInTheDocument();
-  });
-
-  it('documentation link points to the admin URL', () => {
-    renderWrapper(<SelectUsersAndRoleStep {...defaultProps} />);
+    expect(screen.getByText(/Some roles are managed outside this console/)).toBeInTheDocument();
     const link = screen.getByRole('link', { name: /View roles managed in LMS and Django Admin/i });
     expect(link).toHaveAttribute('href', 'http://localhost:8000/admin');
   });

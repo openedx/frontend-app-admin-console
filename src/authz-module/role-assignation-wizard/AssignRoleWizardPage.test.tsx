@@ -158,9 +158,9 @@ describe('AssignRoleWizardPage', () => {
       allRoles.forEach((role) => {
         expect(screen.getByText(role)).toBeInTheDocument();
       });
-      expect(screen.getAllByRole('radiogroup')).toEqual([
-        screen.getByRole('radiogroup', { name: 'Courses' }),
-        screen.getByRole('radiogroup', { name: 'Libraries' }),
+      expect(screen.getAllByRole('group')).toEqual([
+        screen.getByRole('group', { name: 'Courses' }),
+        screen.getByRole('group', { name: 'Libraries' }),
       ]);
     });
 
