@@ -7,7 +7,7 @@ import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from
 import type { ComponentProps, ReactNode } from 'react';
 import {
   ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeContextType, MAP_ROLE_KEY_TO_LABEL,
+  getScopeContextType, MAP_ROLE_KEY_TO_LABEL, SCOPE_TYPES,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip,
@@ -17,7 +17,7 @@ import { useExclusiveRowExpansion } from '@src/authz-module/hooks/useExclusiveRo
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { AGGREGATE_SCOPE_LABELS } from '@src/authz-module/messages';
-import { courseRolesWithPermissions, libraryRolesWithPermissions } from '@src/authz-module/roles-permissions';
+import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
@@ -104,6 +104,7 @@ const OrgIconCell = ({ row }: AssignmentCellProps) => {
 const PermissionsCell = ({ row }: CellProps) => {
   const { formatMessage } = useIntl();
   const toggleExpanded = useExclusiveRowExpansion(row);
+  const { getScopeCatalog } = useAuthzCatalog();
   const { role, scope, permissionCount: count } = row.original;
   const isDjangoRole = DJANGO_MANAGED_ROLES.includes(role);
   const accessType = role === 'django.superuser' ? 'total' : 'partial';
@@ -111,9 +112,10 @@ const PermissionsCell = ({ row }: CellProps) => {
     ? formatMessage(messages['authz.user.table.permissions.access.label'], { accessType })
     : formatMessage(messages['authz.user.table.permissions.available.count'], { count });
 
-  const scopeRoles = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
-    ? libraryRolesWithPermissions
-    : courseRolesWithPermissions;
+  const scopeType = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
+    ? SCOPE_TYPES.LIBRARY
+    : SCOPE_TYPES.COURSE;
+  const scopeRoles = getScopeCatalog(scopeType)?.roles ?? [];
   const isKnownRole = scopeRoles.some((r) => r.role === role);
 
   if (!isDjangoRole && !isKnownRole) {

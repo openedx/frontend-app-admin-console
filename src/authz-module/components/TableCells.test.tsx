@@ -2,12 +2,17 @@ import { screen } from '@testing-library/react';
 import { initializeMocks, renderWrapper } from '@src/testUtils';
 import userEvent from '@testing-library/user-event';
 import { DataTableContext } from '@openedx/paragon';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import {
   OrgIconCell,
   ScopeNameCell,
   PermissionsCell,
   createActionsCell,
 } from './TableCells';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 const mockNavigate = jest.fn();
 
@@ -22,6 +27,9 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
 }));
 
 describe('TableCells Components', () => {
+  beforeEach(() => {
+    mockAuthzCatalog();
+  });
   beforeAll(() => {
     initializeMocks();
   });
@@ -173,11 +181,13 @@ describe('TableCells Components', () => {
         row: {
           id: '0',
           original: {
-            role: 'unknown_role',
+            // Not one of the roles of the mocked catalog (`authzCatalog` in
+            // @src/authz-module/catalog/testUtils), so it has no permissions to expand.
+            role: 'course_auditor',
             scopeDisplayName: '',
             permissionCount: 1,
             org: 'Test Org',
-            scope: 'Test Scope',
+            scope: 'course-v1:TestOrg+Course+Run',
           },
         },
         column: { id: 'permissions' },
@@ -189,7 +199,7 @@ describe('TableCells Components', () => {
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
-    it('shows the count as plain text when the role is not described for the scope resource type', () => {
+    it("shows the count as plain text when the catalog does not describe the role for the assignment's scope type", () => {
       const props = {
         row: {
           id: '0',

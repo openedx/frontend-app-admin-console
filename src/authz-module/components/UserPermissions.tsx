@@ -1,17 +1,22 @@
 import { useIntl } from '@openedx/frontend-base';
-import { CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getScopeContextType } from '@src/authz-module/constants';
 import {
-  courseResourceTypes,
-  coursePermissions,
-  courseRolesWithPermissions,
-  libraryResourceTypes,
-  libraryPermissions,
-  libraryRolesWithPermissions,
-  getPermissionMetadata,
-} from '@src/authz-module/roles-permissions';
+  CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getScopeContextType, SCOPE_TYPES,
+} from '@src/authz-module/constants';
+import { useAuthzCatalog } from '@src/authz-module/catalog';
+import type { CategoryPermissions } from '@src/authz-module/catalog';
+import { buildPermissionMatrix } from '@src/authz-module/roles-permissions';
 import RenderPermissionColumn from './RenderPermissionColumn';
-import RenderPermissionInLine from './RenderPermissionInLine';
+import RenderPermissionInline from './RenderPermissionInline';
 import RenderAdminRole from './RenderAdminRole';
+import messages from './messages';
+
+// Category of the permissions the catalog sends without one.
+const OTHER_CATEGORY_ID = 'other';
+
+const catalogScopeTypes = {
+  [CONTEXT_TYPES.COURSE]: SCOPE_TYPES.COURSE,
+  [CONTEXT_TYPES.LIBRARY]: SCOPE_TYPES.LIBRARY,
+};
 
 interface UserPermissionsProps {
   row: {
@@ -24,56 +29,47 @@ interface UserPermissionsProps {
 
 const UserPermissions = ({ row }: UserPermissionsProps) => {
   const intl = useIntl();
-  const roleKey = row?.original?.role;
-  const scope = row?.original?.scope;
-  if (!roleKey) return null;
+  const { getScopeCatalog } = useAuthzCatalog();
+  const { role, scope } = row.original;
+  if (!role) return null;
 
-  if (DJANGO_MANAGED_ROLES.includes(roleKey)) {
+  if (DJANGO_MANAGED_ROLES.includes(role)) {
     return (
       <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light">
-        <RenderAdminRole role={roleKey} />
+        <RenderAdminRole role={role} />
       </div>
     );
   }
 
-  const config = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
-    ? {
-        resourceTypes: libraryResourceTypes,
-        permissions: libraryPermissions,
-        roles: libraryRolesWithPermissions,
-      }
-    : {
-        resourceTypes: courseResourceTypes,
-        permissions: coursePermissions,
-        roles: courseRolesWithPermissions,
-      };
+  // Only the assignment's scope type describes it: a role from another scope type must not.
+  const scopeCatalog = getScopeCatalog(catalogScopeTypes[getScopeContextType(scope)]);
+  if (!scopeCatalog) return null;
 
-  const roleObj = config.roles.find(r => r.role === roleKey);
-  if (!roleObj) return null;
+  const otherCategory = {
+    id: OTHER_CATEGORY_ID,
+    displayName: intl.formatMessage(messages['authz.tabs.permissionsRoles.category.other']),
+    description: '',
+    icon: null,
+  };
+  // The role's permissions grouped by category, in the same order as the roles and permissions matrix.
+  const categories: CategoryPermissions[] = buildPermissionMatrix(scopeCatalog, otherCategory)
+    .map(({ category, permissions }) => ({
+      category,
+      permissions: permissions.filter(({ grantedTo }) => grantedTo[role]).map(({ permission }) => permission),
+    }))
+    .filter(({ permissions }) => permissions.length > 0);
 
-  const rolePerms = new Set(roleObj.permissions.map(String));
-  // Build resource list with permissions (only once). Permissions without an
-  // explicit label (most library ones) get a localized label derived from
-  // their action key, the same enrichment the permissions matrix uses.
-  const resources = config.resourceTypes
-    .map(resource => {
-      const perms = config.permissions
-        .filter(p => p.resource === resource.key && rolePerms.has(String(p.key)))
-        .map(p => getPermissionMetadata(p, intl));
-      return perms.length ? { ...resource, perms } : null;
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null);
-  if (!resources.length) return null;
+  if (!categories.length) return null;
 
-  const isSingleRow = resources.length <= 3;
-  const mid = Math.ceil(resources.length / 2);
+  const isSingleRow = categories.length <= 3;
+  const mid = Math.ceil(categories.length / 2);
   const columns = isSingleRow
-    ? [resources]
-    : [resources.slice(0, mid), resources.slice(mid)];
+    ? [categories]
+    : [categories.slice(0, mid), categories.slice(mid)];
   return (
     <div className="d-flex flex-wrap bg-white px-4 py-4 border border-light-200">
       {isSingleRow
-        ? <RenderPermissionInLine items={resources} />
+        ? <RenderPermissionInline items={categories} />
         : (
             <div className="d-flex flex-wrap w-100">
               {columns.map((col, index) => (
