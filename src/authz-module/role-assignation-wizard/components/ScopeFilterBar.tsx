@@ -12,8 +12,8 @@ interface ScopeFilterBarProps {
   onSearchChange: (value: string) => void;
   selectedOrgs: string[];
   onOrgsChange: (value: string[]) => void;
-  contextType: string | undefined;
-  contextLabel: string;
+  scopeType: string | undefined;
+  scopeTypeLabel: string;
   allScopesCount: number;
   totalCount: number;
 }
@@ -23,8 +23,8 @@ const ScopeFilterBar = ({
   onSearchChange,
   selectedOrgs,
   onOrgsChange,
-  contextType,
-  contextLabel,
+  scopeType,
+  scopeTypeLabel,
   allScopesCount,
   totalCount,
 }: ScopeFilterBarProps) => {
@@ -56,11 +56,11 @@ const ScopeFilterBar = ({
         </span>
       </div>
 
-      {contextType && (
+      {scopeType && (
         <Stack direction="horizontal" gap={2} className="align-items-center mt-3">
           <span className="text-muted small">{intl.formatMessage(messages['wizard.step2.filter.applied'])}</span>
           <Badge className="py-1 px-2" variant="light">
-            {contextLabel}
+            {scopeTypeLabel}
           </Badge>
         </Stack>
       )}

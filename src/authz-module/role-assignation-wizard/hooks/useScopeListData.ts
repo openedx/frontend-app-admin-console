@@ -3,13 +3,14 @@ import { useIntl } from '@openedx/frontend-base';
 import { Scope } from '@src/types';
 import { useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { getOrgAggregateScopeKey, getPlatformAggregateScopeKey } from '@src/authz-module/constants';
-import type { ContextType } from '@src/authz-module/constants';
+import {
+  getOrgAggregateScopeKey, getPlatformAggregateScopeKey, SCOPE_TYPES,
+} from '@src/authz-module/constants';
 import messages from '../messages';
 import useScopePermissions from './useScopePermissions';
 
 interface UseScopeListDataParams {
-  contextType: string | undefined;
+  scopeType: string | undefined;
   search: string;
   orgs: string[];
 }
@@ -21,7 +22,7 @@ const groupByOrg = (acc: Record<string, Scope[]>, scope: Scope): Record<string, 
   return acc;
 };
 
-const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams) => {
+const useScopeListData = ({ scopeType, search, orgs }: UseScopeListDataParams) => {
   const intl = useIntl();
   const {
     data: scopesData,
@@ -31,7 +32,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     isLoading,
     isError,
   } = useScopes({
-    scopeType: contextType,
+    scopeType,
     search: search || undefined,
     orgs: orgs.length ? orgs : undefined,
     managementPermissionOnly: true,
@@ -47,7 +48,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
       const scopes = scopesData?.pages.flatMap((page) => page.results) ?? [];
       const serverCount = scopesData?.pages[0]?.count ?? 0;
       // Course scopes are gated by the course-authoring flag; libraries always pass.
-      if (contextType !== 'course') return { allScopes: scopes, totalCount: serverCount };
+      if (scopeType !== SCOPE_TYPES.COURSE) return { allScopes: scopes, totalCount: serverCount };
       const enabledScopes = scopes.filter((scope) => isCourseEnabled(scope.externalKey));
       // The server count includes authoring-disabled courses this filter hides; subtract
       // the ones already loaded so the reported total converges as pages arrive.
@@ -56,7 +57,7 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
         totalCount: serverCount - (scopes.length - enabledScopes.length),
       };
     },
-    [scopesData, contextType, isCourseEnabled],
+    [scopesData, scopeType, isCourseEnabled],
   );
 
   const scopesByOrg = useMemo(
@@ -77,23 +78,23 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
     return [...orgSlugs].sort();
   }, [scopesByOrg, organizations, orgs]);
 
-  const { hasPlatformPermission, orgHasPermission } = useScopePermissions({ contextType, orderedOrgs });
+  const { hasPlatformPermission, orgHasPermission } = useScopePermissions({ scopeType, orderedOrgs });
 
-  const aggregateDescription = contextType === 'course'
+  const aggregateDescription = scopeType === SCOPE_TYPES.COURSE
     ? intl.formatMessage(messages['wizard.step2.scope.aggregate.description.course'])
     : intl.formatMessage(messages['wizard.step2.scope.aggregate.description.library']);
 
-  const platformAggregateLabel = contextType === 'course'
+  const platformAggregateLabel = scopeType === SCOPE_TYPES.COURSE
     ? intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.course'])
     : intl.formatMessage(messages['wizard.step2.scope.aggregate.platform.label.library']);
 
-  const orgAggregateLabel = contextType === 'course'
+  const orgAggregateLabel = scopeType === SCOPE_TYPES.COURSE
     ? intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.course'])
     : intl.formatMessage(messages['wizard.step2.scopeList.aggregate.label.library']);
 
-  const platformAggregateScopeItem: Scope | null = (contextType && hasPlatformPermission)
+  const platformAggregateScopeItem: Scope | null = (scopeType && hasPlatformPermission)
     ? {
-        externalKey: getPlatformAggregateScopeKey(contextType as ContextType),
+        externalKey: getPlatformAggregateScopeKey(scopeType),
         displayName: platformAggregateLabel,
         description: aggregateDescription,
         org: null,
@@ -107,26 +108,26 @@ const useScopeListData = ({ contextType, search, orgs }: UseScopeListDataParams)
    * libraries within an org (e.g. `course-v1:OrgSlug+*` or `lib:OrgSlug:*`).
    * Only orgs where the current user already holds permission are included.
    *
-   * Returns an empty object when `contextType` is not yet defined.
+   * Returns an empty object when `scopeType` is not yet defined.
    */
   const orgAggregateScopeItems = useMemo<Record<string, Scope>>(() => {
-    if (!contextType) return {};
+    if (!scopeType) return {};
     return Object.fromEntries(
       orderedOrgs
         .filter((orgSlug) => orgHasPermission[orgSlug])
         // The org-wide aggregate is only offered when authoring is enabled for that org.
-        .filter((orgSlug) => contextType !== 'course' || isOrgAuthoringEnabled(orgSlug))
+        .filter((orgSlug) => scopeType !== SCOPE_TYPES.COURSE || isOrgAuthoringEnabled(orgSlug))
         .map((orgSlug) => [
           orgSlug,
           {
-            externalKey: getOrgAggregateScopeKey(contextType as ContextType, orgSlug),
+            externalKey: getOrgAggregateScopeKey(scopeType, orgSlug),
             displayName: orgAggregateLabel,
             description: aggregateDescription,
             org: { id: '0', name: orgSlug, shortName: orgSlug },
           } satisfies Scope,
         ]),
     );
-  }, [orderedOrgs, contextType, orgHasPermission, orgAggregateLabel, aggregateDescription, isOrgAuthoringEnabled]);
+  }, [orderedOrgs, scopeType, orgHasPermission, orgAggregateLabel, aggregateDescription, isOrgAuthoringEnabled]);
 
   return {
     organizations,

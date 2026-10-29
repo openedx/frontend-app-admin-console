@@ -2,6 +2,7 @@ import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/testUtils';
 import { getAuthenticatedUser } from '@openedx/frontend-base';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import DefineApplicationScopeStep from './DefineApplicationScopeStep';
 import { useScopes, useOrgs } from '@src/authz-module/data/hooks';
 import useScopePermissions from '@src/authz-module/role-assignation-wizard/hooks/useScopePermissions';
@@ -70,7 +71,7 @@ const defaultOrgs = [
 ];
 
 const defaultProps = {
-  selectedRole: 'library_admin',
+  scopeType: SCOPE_TYPES.LIBRARY,
   selectedScopes: new Set<string>(),
   onScopeToggle: jest.fn(),
 };
@@ -112,18 +113,18 @@ describe('DefineApplicationScopeStep', () => {
 
   describe('Context type filter badge', () => {
     it('shows "Libraries" badge for a library role', () => {
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
       expect(screen.getByText('Filter applied:')).toBeInTheDocument();
       expect(screen.getByText('Libraries')).toBeInTheDocument();
     });
 
     it('shows "Courses" badge for a course role', () => {
-      renderComponent({ selectedRole: 'course_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.COURSE });
       expect(screen.getByText('Courses')).toBeInTheDocument();
     });
 
-    it('does not show filter badge when selectedRole is null', () => {
-      renderComponent({ selectedRole: null });
+    it('does not show filter badge when no role is selected', () => {
+      renderComponent({ scopeType: null });
       expect(screen.queryByText('Filter applied:')).not.toBeInTheDocument();
     });
   });
@@ -165,7 +166,7 @@ describe('DefineApplicationScopeStep', () => {
 
     it('does not render platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
       expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
@@ -281,7 +282,7 @@ describe('DefineApplicationScopeStep', () => {
       externalKey, displayName, org: orgSlug ? { id: 1, name: orgSlug, shortName: orgSlug } : null,
     });
 
-    it('shows org aggregate option when org is in managedOrgs and contextType is set', () => {
+    it('shows org aggregate option when org is in managedOrgs and scopeType is set', () => {
       (useScopes as jest.Mock).mockReturnValue(
         makeScopesHook({
           data: {
@@ -296,14 +297,14 @@ describe('DefineApplicationScopeStep', () => {
       );
       // org1 and org2 are both in managedOrgs — org2 has no scopes but still
       // shows an aggregate option.
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
       expect(screen.getAllByText('All libraries in this organization')).toHaveLength(2);
     });
 
     it('renders OrgSection with only the aggregate option for an org with zero scopes', () => {
       // API returns no scopes at all — both orgs come purely from useOrgs
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
 
       // Both org sections render even though neither has individual scopes
       expect(screen.getByText('Org: Organization One')).toBeInTheDocument();
@@ -317,7 +318,7 @@ describe('DefineApplicationScopeStep', () => {
       expect(checkboxes).toHaveLength(2);
     });
 
-    // Org aggregate is always shown when contextType is set - backend filters orgs by permissions
+    // Org aggregate is always shown when scopeType is set - backend filters orgs by permissions
     it('shows org aggregate even when some orgs are not in managedOrgs', () => {
       (useScopes as jest.Mock).mockReturnValue(
         makeScopesHook({
@@ -335,23 +336,23 @@ describe('DefineApplicationScopeStep', () => {
         hasPlatformPermission: false,
         orgHasPermission: { org3: true },
       });
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
       expect(screen.getByText('All libraries in this organization')).toBeInTheDocument();
     });
 
     it('does not show platform aggregate (disabled pending backend support)', () => {
       (useScopes as jest.Mock).mockReturnValue(makeScopesHook());
-      renderComponent({ selectedRole: 'library_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.LIBRARY });
       expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
-    it('does not show platform aggregate when selectedRole is null', () => {
-      renderComponent({ selectedRole: null });
+    it('does not show platform aggregate when no role is selected', () => {
+      renderComponent({ scopeType: null });
       expect(screen.queryByText('All libraries on the platform')).not.toBeInTheDocument();
     });
 
     it('does not show "All courses on the platform" (disabled pending backend support)', () => {
-      renderComponent({ selectedRole: 'course_admin' });
+      renderComponent({ scopeType: SCOPE_TYPES.COURSE });
       expect(screen.queryByText('All courses on the platform')).not.toBeInTheDocument();
     });
   });
