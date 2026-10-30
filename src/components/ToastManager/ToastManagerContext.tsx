@@ -31,6 +31,27 @@ export interface AppToast {
 const Bold = (chunks: React.ReactNode[]) => <b>{chunks}</b>;
 const Br = () => <br />;
 
+/**
+ * Keeps a press on a toast from reaching the document, so an open modal or sheet does not
+ * read it as a click on the page behind and close itself.
+ *
+ * Paragon renders toasts in a `#toast-root` appended to `body`, a sibling of the modal's
+ * own portal, while `react-focus-on` watches `document` for `mousedown`/`touchstart`
+ * outside the modal to fire its `onClickOutside`. It exempts nodes passed to it as
+ * `shards`, but Paragon does not forward that prop, so the toast cannot be declared part
+ * of the modal and every press on one counts as a press outside. In this app that would
+ * discard the role wizard, which resets its form when it closes. Stopping propagation
+ * here is enough because the toast is a React child of this container even though it is
+ * portalled elsewhere in the DOM, so this runs before the event reaches `document`. Note
+ * that it has to be `stopPropagation` and not `preventDefault`: the latter would also
+ * suppress `react-focus-on`'s handler, but it would stop the toast's own buttons taking
+ * focus when pressed.
+ *
+ * Workaround while Paragon settles how toasts should behave over modals and sheets:
+ * https://github.com/openedx/paragon/issues/3654
+ */
+const stopPointerEventPropagation = (event: React.SyntheticEvent) => event.stopPropagation();
+
 interface ToastManagerContextType {
   showToast: (toast: Omit<AppToast, 'id'>) => void;
   showErrorToast: (error: unknown, retryFn?: () => void) => void;
@@ -109,7 +130,11 @@ export const ToastManagerProvider = ({ children }: ToastManagerProviderProps) =>
     <ToastManagerContext.Provider value={value}>
       {children}
 
-      <div className="toast-container">
+      <div
+        className="toast-container"
+        onMouseDown={stopPointerEventPropagation}
+        onTouchStart={stopPointerEventPropagation}
+      >
         {toasts.map(toast => (
           <Toast
             key={toast.id}

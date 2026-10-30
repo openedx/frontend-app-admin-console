@@ -18,15 +18,34 @@
 
 // Runtime styles for the toast manager.
 .toast-container {
-  // Ensure toast appears above modal
-  z-index: 1000;
+  /*
+    Paragon paints the toast container at `z-index: 2` and its modal layer at 1050, so a
+    toast raised while a modal is open lands underneath it: dimmed by the backdrop for a
+    centred modal, invisible behind a full-screen one, which is opaque and covers the
+    viewport. The role wizard reports request failures this way, so the container is
+    lifted one step over the modal layer. It deliberately stays under popover (1060) and
+    tooltip (1070), so overlays opened from inside a modal still come out on top.
+
+    The token is Paragon's own, so a theme that restacks its layers carries the toast
+    along; the literal repeats its stock value only as a fallback, because an undefined
+    custom property inside `calc()` would void the declaration and drop the container
+    back to `auto`.
+
+    Workaround while Paragon settles how toasts should layer against modals and sheets:
+    https://github.com/openedx/paragon/issues/3654
+  */
+  z-index: calc(var(--pgn-elevation-modal-zindex, 1050) + 1);
   // Move toast to the right
   left: auto !important;
   right: var(--pgn-spacing-toast-container-gutter-lg);
 }
 
-// Fix a bug with a toast on edit tags sheet component: can't click on close toast button
-// https://github.com/openedx/frontend-app-authoring/issues/1898
+/*
+  The focus lock a modal or sheet installs also marks the toast root inert to the pointer,
+  so the toast's close and action buttons stop responding to clicks. This is the override
+  the community merged for it in frontend-app-authoring#2139.
+  https://github.com/openedx/frontend-app-authoring/issues/1898
+*/
 #toast-root[data-focus-on-hidden] {
   pointer-events: initial !important;
 }

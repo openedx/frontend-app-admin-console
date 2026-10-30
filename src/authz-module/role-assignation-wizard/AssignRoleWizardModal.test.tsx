@@ -11,13 +11,7 @@ import {
   courseRolesMetadata,
   libraryRolesMetadata,
 } from '@src/authz-module/roles-permissions';
-import AssignRoleWizardPage from './AssignRoleWizardPage';
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useSearchParams: jest.fn(),
-  useNavigate: jest.fn(),
-}));
+import AssignRoleWizardModal from './AssignRoleWizardModal';
 
 jest.mock('../data/hooks', () => ({
   useValidateUsers: jest.fn(),
@@ -54,24 +48,13 @@ const mockPermissions = (
   manageData: typeof allowAllPermissions,
 ) => () => manageData;
 
-const setupMocks = ({ users = '', from = '' } = {}) => {
-  const { useSearchParams, useNavigate } = jest.requireMock('react-router-dom');
-  const params = new URLSearchParams();
-  if (users) params.set('users', users);
-  if (from) params.set('from', from);
-  useSearchParams.mockReturnValue([params]);
-  const navigate = jest.fn();
-  useNavigate.mockReturnValue(navigate);
-  return { navigate };
-};
-
-const renderPage = () => renderWithAllProviders(
+const renderModal = (props = {}) => renderWithAllProviders(
   <ToastManagerProvider>
-    <AssignRoleWizardPage />
+    <AssignRoleWizardModal isOpen onClose={jest.fn()} {...props} />
   </ToastManagerProvider>,
 );
 
-describe('AssignRoleWizardPage', () => {
+describe('AssignRoleWizardModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseValidateUsers.mockReturnValue({
@@ -86,57 +69,28 @@ describe('AssignRoleWizardPage', () => {
     });
   });
 
-  it('renders the page with the wizard and title', () => {
-    setupMocks();
-    renderPage();
-    expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
+  it('shows the wizard in a modal titled "Assign Role"', () => {
+    renderModal();
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toBeInTheDocument();
     expect(screen.getByLabelText(/Add users by username or email/i)).toBeInTheDocument();
   });
 
-  it('passes initialUsers from search params to the wizard', () => {
-    setupMocks({ users: 'alice,bob' });
-    renderPage();
+  it('renders nothing while closed', () => {
+    renderModal({ isOpen: false });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('passes initialUsers to the wizard', () => {
+    renderModal({ initialUsers: 'alice,bob' });
     expect(screen.getByLabelText(/Add users by username or email/i)).toHaveValue('alice,bob');
   });
 
-  it('navigates to home path when the wizard Cancel is clicked', async () => {
-    const { navigate } = setupMocks();
+  it('calls onClose when the wizard is cancelled, leaving the host page in place', async () => {
+    const onClose = jest.fn();
     const user = userEvent.setup();
-    renderPage();
-    await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/admin-console/authz');
-  });
-
-  it('navigates to the from= path when Cancel is clicked and a from param is present', async () => {
-    const { navigate } = setupMocks({ from: '/admin-console/authz/libraries/lib:123/alice' });
-    const user = userEvent.setup();
-    renderPage();
-    await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/libraries/lib:123/alice');
-  });
-
-  it('navigates to home path when from is an external URL', async () => {
-    const { navigate } = setupMocks({ from: 'https://evil.com' });
-    const user = userEvent.setup();
-    renderPage();
-    await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/admin-console/authz');
-  });
-
-  it('navigates to the user-specific view when a single preset user is set', async () => {
-    const { navigate } = setupMocks({ users: 'alice' });
-    const user = userEvent.setup();
-    renderPage();
-    await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/user/alice');
-  });
-
-  it('navigates to returnTo when multiple preset users are set', async () => {
-    const { navigate } = setupMocks({ users: 'alice,bob', from: '/admin-console/authz/team' });
-    const user = userEvent.setup();
-    renderPage();
-    await user.click(screen.getByRole('button', { name: /Cancel/i }));
-    expect(navigate).toHaveBeenCalledWith('/admin-console/authz/team');
+    renderModal({ onClose });
+    await user.click(screen.getByRole('button', { name: /^Cancel$/i }));
+    expect(onClose).toHaveBeenCalled();
   });
 
   describe('assignable roles', () => {
@@ -149,8 +103,7 @@ describe('AssignRoleWizardPage', () => {
     const allRoles = scopeRoles.flatMap(({ roles }) => roles);
 
     it('shows the roles for every allowed scope', () => {
-      setupMocks();
-      renderPage();
+      renderModal();
       allRoles.forEach((role) => {
         expect(screen.getByText(role.name)).toBeInTheDocument();
       });
@@ -161,8 +114,7 @@ describe('AssignRoleWizardPage', () => {
         data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
         isLoading: false,
       }));
-      setupMocks();
-      renderPage();
+      renderModal();
 
       roles.forEach((role) => {
         expect(screen.getByText(role.name)).toBeInTheDocument();
@@ -179,8 +131,7 @@ describe('AssignRoleWizardPage', () => {
         data: scopeRoles.map(({ action }) => ({ action, allowed: false })),
         isLoading: false,
       }));
-      setupMocks();
-      renderPage();
+      renderModal();
       allRoles.forEach((role) => {
         expect(screen.queryByText(role.name)).not.toBeInTheDocument();
       });
@@ -191,8 +142,7 @@ describe('AssignRoleWizardPage', () => {
         data: [{ action: 'some.unrelated.permission', allowed: true }],
         isLoading: false,
       }));
-      setupMocks();
-      renderPage();
+      renderModal();
       allRoles.forEach((role) => {
         expect(screen.queryByText(role.name)).not.toBeInTheDocument();
       });
@@ -204,8 +154,7 @@ describe('AssignRoleWizardPage', () => {
         isCourseEnabled: () => false,
         isLoading: false,
       });
-      setupMocks();
-      renderPage();
+      renderModal();
       courseRolesMetadata.forEach((role) => {
         expect(screen.queryByText(role.name)).not.toBeInTheDocument();
       });

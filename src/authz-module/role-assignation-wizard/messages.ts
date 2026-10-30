@@ -1,16 +1,11 @@
 import { defineMessages } from '@openedx/frontend-base';
 
 const messages = defineMessages({
-  // AssignRoleWizardPage
-  'wizard.page.breadcrumb': {
-    id: 'wizard.page.breadcrumb',
-    defaultMessage: 'Roles and Permissions Management',
-    description: 'Breadcrumb label linking back to the team manager page',
-  },
-  'wizard.page.title': {
-    id: 'wizard.page.title',
+  // AssignRoleWizard — modal
+  'wizard.modal.title': {
+    id: 'wizard.modal.title',
     defaultMessage: 'Assign Role',
-    description: 'Page title for the assign role wizard page',
+    description: 'Title of the full-screen modal holding the assign role wizard',
   },
 
   // AssignRoleWizard — step titles
