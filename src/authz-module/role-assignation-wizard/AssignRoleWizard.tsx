@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import {
-  Stepper, Button, StatefulButton, Icon,
+  Stepper, Button, StatefulButton, Icon, FullscreenModal,
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
 import { RoleMetadata } from '@src/types';
@@ -22,6 +22,9 @@ const STEPS = {
 type StepKey = typeof STEPS[keyof typeof STEPS];
 
 interface AssignRoleWizardProps {
+  /** Whether the wizard modal is shown. The host owns this state. */
+  isOpen: boolean;
+  /** Called when the wizard is dismissed (Cancel, header close, Esc) and after a successful save. */
   onClose: () => void;
   initialUsers?: string;
   roles?: RoleMetadata[];
@@ -41,8 +44,15 @@ const getInitialState = (initialUsers: string) => ({
   validatedUsers: [] as string[],
 });
 
+/**
+ * Role assignation wizard, presented as a full-screen modal so that assigning a role
+ * never takes the admin away from the page they are working on. The `Stepper` wraps the
+ * modal rather than sitting inside it: the stepper header, the steps and the per-step
+ * action rows land in three different modal slots (`beforeBodyNode`, the body and
+ * `footerNode`), and all three need to read the same stepper context.
+ */
 const AssignRoleWizard = ({
-  onClose, initialUsers = '', roles = [],
+  isOpen, onClose, initialUsers = '', roles = [],
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, showErrorToast } = useToastManager();
@@ -80,6 +90,21 @@ const AssignRoleWizard = ({
     resetState();
     onClose();
   };
+
+  /**
+   * Seed the form every time the wizard opens rather than only on mount: the host stays
+   * mounted while the modal is closed, and it may resolve `initialUsers` asynchronously
+   * (the audit page reads the username from a request), so the value at mount time is
+   * not necessarily the one the admin should see.
+   */
+  useEffect(() => {
+    if (isOpen) {
+      resetState();
+    }
+    // `resetState` is re-created every render; depending on it would wipe the form as the
+    // admin types. The open transition is the only moment the form should be re-seeded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const validateUsersAndProceed = async () => {
     if (validateUsersMutation.isPending) return;
@@ -156,9 +181,62 @@ const AssignRoleWizard = ({
 
   return (
     <Stepper activeKey={activeStep}>
-      <Stepper.Header className="bg-info-100" />
+      <FullscreenModal
+        title={intl.formatMessage(messages['wizard.modal.title'])}
+        isOpen={isOpen}
+        onClose={handleClose}
+        isOverflowVisible={false}
+        className="authz-module assign-role-wizard"
+        beforeBodyNode={<Stepper.Header className="border-bottom" />}
+        footerNode={(
+          <>
+            <Stepper.ActionRow eventKey={STEPS.SELECT_USERS_AND_ROLE}>
+              <Button variant="outline-primary" onClick={handleClose}>
+                {intl.formatMessage(messages['wizard.button.cancel'])}
+              </Button>
+              <Stepper.ActionRow.Spacer />
+              <StatefulButton
+                labels={{
+                  default: intl.formatMessage(messages['wizard.button.next']),
+                  pending: intl.formatMessage(messages['wizard.button.next.pending']),
+                }}
+                icons={{ pending: <Icon src={SpinnerSimple} /> }}
+                variant={invalidUsers.length ? 'danger' : 'primary'}
+                state={validateUsersMutation.isPending ? 'pending' : 'default'}
+                onClick={validateUsersAndProceed}
+                disabled={!canProceed || validateUsersMutation.isPending}
+              />
+            </Stepper.ActionRow>
 
-      <div className="page-band py-5">
+            <Stepper.ActionRow eventKey={STEPS.DEFINE_APPLICATION_SCOPE}>
+              <Button variant="outline-primary" onClick={handleClose}>
+                {intl.formatMessage(messages['wizard.button.cancel'])}
+              </Button>
+              <Button
+                variant="tertiary"
+                onClick={() => {
+                  setSelectedScopes(new Set());
+                  setAssignmentErrors([]);
+                  setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
+                }}
+              >
+                {intl.formatMessage(messages['wizard.button.back'])}
+              </Button>
+              <Stepper.ActionRow.Spacer />
+              <StatefulButton
+                labels={{
+                  default: intl.formatMessage(messages['wizard.button.save']),
+                  pending: intl.formatMessage(messages['wizard.button.save.pending']),
+                }}
+                icons={{ pending: <Icon src={SpinnerSimple} /> }}
+                state={assignRoleMutation.isPending ? 'pending' : 'default'}
+                onClick={handleSave}
+                disabled={!canSave || assignRoleMutation.isPending}
+              />
+            </Stepper.ActionRow>
+          </>
+        )}
+      >
         <Stepper.Step
           eventKey={STEPS.SELECT_USERS_AND_ROLE}
           title={intl.formatMessage(messages['wizard.step.selectUsersAndRole.title'])}
@@ -189,54 +267,7 @@ const AssignRoleWizard = ({
             assignmentErrors={assignmentErrors}
           />
         </Stepper.Step>
-      </div>
-
-      <div className="page-band py-5">
-        <Stepper.ActionRow eventKey={STEPS.SELECT_USERS_AND_ROLE}>
-          <Button variant="outline-primary" onClick={handleClose}>
-            {intl.formatMessage(messages['wizard.button.cancel'])}
-          </Button>
-          <Stepper.ActionRow.Spacer />
-          <StatefulButton
-            labels={{
-              default: intl.formatMessage(messages['wizard.button.next']),
-              pending: intl.formatMessage(messages['wizard.button.next.pending']),
-            }}
-            icons={{ pending: <Icon src={SpinnerSimple} /> }}
-            variant={invalidUsers.length ? 'danger' : 'primary'}
-            state={validateUsersMutation.isPending ? 'pending' : 'default'}
-            onClick={validateUsersAndProceed}
-            disabled={!canProceed || validateUsersMutation.isPending}
-          />
-        </Stepper.ActionRow>
-
-        <Stepper.ActionRow eventKey={STEPS.DEFINE_APPLICATION_SCOPE}>
-          <Button variant="outline-primary" onClick={handleClose}>
-            {intl.formatMessage(messages['wizard.button.cancel'])}
-          </Button>
-          <Button
-            variant="tertiary"
-            onClick={() => {
-              setSelectedScopes(new Set());
-              setAssignmentErrors([]);
-              setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
-            }}
-          >
-            {intl.formatMessage(messages['wizard.button.back'])}
-          </Button>
-          <Stepper.ActionRow.Spacer />
-          <StatefulButton
-            labels={{
-              default: intl.formatMessage(messages['wizard.button.save']),
-              pending: intl.formatMessage(messages['wizard.button.save.pending']),
-            }}
-            icons={{ pending: <Icon src={SpinnerSimple} /> }}
-            state={assignRoleMutation.isPending ? 'pending' : 'default'}
-            onClick={handleSave}
-            disabled={!canSave || assignRoleMutation.isPending}
-          />
-        </Stepper.ActionRow>
-      </div>
+      </FullscreenModal>
     </Stepper>
   );
 };

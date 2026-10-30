@@ -91,16 +91,30 @@ const oneOrg = [
   },
 ];
 
-const renderWizard = (props = {}) => renderWrapper(
+const wizard = (props = {}) => (
   <ToastManagerProvider>
-    <AssignRoleWizard onClose={jest.fn()} roles={allRolesMetadata} {...props} />
-  </ToastManagerProvider>,
+    <AssignRoleWizard isOpen onClose={jest.fn()} roles={allRolesMetadata} {...props} />
+  </ToastManagerProvider>
 );
+
+const renderWizard = (props = {}) => renderWrapper(wizard(props));
 
 const getUsersInput = () => screen.getByLabelText(/Add users by username or email/i);
 const getRoleRadio = (name: RegExp) => screen.getByRole('radio', { name });
 const getNextButton = () => screen.getByRole('button', { name: /^Next$/i });
 const getCancelButton = () => screen.getByRole('button', { name: /^Cancel$/i });
+
+/*
+  Toasts render in Paragon's `#toast-root`, a `body` child outside the modal that Paragon
+  creates with the first toast and never removes. The modal's focus lock marks everything
+  outside itself `aria-hidden`, so from the second time a modal opens on a page the toast
+  root carries that attribute and role queries only reach it with `hidden: true`. The
+  toast is still on screen and clickable (see the z-index and pointer-events rules in
+  `style.scss`); the same applies to the delete-role modal, which also reports failures
+  through toasts.
+*/
+const getToast = () => screen.getByRole('alert', { hidden: true });
+const getToastRetryButton = () => screen.getByRole('button', { name: /retry/i, hidden: true });
 
 describe('AssignRoleWizard — Step 1', () => {
   beforeEach(() => {
@@ -116,6 +130,21 @@ describe('AssignRoleWizard — Step 1', () => {
     });
   });
 
+  it('presents the wizard as a full-screen modal titled "Assign Role"', () => {
+    renderWizard();
+    const dialog = screen.getByRole('dialog', { name: 'Assign Role' });
+    expect(dialog).toHaveClass('pgn__modal-fullscreen');
+    // Carries the header's primary repaint and the module's scoped styles into the portal.
+    expect(dialog).toHaveClass('assign-role-wizard', 'authz-module');
+    expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
+  });
+
+  it('renders nothing while closed', () => {
+    renderWizard({ isOpen: false });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Add users by username or email/i)).not.toBeInTheDocument();
+  });
+
   it('Cancel returns to the previous view', async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -124,8 +153,39 @@ describe('AssignRoleWizard — Step 1', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('closes from the modal header close button', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    renderWizard({ onClose });
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('opens with the user pre-populated when provided via initialUsers', () => {
     renderWizard({ initialUsers: 'alice' });
+    expect(getUsersInput()).toHaveValue('alice');
+  });
+
+  it('seeds the users field on open, even when initialUsers resolves after mount', () => {
+    const { rerender } = renderWrapper(wizard({ isOpen: false, initialUsers: '' }));
+
+    rerender(wizard({ isOpen: false, initialUsers: 'alice' }));
+    rerender(wizard({ isOpen: true, initialUsers: 'alice' }));
+
+    expect(getUsersInput()).toHaveValue('alice');
+  });
+
+  it('discards what was typed when the wizard is closed and opened again', async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderWrapper(wizard({ initialUsers: 'alice' }));
+
+    await user.clear(getUsersInput());
+    await user.type(getUsersInput(), 'bob');
+    expect(getUsersInput()).toHaveValue('bob');
+
+    rerender(wizard({ isOpen: false, initialUsers: 'alice' }));
+    rerender(wizard({ isOpen: true, initialUsers: 'alice' }));
+
     expect(getUsersInput()).toHaveValue('alice');
   });
 
@@ -182,7 +242,7 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(getToast()).toBeInTheDocument();
       expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
     });
   });
@@ -200,19 +260,28 @@ describe('AssignRoleWizard — Step 1', () => {
   });
 
   it('allows retry when validation call fails', async () => {
-    const user = userEvent.setup();
+    /*
+      The focus lock also gives the toast root an inline `pointer-events: none`, which
+      `style.scss` overrides with `!important` — a stylesheet jsdom never loads, so the
+      pointer check has to be switched off to click the Retry action here.
+    */
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const onClose = jest.fn();
     mockValidateMutateAsync
       .mockRejectedValueOnce(new Error('Network error'))
       .mockResolvedValueOnce({ invalidUsers: [], validUsers: ['alice'] });
-    renderWizard();
+    renderWizard({ onClose });
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
-    await user.click(screen.getByRole('button', { name: /retry/i }));
+    await waitFor(() => expect(getToast()).toBeInTheDocument());
+    await user.click(getToastRetryButton());
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
+    // Reaching the toast means pressing outside the modal, which must not dismiss the
+    // wizard: closing it resets the form, so the retry would have nothing to resubmit.
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
 
@@ -316,7 +385,7 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(getToast()).toBeInTheDocument();
     });
   });
 });

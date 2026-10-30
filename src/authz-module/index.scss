@@ -286,3 +286,38 @@
 .scope-list {
   max-height: 500px;
 }
+
+/*
+  Chrome for the assign-role wizard's full-screen modal. `.pgn__modal` is in the selector
+  purely to outrank Paragon's own `.pgn__modal-dark .pgn__modal-header`.
+*/
+.pgn__modal.assign-role-wizard {
+  /*
+    The header is painted with the same primary as the step's Next button, per the design,
+    so it reads as one band of brand colour rather than Paragon's neutral dark. It consumes
+    the button's own background token so a theme that restyles buttons keeps the two in step.
+  */
+  .pgn__modal-header {
+    background-color: var(--pgn-color-btn-bg-primary);
+  }
+
+  /*
+    The stepper's action row sits in the sticky footer, which Paragon leaves flat: the only
+    separation from the step content is a gradient inside the body that fades out once there
+    is nothing left to scroll. The design keeps the button bar lifted at all times, and the
+    footer already carries a `box-shadow` transition for exactly this, so it takes Paragon's
+    upward sticky elevation. Only the `-bottom` composite of that token pair is assembled in
+    Paragon's `:root`, so the `-top` one is built here from the same published parts.
+  */
+  .pgn__modal-footer {
+    box-shadow:
+      var(--pgn-elevation-sticky-shadow-top-1-offset-x)
+      var(--pgn-elevation-sticky-shadow-top-1-offset-y)
+      var(--pgn-elevation-sticky-shadow-top-1-blur)
+      var(--pgn-elevation-sticky-shadow-top-1-color),
+      var(--pgn-elevation-sticky-shadow-top-2-offset-x)
+      var(--pgn-elevation-sticky-shadow-top-2-offset-y)
+      var(--pgn-elevation-sticky-shadow-top-2-blur)
+      var(--pgn-elevation-sticky-shadow-top-2-color);
+  }
+}

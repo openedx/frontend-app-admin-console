@@ -1,5 +1,6 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { FullscreenModal } from '@openedx/paragon';
 import { renderWrapper } from '@src/testUtils';
 import { logError } from '@openedx/frontend-base';
 import { DEFAULT_TOAST_DELAY } from '@src/authz-module/constants';
@@ -262,5 +263,67 @@ describe('ToastManagerContext', () => {
     }, { timeout: 5050 });
 
     expect(logError).toHaveBeenCalled();
+  });
+});
+
+describe('ToastManagerProvider inside a modal', () => {
+  /*
+    Toasts are portalled to a `#toast-root` on `body`, next to the modal's own portal,
+    and `react-focus-on` treats a press anywhere outside the modal as a click-outside.
+    Without the provider stopping that propagation, pressing a toast closes the modal
+    underneath it — which for the role wizard also discards the form.
+  */
+  const ModalWithToast = ({ onClose }: { onClose: () => void }) => {
+    const { showToast } = useToastManager();
+    return (
+      <FullscreenModal title="Host modal" isOpen onClose={onClose} isOverflowVisible={false}>
+        <button type="button" onClick={() => showToast({ message: 'Saving failed', type: 'error' })}>
+          Trigger toast
+        </button>
+      </FullscreenModal>
+    );
+  };
+
+  const renderModalAndRaiseToast = async () => {
+    const onClose = jest.fn();
+    /*
+      The focus lock marks the toast root inert to the pointer, which `style.scss`
+      overrides with `!important` — a stylesheet jsdom never loads, so the pointer check
+      has to be off to interact with the toast here.
+    */
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderWrapper(
+      <ToastManagerProvider>
+        <ModalWithToast onClose={onClose} />
+      </ToastManagerProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Trigger toast' }));
+    const toast = await screen.findByRole('alert', { hidden: true });
+    return { onClose, toast, user };
+  };
+
+  it('keeps the modal open when the toast is clicked', async () => {
+    const { onClose, toast, user } = await renderModalAndRaiseToast();
+
+    await user.click(toast);
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps the modal open when the toast is tapped', async () => {
+    const { onClose, toast, user } = await renderModalAndRaiseToast();
+
+    await user.pointer({ keys: '[TouchA]', target: toast });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('still closes the modal when the page behind it is clicked', async () => {
+    const { onClose, user } = await renderModalAndRaiseToast();
+
+    await user.click(document.body);
+
+    expect(onClose).toHaveBeenCalled();
   });
 });
