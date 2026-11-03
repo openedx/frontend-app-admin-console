@@ -104,17 +104,9 @@ const getRoleRadio = (name: RegExp) => screen.getByRole('radio', { name });
 const getNextButton = () => screen.getByRole('button', { name: /^Next$/i });
 const getCancelButton = () => screen.getByRole('button', { name: /^Cancel$/i });
 
-/*
-  Toasts render in Paragon's `#toast-root`, a `body` child outside the modal that Paragon
-  creates with the first toast and never removes. The modal's focus lock marks everything
-  outside itself `aria-hidden`, so from the second time a modal opens on a page the toast
-  root carries that attribute and role queries only reach it with `hidden: true`. The
-  toast is still on screen and clickable (see the z-index and pointer-events rules in
-  `style.scss`); the same applies to the delete-role modal, which also reports failures
-  through toasts.
-*/
-const getToast = () => screen.getByRole('alert', { hidden: true });
-const getToastRetryButton = () => screen.getByRole('button', { name: /retry/i, hidden: true });
+// Failures report inside the modal, so they are reachable without `hidden: true`.
+const getErrorAlert = () => screen.getByRole('alert');
+const getRetryButton = () => screen.getByRole('button', { name: /retry/i });
 
 describe('AssignRoleWizard — Step 1', () => {
   beforeEach(() => {
@@ -136,6 +128,8 @@ describe('AssignRoleWizard — Step 1', () => {
     expect(dialog).toHaveClass('pgn__modal-fullscreen');
     // Carries the header's primary repaint and the module's scoped styles into the portal.
     expect(dialog).toHaveClass('assign-role-wizard', 'authz-module');
+    // The design tints the step content, leaving the stepper band and action row white.
+    expect(dialog.querySelector('.pgn__modal-body')).toHaveClass('bg-light-200');
     expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
   });
 
@@ -234,17 +228,54 @@ describe('AssignRoleWizard — Step 1', () => {
     });
   });
 
-  it('shows a network error and blocks progression when the validation call fails', async () => {
+  it('focuses the users field when validation rejects a name', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: ['ghost'], validUsers: [] });
+    renderWizard();
+    await user.type(getUsersInput(), 'ghost');
+    await user.click(getRoleRadio(/Library Admin/i));
+    await user.click(getNextButton());
+
+    await waitFor(() => expect(getUsersInput()).toHaveFocus());
+  });
+
+  it('hands focus to the new step on advancing, not to the footer', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
+    renderWizard();
+    await user.type(getUsersInput(), 'alice');
+    await user.click(getRoleRadio(/Library Admin/i));
+
+    getNextButton().focus();
+    await user.keyboard('{Enter}');
+
+    const stepTwo = await waitFor(() => {
+      const content = screen.getByPlaceholderText('Search').closest('.assign-role-wizard__step');
+      expect(content).toBeInTheDocument();
+      return content;
+    });
+    expect(stepTwo).toHaveFocus();
+  });
+
+  // A toast would portal outside the dialog, hidden from screen readers and Retry untabbable.
+  it('reports a failed validation inside the dialog and blocks progression', async () => {
     const user = userEvent.setup();
     mockValidateMutateAsync.mockRejectedValue(new Error('Network error'));
     renderWizard();
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
-    await waitFor(() => {
-      expect(getToast()).toBeInTheDocument();
-      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
-    });
+
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+    const dialog = screen.getByRole('dialog', { name: 'Assign Role' });
+    expect(dialog).toContainElement(getErrorAlert());
+    // Between the body and the footer, so it sits by the button that failed and cannot
+    // be scrolled out of view.
+    expect(dialog.querySelector('.pgn__modal-body')).not.toContainElement(getErrorAlert());
+    expect(getErrorAlert()).toHaveFocus();
+    expect(getErrorAlert()).toHaveTextContent(/something went wrong on our end/i);
+    expect(getRetryButton()).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument();
   });
 
   it('clears the invalid user highlights when the input is edited', async () => {
@@ -259,13 +290,8 @@ describe('AssignRoleWizard — Step 1', () => {
     await waitFor(() => expect(screen.queryByText(/not associated with an account/i)).not.toBeInTheDocument());
   });
 
-  it('allows retry when validation call fails', async () => {
-    /*
-      The focus lock also gives the toast root an inline `pointer-events: none`, which
-      `style.scss` overrides with `!important` — a stylesheet jsdom never loads, so the
-      pointer check has to be switched off to click the Retry action here.
-    */
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
+  it('retries from the error alert without losing the form', async () => {
+    const user = userEvent.setup();
     const onClose = jest.fn();
     mockValidateMutateAsync
       .mockRejectedValueOnce(new Error('Network error'))
@@ -274,13 +300,12 @@ describe('AssignRoleWizard — Step 1', () => {
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
-    await waitFor(() => expect(getToast()).toBeInTheDocument());
-    await user.click(getToastRetryButton());
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
-    // Reaching the toast means pressing outside the modal, which must not dismiss the
-    // wizard: closing it resets the form, so the retry would have nothing to resubmit.
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(getRetryButton());
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Search')).toBeInTheDocument());
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
 });
@@ -317,6 +342,46 @@ describe('AssignRoleWizard — Step 2', () => {
     await waitFor(() => {
       expect(getUsersInput()).toBeInTheDocument();
     });
+  });
+
+  it('leaves a failed save behind when going Back', async () => {
+    const user = userEvent.setup();
+    mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
+    renderWizard();
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /^Back$/i }));
+
+    // Retry is bound to the active step, so carrying it over would re-run validation.
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  });
+
+  it('fills the body height on the scope step only', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    const body = () => screen.getByRole('dialog', { name: 'Assign Role' }).querySelector('.pgn__modal-body');
+
+    expect(body()).not.toHaveClass('assign-role-wizard__body--filled');
+
+    await advanceToStep2(user);
+    expect(body()).toHaveClass('assign-role-wizard__body--filled');
+
+    await user.click(screen.getByRole('button', { name: /^Back$/i }));
+    await waitFor(() => expect(body()).not.toHaveClass('assign-role-wizard__body--filled'));
+  });
+
+  it('offers Back and Save, and leaves dismissing to the header close button', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await advanceToStep2(user);
+
+    expect(screen.getByRole('button', { name: /^Back$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Cancel$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
   });
 
   it('Save button is disabled when no scopes are selected', async () => {
@@ -360,7 +425,7 @@ describe('AssignRoleWizard — Step 2', () => {
     });
   });
 
-  it('shows error toast and inline alert when the API returns assignment errors', async () => {
+  it('lists the per-user details when the API returns assignment errors', async () => {
     const user = userEvent.setup();
     mockAssignMutateAsync.mockResolvedValue({
       completed: [],
@@ -371,21 +436,28 @@ describe('AssignRoleWizard — Step 2', () => {
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
     await waitFor(() => {
-      expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
       expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
       expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+      // The details are inline, so a summary toast would only repeat them over Save.
+      expect(screen.queryByText(/Some assignments could not be completed/i)).not.toBeInTheDocument();
     });
   });
 
-  it('shows error toast when save throws a network error', async () => {
+  it('reports a failed save inside the dialog, with a working retry', async () => {
     const user = userEvent.setup();
-    mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
+    mockAssignMutateAsync
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ completed: [], errors: [] });
     renderWizard();
     await advanceToStep2(user);
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
-    await waitFor(() => {
-      expect(getToast()).toBeInTheDocument();
-    });
+
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toContainElement(getErrorAlert());
+
+    await user.click(getRetryButton());
+
+    await waitFor(() => expect(mockAssignMutateAsync).toHaveBeenCalledTimes(2));
   });
 });

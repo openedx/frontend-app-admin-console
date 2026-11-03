@@ -62,7 +62,7 @@ const DefineApplicationScopeStep = ({
   } = useScopeListData({ contextType, search: debouncedSearch, orgs: selectedOrgs });
 
   return (
-    <div className="define-application-scope-step">
+    <div className="define-application-scope-step py-4">
       <h3 className="mb-4">{intl.formatMessage(messages['wizard.step.defineScope.title'])}</h3>
 
       <ScopeFilterBar

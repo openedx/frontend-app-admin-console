@@ -1,13 +1,15 @@
 import {
-  useState, useCallback, useRef, useEffect,
+  useState, useCallback, useRef, useEffect, ReactNode,
 } from 'react';
-import { useIntl } from '@openedx/frontend-base';
+import { logError, useIntl } from '@openedx/frontend-base';
 import {
-  Stepper, Button, StatefulButton, Icon, FullscreenModal,
+  Stepper, Button, StatefulButton, Icon, FullscreenModal, Alert,
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
 import { RoleMetadata } from '@src/types';
-import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import baseMessages from '@src/authz-module/messages';
+import { ERROR_TOAST_MAP, useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import { getHttpErrorStatus } from '@src/data/utils';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
 import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
@@ -22,9 +24,9 @@ const STEPS = {
 type StepKey = typeof STEPS[keyof typeof STEPS];
 
 interface AssignRoleWizardProps {
-  /** Whether the wizard modal is shown. The host owns this state. */
+  /** Shown while true; the host owns this state. */
   isOpen: boolean;
-  /** Called when the wizard is dismissed (Cancel, header close, Esc) and after a successful save. */
+  /** Called on Cancel, header close and Esc, and after a successful save. */
   onClose: () => void;
   initialUsers?: string;
   roles?: RoleMetadata[];
@@ -45,17 +47,14 @@ const getInitialState = (initialUsers: string) => ({
 });
 
 /**
- * Role assignation wizard, presented as a full-screen modal so that assigning a role
- * never takes the admin away from the page they are working on. The `Stepper` wraps the
- * modal rather than sitting inside it: the stepper header, the steps and the per-step
- * action rows land in three different modal slots (`beforeBodyNode`, the body and
- * `footerNode`), and all three need to read the same stepper context.
+ * Full-screen modal, so assigning never navigates away. `Stepper` wraps it because its
+ * header, steps and action rows go into three modal slots that share one context.
  */
 const AssignRoleWizard = ({
   isOpen, onClose, initialUsers = '', roles = [],
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
-  const { showToast, showErrorToast } = useToastManager();
+  const { showToast, Bold, Br } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -64,8 +63,14 @@ const AssignRoleWizard = ({
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
   const [validatedUsers, setValidatedUsers] = useState<string[]>([]);
   const [assignmentErrors, setAssignmentErrors] = useState<string[]>([]);
+  /** Reported in the modal, not as a toast, which portals outside its a11y boundary. */
+  const [requestError, setRequestError] = useState<ReactNode | null>(null);
 
   const usersInputRef = useRef<HTMLTextAreaElement>(null);
+  /** Focus target for the active step; only one renders, so both share the ref. */
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  const requestErrorRef = useRef<HTMLDivElement>(null);
+  const focusedStep = useRef<StepKey>(activeStep);
 
   const validateUsersMutation = useValidateUsers();
   const assignRoleMutation = useAssignTeamMembersRole();
@@ -84,6 +89,15 @@ const AssignRoleWizard = ({
     setInvalidUsers(initialState.invalidUsers);
     setValidatedUsers(initialState.validatedUsers);
     setAssignmentErrors([]);
+    setRequestError(null);
+  };
+
+  /** Same status-to-copy mapping the toasts use, so the wording stays consistent. */
+  const handleRequestError = (error: unknown) => {
+    logError(error as Error);
+    const status = getHttpErrorStatus(error);
+    const { messageId } = (status !== undefined && ERROR_TOAST_MAP[status]) || ERROR_TOAST_MAP.DEFAULT;
+    setRequestError(intl.formatMessage(baseMessages[messageId], { Bold, Br }));
   };
 
   const handleClose = () => {
@@ -91,18 +105,12 @@ const AssignRoleWizard = ({
     onClose();
   };
 
-  /**
-   * Seed the form every time the wizard opens rather than only on mount: the host stays
-   * mounted while the modal is closed, and it may resolve `initialUsers` asynchronously
-   * (the audit page reads the username from a request), so the value at mount time is
-   * not necessarily the one the admin should see.
-   */
+  /** Re-seed on open, not just on mount: `initialUsers` can arrive after mount. */
   useEffect(() => {
     if (isOpen) {
       resetState();
     }
-    // `resetState` is re-created every render; depending on it would wipe the form as the
-    // admin types. The open transition is the only moment the form should be re-seeded.
+    // Depending on `resetState` would wipe the form as the admin types.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -112,6 +120,7 @@ const AssignRoleWizard = ({
     if (usersList.length === 0 || !selectedRole) return;
 
     setInvalidUsers([]);
+    setRequestError(null);
 
     try {
       const result = await validateUsersMutation.mutateAsync({ data: { users: usersList } });
@@ -122,7 +131,7 @@ const AssignRoleWizard = ({
         setActiveStep(STEPS.DEFINE_APPLICATION_SCOPE);
       }
     } catch (error) {
-      showErrorToast(error, validateUsersAndProceed);
+      handleRequestError(error);
     }
   };
 
@@ -140,6 +149,7 @@ const AssignRoleWizard = ({
   const handleSave = async () => {
     if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) return;
     setAssignmentErrors([]);
+    setRequestError(null);
 
     try {
       const result = await assignRoleMutation.mutateAsync({
@@ -151,11 +161,9 @@ const AssignRoleWizard = ({
       });
 
       if (result.errors?.length > 0) {
+        // The per-user details render inline in step 2, so a summary toast adds nothing
+        // and would sit over the Save button.
         setAssignmentErrors(result.errors.map((e) => formatRoleAssignmentError(intl, e)));
-        showToast({
-          message: intl.formatMessage(messages['wizard.save.errors.summary']),
-          type: 'error',
-        });
       } else {
         showToast({
           message: intl.formatMessage(messages['wizard.save.success']),
@@ -165,19 +173,48 @@ const AssignRoleWizard = ({
         onClose();
       }
     } catch (error) {
-      showErrorToast(error, handleSave);
+      handleRequestError(error);
     }
   };
 
   useEffect(() => {
     if (invalidUsers.length && usersInputRef.current) {
       usersInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Validating disabled Next, dropping focus; put it on the field to correct.
+      usersInputRef.current.focus();
     }
   }, [invalidUsers]);
+
+  /** Next and Save disable while pending, so focus would strand on the old step's footer. */
+  useEffect(() => {
+    if (focusedStep.current === activeStep) {
+      return;
+    }
+    focusedStep.current = activeStep;
+    stepContentRef.current?.focus();
+  }, [activeStep]);
+
+  /** A partial failure stays on the step, so the effect above never fires. */
+  useEffect(() => {
+    if (assignmentErrors.length) {
+      stepContentRef.current?.focus();
+    }
+  }, [assignmentErrors]);
+
+  /** Put the failure under the keyboard, so Retry is the next thing reached. */
+  useEffect(() => {
+    if (requestError) {
+      requestErrorRef.current?.focus();
+    }
+  }, [requestError]);
 
   const parsedUsers = parseUsers(users);
   const canProceed = parsedUsers.length > 0 && !!selectedRole;
   const canSave = selectedScopes.size > 0;
+  /** Step 1 must stay free to grow and scroll; only step 2 fills the body height. */
+  const isScopeStep = activeStep === STEPS.DEFINE_APPLICATION_SCOPE;
+  /** Resolved per render, so Retry resubmits what is on screen rather than a stale copy. */
+  const retryFailedRequest = isScopeStep ? handleSave : validateUsersAndProceed;
 
   return (
     <Stepper activeKey={activeStep}>
@@ -188,6 +225,27 @@ const AssignRoleWizard = ({
         isOverflowVisible={false}
         className="authz-module assign-role-wizard"
         beforeBodyNode={<Stepper.Header className="border-bottom" />}
+        // Between body and footer: beside the button that failed, never scrolled away.
+        afterBodyNode={requestError && (
+          <div className="mb-5 bg-light-200">
+            <Alert
+              variant="danger"
+              ref={requestErrorRef}
+              tabIndex={-1}
+              className="mx-4 mb-0"
+              dismissible
+              actions={[
+                <Button key="retry" onClick={retryFailedRequest}>
+                  {intl.formatMessage(baseMessages['authz.team.toast.retry.label'])}
+                </Button>,
+              ]}
+            >
+              {requestError}
+            </Alert>
+          </div>
+        )}
+        // Only the body is tinted. `pt-0` because each step pads itself; else 48px.
+        modalBodyClassName={`bg-light-200 pt-0${isScopeStep ? ' assign-role-wizard__body--filled' : ''}`}
         footerNode={(
           <>
             <Stepper.ActionRow eventKey={STEPS.SELECT_USERS_AND_ROLE}>
@@ -209,14 +267,15 @@ const AssignRoleWizard = ({
             </Stepper.ActionRow>
 
             <Stepper.ActionRow eventKey={STEPS.DEFINE_APPLICATION_SCOPE}>
-              <Button variant="outline-primary" onClick={handleClose}>
-                {intl.formatMessage(messages['wizard.button.cancel'])}
-              </Button>
+              {/* Back takes Cancel's slot here, per the design; the header close dismisses. */}
               <Button
-                variant="tertiary"
+                variant="outline-primary"
                 onClick={() => {
                   setSelectedScopes(new Set());
                   setAssignmentErrors([]);
+                  // Retry is bound to the active step, so a save failure must not survive
+                  // into step 1 where it would re-run validation instead.
+                  setRequestError(null);
                   setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
                 }}
               >
@@ -244,15 +303,17 @@ const AssignRoleWizard = ({
           description={invalidUsers.length > 0 ? intl.formatMessage(messages['wizard.step.selectUsersAndRole.error']) : ''}
           index={0}
         >
-          <SelectUsersAndRoleStep
-            users={users}
-            setUsers={handleUsersChange}
-            selectedRole={selectedRole}
-            setSelectedRole={setSelectedRole}
-            roles={roles}
-            invalidUsers={invalidUsers}
-            inputRef={usersInputRef}
-          />
+          <div ref={stepContentRef} tabIndex={-1} className="assign-role-wizard__step">
+            <SelectUsersAndRoleStep
+              users={users}
+              setUsers={handleUsersChange}
+              selectedRole={selectedRole}
+              setSelectedRole={setSelectedRole}
+              roles={roles}
+              invalidUsers={invalidUsers}
+              inputRef={usersInputRef}
+            />
+          </div>
         </Stepper.Step>
 
         <Stepper.Step
@@ -260,12 +321,14 @@ const AssignRoleWizard = ({
           title={intl.formatMessage(messages['wizard.step.defineScope.title'])}
           index={1}
         >
-          <DefineApplicationScopeStep
-            selectedRole={selectedRole}
-            selectedScopes={selectedScopes}
-            onScopeToggle={handleScopeToggle}
-            assignmentErrors={assignmentErrors}
-          />
+          <div ref={stepContentRef} tabIndex={-1} className="assign-role-wizard__step">
+            <DefineApplicationScopeStep
+              selectedRole={selectedRole}
+              selectedScopes={selectedScopes}
+              onScopeToggle={handleScopeToggle}
+              assignmentErrors={assignmentErrors}
+            />
+          </div>
         </Stepper.Step>
       </FullscreenModal>
     </Stepper>

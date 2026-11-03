@@ -37,6 +37,7 @@ const ScopeFilterBar = ({
           <Form.Group controlId="scope-search" className="mb-0">
             <Form.Control
               type="text"
+              size="sm"
               value={search}
               onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
               placeholder={intl.formatMessage(messages['wizard.step2.search.placeholder'])}

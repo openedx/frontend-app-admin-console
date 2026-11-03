@@ -3,7 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from '@src/authz-module/roles-permissions';
+import {
+  CONTENT_COURSE_PERMISSIONS,
+  CONTENT_LIBRARY_PERMISSIONS,
+  courseRolesMetadata,
+  libraryRolesMetadata,
+} from '@src/authz-module/roles-permissions';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import AddRoleButton from './AddRoleButton';
 
 jest.mock('@src/data/hooks', () => ({
@@ -17,15 +23,11 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
-  useCourseAuthoringFlag: () => ({
-    isCourseAuthoringEnabled: true,
-    isCourseEnabled: () => true,
-    isOrgAuthoringEnabled: () => true,
-    isLoading: false,
-  }),
+  useCourseAuthoringFlag: jest.fn(),
 }));
 
 const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 const allowAllPermissions = {
   data: [
     { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
@@ -50,6 +52,12 @@ describe('AddRoleButton', () => {
 
   beforeEach(() => {
     mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
+    mockUseCourseAuthoringFlag.mockReturnValue({
+      isCourseAuthoringEnabled: true,
+      isCourseEnabled: () => true,
+      isOrgAuthoringEnabled: () => true,
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -139,6 +147,76 @@ describe('AddRoleButton', () => {
 
       await user.keyboard(' ');
       expect(getWizard()).toBeInTheDocument();
+    });
+  });
+
+  describe('assignable roles', () => {
+    // Each entry maps an allowed permission to the role metadata the wizard should
+    // surface for it. Add a row here as more scopes/roles are introduced.
+    const scopeRoles = [
+      { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, roles: libraryRolesMetadata },
+      { action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM, roles: courseRolesMetadata },
+    ];
+    const allRoles = scopeRoles.flatMap(({ roles }) => roles);
+
+    const openWizard = async () => {
+      const user = userEvent.setup();
+      renderButton();
+      await user.click(getButton());
+    };
+
+    it('offers the roles for every allowed scope', async () => {
+      await openWizard();
+
+      allRoles.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
+      });
+    });
+
+    it.each(scopeRoles)('offers only the roles for the allowed scope %#', async ({ action, roles }) => {
+      mockUseValidatePermissions.mockReturnValue({
+        data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
+        isLoading: false,
+      });
+      await openWizard();
+
+      roles.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
+      });
+      allRoles
+        .filter((role) => !roles.includes(role))
+        .forEach((role) => {
+          expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+        });
+    });
+
+    it('ignores allowed permissions whose action is not a known role scope', async () => {
+      mockUseValidatePermissions.mockReturnValue({
+        data: [{ action: 'some.unrelated.permission', allowed: true }],
+        isLoading: false,
+      });
+      await openWizard();
+
+      allRoles.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', async () => {
+      mockUseCourseAuthoringFlag.mockReturnValue({
+        isCourseAuthoringEnabled: false,
+        isCourseEnabled: () => false,
+        isOrgAuthoringEnabled: () => false,
+        isLoading: false,
+      });
+      await openWizard();
+
+      courseRolesMetadata.forEach((role) => {
+        expect(screen.queryByText(role.name)).not.toBeInTheDocument();
+      });
+      libraryRolesMetadata.forEach((role) => {
+        expect(screen.getByText(role.name)).toBeInTheDocument();
+      });
     });
   });
 
