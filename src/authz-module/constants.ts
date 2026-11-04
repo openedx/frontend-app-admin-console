@@ -18,13 +18,12 @@ export const MANAGE_TEAM_ACTIONS: Record<string, string> = {
   [SCOPE_TYPES.LIBRARY]: 'content_libraries.manage_library_team',
 };
 
-// Validate/me requests for those permissions. Every consumer sends them in the same order
-// (libraries first), so they share one query.
-export const VIEW_TEAM_PERMISSIONS: { action: string }[] = [
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },
-];
+// Shared view-team validation map so the catalog and team views use one permission query.
+export const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
+  Object.entries(VIEW_TEAM_ACTIONS).map(([scopeType, action]) => [scopeType, { action }]),
+);
 
+// Keep manage-team requests in the same order (libraries first) to share one query.
 export const MANAGE_TEAM_PERMISSIONS: { action: string }[] = [
   { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
   { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },

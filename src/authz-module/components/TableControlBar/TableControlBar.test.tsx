@@ -58,17 +58,13 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 
 // ScopesFilter and OrgFilter read the view-team permissions to decide what to show.
 // Grant both so the full course/library filters render for these wiring tests.
-jest.mock('@src/data/hooks', () => {
-  const { SCOPE_TYPES, VIEW_TEAM_ACTIONS } = jest.requireActual('@src/authz-module/constants');
-  return {
-    useValidateUserPermissionsNonSuspense: () => ({
-      data: [
-        { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
-        { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
-      ],
-    }),
-  };
-});
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: () => ({
+    isLibraryViewAllowed: true,
+    isCourseViewAllowed: true,
+    isLoading: false,
+  }),
+}));
 
 describe('TableControlBar', () => {
   const mockDataTableContext = {

@@ -1,21 +1,21 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWrapper } from '@src/testUtils';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useScopes } from '@src/authz-module/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import ScopesFilter from './ScopesFilter';
 
-jest.mock('@src/data/hooks', () => ({
-  useValidateUserPermissionsNonSuspense: jest.fn(),
+jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
+  useViewTeamPermissions: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: jest.fn(),
 }));
 
-const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUsePermissions = useViewTeamPermissions as jest.Mock;
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -43,10 +43,11 @@ jest.mock('@src/authz-module/data/hooks', () => ({
 
 const mockUseScopes = useScopes as jest.Mock;
 
-const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => [
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: !!library },
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: !!course },
-];
+const permissionsData = ({ library, course }: { library?: boolean; course?: boolean }) => ({
+  isLibraryViewAllowed: !!library,
+  isCourseViewAllowed: !!course,
+  isLoading: false,
+});
 
 describe('ScopesFilter', () => {
   const defaultProps = {
@@ -58,7 +59,7 @@ describe('ScopesFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: true }) });
+    mockUsePermissions.mockReturnValue(permissionsData({ library: true, course: true }));
     mockUseCourseAuthoringFlag.mockReturnValue({
       isCourseAuthoringEnabled: true,
       isCourseEnabled: () => true,
@@ -117,7 +118,7 @@ describe('ScopesFilter', () => {
   });
 
   it('fetches only library scopes when the user cannot view courses', () => {
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ library: true, course: false }) });
+    mockUsePermissions.mockReturnValue(permissionsData({ library: true, course: false }));
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
       expect.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
@@ -125,7 +126,11 @@ describe('ScopesFilter', () => {
   });
 
   it('defaults to showing only library scopes while permissions are loading', () => {
-    mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
+    mockUsePermissions.mockReturnValue({
+      isLibraryViewAllowed: false,
+      isCourseViewAllowed: false,
+      isLoading: true,
+    });
     renderWrapper(<ScopesFilter {...defaultProps} />);
     expect(mockUseScopes).toHaveBeenCalledWith(
       expect.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
