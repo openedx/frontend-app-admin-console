@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
@@ -10,6 +11,7 @@ import {
   libraryRolesMetadata,
 } from '@src/authz-module/roles-permissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
+import { useValidateUsers } from '@src/authz-module/data/hooks';
 import AddRoleButton from './AddRoleButton';
 
 jest.mock('@src/data/hooks', () => ({
@@ -28,6 +30,7 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
 
 const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
+const mockUseValidateUsers = useValidateUsers as jest.Mock;
 const allowAllPermissions = {
   data: [
     { action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM, allowed: true },
@@ -51,6 +54,8 @@ describe('AddRoleButton', () => {
   });
 
   beforeEach(() => {
+    // Restated here because `mockImplementation` outlives `clearAllMocks`.
+    mockUseValidateUsers.mockImplementation(() => ({ mutateAsync: jest.fn(), isPending: false }));
     mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
     mockUseCourseAuthoringFlag.mockReturnValue({
       isCourseAuthoringEnabled: true,
@@ -110,6 +115,50 @@ describe('AddRoleButton', () => {
       await user.click(getButton());
 
       expect(screen.getByLabelText(/Add users by username or email/i)).toHaveValue('user@example.com');
+    });
+
+    // The wizard is mounted only while open. Hiding it instead would carry one
+    // instance across openings, and with it the request state of the opening the
+    // admin already abandoned. `useValidateUsers` keeps `isPending` per hook
+    // instance, so the mock does too: that is the property the unmount relies on.
+    it('does not leave a reopened wizard waiting on the abandoned request', async () => {
+      const user = userEvent.setup();
+      mockUseValidateUsers.mockImplementation(() => {
+        const [isPending, setIsPending] = useState(false);
+        return {
+          isPending,
+          mutateAsync: () => {
+            setIsPending(true);
+            // Never settles: the slow connection from the repro.
+            return new Promise(() => {});
+          },
+        };
+      });
+      renderButton({ presetUsername: 'alice' });
+
+      await user.click(getButton());
+      await user.click(screen.getByRole('radio', { name: /Library Admin/i }));
+      await user.click(screen.getByRole('button', { name: /^Next$/i }));
+      expect(screen.getByRole('button', { name: /Validating/i })).toBeDisabled();
+
+      await user.click(screen.getByRole('button', { name: /^Cancel$/i }));
+      await user.click(getButton());
+
+      expect(screen.queryByRole('button', { name: /Validating/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
+    });
+
+    it('gives each opening a fresh form rather than reviving the last one', async () => {
+      const user = userEvent.setup();
+      renderButton();
+
+      await user.click(getButton());
+      await user.type(screen.getByLabelText(/Add users by username or email/i), 'abandoned');
+      await user.click(screen.getByRole('button', { name: /^Cancel$/i }));
+
+      await user.click(getButton());
+      expect(screen.getByLabelText(/Add users by username or email/i)).toHaveValue('');
+      expect(screen.getByRole('button', { name: /^Next$/i })).toBeDisabled();
     });
 
     it('returns to the host page when the wizard is cancelled, and reopens on a second click', async () => {

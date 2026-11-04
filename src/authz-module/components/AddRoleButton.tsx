@@ -20,6 +20,9 @@ interface AddRoleButtonProps {
  * Opens the role assignation wizard, hosting it so the admin stays on the current page.
  * One permissions query answers both whether this button shows and which roles the
  * wizard may offer, which keeps the wizard free of data concerns.
+ *
+ * The wizard is mounted only while open, never hidden: each opening gets its own state
+ * and its own request state
  */
 const AddRoleButton = ({ presetUsername }: AddRoleButtonProps) => {
   const intl = useIntl();
@@ -53,12 +56,14 @@ const AddRoleButton = ({ presetUsername }: AddRoleButtonProps) => {
       >
         {intl.formatMessage(baseMessages['authz.management.assign.role.title'])}
       </Button>
-      <AssignRoleWizard
-        isOpen={isWizardOpen}
-        onClose={() => setIsWizardOpen(false)}
-        initialUsers={presetUsername}
-        roles={rolesAssignable}
-      />
+      {isWizardOpen && (
+        <AssignRoleWizard
+          isOpen
+          onClose={() => setIsWizardOpen(false)}
+          initialUsers={presetUsername}
+          roles={rolesAssignable}
+        />
+      )}
     </>
   );
 };

@@ -455,6 +455,58 @@ describe('DefineApplicationScopeStep', () => {
     });
   });
 
+  describe('Reported assignment failures', () => {
+    const errors = ['alice already has this role in lib:org1/lib1'];
+
+    it('renders nothing when the last save reported no failures', () => {
+      renderComponent();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('tallies what succeeded against what failed when part of the save landed', () => {
+      renderComponent({ assignmentFailure: { errors, completedCount: 1 } });
+      const alert = screen.getByRole('alert');
+
+      expect(alert).toHaveTextContent('Some assignments could not be completed');
+      expect(alert).toHaveTextContent('1 assignment succeeded and 1 failed. See details below:');
+      expect(alert).toHaveTextContent(errors[0]);
+      // The severity is the only thing separating "partly done" from "nothing done".
+      expect(alert).toHaveClass('alert-warning');
+    });
+
+    it('pluralizes both sides of the tally', () => {
+      renderComponent({
+        assignmentFailure: {
+          errors: ['alice already has this role in lib:org1/lib1', 'User "ghost" was not found'],
+          completedCount: 3,
+        },
+      });
+      expect(screen.getByRole('alert')).toHaveTextContent('3 assignments succeeded and 2 failed.');
+    });
+
+    it('says nothing was assigned when the whole save failed', () => {
+      renderComponent({ assignmentFailure: { errors, completedCount: 0 } });
+      const alert = screen.getByRole('alert');
+
+      expect(alert).toHaveTextContent('The role could not be assigned');
+      expect(alert).not.toHaveTextContent('Some assignments could not be completed');
+      // No tally: with nothing assigned, the list below is all there is to report.
+      expect(alert).toHaveTextContent('See details below:');
+      expect(alert).not.toHaveTextContent('succeeded');
+      expect(alert).toHaveClass('alert-danger');
+    });
+
+    it('lists every reported failure', () => {
+      renderComponent({
+        assignmentFailure: {
+          errors: ['alice already has this role in lib:org1/lib1', 'User "ghost" was not found'],
+          completedCount: 1,
+        },
+      });
+      expect(screen.getAllByRole('listitem')).toHaveLength(2);
+    });
+  });
+
   describe('IntersectionObserver for infinite scroll', () => {
     it('sets up IntersectionObserver on the load-more div', () => {
       renderComponent();

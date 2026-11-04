@@ -1,5 +1,5 @@
 import {
-  useState, useCallback, useRef, useEffect, ReactNode,
+  useState, useCallback, useRef, useEffect, type ReactNode,
 } from 'react';
 import { logError, useIntl } from '@openedx/frontend-base';
 import {
@@ -14,7 +14,7 @@ import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
 import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
-import { formatRoleAssignmentError } from './utils';
+import { formatRoleAssignmentError, type AssignmentFailure } from './utils';
 
 const STEPS = {
   SELECT_USERS_AND_ROLE: 'select-users-and-role',
@@ -62,7 +62,8 @@ const AssignRoleWizard = ({
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
   const [validatedUsers, setValidatedUsers] = useState<string[]>([]);
-  const [assignmentErrors, setAssignmentErrors] = useState<string[]>([]);
+  /** Set when the API accepts the save but reports per-user failures. */
+  const [assignmentFailure, setAssignmentFailure] = useState<AssignmentFailure | null>(null);
   /** Reported in the modal, not as a toast, which portals outside its a11y boundary. */
   const [requestError, setRequestError] = useState<ReactNode | null>(null);
 
@@ -88,7 +89,7 @@ const AssignRoleWizard = ({
     setSelectedScopes(initialState.selectedScopes);
     setInvalidUsers(initialState.invalidUsers);
     setValidatedUsers(initialState.validatedUsers);
-    setAssignmentErrors([]);
+    setAssignmentFailure(null);
     setRequestError(null);
   };
 
@@ -148,7 +149,8 @@ const AssignRoleWizard = ({
 
   const handleSave = async () => {
     if (!selectedRole || selectedScopes.size === 0 || validatedUsers.length === 0) return;
-    setAssignmentErrors([]);
+    // A summary that outlived its save would credit this attempt with the last one's successes.
+    setAssignmentFailure(null);
     setRequestError(null);
 
     try {
@@ -161,9 +163,13 @@ const AssignRoleWizard = ({
       });
 
       if (result.errors?.length > 0) {
-        // The per-user details render inline in step 2, so a summary toast adds nothing
-        // and would sit over the Save button.
-        setAssignmentErrors(result.errors.map((e) => formatRoleAssignmentError(intl, e)));
+        // Reported inline in step 2, beside the scopes it names: a summary toast would
+        // repeat the detail and sit over the Save button. `completed` comes along because
+        // it decides whether the rest of the save landed, which the failures cannot say.
+        setAssignmentFailure({
+          errors: result.errors.map((e) => formatRoleAssignmentError(intl, e)),
+          completedCount: result.completed?.length ?? 0,
+        });
       } else {
         showToast({
           message: intl.formatMessage(messages['wizard.save.success']),
@@ -194,12 +200,12 @@ const AssignRoleWizard = ({
     stepContentRef.current?.focus();
   }, [activeStep]);
 
-  /** A partial failure stays on the step, so the effect above never fires. */
+  /** A reported failure stays on the step, so the effect above never fires. */
   useEffect(() => {
-    if (assignmentErrors.length) {
+    if (assignmentFailure) {
       stepContentRef.current?.focus();
     }
-  }, [assignmentErrors]);
+  }, [assignmentFailure]);
 
   /** Put the failure under the keyboard, so Retry is the next thing reached. */
   useEffect(() => {
@@ -234,6 +240,7 @@ const AssignRoleWizard = ({
               tabIndex={-1}
               className="mx-4 mb-0"
               dismissible
+              onClose={() => setRequestError(null)}
               actions={[
                 <Button key="retry" onClick={retryFailedRequest}>
                   {intl.formatMessage(baseMessages['authz.team.toast.retry.label'])}
@@ -272,7 +279,7 @@ const AssignRoleWizard = ({
                 variant="outline-primary"
                 onClick={() => {
                   setSelectedScopes(new Set());
-                  setAssignmentErrors([]);
+                  setAssignmentFailure(null);
                   // Retry is bound to the active step, so a save failure must not survive
                   // into step 1 where it would re-run validation instead.
                   setRequestError(null);
@@ -326,7 +333,7 @@ const AssignRoleWizard = ({
               selectedRole={selectedRole}
               selectedScopes={selectedScopes}
               onScopeToggle={handleScopeToggle}
-              assignmentErrors={assignmentErrors}
+              assignmentFailure={assignmentFailure}
             />
           </div>
         </Stepper.Step>

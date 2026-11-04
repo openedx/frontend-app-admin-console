@@ -122,14 +122,9 @@ describe('AssignRoleWizard — Step 1', () => {
     });
   });
 
-  it('presents the wizard as a full-screen modal titled "Assign Role"', () => {
+  it('presents the wizard as a modal titled "Assign Role"', () => {
     renderWizard();
-    const dialog = screen.getByRole('dialog', { name: 'Assign Role' });
-    expect(dialog).toHaveClass('pgn__modal-fullscreen');
-    // Carries the header's primary repaint and the module's scoped styles into the portal.
-    expect(dialog).toHaveClass('assign-role-wizard', 'authz-module');
-    // The design tints the step content, leaving the stepper band and action row white.
-    expect(dialog.querySelector('.pgn__modal-body')).toHaveClass('bg-light-200');
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
   });
 
@@ -160,25 +155,28 @@ describe('AssignRoleWizard — Step 1', () => {
     expect(getUsersInput()).toHaveValue('alice');
   });
 
-  it('seeds the users field on open, even when initialUsers resolves after mount', () => {
-    const { rerender } = renderWrapper(wizard({ isOpen: false, initialUsers: '' }));
+  // The host mounts the wizard only while it is open, so "opening again" is a new
+  // instance rather than a prop flip. These cases follow that lifecycle.
+  it('seeds the users field from the value the host held when it opened', () => {
+    const { unmount } = renderWrapper(wizard({ initialUsers: '' }));
+    expect(getUsersInput()).toHaveValue('');
+    unmount();
 
-    rerender(wizard({ isOpen: false, initialUsers: 'alice' }));
-    rerender(wizard({ isOpen: true, initialUsers: 'alice' }));
+    renderWrapper(wizard({ initialUsers: 'alice' }));
 
     expect(getUsersInput()).toHaveValue('alice');
   });
 
   it('discards what was typed when the wizard is closed and opened again', async () => {
     const user = userEvent.setup();
-    const { rerender } = renderWrapper(wizard({ initialUsers: 'alice' }));
+    const { unmount } = renderWrapper(wizard({ initialUsers: 'alice' }));
 
     await user.clear(getUsersInput());
     await user.type(getUsersInput(), 'bob');
     expect(getUsersInput()).toHaveValue('bob');
+    unmount();
 
-    rerender(wizard({ isOpen: false, initialUsers: 'alice' }));
-    rerender(wizard({ isOpen: true, initialUsers: 'alice' }));
+    renderWrapper(wizard({ initialUsers: 'alice' }));
 
     expect(getUsersInput()).toHaveValue('alice');
   });
@@ -308,6 +306,23 @@ describe('AssignRoleWizard — Step 1', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it('dismisses the error alert and leaves the form ready to submit again', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockRejectedValue(new Error('Network error'));
+    renderWizard();
+    await user.type(getUsersInput(), 'alice');
+    await user.click(getRoleRadio(/Library Admin/i));
+    await user.click(getNextButton());
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /dismiss/i }));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(getUsersInput()).toHaveValue('alice');
+    expect(getRoleRadio(/Library Admin/i)).toBeChecked();
+    expect(getNextButton()).toBeEnabled();
+  });
 });
 
 describe('AssignRoleWizard — Step 2', () => {
@@ -357,20 +372,6 @@ describe('AssignRoleWizard — Step 2', () => {
 
     // Retry is bound to the active step, so carrying it over would re-run validation.
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
-  });
-
-  it('fills the body height on the scope step only', async () => {
-    const user = userEvent.setup();
-    renderWizard();
-    const body = () => screen.getByRole('dialog', { name: 'Assign Role' }).querySelector('.pgn__modal-body');
-
-    expect(body()).not.toHaveClass('assign-role-wizard__body--filled');
-
-    await advanceToStep2(user);
-    expect(body()).toHaveClass('assign-role-wizard__body--filled');
-
-    await user.click(screen.getByRole('button', { name: /^Back$/i }));
-    await waitFor(() => expect(body()).not.toHaveClass('assign-role-wizard__body--filled'));
   });
 
   it('offers Back and Save, and leaves dismissing to the header close button', async () => {
@@ -425,22 +426,83 @@ describe('AssignRoleWizard — Step 2', () => {
     });
   });
 
-  it('lists the per-user details when the API returns assignment errors', async () => {
-    const user = userEvent.setup();
-    mockAssignMutateAsync.mockResolvedValue({
-      completed: [],
-      errors: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' }],
-    });
-    renderWizard();
+  const saveWith = async (user: ReturnType<typeof userEvent.setup>, result: unknown) => {
+    mockAssignMutateAsync.mockResolvedValue(result);
     await advanceToStep2(user);
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
-      expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
-      // The details are inline, so a summary toast would only repeat them over Save.
-      expect(screen.queryByText(/Some assignments could not be completed/i)).not.toBeInTheDocument();
+  };
+
+  const aliceFailed = { userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' };
+
+  it('reports that the rest of the save landed when only some assignments fail', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
     });
+
+    await waitFor(() => expect(screen.getByText('Some assignments could not be completed')).toBeInTheDocument());
+    expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+    // Counted off the response: without it the admin cannot tell that bob got the role,
+    // and would save again for everyone.
+    expect(screen.getByText('1 assignment succeeded and 1 failed. See details below:')).toBeInTheDocument();
+  });
+
+  it('does not claim partial success when every assignment fails', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, { completed: [], errors: [aliceFailed] });
+
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+    expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Some assignments could not be completed/i)).not.toBeInTheDocument();
+  });
+
+  it('reports a partial failure once, inside the dialog', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
+    });
+
+    // A toast would portal outside the dialog and repeat the detail over the Save button.
+    const summary = await waitFor(() => screen.getAllByText('Some assignments could not be completed'));
+    expect(summary).toHaveLength(1);
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toContainElement(summary[0]);
+  });
+
+  it('re-reports the outcome of the latest save, not the previous one', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
+    });
+    await waitFor(() => expect(screen.getByText('Some assignments could not be completed')).toBeInTheDocument());
+
+    // Carrying the first outcome over would credit this save with bob's success.
+    mockAssignMutateAsync.mockResolvedValue({ completed: [], errors: [aliceFailed] });
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+    expect(screen.queryByText('Some assignments could not be completed')).not.toBeInTheDocument();
+  });
+
+  it('leaves a reported failure behind when going Back and returning', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, { completed: [], errors: [aliceFailed] });
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /^Back$/i }));
+    await waitFor(() => expect(getUsersInput()).toBeInTheDocument());
+    await user.click(getNextButton());
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Search')).toBeInTheDocument());
+    expect(screen.queryByText('The role could not be assigned')).not.toBeInTheDocument();
   });
 
   it('reports a failed save inside the dialog, with a working retry', async () => {
