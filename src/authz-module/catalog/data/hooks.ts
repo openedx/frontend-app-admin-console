@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { usePermissions } from '@openedx/frontend-base';
 import { appId } from '@src/constants';
-import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
+import { SCOPE_TYPES, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/constants';
 import { getAuthzCatalog } from './api';
 import type { AuthzCatalog, ScopeCatalog } from '../types';
 import { getScopeCatalog } from '../utils';
@@ -34,10 +34,6 @@ export const invalidateAuthzCatalog = (queryClient: QueryClient) => queryClient.
 
 const NO_SCOPE_TYPES: string[] = [];
 
-const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
-  Object.entries(VIEW_TEAM_ACTIONS).map(([scopeType, action]) => [scopeType, { action }]),
-);
-
 /**
  * Loads the shared roles, permissions and categories catalog for the scope types the user can view.
  *
@@ -58,6 +54,7 @@ const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
  * ```
  */
 export const useAuthzCatalog = () => {
+  // Authz checks are always enabled in the admin console.
   const permissions = usePermissions(VIEW_TEAM_PERMISSIONS, true);
 
   const viewableScopeTypes: string[] = [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY].filter((scopeType) => (

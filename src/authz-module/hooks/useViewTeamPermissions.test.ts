@@ -1,22 +1,24 @@
 import { renderHook } from '@testing-library/react';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
+import { usePermissions } from '@openedx/frontend-base';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { useViewTeamPermissions } from './useViewTeamPermissions';
 
-jest.mock('@src/data/hooks', () => ({
-  useValidateUserPermissionsNonSuspense: jest.fn(),
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  usePermissions: jest.fn(),
 }));
 
-const mockUsePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUsePermissions = usePermissions as jest.Mock;
 
-const permissionsData = ({ course, library }: { course: boolean; library: boolean }) => [
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: course },
-  { action: VIEW_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: library },
-];
+const permissionsData = ({ course, library }: { course: boolean; library: boolean }) => ({
+  [SCOPE_TYPES.COURSE]: course,
+  [SCOPE_TYPES.LIBRARY]: library,
+  isLoading: false,
+});
 
 describe('useViewTeamPermissions', () => {
   beforeEach(() => {
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ course: true, library: true }), isLoading: false });
+    mockUsePermissions.mockReturnValue(permissionsData({ course: true, library: true }));
   });
 
   it('returns both flags allowed when permissions are granted', () => {
@@ -27,21 +29,21 @@ describe('useViewTeamPermissions', () => {
   });
 
   it('returns isCourseViewAllowed false when VIEW_COURSE_TEAM is denied', () => {
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ course: false, library: true }), isLoading: false });
+    mockUsePermissions.mockReturnValue(permissionsData({ course: false, library: true }));
     const { result } = renderHook(() => useViewTeamPermissions());
     expect(result.current.isCourseViewAllowed).toBe(false);
     expect(result.current.isLibraryViewAllowed).toBe(true);
   });
 
   it('returns isLibraryViewAllowed false when VIEW_LIBRARY_TEAM is denied', () => {
-    mockUsePermissions.mockReturnValue({ data: permissionsData({ course: true, library: false }), isLoading: false });
+    mockUsePermissions.mockReturnValue(permissionsData({ course: true, library: false }));
     const { result } = renderHook(() => useViewTeamPermissions());
     expect(result.current.isCourseViewAllowed).toBe(true);
     expect(result.current.isLibraryViewAllowed).toBe(false);
   });
 
   it('defaults both to false while permissions are loading', () => {
-    mockUsePermissions.mockReturnValue({ data: undefined, isLoading: true });
+    mockUsePermissions.mockReturnValue({ isLoading: true });
     const { result } = renderHook(() => useViewTeamPermissions());
     expect(result.current.isLoading).toBe(true);
     expect(result.current.isCourseViewAllowed).toBe(false);
