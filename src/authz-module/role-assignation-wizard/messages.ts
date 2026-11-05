@@ -118,7 +118,7 @@ const messages = defineMessages({
   'wizard.step2.filter.applied': {
     id: 'wizard.step2.filter.applied',
     defaultMessage: 'Filter applied:',
-    description: 'Label prefix shown before the active context-type filter badge in step 2',
+    description: 'Label prefix shown before the active scope-type filter badge in step 2',
   },
   'wizard.step2.count': {
     id: 'wizard.step2.count',
@@ -184,39 +184,39 @@ const messages = defineMessages({
   'wizard.step2.contextLabel.course': {
     id: 'wizard.step2.contextLabel.course',
     defaultMessage: 'Courses',
-    description: 'Context label shown in the scope filter bar when the selected role applies to courses',
+    description: 'Scope type label shown in the scope filter bar when the selected role applies to courses',
   },
   'wizard.step2.contextLabel.library': {
     id: 'wizard.step2.contextLabel.library',
     defaultMessage: 'Libraries',
-    description: 'Context label shown in the scope filter bar when the selected role applies to libraries',
+    description: 'Scope type label shown in the scope filter bar when the selected role applies to libraries',
   },
   'wizard.step2.contextLabel.default': {
     id: 'wizard.step2.contextLabel.default',
     defaultMessage: 'Items',
-    description: 'Fallback context label shown in the scope filter bar when no specific context type is matched',
+    description: 'Fallback scope type label shown in the scope filter bar when no specific scope type is matched',
   },
 
   // useScopeListData — platform/org aggregate scope items
   'wizard.step2.scope.aggregate.description.course': {
     id: 'wizard.step2.scope.aggregate.description.course',
     defaultMessage: 'Includes current and future courses',
-    description: 'Description for the platform-wide aggregate scope item when context type is course',
+    description: 'Description for the platform-wide aggregate scope item when the scope type is course',
   },
   'wizard.step2.scope.aggregate.description.library': {
     id: 'wizard.step2.scope.aggregate.description.library',
     defaultMessage: 'Includes current and future libraries',
-    description: 'Description for the platform-wide aggregate scope item when context type is library',
+    description: 'Description for the platform-wide aggregate scope item when the scope type is library',
   },
   'wizard.step2.scope.aggregate.platform.label.course': {
     id: 'wizard.step2.scope.aggregate.platform.label.course',
     defaultMessage: 'All courses on the platform',
-    description: 'Display name for the platform-wide aggregate scope item when context type is course',
+    description: 'Display name for the platform-wide aggregate scope item when the scope type is course',
   },
   'wizard.step2.scope.aggregate.platform.label.library': {
     id: 'wizard.step2.scope.aggregate.platform.label.library',
     defaultMessage: 'All libraries on the platform',
-    description: 'Display name for the platform-wide aggregate scope item when context type is library',
+    description: 'Display name for the platform-wide aggregate scope item when the scope type is library',
   },
 
   // ScopeList — org section header
@@ -230,12 +230,12 @@ const messages = defineMessages({
   'wizard.step2.scopeList.aggregate.label.course': {
     id: 'wizard.step2.scopeList.aggregate.label.course',
     defaultMessage: 'All courses in this organization',
-    description: 'Display name for the org-wide aggregate scope item when context type is course',
+    description: 'Display name for the org-wide aggregate scope item when the scope type is course',
   },
   'wizard.step2.scopeList.aggregate.label.library': {
     id: 'wizard.step2.scopeList.aggregate.label.library',
     defaultMessage: 'All libraries in this organization',
-    description: 'Display name for the org-wide aggregate scope item when context type is library',
+    description: 'Display name for the org-wide aggregate scope item when the scope type is library',
   },
 
   // ScopeList — loading / empty states

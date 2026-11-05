@@ -4,7 +4,7 @@ import {
   getCellHeader, getScopeManageAction, getScopeManageActionPermission, getScopeResourceIcon,
 } from './utils';
 import { RESOURCE_ICONS } from './components/constants';
-import { CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS } from './roles-permissions';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from './constants';
 
 const renderCellHeader = (columnId: string, columnTitle: string, filtersApplied: string[]) => {
   const result = getCellHeader(columnId, columnTitle, filtersApplied);
@@ -105,49 +105,49 @@ describe('utils', () => {
   describe('getScopeManageAction', () => {
     it('returns MANAGE_LIBRARY_TEAM for library scopes', () => {
       expect(getScopeManageAction('lib:testorg:library-123')).toBe(
-        CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY],
       );
     });
 
     it('returns MANAGE_LIBRARY_TEAM for library scope with different format', () => {
       expect(getScopeManageAction('lib:example:collection-456')).toBe(
-        CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY],
       );
     });
 
     it('returns MANAGE_COURSE_TEAM for course scopes', () => {
       expect(getScopeManageAction('course-v1:testorg+course123+2023')).toBe(
-        CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
       );
     });
 
     it('returns MANAGE_COURSE_TEAM for course scope with different format', () => {
       expect(getScopeManageAction('course-v1:example+math101+fall2023')).toBe(
-        CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
       );
     });
 
     it('returns default MANAGE_COURSE_TEAM for unknown scope types', () => {
       expect(getScopeManageAction('unknown:scope:type')).toBe(
-        CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
       );
     });
 
     it('returns default MANAGE_COURSE_TEAM for empty scope', () => {
       expect(getScopeManageAction('')).toBe(
-        CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
       );
     });
 
     it('handles scope that starts with "course" but not exactly "course-v1"', () => {
       expect(getScopeManageAction('course:example:test')).toBe(
-        CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
       );
     });
 
     it('handles scope that starts with "lib" variations', () => {
       expect(getScopeManageAction('library:test:scope')).toBe(
-        CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
+        MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY],
       );
     });
   });
@@ -158,7 +158,7 @@ describe('utils', () => {
       const result = getScopeManageActionPermission(scope);
 
       expect(result).toEqual({
-        action: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
+        action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY],
         scope,
       });
     });
@@ -168,7 +168,7 @@ describe('utils', () => {
       const result = getScopeManageActionPermission(scope);
 
       expect(result).toEqual({
-        action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
         scope,
       });
     });
@@ -178,7 +178,7 @@ describe('utils', () => {
       const result = getScopeManageActionPermission(scope);
 
       expect(result).toEqual({
-        action: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
+        action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE],
         scope,
       });
     });
@@ -188,7 +188,7 @@ describe('utils', () => {
       const result = getScopeManageActionPermission(scope);
 
       expect(result.scope).toBe(scope);
-      expect(result.action).toBe(CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM);
+      expect(result.action).toBe(MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY]);
     });
   });
 });

@@ -6,8 +6,8 @@ import {
 import type { UserRoleWithPermissions, RoleToDelete, TeamMemberAssignment } from '@src/types';
 import type { ComponentProps, ReactNode } from 'react';
 import {
-  ADMIN_ROLES, ALL_ORGS_KEY, CONTEXT_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
-  getScopeContextType, MAP_ROLE_KEY_TO_LABEL, SCOPE_TYPES,
+  ADMIN_ROLES, ALL_ORGS_KEY, SCOPE_TYPES, DJANGO_MANAGED_ROLES, getAggregateScopeType,
+  getScopeType, MAP_ROLE_KEY_TO_LABEL,
 } from '@src/authz-module/constants';
 import {
   Icon, IconButton, OverlayTrigger, Tooltip,
@@ -70,7 +70,7 @@ const ScopeNameCell = ({ row }: AssignmentCellProps) => {
   const { scope, scopeDisplayName, org } = row.original;
   const aggregateType = getAggregateScopeType(scope, org);
   const scopeText = aggregateType
-    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeContextType(scope)])
+    ? formatMessage(AGGREGATE_SCOPE_LABELS[getScopeType(scope)])
     : scopeDisplayName || scope;
 
   return (
@@ -112,10 +112,7 @@ const PermissionsCell = ({ row }: CellProps) => {
     ? formatMessage(messages['authz.user.table.permissions.access.label'], { accessType })
     : formatMessage(messages['authz.user.table.permissions.available.count'], { count });
 
-  const scopeType = getScopeContextType(scope) === CONTEXT_TYPES.LIBRARY
-    ? SCOPE_TYPES.LIBRARY
-    : SCOPE_TYPES.COURSE;
-  const scopeRoles = getScopeCatalog(scopeType)?.roles ?? [];
+  const scopeRoles = getScopeCatalog(getScopeType(scope))?.roles ?? [];
   const isKnownRole = scopeRoles.some((r) => r.role === role);
 
   if (!isDjangoRole && !isKnownRole) {
@@ -179,7 +176,7 @@ const ActionsCell = ({
     );
   }
 
-  const isCourseScope = getScopeContextType(scope) === CONTEXT_TYPES.COURSE;
+  const isCourseScope = getScopeType(scope) === SCOPE_TYPES.COURSE;
   const isCourseAuthoringDisabled = isCourseScope && !isCourseEnabled(scope);
 
   if (isCourseAuthoringDisabled) {

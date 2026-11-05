@@ -7,35 +7,6 @@ export interface PermissionValidationResponse extends PermissionValidationReques
   allowed: boolean;
 }
 
-export interface RoleMetadata {
-  role: string;
-  name: string;
-  description: string;
-  contextType: string;
-  disabled?: boolean;
-}
-// TODO: remove unnecessary fields when libraries gets removed
-export interface Role extends RoleMetadata {
-  scope: string;
-  userCount: number;
-  permissions: string[];
-}
-
-export interface ResourceMetadata {
-  key: string;
-  label: string;
-  description: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}
-
-export interface PermissionMetadata {
-  key: string;
-  resource: string;
-  label?: string;
-  description?: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}
-
 export interface Org {
   id: string;
   name: string;
