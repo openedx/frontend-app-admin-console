@@ -1,24 +1,42 @@
-import { useMemo } from 'react';
+import { useId } from 'react';
 import {
-  Form, Stack, OverlayTrigger,
-  Tooltip,
+  Alert, Form, Spinner, Stack,
 } from '@openedx/paragon';
 import { getSiteConfig, useIntl } from '@openedx/frontend-base';
-import { RoleMetadata } from '@src/types';
+import type { MessageDescriptor } from '@openedx/frontend-base';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
+import type { ScopeCatalog } from '@src/authz-module/catalog';
 import HighlightedUsersInput from './HighlightedUsersInput';
 import messages from '@src/authz-module/role-assignation-wizard/messages';
+
+// The selected role and its scope type, which defines where the role can be assigned.
+export interface SelectedRole {
+  scopeType: string;
+  role: string;
+}
+
+// The roles the user can assign in one scope type.
+export type RoleGroup = Pick<ScopeCatalog, 'scopeType' | 'roles'>;
 
 interface SelectUsersAndRoleStepProps {
   users: string;
   setUsers: (value: string) => void;
-  selectedRole: string | null;
-  setSelectedRole: React.Dispatch<React.SetStateAction<string | null>>;
-  roles: RoleMetadata[];
+  selectedRole: SelectedRole | null;
+  setSelectedRole: (selectedRole: SelectedRole) => void;
+  roleGroups: RoleGroup[];
+  // The roles come from the catalog, which loads asynchronously.
+  isLoadingRoles?: boolean;
+  isRolesError?: boolean;
   invalidUsers: string[];
   inputRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
-const CONTEXT_ORDER = ['library', 'course'];
+// Header of the roles of each scope type.
+const SCOPE_TYPE_LABELS: Partial<Record<string, MessageDescriptor>> = {
+  [SCOPE_TYPES.COURSE]: messages['wizard.step1.roles.contextLabel.course'],
+  [SCOPE_TYPES.LIBRARY]: messages['wizard.step1.roles.contextLabel.library'],
+};
+
 const ADMIN_URL = `${getSiteConfig().lmsBaseUrl}/admin`;
 
 const SelectUsersAndRoleStep = ({
@@ -26,25 +44,22 @@ const SelectUsersAndRoleStep = ({
   setUsers,
   selectedRole,
   setSelectedRole,
-  roles,
+  roleGroups,
+  isLoadingRoles = false,
+  isRolesError = false,
   invalidUsers,
   inputRef,
 }: SelectUsersAndRoleStepProps) => {
   const intl = useIntl();
+  const idPrefix = useId();
+  const rolesHeadingId = `${idPrefix}-roles`;
+  const visibleRoleGroups = roleGroups.filter(({ roles }) => roles.length > 0);
 
-  const contextLabels: Record<string, string> = {
-    library: intl.formatMessage(messages['wizard.step1.roles.contextLabel.library']),
-    course: intl.formatMessage(messages['wizard.step1.roles.contextLabel.course']),
+  // Roles offered in several scope types aren't supported yet, so the role identifies its scope type.
+  const handleRoleChange = (role: string) => {
+    const roleGroup = visibleRoleGroups.find(({ roles }) => roles.some((r) => r.role === role));
+    if (roleGroup) setSelectedRole({ scopeType: roleGroup.scopeType, role });
   };
-
-  const rolesByContext = useMemo(() => roles.reduce<Record<string, RoleMetadata[]>>((acc, role) => {
-    const context = role.contextType;
-    if (!acc[context]) acc[context] = [];
-    acc[context].push(role);
-    return acc;
-  }, {}), [roles]);
-
-  const orderedContexts = useMemo(() => CONTEXT_ORDER.filter((ctx) => rolesByContext[ctx]), [rolesByContext]);
 
   return (
     <div className="select-users-and-role-step">
@@ -70,52 +85,52 @@ const SelectUsersAndRoleStep = ({
       </Form.Group>
 
       {/* Roles Section */}
-      <h3 className="text-primary mt-4 mb-2">{intl.formatMessage(messages['wizard.step1.roles.heading'])}</h3>
-      {orderedContexts.map((context) => (
-        <div key={context} className="role-group mb-4">
-          <h5 className="h4 text-gray role-group-header my-4 pl-4">
-            {contextLabels[context] || context}
-          </h5>
-          <Form.RadioSet
-            name={`role-selection-${context}`}
-            value={selectedRole || ''}
-            onChange={(e) => setSelectedRole(e.target.value)}
-            aria-required
-            className="pl-4"
-          >
-            {(rolesByContext[context] || []).map((role) => {
-              const radioContent = (
-                <Form.Radio key={role.role} value={role.role} disabled={role.disabled}>
-                  <Stack gap={2}>
-                    <span className={`role-name ${role.disabled ? ' text-muted' : ''}`}>
-                      {role.name}
-                    </span>
-                    <p className="mb-0 text-gray-500 small">{role.description}</p>
-                  </Stack>
-                </Form.Radio>
-              );
-
-              if (role.disabled) {
-                return (
-                  <OverlayTrigger
-                    key={role.role}
-                    placement="right"
-                    overlay={(
-                      <Tooltip variant="light" id={`tooltip-disabled-${role.role}`}>
-                        {intl.formatMessage(messages['wizard.step1.roles.disabled.tooltip'])}
-                      </Tooltip>
-                    )}
-                  >
-                    <div tabIndex={0} role="button" aria-disabled="true" aria-describedby={`tooltip-disabled-${role.role}`}>{radioContent}</div>
-                  </OverlayTrigger>
-                );
-              }
-
-              return radioContent;
-            })}
-          </Form.RadioSet>
+      <h3 id={rolesHeadingId} className="text-primary mt-4 mb-2">{intl.formatMessage(messages['wizard.step1.roles.heading'])}</h3>
+      {isLoadingRoles && (
+        <div className="d-flex justify-content-center p-4">
+          <Spinner animation="border" screenReaderText={intl.formatMessage(messages['wizard.step1.roles.loading'])} />
         </div>
-      ))}
+      )}
+      {isRolesError && (
+        <Alert variant="danger" className="my-4">
+          {intl.formatMessage(messages['wizard.step1.roles.error'])}
+        </Alert>
+      )}
+      {/* A single role is assigned, so all the roles form one required radio group, split by scope type. */}
+      {visibleRoleGroups.length > 0 && (
+        <Form.RadioSet
+          name="role-selection"
+          aria-labelledby={rolesHeadingId}
+          value={selectedRole?.role ?? ''}
+          onChange={(e) => handleRoleChange(e.target.value)}
+          aria-required
+        >
+          {visibleRoleGroups.map(({ scopeType, roles }) => {
+            const label = SCOPE_TYPE_LABELS[scopeType];
+            const headerId = `${idPrefix}-${scopeType}`;
+            return (
+              <div key={scopeType} role="group" aria-labelledby={headerId} className="role-group mb-4">
+                <h4 id={headerId} className="text-gray role-group-header my-4 pl-4">
+                  {label ? intl.formatMessage(label) : scopeType}
+                </h4>
+                {/* Stacks the radios the way Form.RadioSet does when they are its direct children. */}
+                <div className="pgn__form-control-set pl-4">
+                  {roles.map((role) => (
+                    <Form.Radio key={role.role} value={role.role}>
+                      <Stack gap={2}>
+                        <span className="role-name">
+                          {role.displayName}
+                        </span>
+                        <p className="mb-0 text-gray-500 small">{role.description}</p>
+                      </Stack>
+                    </Form.Radio>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </Form.RadioSet>
+      )}
 
       {/* Documentation Link */}
       <div className="mt-3">
