@@ -1,6 +1,11 @@
 import { defineMessages } from '@openedx/frontend-base';
 
 const messages = defineMessages({
+  'authz.category.permissions.info.label': {
+    id: 'authz.category.permissions.info.label',
+    defaultMessage: 'About {categoryName} permissions',
+    description: 'Accessible label for the button showing a permission category and its permission descriptions',
+  },
   'authz.role.card.permission.for.role.status.granted': {
     id: 'authz.role.card.permission.for.role.status.granted',
     defaultMessage: 'Permission granted in {roleName} role',
