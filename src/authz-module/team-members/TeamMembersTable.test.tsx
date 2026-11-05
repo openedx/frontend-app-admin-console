@@ -5,7 +5,7 @@ import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module
 import type { GetTeamMembersAssignmentsResponse } from '@src/authz-module/data/api';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-import { LIBRARY_ROLE_KEYS } from '@src/authz-module/roles-permissions';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { AUTHZ_HOME_PATH } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import TeamMembersTable from './TeamMembersTable';
@@ -13,6 +13,8 @@ import TeamMembersTable from './TeamMembersTable';
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: jest.fn(),
 }));
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({ useAuthzCatalog: jest.fn() }));
 
 const mockUseViewTeamPermissions = useViewTeamPermissions as jest.Mock;
 
@@ -187,6 +189,7 @@ describe('TeamMembersTable', () => {
       isCourseEnabled: () => true,
       isLoading: false,
     });
+    mockAuthzCatalog();
   });
 
   it('renders one row per user', async () => {
@@ -478,7 +481,7 @@ describe('TeamMembersTable', () => {
     expect(screen.queryByText('johndoe')).not.toBeInTheDocument();
   });
 
-  it('filters to library roles only when course view is not allowed', async () => {
+  it('filters to the catalog library roles when course view is not allowed', async () => {
     mockUseViewTeamPermissions.mockReturnValue({
       isCourseViewAllowed: false,
       isLibraryViewAllowed: true,
@@ -488,9 +491,24 @@ describe('TeamMembersTable', () => {
     renderTable();
     await waitFor(() => {
       expect(useTeamMembersAssignments).toHaveBeenCalledWith(
-        expect.objectContaining({ roles: LIBRARY_ROLE_KEYS }),
+        expect.objectContaining({ roles: 'library_admin,library_author,library_contributor,library_user' }),
+        true,
       );
     });
+  });
+
+  it('waits for the catalog library roles before listing the team when course view is not allowed', () => {
+    mockUseViewTeamPermissions.mockReturnValue({
+      isCourseViewAllowed: false,
+      isLibraryViewAllowed: true,
+      isLoading: false,
+    });
+    mockAuthzCatalog({ isLoading: true });
+    mockApiResponses();
+    (useTeamMembersAssignments as jest.Mock).mockClear();
+    renderTable();
+    expect(useTeamMembersAssignments).toHaveBeenCalledWith(expect.objectContaining({ roles: null }), false);
+    expect(useTeamMembersAssignments).not.toHaveBeenCalledWith(expect.anything(), true);
   });
 
   it('announces a failure once, not once per effect pass', () => {

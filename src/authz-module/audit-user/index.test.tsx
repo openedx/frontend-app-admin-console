@@ -30,9 +30,10 @@ jest.mock('@src/data/hooks', () => ({
 
 // Mock the useRevokeUserRoles hook
 const mockRevokeUserRoles = jest.fn();
+const mockIsCourseViewAllowed = jest.fn(() => true);
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: () => ({
-    isCourseViewAllowed: true,
+    isCourseViewAllowed: mockIsCourseViewAllowed(),
     isLibraryViewAllowed: true,
     isLoading: false,
   }),
@@ -119,6 +120,7 @@ describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthzCatalog();
+    mockIsCourseViewAllowed.mockReturnValue(true);
     mockIsCourseEnabled.mockReturnValue(true);
     mockUseCourseAuthoringFlag.mockReturnValue(loadedCourseAuthoringFlag(mockIsCourseEnabled));
     // Set up default mock behavior for useRevokeUserRoles
@@ -251,6 +253,32 @@ describe('AuditUserPage', () => {
       expect(screen.getByText('Test Library')).toBeInTheDocument();
     });
     expect(screen.queryByText('lib:test')).not.toBeInTheDocument();
+  });
+
+  it('lists only the catalog library roles to a user who can only view library teams', async () => {
+    mockIsCourseViewAllowed.mockReturnValue(false);
+    (useUserAccount as jest.Mock).mockReturnValue({ data: mockUser, isLoading: false, error: null });
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({ data: mockAssignments, isLoading: false, error: null });
+
+    renderWithRouter();
+
+    await waitFor(() => expect(useUserAssignedRoles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ roles: 'library_admin,library_author,library_contributor,library_user' }),
+      true,
+    ));
+  });
+
+  it('waits for the catalog library roles before listing the roles of a user who can only view library teams', () => {
+    mockIsCourseViewAllowed.mockReturnValue(false);
+    mockAuthzCatalog({ isLoading: true });
+    (useUserAccount as jest.Mock).mockReturnValue({ data: mockUser, isLoading: false, error: null });
+    (useUserAssignedRoles as jest.Mock).mockReturnValue({ data: mockAssignments, isLoading: false, error: null });
+
+    renderWithRouter();
+
+    expect(useUserAssignedRoles).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ roles: null }), false);
+    expect(useUserAssignedRoles).not.toHaveBeenCalledWith(expect.anything(), expect.anything(), true);
   });
 
   it('expands row to show UserPermissions component when view all permissions is clicked', async () => {
