@@ -54,7 +54,7 @@ const messages = defineMessages({
   'authz.tabs.permissionsRoles.category.other': {
     id: 'authz.tabs.permissionsRoles.category.other',
     defaultMessage: 'Other',
-    description: 'Libraries AuthZ name of the category that groups the permissions without a category in the roles table',
+    description: 'AuthZ name of the category that groups the permissions without a category in the roles table',
   },
   'authz.tabs.permissionsRoles.loading': {
     id: 'authz.tabs.permissionsRoles.loading',
