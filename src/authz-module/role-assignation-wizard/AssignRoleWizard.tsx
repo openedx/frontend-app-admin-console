@@ -101,19 +101,18 @@ const AssignRoleWizard = ({
     setRequestError(intl.formatMessage(baseMessages[messageId], { Bold, Br }));
   };
 
+  /**
+   * Held open while a save is in flight: its response still runs `handleSave` after an
+   * unmount, so it would close a reopened wizard or drop a partial-failure report.
+   */
+  const isSaving = assignRoleMutation.isPending;
+
   const handleClose = () => {
+    // The header close button ignores `isBlocking`, so it is guarded here too.
+    if (isSaving) return;
     resetState();
     onClose();
   };
-
-  /** Re-seed on open, not just on mount: `initialUsers` can arrive after mount. */
-  useEffect(() => {
-    if (isOpen) {
-      resetState();
-    }
-    // Depending on `resetState` would wipe the form as the admin types.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
 
   const validateUsersAndProceed = async () => {
     if (validateUsersMutation.isPending) return;
@@ -228,6 +227,7 @@ const AssignRoleWizard = ({
         title={intl.formatMessage(messages['wizard.modal.title'])}
         isOpen={isOpen}
         onClose={handleClose}
+        isBlocking={isSaving}
         isOverflowVisible={false}
         className="authz-module assign-role-wizard"
         beforeBodyNode={<Stepper.Header className="border-bottom" />}
@@ -285,6 +285,7 @@ const AssignRoleWizard = ({
                   setRequestError(null);
                   setActiveStep(STEPS.SELECT_USERS_AND_ROLE);
                 }}
+                disabled={isSaving}
               >
                 {intl.formatMessage(messages['wizard.button.back'])}
               </Button>
@@ -295,9 +296,9 @@ const AssignRoleWizard = ({
                   pending: intl.formatMessage(messages['wizard.button.save.pending']),
                 }}
                 icons={{ pending: <Icon src={SpinnerSimple} /> }}
-                state={assignRoleMutation.isPending ? 'pending' : 'default'}
+                state={isSaving ? 'pending' : 'default'}
                 onClick={handleSave}
-                disabled={!canSave || assignRoleMutation.isPending}
+                disabled={!canSave || isSaving}
               />
             </Stepper.ActionRow>
           </>

@@ -385,6 +385,25 @@ describe('AssignRoleWizard — Step 2', () => {
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
   });
 
+  // The save's response still runs after an unmount, so letting the admin leave mid-save
+  // would let it close a reopened wizard or drop a partial-failure report.
+  it('cannot be closed or left while a save is in flight', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const { rerender } = renderWizard({ onClose });
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+
+    mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: true });
+    rerender(wizard({ onClose }));
+
+    expect(screen.getByRole('button', { name: /^Back$/i })).toBeDisabled();
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+  });
+
   it('Save button is disabled when no scopes are selected', async () => {
     const user = userEvent.setup();
     renderWizard();

@@ -283,10 +283,6 @@
   }
 }
 
-.scope-list {
-  max-height: 500px;
-}
-
 // Wizard modal chrome. `.pgn__modal` only to outrank Paragon's `-dark` header rule.
 .pgn__modal.assign-role-wizard {
   // Matches the Next button, via the button's own token so a theme keeps them in step.
