@@ -79,9 +79,8 @@ describe('PermissionTable', () => {
     const user = userEvent.setup();
     renderWrapper(<PermissionTable roles={roles} matrix={matrix} />);
 
-    // The info icon follows the category label.
-    const infoIcon = screen.getByText('Library').parentElement?.nextElementSibling as HTMLElement;
-    await user.hover(infoIcon);
+    const trigger = screen.getByRole('button', { name: 'About Library permissions' });
+    await user.hover(trigger);
 
     const popover = await screen.findByRole('tooltip');
     expect(within(popover).getByText('Permissions related to the library.')).toBeInTheDocument();
