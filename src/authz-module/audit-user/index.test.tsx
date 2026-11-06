@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useUserAccount, useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useUserAssignedRoles } from '@src/authz-module/data/hooks';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import AuditUserPage from './index';
 
 jest.mock('@openedx/frontend-base', () => ({
@@ -35,6 +36,10 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
     isLibraryViewAllowed: true,
     isLoading: false,
   }),
+}));
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
 }));
 
 const mockIsCourseEnabled = jest.fn(() => true);
@@ -113,6 +118,7 @@ const renderWithRouter = (route = '/audit/johndoe') => {
 describe('AuditUserPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthzCatalog();
     mockIsCourseEnabled.mockReturnValue(true);
     mockUseCourseAuthoringFlag.mockReturnValue(loadedCourseAuthoringFlag(mockIsCourseEnabled));
     // Set up default mock behavior for useRevokeUserRoles
