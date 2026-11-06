@@ -163,7 +163,7 @@ describe('AuditUserPage', () => {
     });
   });
 
-  it('allows user to interact with Assign Role button', async () => {
+  it('opens the assign role wizard for the audited user, keeping the page behind it', async () => {
     mockHttpClient().mockReturnValue({
       get: jest
         .fn()
@@ -178,9 +178,14 @@ describe('AuditUserPage', () => {
     });
 
     const user = userEvent.setup();
-    const button = screen.getByRole('button', { name: /assign role/i });
-    await user.click(button);
-    expect(button).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /assign role/i }));
+
+    expect(await screen.findByRole('dialog', { name: 'Assign Role' })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Add users by username or email/i)).toHaveValue('johndoe');
+    // The page is still mounted behind the dialog, which is what replaces the old
+    // navigate-away-and-come-back round trip. Role queries cannot see it, because the
+    // modal correctly hides the rest of the document from assistive technology.
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
   });
 
   it('renders empty state when user has no assignments', async () => {

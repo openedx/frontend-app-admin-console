@@ -91,16 +91,22 @@ const oneOrg = [
   },
 ];
 
-const renderWizard = (props = {}) => renderWrapper(
+const wizard = (props = {}) => (
   <ToastManagerProvider>
-    <AssignRoleWizard onClose={jest.fn()} roles={allRolesMetadata} {...props} />
-  </ToastManagerProvider>,
+    <AssignRoleWizard isOpen onClose={jest.fn()} roles={allRolesMetadata} {...props} />
+  </ToastManagerProvider>
 );
+
+const renderWizard = (props = {}) => renderWrapper(wizard(props));
 
 const getUsersInput = () => screen.getByLabelText(/Add users by username or email/i);
 const getRoleRadio = (name: RegExp) => screen.getByRole('radio', { name });
 const getNextButton = () => screen.getByRole('button', { name: /^Next$/i });
 const getCancelButton = () => screen.getByRole('button', { name: /^Cancel$/i });
+
+// Failures report inside the modal, so they are reachable without `hidden: true`.
+const getErrorAlert = () => screen.getByRole('alert');
+const getRetryButton = () => screen.getByRole('button', { name: /retry/i });
 
 describe('AssignRoleWizard — Step 1', () => {
   beforeEach(() => {
@@ -116,6 +122,18 @@ describe('AssignRoleWizard — Step 1', () => {
     });
   });
 
+  it('presents the wizard as a modal titled "Assign Role"', () => {
+    renderWizard();
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Assign Role' })).toBeInTheDocument();
+  });
+
+  it('renders nothing while closed', () => {
+    renderWizard({ isOpen: false });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Add users by username or email/i)).not.toBeInTheDocument();
+  });
+
   it('Cancel returns to the previous view', async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -124,8 +142,42 @@ describe('AssignRoleWizard — Step 1', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('closes from the modal header close button', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    renderWizard({ onClose });
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('opens with the user pre-populated when provided via initialUsers', () => {
     renderWizard({ initialUsers: 'alice' });
+    expect(getUsersInput()).toHaveValue('alice');
+  });
+
+  // The host mounts the wizard only while it is open, so "opening again" is a new
+  // instance rather than a prop flip. These cases follow that lifecycle.
+  it('seeds the users field from the value the host held when it opened', () => {
+    const { unmount } = renderWrapper(wizard({ initialUsers: '' }));
+    expect(getUsersInput()).toHaveValue('');
+    unmount();
+
+    renderWrapper(wizard({ initialUsers: 'alice' }));
+
+    expect(getUsersInput()).toHaveValue('alice');
+  });
+
+  it('discards what was typed when the wizard is closed and opened again', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderWrapper(wizard({ initialUsers: 'alice' }));
+
+    await user.clear(getUsersInput());
+    await user.type(getUsersInput(), 'bob');
+    expect(getUsersInput()).toHaveValue('bob');
+    unmount();
+
+    renderWrapper(wizard({ initialUsers: 'alice' }));
+
     expect(getUsersInput()).toHaveValue('alice');
   });
 
@@ -174,17 +226,54 @@ describe('AssignRoleWizard — Step 1', () => {
     });
   });
 
-  it('shows a network error and blocks progression when the validation call fails', async () => {
+  it('focuses the users field when validation rejects a name', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: ['ghost'], validUsers: [] });
+    renderWizard();
+    await user.type(getUsersInput(), 'ghost');
+    await user.click(getRoleRadio(/Library Admin/i));
+    await user.click(getNextButton());
+
+    await waitFor(() => expect(getUsersInput()).toHaveFocus());
+  });
+
+  it('hands focus to the new step on advancing, not to the footer', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
+    renderWizard();
+    await user.type(getUsersInput(), 'alice');
+    await user.click(getRoleRadio(/Library Admin/i));
+
+    getNextButton().focus();
+    await user.keyboard('{Enter}');
+
+    const stepTwo = await waitFor(() => {
+      const content = screen.getByPlaceholderText('Search').closest('.assign-role-wizard__step');
+      expect(content).toBeInTheDocument();
+      return content;
+    });
+    expect(stepTwo).toHaveFocus();
+  });
+
+  // A toast would portal outside the dialog, hidden from screen readers and Retry untabbable.
+  it('reports a failed validation inside the dialog and blocks progression', async () => {
     const user = userEvent.setup();
     mockValidateMutateAsync.mockRejectedValue(new Error('Network error'));
     renderWizard();
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.queryByTestId('toggle-scope-*')).not.toBeInTheDocument();
-    });
+
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+    const dialog = screen.getByRole('dialog', { name: 'Assign Role' });
+    expect(dialog).toContainElement(getErrorAlert());
+    // Between the body and the footer, so it sits by the button that failed and cannot
+    // be scrolled out of view.
+    expect(dialog.querySelector('.pgn__modal-body')).not.toContainElement(getErrorAlert());
+    expect(getErrorAlert()).toHaveFocus();
+    expect(getErrorAlert()).toHaveTextContent(/something went wrong on our end/i);
+    expect(getRetryButton()).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument();
   });
 
   it('clears the invalid user highlights when the input is edited', async () => {
@@ -199,20 +288,40 @@ describe('AssignRoleWizard — Step 1', () => {
     await waitFor(() => expect(screen.queryByText(/not associated with an account/i)).not.toBeInTheDocument());
   });
 
-  it('allows retry when validation call fails', async () => {
+  it('retries from the error alert without losing the form', async () => {
     const user = userEvent.setup();
+    const onClose = jest.fn();
     mockValidateMutateAsync
       .mockRejectedValueOnce(new Error('Network error'))
       .mockResolvedValueOnce({ invalidUsers: [], validUsers: ['alice'] });
+    renderWizard({ onClose });
+    await user.type(getUsersInput(), 'alice');
+    await user.click(getRoleRadio(/Library Admin/i));
+    await user.click(getNextButton());
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(getRetryButton());
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Search')).toBeInTheDocument());
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('dismisses the error alert and leaves the form ready to submit again', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockRejectedValue(new Error('Network error'));
     renderWizard();
     await user.type(getUsersInput(), 'alice');
     await user.click(getRoleRadio(/Library Admin/i));
     await user.click(getNextButton());
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
-    await user.click(screen.getByRole('button', { name: /retry/i }));
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /dismiss/i }));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(getUsersInput()).toHaveValue('alice');
+    expect(getRoleRadio(/Library Admin/i)).toBeChecked();
+    expect(getNextButton()).toBeEnabled();
   });
 });
 
@@ -248,6 +357,51 @@ describe('AssignRoleWizard — Step 2', () => {
     await waitFor(() => {
       expect(getUsersInput()).toBeInTheDocument();
     });
+  });
+
+  it('leaves a failed save behind when going Back', async () => {
+    const user = userEvent.setup();
+    mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
+    renderWizard();
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /^Back$/i }));
+
+    // Retry is bound to the active step, so carrying it over would re-run validation.
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  });
+
+  it('offers Back and Save, and leaves dismissing to the header close button', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await advanceToStep2(user);
+
+    expect(screen.getByRole('button', { name: /^Back$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Save$/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Cancel$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+  });
+
+  // The save's response still runs after an unmount, so letting the admin leave mid-save
+  // would let it close a reopened wizard or drop a partial-failure report.
+  it('cannot be closed or left while a save is in flight', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const { rerender } = renderWizard({ onClose });
+    await advanceToStep2(user);
+    await user.click(screen.getByLabelText('Library One'));
+
+    mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: true });
+    rerender(wizard({ onClose }));
+
+    expect(screen.getByRole('button', { name: /^Back$/i })).toBeDisabled();
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
   });
 
   it('Save button is disabled when no scopes are selected', async () => {
@@ -291,32 +445,100 @@ describe('AssignRoleWizard — Step 2', () => {
     });
   });
 
-  it('shows error toast and inline alert when the API returns assignment errors', async () => {
-    const user = userEvent.setup();
-    mockAssignMutateAsync.mockResolvedValue({
-      completed: [],
-      errors: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' }],
-    });
-    renderWizard();
+  const saveWith = async (user: ReturnType<typeof userEvent.setup>, result: unknown) => {
+    mockAssignMutateAsync.mockResolvedValue(result);
     await advanceToStep2(user);
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/Some assignments could not be completed/i)).toBeInTheDocument();
-      expect(screen.getByText(/The following errors occurred/i)).toBeInTheDocument();
-      expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+  };
+
+  const aliceFailed = { userIdentifier: 'alice', scope: 'lib:org1/lib1', error: 'user_already_has_role' };
+
+  it('reports that the rest of the save landed when only some assignments fail', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
     });
+
+    await waitFor(() => expect(screen.getByText('Some assignments could not be completed')).toBeInTheDocument());
+    expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+    // Counted off the response: without it the admin cannot tell that bob got the role,
+    // and would save again for everyone.
+    expect(screen.getByText('1 assignment succeeded and 1 failed. See details below:')).toBeInTheDocument();
   });
 
-  it('shows error toast when save throws a network error', async () => {
+  it('does not claim partial success when every assignment fails', async () => {
     const user = userEvent.setup();
-    mockAssignMutateAsync.mockRejectedValue(new Error('Network error'));
+    renderWizard();
+    await saveWith(user, { completed: [], errors: [aliceFailed] });
+
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+    expect(screen.getByText(/alice already has this role in lib:org1\/lib1/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Some assignments could not be completed/i)).not.toBeInTheDocument();
+  });
+
+  it('reports a partial failure once, inside the dialog', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
+    });
+
+    // A toast would portal outside the dialog and repeat the detail over the Save button.
+    const summary = await waitFor(() => screen.getAllByText('Some assignments could not be completed'));
+    expect(summary).toHaveLength(1);
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toContainElement(summary[0]);
+  });
+
+  it('re-reports the outcome of the latest save, not the previous one', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, {
+      completed: [{ userIdentifier: 'bob', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [aliceFailed],
+    });
+    await waitFor(() => expect(screen.getByText('Some assignments could not be completed')).toBeInTheDocument());
+
+    // Carrying the first outcome over would credit this save with bob's success.
+    mockAssignMutateAsync.mockResolvedValue({ completed: [], errors: [aliceFailed] });
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+    expect(screen.queryByText('Some assignments could not be completed')).not.toBeInTheDocument();
+  });
+
+  it('leaves a reported failure behind when going Back and returning', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await saveWith(user, { completed: [], errors: [aliceFailed] });
+    await waitFor(() => expect(screen.getByText('The role could not be assigned')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /^Back$/i }));
+    await waitFor(() => expect(getUsersInput()).toBeInTheDocument());
+    await user.click(getNextButton());
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Search')).toBeInTheDocument());
+    expect(screen.queryByText('The role could not be assigned')).not.toBeInTheDocument();
+  });
+
+  it('reports a failed save inside the dialog, with a working retry', async () => {
+    const user = userEvent.setup();
+    mockAssignMutateAsync
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ completed: [], errors: [] });
     renderWizard();
     await advanceToStep2(user);
     await user.click(screen.getByLabelText('Library One'));
     await user.click(screen.getByRole('button', { name: /^Save$/i }));
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-    });
+
+    await waitFor(() => expect(getErrorAlert()).toBeInTheDocument());
+    expect(screen.getByRole('dialog', { name: 'Assign Role' })).toContainElement(getErrorAlert());
+
+    await user.click(getRetryButton());
+
+    await waitFor(() => expect(mockAssignMutateAsync).toHaveBeenCalledTimes(2));
   });
 });

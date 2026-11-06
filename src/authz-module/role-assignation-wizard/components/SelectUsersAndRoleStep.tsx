@@ -47,7 +47,7 @@ const SelectUsersAndRoleStep = ({
   const orderedContexts = useMemo(() => CONTEXT_ORDER.filter((ctx) => rolesByContext[ctx]), [rolesByContext]);
 
   return (
-    <div className="select-users-and-role-step">
+    <div className="select-users-and-role-step py-4">
       {/* Users Section */}
       <h3 className="text-primary mb-2">{intl.formatMessage(messages['wizard.step1.users.heading'])}</h3>
       <Form.Group controlId="users-input">

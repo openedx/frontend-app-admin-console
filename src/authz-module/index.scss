@@ -283,6 +283,57 @@
   }
 }
 
-.scope-list {
-  max-height: 500px;
+// Wizard modal chrome. `.pgn__modal` only to outrank Paragon's `-dark` header rule.
+.pgn__modal.assign-role-wizard {
+  // Matches the Next button, via the button's own token so a theme keeps them in step.
+  .pgn__modal-header {
+    background-color: var(--pgn-color-btn-bg-primary);
+  }
+
+  .assign-role-wizard__step:focus {
+    outline: none;
+  }
+  
+  // Step 2 passes its height down so only the scope list scrolls. The chain has to be
+  // unbroken, hence Paragon's wrappers, and `min-height: 0` lets the list be what gives.
+  .pgn__modal-body.assign-role-wizard__body--filled {
+    display: flex;
+    flex-direction: column;
+
+    // Nothing left to mark once the body stops scrolling, and a flex container would
+    // lay these out as items.
+    &::before,
+    &::after {
+      display: none;
+    }
+
+    .pgn__modal-body-content,
+    .pgn__stepper-step,
+    .assign-role-wizard__step,
+    .define-application-scope-step {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .scope-list {
+      flex: 1;
+      min-height: 240px;
+      max-height: none;
+    }
+  }
+  // Lifts the sticky footer. Paragon assembles only the `-bottom` composite of this
+  // token pair, so the `-top` one is built here from its published parts.
+  .pgn__modal-footer {
+    box-shadow:
+      var(--pgn-elevation-sticky-shadow-top-1-offset-x)
+      var(--pgn-elevation-sticky-shadow-top-1-offset-y)
+      var(--pgn-elevation-sticky-shadow-top-1-blur)
+      var(--pgn-elevation-sticky-shadow-top-1-color),
+      var(--pgn-elevation-sticky-shadow-top-2-offset-x)
+      var(--pgn-elevation-sticky-shadow-top-2-offset-y)
+      var(--pgn-elevation-sticky-shadow-top-2-blur)
+      var(--pgn-elevation-sticky-shadow-top-2-color);
+  }
 }

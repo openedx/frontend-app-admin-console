@@ -5,6 +5,20 @@ import messages from './messages';
 
 type RoleAssignmentError = PutAssignTeamMembersRoleResponse['errors'][number];
 
+/**
+ * A save the API accepted but only partly applied.
+ *
+ * `completedCount` travels with the lines because it cannot be recovered from them: the
+ * failures say nothing about the assignments that went through, and that is what tells
+ * the admin whether to fix only the users listed here or to save again for everyone.
+ */
+export interface AssignmentFailure {
+  /** Per-user failures, already formatted for display. One line per user/scope pair. */
+  errors: string[];
+  /** User/scope pairs the same save did assign. Zero means nothing was assigned. */
+  completedCount: number;
+}
+
 export const formatRoleAssignmentError = (
   intl: IntlShape,
   e: RoleAssignmentError,

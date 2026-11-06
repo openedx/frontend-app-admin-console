@@ -1,16 +1,11 @@
 import { defineMessages } from '@openedx/frontend-base';
 
 const messages = defineMessages({
-  // AssignRoleWizardPage
-  'wizard.page.breadcrumb': {
-    id: 'wizard.page.breadcrumb',
-    defaultMessage: 'Roles and Permissions Management',
-    description: 'Breadcrumb label linking back to the team manager page',
-  },
-  'wizard.page.title': {
-    id: 'wizard.page.title',
+  // AssignRoleWizard — modal
+  'wizard.modal.title': {
+    id: 'wizard.modal.title',
     defaultMessage: 'Assign Role',
-    description: 'Page title for the assign role wizard page',
+    description: 'Title of the full-screen modal holding the assign role wizard',
   },
 
   // AssignRoleWizard — step titles
@@ -68,35 +63,46 @@ const messages = defineMessages({
     defaultMessage: 'Role assigned successfully.',
     description: 'Toast message shown when a role is successfully assigned',
   },
-  'wizard.save.errors.summary': {
-    id: 'wizard.save.errors.summary',
-    defaultMessage: 'Some assignments could not be completed. See details above.',
-    description: 'Short toast message shown when one or more role assignments fail',
+
+  'wizard.step2.errors.alert.title.partial': {
+    id: 'wizard.step2.errors.alert.title.partial',
+    defaultMessage: 'Some assignments could not be completed',
+    description: 'Heading of the inline alert shown in step 2 when the role was assigned to some users but not others. "Some" is what tells the admin the rest of the save went through, so it must not be used when every assignment failed.',
   },
-  'wizard.step2.errors.alert.title': {
-    id: 'wizard.step2.errors.alert.title',
-    defaultMessage: 'The following errors occurred:',
-    description: 'Heading of the inline error alert shown in step 2 when role assignments partially fail',
+  'wizard.step2.errors.alert.title.total': {
+    id: 'wizard.step2.errors.alert.title.total',
+    defaultMessage: 'The role could not be assigned',
+    description: 'Heading of the inline alert shown in step 2 when every role assignment in the save failed',
+  },
+  'wizard.step2.errors.alert.body.partial': {
+    id: 'wizard.step2.errors.alert.body.partial',
+    defaultMessage: '{completedCount, plural, one {# assignment succeeded} other {# assignments succeeded}} and {failedCount, plural, one {# failed} other {# failed}}. See details below:',
+    description: 'Lead-in between the step 2 alert heading and the list of failures, when part of the save landed. An assignment is one user in one scope, so a save covering several users or scopes reports more assignments than either count. The succeeded tally cannot be read off the list of failures, which is why it is stated.',
+  },
+  'wizard.step2.errors.alert.body.total': {
+    id: 'wizard.step2.errors.alert.body.total',
+    defaultMessage: 'See details below:',
+    description: 'Lead-in between the step 2 alert heading and the list of failures, when nothing was assigned. No tally here: the list below is the whole of what was attempted.',
   },
   'wizard.save.error.user_already_has_role': {
     id: 'wizard.save.error.user_already_has_role',
     defaultMessage: '{userIdentifier} already has this role in {scope}',
-    description: 'Error shown in the toast when the user already holds the role in the selected scope',
+    description: 'Failure listed in the step 2 alert when the user already holds the role in the selected scope',
   },
   'wizard.save.error.user_not_found': {
     id: 'wizard.save.error.user_not_found',
     defaultMessage: 'User "{userIdentifier}" was not found',
-    description: 'Error shown in the toast when the username or email does not match any account',
+    description: 'Failure listed in the step 2 alert when the username or email does not match any account',
   },
   'wizard.save.error.role_assignment_error': {
     id: 'wizard.save.error.role_assignment_error',
     defaultMessage: 'Could not assign role to {userIdentifier} in {scope}',
-    description: 'Error shown in the toast when an unexpected error occurs during role assignment',
+    description: 'Failure listed in the step 2 alert when an unexpected error occurs during role assignment',
   },
   'wizard.save.error.default': {
     id: 'wizard.save.error.default',
     defaultMessage: '{userIdentifier} ({scope}): {error}',
-    description: 'Fallback error line shown in the toast for unknown role-assignment error codes',
+    description: 'Fallback failure line listed in the step 2 alert for unknown role-assignment error codes',
   },
 
   // DefineApplicationScopeStep — filter bar

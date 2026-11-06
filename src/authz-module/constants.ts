@@ -65,20 +65,9 @@ export const AUTHZ_HOME_PATH = '/admin-console/authz';
 /** Segments nested under the authz splat route, relative to AUTHZ_HOME_PATH. */
 export const ROUTES = {
   AUDIT_USER_PATH: 'user/:username',
-  ASSIGN_ROLE_WIZARD_PATH: 'assign-role',
 };
 
 export const buildAuditUserPath = (username: string) => `${AUTHZ_HOME_PATH}/user/${encodeURIComponent(username)}`;
-
-export const buildWizardPath = (options?: { users?: string; from?: string }) => {
-  const base = `${AUTHZ_HOME_PATH}/${ROUTES.ASSIGN_ROLE_WIZARD_PATH}`;
-  if (!options) return base;
-  const params = new URLSearchParams();
-  if (options.users) params.set('users', options.users);
-  if (options.from) params.set('from', options.from);
-  const query = params.toString();
-  return query ? `${base}?${query}` : base;
-};
 
 export enum RoleOperationErrorStatus {
   USER_NOT_FOUND = 'user_not_found',

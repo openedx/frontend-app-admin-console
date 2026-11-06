@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import { Alert } from '@openedx/paragon';
+import { WarningFilled, Error as ErrorIcon } from '@openedx/paragon/icons';
+import type { AssignmentFailure } from '@src/authz-module/role-assignation-wizard/utils';
 import { courseRolesMetadata } from '@src/authz-module/roles-permissions/course/constants';
 import { libraryRolesMetadata } from '@src/authz-module/roles-permissions/library/constants';
 import useScopeListData from '@src/authz-module/role-assignation-wizard/hooks/useScopeListData';
@@ -19,14 +21,15 @@ interface DefineApplicationScopeStepProps {
   selectedRole: string | null;
   selectedScopes: Set<string>;
   onScopeToggle: (scopeId: string) => void;
-  assignmentErrors?: string[];
+  /** Reported by the last save, or null when there is nothing to report. */
+  assignmentFailure?: AssignmentFailure | null;
 }
 
 const DefineApplicationScopeStep = ({
   selectedRole,
   selectedScopes,
   onScopeToggle,
-  assignmentErrors = [],
+  assignmentFailure = null,
 }: DefineApplicationScopeStepProps) => {
   const intl = useIntl();
   const [search, setSearch] = useState('');
@@ -37,6 +40,9 @@ const DefineApplicationScopeStep = ({
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  /** Separates "some of it worked" from "none of it did", which read differently. */
+  const hasCompleted = (assignmentFailure?.completedCount ?? 0) > 0;
 
   const contextType = useMemo(
     () => getContextType(selectedRole),
@@ -62,7 +68,7 @@ const DefineApplicationScopeStep = ({
   } = useScopeListData({ contextType, search: debouncedSearch, orgs: selectedOrgs });
 
   return (
-    <div className="define-application-scope-step">
+    <div className="define-application-scope-step py-4">
       <h3 className="mb-4">{intl.formatMessage(messages['wizard.step.defineScope.title'])}</h3>
 
       <ScopeFilterBar
@@ -78,13 +84,29 @@ const DefineApplicationScopeStep = ({
 
       <hr className="my-4" />
 
-      {assignmentErrors.length > 0 && (
-        <Alert variant="danger" className="mb-4">
-          <p className="mb-1 font-weight-bold">
-            {intl.formatMessage(messages['wizard.step2.errors.alert.title'])}
+      {assignmentFailure && (
+        // Warning, not danger, when part of the save landed: the role was assigned, just
+        // not everywhere. Nothing assigned at all stays danger.
+        <Alert
+          variant={hasCompleted ? 'warning' : 'danger'}
+          icon={hasCompleted ? WarningFilled : ErrorIcon}
+          className="mb-4"
+        >
+          <Alert.Heading>
+            {intl.formatMessage(hasCompleted
+              ? messages['wizard.step2.errors.alert.title.partial']
+              : messages['wizard.step2.errors.alert.title.total'])}
+          </Alert.Heading>
+          <p className="mb-1">
+            {hasCompleted
+              ? intl.formatMessage(messages['wizard.step2.errors.alert.body.partial'], {
+                  completedCount: assignmentFailure.completedCount,
+                  failedCount: assignmentFailure.errors.length,
+                })
+              : intl.formatMessage(messages['wizard.step2.errors.alert.body.total'])}
           </p>
           <ul className="mb-0 pl-3">
-            {assignmentErrors.map((msg) => <li key={msg}>{msg}</li>)}
+            {assignmentFailure.errors.map((msg) => <li key={msg}>{msg}</li>)}
           </ul>
         </Alert>
       )}
