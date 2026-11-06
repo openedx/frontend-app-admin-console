@@ -1,12 +1,17 @@
 import { screen } from '@testing-library/react';
 import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { renderWithAllProviders } from '@src/testUtils';
+import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { CustomErrors } from '@src/constants';
 import AuthzHome from './index';
 import messages from './messages';
+
+jest.mock('@src/authz-module/catalog/data/hooks', () => ({
+  useAuthzCatalog: jest.fn(),
+}));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: () => ({
@@ -65,6 +70,7 @@ describe('AuthzHome', () => {
   beforeEach(() => {
     // Call history is asserted on below, so it must not carry over between cases.
     jest.clearAllMocks();
+    mockAuthzCatalog();
     mockViewTeamPermissions({ isCourseViewAllowed: true, isLibraryViewAllowed: true, isLoading: false });
     (useTeamMembersAssignments as jest.Mock).mockReturnValue(emptyResponse);
     (useOrgs as jest.Mock).mockReturnValue(emptyResponse);
@@ -93,7 +99,7 @@ describe('AuthzHome', () => {
     const user = userEvent.setup();
     renderAuthzHome();
     await user.click(screen.getByText(messages['authz.tabs.permissionsRoles'].defaultMessage));
-    expect(screen.getByRole('button', { name: 'Courses' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Courses' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Libraries' })).toBeInTheDocument();
   });
 
