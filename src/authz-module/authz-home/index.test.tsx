@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { renderWithAllProviders } from '@src/testUtils';
 import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
@@ -95,12 +95,12 @@ describe('AuthzHome', () => {
     expect(screen.getAllByRole('tab')).toHaveLength(3); // 2 + tab invisible for more...
   });
 
-  it('renders the RolesPermissions component in the permissions tab', async () => {
+  it('renders the roles table in the permissions tab', async () => {
     const user = userEvent.setup();
     renderAuthzHome();
     await user.click(screen.getByText(messages['authz.tabs.permissionsRoles'].defaultMessage));
-    expect(await screen.findByRole('button', { name: 'Courses' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Libraries' })).toBeInTheDocument();
+    expect(await screen.findByText('Course Admin')).toBeInTheDocument();
+    expect(screen.getByText('Library Admin')).toBeInTheDocument();
   });
 
   it('denies access to the whole page when the user may view neither courses nor libraries', () => {
@@ -134,13 +134,15 @@ describe('AuthzHome', () => {
   it('renders the TeamMembersTable component in the team members tab', () => {
     renderAuthzHome();
     expect(screen.getByText(messages['authz.manage.page.title'].defaultMessage)).toBeInTheDocument();
-    expect(screen.getByText('Username')).toBeInTheDocument();
-    expect(screen.getByText('Email')).toBeInTheDocument();
-    expect(screen.getByText('Assigned roles')).toBeInTheDocument();
+    // The roles tab stays mounted with its own Role and Actions headers, so look only in the active tab.
+    const teamTab = within(screen.getByRole('tabpanel'));
+    expect(teamTab.getByText('Username')).toBeInTheDocument();
+    expect(teamTab.getByText('Email')).toBeInTheDocument();
+    expect(teamTab.getByText('Assigned roles')).toBeInTheDocument();
     // Org, scope and role are filter controls only — they are no longer column headers.
-    expect(screen.getAllByText('Organization').length).toBe(1);
-    expect(screen.getAllByText('Scope').length).toBe(1);
-    expect(screen.getAllByText('Role').length).toBe(1);
-    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(teamTab.getAllByText('Organization').length).toBe(1);
+    expect(teamTab.getAllByText('Scope').length).toBe(1);
+    expect(teamTab.getAllByText('Role').length).toBe(1);
+    expect(teamTab.getByText('Actions')).toBeInTheDocument();
   });
 });
