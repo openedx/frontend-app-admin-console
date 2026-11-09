@@ -79,6 +79,29 @@ describe('MultipleChoiceFilter', () => {
     );
   });
 
+  it.each([false, true])('preserves focus when duplicate display names are filtered (grouped: %s)', async (isGrouped) => {
+    const user = userEvent.setup();
+    const filterChoices = ['first', 'second', 'third'].map((value) => ({
+      displayName: 'Same name', value, groupName: 'Group A',
+    }));
+    const props = { ...defaultProps, filterChoices, filterValue: ['second'], isGrouped };
+    const { rerender } = renderWrapper(<MultipleChoiceFilter {...props} />);
+    await user.click(screen.getByRole('button', { name: 'Test Filter (1)' }));
+    await user.tab();
+    await user.tab();
+    const selectedCheckbox = screen.getByRole('checkbox', { checked: true });
+    expect(selectedCheckbox).toHaveFocus();
+
+    rerender(<MultipleChoiceFilter {...props} filterChoices={[filterChoices[1]]} />);
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(1);
+    expect(checkboxes[0]).toBe(selectedCheckbox);
+    expect(checkboxes[0]).toHaveAttribute('value', 'second');
+    expect(checkboxes[0]).toBeChecked();
+    expect(checkboxes[0]).toHaveFocus();
+  });
+
   it('calls setFilter when option is selected', async () => {
     const user = userEvent.setup();
     const mockSetFilter = jest.fn();
