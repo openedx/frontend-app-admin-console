@@ -6,7 +6,7 @@ import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { CustomErrors } from '@src/constants';
 import LoadingPage from '@src/components/LoadingPage';
-import RolesPermissions from '@src/authz-module/roles-permissions/RolesPermissions';
+import { RolesPermissionsTable } from '../roles-permissions';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 
 import messages from './messages';
@@ -47,6 +47,8 @@ const AuthzHome = () => {
   return (
     <AuthZLayout
       pageTitle={pageTitle}
+      // TODO: add the "Create Custom Role" header button, tracked in
+      // https://github.com/openedx/openedx-authz/issues/571
       actions={
         [<AddRoleButton key="add-role-button" />]
       }
@@ -60,7 +62,7 @@ const AuthzHome = () => {
           <TeamMembersTable presetScope={presetScope} />
         </Tab>
         <Tab id="libraries-permissions-roles-tab" eventKey="permissionsRoles" title={intl.formatMessage(messages['authz.tabs.permissionsRoles'])} className="page-band py-3">
-          <RolesPermissions />
+          <RolesPermissionsTable />
         </Tab>
       </Tabs>
     </AuthZLayout>
