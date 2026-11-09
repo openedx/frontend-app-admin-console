@@ -112,6 +112,7 @@ describe('RolesFilter', () => {
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows no role options while the catalog is still loading', async () => {
@@ -121,6 +122,33 @@ describe('RolesFilter', () => {
     const menu = await openDropdown(user);
     expect(menu.queryByText('Courses')).not.toBeInTheDocument();
     expect(menu.queryByText('Libraries')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('explains a catalog failure instead of showing an empty list', async () => {
+    const user = userEvent.setup();
+    mockAuthzCatalog({ isError: true });
+    renderWithAllProviders(<RolesFilter {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: 'Roles' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Roles could not be loaded. Please try again later.');
+    expect(screen.queryByText('Showing 0 of 0.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  it('restores the selected roles when the catalog recovers', async () => {
+    const user = userEvent.setup();
+    const props = { ...defaultProps, filterValue: ['library_admin'] };
+    mockAuthzCatalog({ isError: true });
+    const { rerender } = renderWithAllProviders(<RolesFilter {...props} />);
+    await user.click(screen.getByRole('button', { name: 'Roles (1)' }));
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    mockAuthzCatalog();
+    rerender(<RolesFilter {...props} />);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Library Admin' })).toBeChecked();
   });
 
   it('hides course roles when the course-authoring flag is disabled', async () => {

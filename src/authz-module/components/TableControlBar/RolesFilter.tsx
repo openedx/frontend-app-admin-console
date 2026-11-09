@@ -10,7 +10,7 @@ import messages from '@src/authz-module/components/messages';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import { FilterChoice, MultipleChoiceFilterProps } from './types';
 
-type RolesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
+type RolesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange' | 'errorMessage'>;
 
 // Group shown for the roles of each scope type.
 const SCOPE_TYPE_GROUPS: Partial<Record<string, { message: MessageDescriptor; icon: ComponentType }>> = {
@@ -23,7 +23,9 @@ const RolesFilter = ({
 }: RolesFilterProps) => {
   const intl = useIntl();
   // The catalog only holds the scope types the user can view.
-  const { scopeTypes, getScopeCatalog, isLoading } = useAuthzCatalog();
+  const {
+    scopeTypes, getScopeCatalog, isLoading, isError,
+  } = useAuthzCatalog();
   const { isCourseAuthoringEnabled, isLoading: isFlagLoading } = useCourseAuthoringFlag();
 
   const rolesOptions = useMemo<FilterChoice[]>(() => {
@@ -52,6 +54,7 @@ const RolesFilter = ({
       isGrouped
       iconSrc={Person}
       disabled={disabled}
+      errorMessage={isError ? intl.formatMessage(messages['authz.table.controlbar.roles.error']) : undefined}
     />
   );
 };
