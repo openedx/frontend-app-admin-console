@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash.debounce';
 import { useIntl } from '@openedx/frontend-base';
 import { DataTable } from '@openedx/paragon';
@@ -6,9 +6,12 @@ import { DataTable } from '@openedx/paragon';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { useCatalogRoles } from '@src/authz-module/catalog';
-import type { GetAuthzCatalogResponse } from '@src/authz-module/catalog';
+import type { GetAuthzCatalogResponse, Role } from '@src/authz-module/catalog';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
+import AssignRoleWizard from '@src/authz-module/role-assignation-wizard/AssignRoleWizard';
+import type { SelectedRole } from '@src/authz-module/role-assignation-wizard/components/SelectUsersAndRoleStep';
+import useAssignableRoleGroups from '@src/authz-module/role-assignation-wizard/hooks/useAssignableRoleGroups';
 import LastUpdatedCell from './components/LastUpdatedCell';
 import MembersCell from './components/MembersCell';
 import PermissionsGrantedCell from './components/PermissionsGrantedCell';
@@ -19,6 +22,7 @@ import RolesTableControlBar from './components/RolesTableControlBar';
 import { ROLES_TABLE_COLUMNS } from './constants';
 import useRolesQuerySettings from './hooks/useRolesQuerySettings';
 import messages from './messages';
+import { RoleAssignmentContext } from './RoleAssignmentContext';
 
 const toastedErrors = new WeakSet<Error>();
 
@@ -66,6 +70,28 @@ const RolesPermissionsTable = () => {
   // With no page to show, the empty table says the roles failed to load, not that none matched.
   const hasFailedToLoad = !!error && !data;
 
+  const {
+    roleGroups, isLoading: isLoadingAssignableRoles, isError: isAssignableRolesError,
+  } = useAssignableRoleGroups();
+  // The role whose "Assign role" item was clicked; the wizard is mounted only while it is set.
+  const [roleToAssign, setRoleToAssign] = useState<SelectedRole | null>(null);
+
+  const roleAssignment = useMemo(() => {
+    // The first of the role's scope types where the user may assign it, if any.
+    const getAssignableScopeType = ({ role: roleKey, scopeTypes }: Role) => roleGroups.find(
+      ({ scopeType, roles }) => scopeTypes.includes(scopeType) && roles.some(({ role }) => role === roleKey),
+    )?.scopeType;
+    return {
+      canAssignRole: (role: Role) => getAssignableScopeType(role) !== undefined,
+      assignRole: (role: Role) => {
+        const scopeType = getAssignableScopeType(role);
+        if (scopeType) {
+          setRoleToAssign({ scopeType, role: role.role });
+        }
+      },
+    };
+  }, [roleGroups]);
+
   // Only transient failures reach here; each one is reported once, with a retry.
   useEffect(() => {
     if (error && !toastedErrors.has(error)) {
@@ -81,72 +107,85 @@ const RolesPermissionsTable = () => {
   useEffect(() => () => fetchData.cancel(), [fetchData]);
 
   return (
-    <DataTable
-      className="roles-permissions-table"
-      isFilterable
-      isPaginated
-      isSortable
-      manualFilters
-      manualPagination
-      manualSortBy
-      fetchData={fetchData}
-      data={results}
-      itemCount={count}
-      pageCount={pageCount}
-      initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
-      isLoading={isLoadingPermissions || isLoadingRoles}
-      additionalColumns={[
-        {
-          id: 'actions',
-          Header: formatMessage(messages['authz.roles.table.column.actions.title']),
-          Cell: RoleActionsCell,
-          headerClassName: 'justify-content-center',
-        },
-      ]}
-      columns={[
-        {
-          id: ROLES_TABLE_COLUMNS.NAME,
-          Header: formatMessage(messages['authz.roles.table.column.role.title']),
-          accessor: 'displayName',
-          Cell: RoleNameCell,
-        },
-        {
-          id: ROLES_TABLE_COLUMNS.RESOURCE_TYPE,
-          Header: formatMessage(messages['authz.roles.table.column.resource.type.title']),
-          accessor: 'scopeTypes',
-          Cell: ResourceTypeCell,
-        },
-        {
-          id: ROLES_TABLE_COLUMNS.MEMBERS,
-          Header: formatMessage(messages['authz.roles.table.column.members.title']),
-          accessor: 'userCount',
-          Cell: MembersCell,
-          disableFilters: true,
-        },
-        {
-          id: 'permissions',
-          Header: formatMessage(messages['authz.roles.table.column.permissions.title']),
-          accessor: 'permissions',
-          Cell: PermissionsGrantedCell,
-          disableFilters: true,
-          disableSortBy: true,
-        },
-        {
-          id: ROLES_TABLE_COLUMNS.LAST_UPDATED,
-          Header: formatMessage(messages['authz.roles.table.column.last.updated.title']),
-          accessor: 'updatedAt',
-          Cell: LastUpdatedCell,
-          disableFilters: true,
-        },
-      ]}
-    >
-      <RolesTableControlBar scopeTypes={viewableScopeTypes} />
-      <DataTable.Table />
-      <DataTable.EmptyTable
-        content={formatMessage(messages[hasFailedToLoad ? 'authz.tabs.permissionsRoles.error' : 'authz.roles.table.empty'])}
-      />
-      <TableFooter showingMessage={messages['authz.roles.table.showing.roles.text']} />
-    </DataTable>
+    <RoleAssignmentContext.Provider value={roleAssignment}>
+      <DataTable
+        className="roles-permissions-table"
+        isFilterable
+        isPaginated
+        isSortable
+        manualFilters
+        manualPagination
+        manualSortBy
+        fetchData={fetchData}
+        data={results}
+        itemCount={count}
+        pageCount={pageCount}
+        initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
+        isLoading={isLoadingPermissions || isLoadingRoles}
+        additionalColumns={[
+          {
+            id: 'actions',
+            Header: formatMessage(messages['authz.roles.table.column.actions.title']),
+            Cell: RoleActionsCell,
+            headerClassName: 'justify-content-center',
+          },
+        ]}
+        columns={[
+          {
+            id: ROLES_TABLE_COLUMNS.NAME,
+            Header: formatMessage(messages['authz.roles.table.column.role.title']),
+            accessor: 'displayName',
+            Cell: RoleNameCell,
+          },
+          {
+            id: ROLES_TABLE_COLUMNS.RESOURCE_TYPE,
+            Header: formatMessage(messages['authz.roles.table.column.resource.type.title']),
+            accessor: 'scopeTypes',
+            Cell: ResourceTypeCell,
+          },
+          {
+            id: ROLES_TABLE_COLUMNS.MEMBERS,
+            Header: formatMessage(messages['authz.roles.table.column.members.title']),
+            accessor: 'userCount',
+            Cell: MembersCell,
+            disableFilters: true,
+          },
+          {
+            id: 'permissions',
+            Header: formatMessage(messages['authz.roles.table.column.permissions.title']),
+            accessor: 'permissions',
+            Cell: PermissionsGrantedCell,
+            disableFilters: true,
+            disableSortBy: true,
+          },
+          {
+            id: ROLES_TABLE_COLUMNS.LAST_UPDATED,
+            Header: formatMessage(messages['authz.roles.table.column.last.updated.title']),
+            accessor: 'updatedAt',
+            Cell: LastUpdatedCell,
+            disableFilters: true,
+          },
+        ]}
+      >
+        <RolesTableControlBar scopeTypes={viewableScopeTypes} />
+        <DataTable.Table />
+        <DataTable.EmptyTable
+          content={formatMessage(messages[hasFailedToLoad ? 'authz.tabs.permissionsRoles.error' : 'authz.roles.table.empty'])}
+        />
+        <TableFooter showingMessage={messages['authz.roles.table.showing.roles.text']} />
+      </DataTable>
+      {/* Mounted only while open, so every opening starts from the clicked role. */}
+      {roleToAssign && (
+        <AssignRoleWizard
+          isOpen
+          onClose={() => setRoleToAssign(null)}
+          initialRole={roleToAssign}
+          roleGroups={roleGroups}
+          isLoadingRoles={isLoadingAssignableRoles}
+          isRolesError={isAssignableRolesError}
+        />
+      )}
+    </RoleAssignmentContext.Provider>
   );
 };
 
