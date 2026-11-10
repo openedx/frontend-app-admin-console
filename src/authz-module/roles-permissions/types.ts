@@ -2,6 +2,8 @@
 export interface RoleRow {
   // A role spanning several scope types gets one row per scope type, so the id includes it.
   id: string;
+  // The catalog role key, e.g. `library_admin`.
+  role: string;
   name: string;
   resourceType: string;
   // TODO: the catalog API (ADR 0028) has no member count or update time yet, so both are always
