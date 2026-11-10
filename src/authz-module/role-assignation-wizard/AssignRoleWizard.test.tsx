@@ -552,3 +552,94 @@ describe('AssignRoleWizard — Step 2', () => {
     await waitFor(() => expect(mockAssignMutateAsync).toHaveBeenCalledTimes(2));
   });
 });
+
+describe('AssignRoleWizard — preselected role', () => {
+  const libraryAdmin = { scopeType: SCOPE_TYPES.LIBRARY, role: 'library_admin' };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseValidateUsers.mockReturnValue({ mutateAsync: mockValidateMutateAsync, isPending: false });
+    mockUseAssignTeamMembersRole.mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: false });
+    mockUseScopes.mockReturnValue(oneScopeReturn);
+    mockUseOrgs.mockReturnValue({ data: { results: oneOrg } });
+    (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+    (useScopePermissions as jest.Mock).mockReturnValue({
+      hasPlatformPermission: false,
+      orgHasPermission: { org1: true },
+    });
+  });
+
+  it('opens with the given role selected', () => {
+    renderWizard({ initialRole: libraryAdmin });
+
+    expect(getRoleRadio(/Library Admin/i)).toBeChecked();
+    expect(getRoleRadio(/Course Admin/i)).not.toBeChecked();
+  });
+
+  it('lets the user pick another role', async () => {
+    const user = userEvent.setup();
+    renderWizard({ initialRole: libraryAdmin });
+
+    await user.click(getRoleRadio(/Course Admin/i));
+
+    expect(getRoleRadio(/Course Admin/i)).toBeChecked();
+    expect(getRoleRadio(/Library Admin/i)).not.toBeChecked();
+  });
+
+  // Next would otherwise enable with no radio checked, saving a role the user cannot see.
+  it('ignores a role the user cannot assign', async () => {
+    const user = userEvent.setup();
+    renderWizard({ initialRole: { scopeType: SCOPE_TYPES.LIBRARY, role: 'library_user' } });
+
+    expect(screen.getAllByRole('radio').filter((radio) => (radio as HTMLInputElement).checked)).toHaveLength(0);
+    await user.type(getUsersInput(), 'alice');
+    expect(getNextButton()).toBeDisabled();
+  });
+
+  it('ignores a known role offered under another scope type', () => {
+    renderWizard({ initialRole: { scopeType: SCOPE_TYPES.COURSE, role: 'library_admin' } });
+
+    expect(getRoleRadio(/Library Admin/i)).not.toBeChecked();
+  });
+
+  it('selects the role once the roles finish loading', () => {
+    const { rerender } = renderWrapper(wizard({ initialRole: libraryAdmin, roleGroups: [], isLoadingRoles: true }));
+
+    rerender(wizard({ initialRole: libraryAdmin }));
+
+    expect(getRoleRadio(/Library Admin/i)).toBeChecked();
+  });
+
+  it('keeps the role the user picked when the roles reload', async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderWrapper(wizard({ initialRole: libraryAdmin }));
+    await user.click(getRoleRadio(/Course Admin/i));
+
+    rerender(wizard({ initialRole: libraryAdmin, roleGroups: [...roleGroups] }));
+
+    expect(getRoleRadio(/Course Admin/i)).toBeChecked();
+  });
+
+  it('assigns the preselected role on save', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
+    mockAssignMutateAsync.mockResolvedValue({
+      completed: [{ userIdentifier: 'alice', scope: 'lib:org1/lib1', status: 'role_added' }],
+      errors: [],
+    });
+    renderWizard({ initialRole: libraryAdmin, onClose });
+
+    await user.type(getUsersInput(), 'alice');
+    await user.click(getNextButton());
+    await user.click(await screen.findByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => {
+      expect(mockAssignMutateAsync).toHaveBeenCalledWith({
+        data: { users: ['alice'], role: 'library_admin', scopes: ['lib:org1/lib1'] },
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+});
