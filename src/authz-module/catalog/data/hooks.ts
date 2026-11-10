@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { usePermissions } from '@openedx/frontend-base';
 import { appId } from '@src/constants';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
@@ -12,6 +12,26 @@ const catalogQueryKeys = {
   byScopeTypes: (scopeTypes: string[]) => [...catalogQueryKeys.all, scopeTypes] as const,
 };
 
+/**
+ * Invalidate the catalog of every scope combination after a successful role-definition change.
+ *
+ * @example
+ * ```tsx
+ * import { useMutation, useQueryClient } from '@tanstack/react-query';
+ * import { invalidateAuthzCatalog } from '@src/authz-module/catalog';
+ *
+ * // Inside a hook that updates role definitions:
+ * const queryClient = useQueryClient();
+ * const mutation = useMutation({
+ *   mutationFn: updateRoleDefinition,
+ *   onSuccess: () => invalidateAuthzCatalog(queryClient),
+ * });
+ * ```
+ */
+export const invalidateAuthzCatalog = (queryClient: QueryClient) => queryClient.invalidateQueries({
+  queryKey: catalogQueryKeys.all,
+});
+
 const NO_SCOPE_TYPES: string[] = [];
 
 const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
@@ -19,13 +39,11 @@ const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
 );
 
 /**
- * React Query hook to fetch the roles, permissions and categories catalog of the scope types the
- * user can view, in a single request.
+ * Loads the shared roles, permissions and categories catalog for the scope types the user can view.
  *
  * The scope types come from the user's view-team permissions (validate/me), so the query waits
  * for them and is skipped when the user can't view any scope type. `isLoading` covers both.
- * The catalog comes from the authz schema and doesn't change while the app runs, so it never
- * goes stale.
+ * The catalog stays fresh for thirty minutes.
  *
  * Besides the query result, it returns:
  * - `scopeTypes`: the scope types of the loaded catalog, courses first; empty until it loads.
@@ -50,7 +68,7 @@ export const useAuthzCatalog = () => {
     queryKey: catalogQueryKeys.byScopeTypes(viewableScopeTypes),
     queryFn: () => getAuthzCatalog(viewableScopeTypes),
     enabled: viewableScopeTypes.length > 0,
-    staleTime: Infinity,
+    staleTime: 30 * 60 * 1000,
   });
 
   const { data: catalog } = query;

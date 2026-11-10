@@ -1,9 +1,10 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { QueryClient } from '@tanstack/react-query';
 import { usePermissions } from '@openedx/frontend-base';
 import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { CATALOG_PAGE_SIZE } from '../constants';
-import { useAuthzCatalog } from './hooks';
+import { invalidateAuthzCatalog, useAuthzCatalog } from './hooks';
 
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
@@ -67,6 +68,90 @@ const renderUseAuthzCatalog = () => renderHook(() => useAuthzCatalog(), { wrappe
 describe('useAuthzCatalog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('reuses fresh catalog data when another consumer mounts', async () => {
+    mockPermissions({ library: true });
+    const { get } = mockCatalogApi();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = createQueryClientWrapper(queryClient);
+    const first = renderHook(() => useAuthzCatalog(), { wrapper });
+    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+
+    jest.spyOn(Date, 'now').mockReturnValue(first.result.current.dataUpdatedAt + 30 * 60 * 1000 - 1);
+    const second = renderHook(() => useAuthzCatalog(), { wrapper });
+
+    expect(second.result.current.data).toBe(first.result.current.data);
+    expect(second.result.current.isFetching).toBe(false);
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the catalog on mount after thirty minutes', async () => {
+    mockPermissions({ library: true });
+    const { get } = mockCatalogApi();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = createQueryClientWrapper(queryClient);
+    const first = renderHook(() => useAuthzCatalog(), { wrapper });
+    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
+    first.unmount();
+
+    jest.spyOn(Date, 'now').mockReturnValue(first.result.current.dataUpdatedAt + 30 * 60 * 1000 + 1);
+    const second = renderHook(() => useAuthzCatalog(), { wrapper });
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(second.result.current.isFetching).toBe(false));
+  });
+
+  it('refreshes an active catalog immediately when explicitly invalidated', async () => {
+    mockPermissions({ library: true });
+    const { get } = mockCatalogApi();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(() => useAuthzCatalog(), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    get.mockResolvedValueOnce({
+      data: {
+        count: 1,
+        next: null,
+        previous: null,
+        scope_types: [SCOPE_TYPES.LIBRARY],
+        categories: [],
+        permissions: [],
+        results: [buildRole('custom_role', [], SCOPE_TYPES.LIBRARY)],
+      },
+    });
+
+    await act(async () => invalidateAuthzCatalog(queryClient));
+
+    expect(get).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(
+      result.current.getScopeCatalog(SCOPE_TYPES.LIBRARY)?.roles.map(({ role }) => role),
+    ).toEqual(['custom_role']));
+  });
+
+  it('invalidates every cached scope combination without touching unrelated queries', async () => {
+    mockCatalogApi();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = createQueryClientWrapper(queryClient);
+    for (const scopes of [{ course: true }, { library: true }, { course: true, library: true }]) {
+      mockPermissions(scopes);
+      const { result, unmount } = renderHook(() => useAuthzCatalog(), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      unmount();
+    }
+    const catalogQueries = queryClient.getQueryCache().getAll();
+    expect(catalogQueries).toHaveLength(3);
+    queryClient.setQueryData(['unrelated'], 'cached data');
+
+    await invalidateAuthzCatalog(queryClient);
+
+    expect(catalogQueries.every((query) => query.state.isInvalidated)).toBe(true);
+    expect(queryClient.getQueryState(['unrelated'])?.isInvalidated).toBe(false);
   });
 
   it('fetches the catalog of every scope type the user can view', async () => {

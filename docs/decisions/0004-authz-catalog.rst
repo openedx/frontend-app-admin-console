@@ -31,7 +31,7 @@ Decision
 
 **1. A dedicated** ``catalog`` **feature owns the catalog.**
 
-Following `ADR 0002`_, the catalog lives in ``src/authz-module/catalog/``. Its barrel (``index.ts``) exposes only what other features consume: ``useAuthzCatalog``, ``CatalogIcon`` and the catalog types. Screens never call the API or read the raw response.
+Following `ADR 0002`_, the catalog lives in ``src/authz-module/catalog/``. Its barrel (``index.ts``) exposes only what other features consume: ``useAuthzCatalog``, ``invalidateAuthzCatalog``, ``CatalogIcon`` and the catalog types. Screens never call the API or read the raw response.
 
 ::
 
@@ -55,29 +55,29 @@ The types mirror the API response (camelCased), without adapters to the old hard
 * a **role** (``role``, ``displayName``, ``permissions``, ``scopeTypes``) replaces the old role metadata;
 * a **scope type** (``course-v1``, ``lib``), the namespace of the scope keys, replaces the old context type (``course``, ``library``). It stays distinct from a **scope**, which is a concrete key such as ``course-v1:OpenedX+DemoX+Demo``.
 
-**3. One request, for the scope types the user can view.**
+**3. One shared catalog for the scope types the user can view.**
 
-The catalog endpoint answers 403 when the user cannot view the team of a requested scope type. So ``useAuthzCatalog`` first checks the user's view-team permissions with ``usePermissions`` from ``@openedx/frontend-base`` (which calls ``/permissions/validate/me``), then requests the catalog of every scope type the user can view, in a single call. A user who cannot view any scope type makes no catalog request.
+The catalog endpoint answers 403 when the user cannot view the team of a requested scope type. So ``useAuthzCatalog`` first checks the user's view-team permissions with ``usePermissions`` from ``@openedx/frontend-base`` (which calls ``/permissions/validate/me``), then loads the catalog for all viewable scope types together. A user who cannot view any scope type makes no catalog request.
 
-The hook takes no arguments, so every consumer shares one cache entry and one request. ``getAuthzCatalog(scopeTypes)`` still takes the scope types, for a caller that needs a subset.
+The hook takes no arguments; consumers share the cached catalog for the user's viewable scope types. ``getAuthzCatalog(scopeTypes)`` still takes the scope types, for a caller that needs a subset.
 
-**4. The whole catalog is loaded and cached for the session.**
+**4. The whole catalog is loaded and shared through the cache.**
 
-``getAuthzCatalog`` always returns the complete catalog. The API paginates the roles, so it requests the first page with 100 roles, the maximum the API allows. If there are more roles, it requests the remaining pages at the same time and joins their roles in page order. Categories and permissions are not paginated (every page includes all of them), so they are taken from the first page.
+``getAuthzCatalog`` always returns the complete catalog for the requested scope types. The API paginates the roles, so it requests the first page with 100 roles, the maximum the API allows. If there are more roles, it requests the remaining pages at the same time and joins their roles in page order. Categories and permissions are not paginated (every page includes all of them), so they are taken from the first page.
 
 Pages are not loaded on demand, because the current UI displays all the roles of a scope type at once: the matrix shows each role as a column, and the roles filter and the wizard list every role the user can choose. This design fits the limited number of roles per scope type and the scope types known today.
 
-The catalog comes from the authz schema and does not change while the app runs, so the query has an infinite ``staleTime``.
+The catalog uses a thirty-minute ``staleTime`` to balance reuse across consumers with freshness as role definitions become editable.
 
-**5. Screens consume one scope type at a time.**
+Role-definition mutations should call ``invalidateAuthzCatalog(queryClient)`` after success, keeping query keys private to the catalog feature. Assigning or revoking an existing role does not change its definition and does not require catalog invalidation.
 
-Every screen shows the roles of one scope type at a time (a matrix tab, a filter group, the scope chosen in the wizard, the scope of an assignment). ``getScopeCatalog(scopeType)`` returns that part of the catalog:
+**5. Current consumers derive scope-specific views.**
+
+The current UI derives scope-specific views from the shared catalog: a matrix tab, a role-filter section, the scope chosen in the wizard, or an assignment's permission breakdown. A screen can combine views of several scope types, as the roles filter does. ``getScopeCatalog(scopeType)`` returns that part of the catalog:
 
 * **permissions**: those whose ``scopeTypes`` include the scope type;
 * **categories**: those used by those permissions;
 * **roles**: those whose ``scopeTypes`` include the scope type, each listing only its permissions of that scope type, ordered from most to fewest permissions. Roles with the same count keep the catalog order, so the order does not depend on the language.
-
-Roles and permissions each keep their own ``scopeTypes`` because the catalog of every viewable scope type comes in one response, and each screen picks the part of its scope type: the roles by their ``scopeTypes`` and the permissions by theirs.
 
 The hook memoizes each scope type's catalog, so its identity is stable between renders and the screens can memoize what they build from it, such as the matrix and the roles filter choices, without rebuilding it on every render.
 
@@ -103,7 +103,7 @@ Consequences
 * Roles, permissions, categories, names and descriptions added or changed in the backend appear in catalog consumers without a frontend release. They can use any supported icon identifier; adding a new identifier requires agreement on the contract and an update to the frontend map.
 * The console only shows what the catalog returns. Roles that the hardcoded copy listed as disabled no longer appear until the backend returns them.
 * Names and descriptions come from the backend and are not translated by the frontend.
-* Screens depend on one more request. Until the catalog loads, they show their loading state.
+* Screens depend on loading the catalog. Until it loads, they show their loading state.
 * The frontend still knows the scope types it supports (``SCOPE_TYPES`` in ``authz-module/constants.ts``), the view-team action of each one and their display order (courses, then libraries). A new scope type still needs a frontend change (see *Future evolution*).
 
 Rejected Alternatives
@@ -116,7 +116,7 @@ Rejected Alternatives
   It would let screens keep their code, but it would keep two vocabularies (resource and category, context type and scope type) and an adapter layer to maintain. Moving each screen to the catalog types once is simpler.
 
 **Request the catalog per screen or per scope type**
-  Each screen would compute its own scope types, different lists would make separate requests, and a wrong list would answer 403. One request for every viewable scope type, sliced on the client, is shared by every screen.
+  Each screen would compute its own scope types, different lists would make separate requests, and a wrong list would answer 403. Sharing the catalog for all viewable scope types avoids this duplication; consumers derive their views from it.
 
 **Use Paragon export names as the permanent icon contract**
   This couples backend schemas to the icon library and version selected by each downstream site. Dynamic imports remain a temporary implementation; the intended contract is an agreed set of identifiers mapped to components by the frontend (Decision 6).
@@ -124,28 +124,27 @@ Rejected Alternatives
 Future evolution
 ################
 
-**Scope-type agnostic frontend.** The goal is a frontend that does not know the scope types, so a scope type defined in the backend (for example by a plugin, see the extensibility section of `ADR 0028`_) appears without frontend changes. What is still hardcoded:
+**Backend-provided scope-type metadata.** Moving scope-type metadata to the backend could allow new scope types (for example, those defined by a plugin; see the extensibility section of `ADR 0028`_) to appear without frontend changes. Whether that flexibility justifies the additional API and frontend complexity remains an open decision. The frontend currently defines:
 
 * the view-team action of each scope type, used to build the request;
-* ``SCOPE_TYPES`` and their display order;
-* the tab labels, filter group names and group icons;
+* the scope-type keys (``SCOPE_TYPES``) and their display order;
+* the scope-type presentation metadata: the "Courses" and "Libraries" tab labels, role-filter section labels, their translations, and icons;
 * the manage-team action of each scope type, used by the wizard.
 
-A possible backend evolution:
+Adding a new scope type therefore requires frontend changes. Role-filter sections group roles by scope type; catalog categories group permissions.
+
+If this approach is adopted, the backend should:
 
 1. Make ``scope_types`` optional in the request. Without it, the endpoint returns the catalog of every scope type the user can view and leaves out the others instead of answering 403.
 2. Return the scope types as objects whose order is the display order, carrying their display name, description, icon, and view and manage permissions.
 
-With that, ``useAuthzCatalog`` keeps its signature but makes one query without parameters and no longer waits for validate/me. The matrix tabs and filter groups come from the response, the wizard checks each scope type's manage permission through validate/me, and the scope types come from the catalog instead of ``SCOPE_TYPES`` and the view-team mapping in ``authz-module/constants.ts``. Because a scope type id is the prefix of its scope keys, the icons and labels of scopes could also come from the catalog.
+The frontend should then use this metadata to build matrix tabs, role-filter sections and permission mappings. ``useAuthzCatalog`` could keep its signature, fetching the catalog without ``scope_types`` and without first calling validate/me. Manage permissions would still be checked through validate/me.
 
-For that step:
-
-* The manage permission would be catalog data, and the frontend would still check it through validate/me, which remains the source for any behavior the UI displays.
-* Tab labels and group names are translated in the frontend today. Moving them to the catalog would require the backend to provide localized scope-type metadata, alongside the localized role, permission and category metadata it already returns.
+The backend would also need to localize the scope-type labels currently translated in the frontend.
 
 **Loading on demand.** The current UI displays all the roles of a scope type at once (Decision 4). Loading the roles on demand, with search or paging in the UI instead of showing every role at once, is only worth it if real cases show that the number of roles per scope type has grown too large for that, for example with user-defined roles. Until then, the current approach stays.
 
-**User-defined roles.** The types already carry ``definitionKind`` (``static`` or ``user_defined``). Roles are expected to be defined in the backend only, so the console just displays them. If screens to create or edit roles are ever added to the console, they would invalidate the catalog query after a change, since its ``staleTime`` is infinite.
+**User-defined roles.** The catalog types already distinguish ``static`` and ``user_defined`` roles through ``definitionKind``. Future role-management screens may also need to refresh affected role assignments after permission edits or role deletions.
 
 **Display order.** The backend returns categories, permissions and roles in a stable order by identifier, and explicit display ordering is a backend follow-up. The frontend keeps the API order for categories and permissions, so a backend display order applies without a frontend change. Roles are ordered by permission count in the frontend, which could move to the backend as well.
 
