@@ -1,13 +1,27 @@
-import { act, screen, within } from '@testing-library/react';
+import {
+  act, screen, waitFor, within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getAuthenticatedUser } from '@openedx/frontend-base';
 import { renderWithAllProviders } from '@src/testUtils';
-import { SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
-import { buildCatalogRole } from '@src/authz-module/catalog/testUtils';
+import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { authzCatalog, buildCatalogRole, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { useCatalogRoles } from '@src/authz-module/catalog/data/hooks';
 import type { GetAuthzCatalogResponse, RolesQueryParams } from '@src/authz-module/catalog';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
+import {
+  useAssignTeamMembersRole, useOrgs, useScopes, useValidateUsers,
+} from '@src/authz-module/data/hooks';
+import useScopePermissions from '@src/authz-module/role-assignation-wizard/hooks/useScopePermissions';
 import RolesPermissionsTable from './RolesPermissionsTable';
+
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  getAuthenticatedUser: jest.fn(),
+}));
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
@@ -16,6 +30,30 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: jest.fn(),
+}));
+
+jest.mock('@src/data/hooks', () => ({
+  ...jest.requireActual('@src/data/hooks'),
+  useValidateUserPermissionsNonSuspense: jest.fn(),
+}));
+
+jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
+  useCourseAuthoringFlag: jest.fn(),
+}));
+
+jest.mock('@src/authz-module/data/hooks', () => ({
+  useValidateUsers: jest.fn(),
+  useAssignTeamMembersRole: jest.fn(),
+  useScopes: jest.fn(),
+  useOrgs: jest.fn(),
+}));
+
+jest.mock('@src/authz-module/role-assignation-wizard/hooks/useScopePermissions');
+
+(globalThis as any).IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
 }));
 
 const mockUseCatalogRoles = useCatalogRoles as jest.Mock;
@@ -65,6 +103,57 @@ const mockViewPermissions = (overrides: Partial<ReturnType<typeof useViewTeamPer
   });
 };
 
+const mockValidateMutateAsync = jest.fn();
+const mockAssignMutateAsync = jest.fn();
+
+const allowManaging = (...scopeTypes: string[]) => ({
+  data: ALL_SCOPE_TYPES.map((scopeType) => ({
+    action: MANAGE_TEAM_ACTIONS[scopeType],
+    allowed: scopeTypes.includes(scopeType),
+  })),
+});
+
+const libraryScope = {
+  externalKey: 'lib:org1/lib1',
+  displayName: 'Library One',
+  org: { id: 1, name: 'Organization One', shortName: 'org1' },
+};
+
+// The assign role wizard: a user who can manage every team, with course authoring on.
+const mockRoleAssignment = () => {
+  mockAuthzCatalog();
+  (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging(...ALL_SCOPE_TYPES));
+  (useCourseAuthoringFlag as jest.Mock).mockReturnValue({
+    isCourseAuthoringEnabled: true,
+    isCourseEnabled: () => true,
+    isOrgAuthoringEnabled: () => true,
+    isLoading: false,
+  });
+  (useValidateUsers as jest.Mock).mockReturnValue({ mutateAsync: mockValidateMutateAsync, isPending: false });
+  (useAssignTeamMembersRole as jest.Mock).mockReturnValue({ mutateAsync: mockAssignMutateAsync, isPending: false });
+  (useScopes as jest.Mock).mockReturnValue({
+    data: {
+      pages: [{
+        results: [libraryScope], count: 1, next: null, previous: null,
+      }],
+    },
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    isFetchingNextPage: false,
+    isLoading: false,
+    isError: false,
+  });
+  (useOrgs as jest.Mock).mockReturnValue({
+    data: {
+      results: [{
+        id: 1, name: 'Organization One', shortName: 'org1', description: '', logo: null, active: true,
+      }],
+    },
+  });
+  (useScopePermissions as jest.Mock).mockReturnValue({ hasPlatformPermission: false, orgHasPermission: { org1: true } });
+  (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
+};
+
 const renderTable = () => renderWithAllProviders(
   <ToastManagerProvider>
     <RolesPermissionsTable />
@@ -89,6 +178,7 @@ describe('RolesPermissionsTable', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockViewPermissions();
     mockRolesPage();
+    mockRoleAssignment();
   });
 
   afterEach(() => {
@@ -347,5 +437,94 @@ describe('RolesPermissionsTable', () => {
       expect(screen.getByText('Course Admin')).toBeInTheDocument();
       expect(screen.queryByText('The roles and permissions could not be loaded. Please try again later.')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('RolesPermissionsTable — assign role', () => {
+  const assignableRoles = authzCatalog.roles.filter(({ role }) => ['course_admin', 'library_admin', 'library_author'].includes(role));
+
+  const openRowMenu = async (user: ReturnType<typeof userEvent.setup>, roleName: string) => {
+    await user.click(within(getRow(roleName)).getByRole('button', { name: `More actions for ${roleName}` }));
+  };
+  const queryAssignItem = () => screen.queryByRole('button', { name: 'Assign role' });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockViewPermissions();
+    mockRolesPage({ data: buildPage({ count: assignableRoles.length, results: assignableRoles }) });
+    mockRoleAssignment();
+  });
+
+  it('opens the wizard with the row role preselected', async () => {
+    const user = userEvent.setup();
+    renderTable();
+
+    await openRowMenu(user, 'Library Author');
+    await user.click(screen.getByRole('button', { name: 'Assign role' }));
+
+    const wizard = screen.getByRole('dialog', { name: 'Assign Role' });
+    expect(within(wizard).getByRole('radio', { name: /Library Author/ })).toBeChecked();
+    expect(within(wizard).getByRole('radio', { name: /Library Admin/ })).not.toBeChecked();
+  });
+
+  it('assigns the role and shows a success toast', async () => {
+    const user = userEvent.setup();
+    mockValidateMutateAsync.mockResolvedValue({ invalidUsers: [], validUsers: ['alice'] });
+    mockAssignMutateAsync.mockResolvedValue({
+      completed: [{ userIdentifier: 'alice', scope: libraryScope.externalKey, status: 'role_added' }],
+      errors: [],
+    });
+    renderTable();
+
+    await openRowMenu(user, 'Library Author');
+    await user.click(screen.getByRole('button', { name: 'Assign role' }));
+    await user.type(screen.getByLabelText(/Add users by username or email/i), 'alice');
+    await user.click(screen.getByRole('button', { name: /^Next$/i }));
+    await user.click(await screen.findByLabelText('Library One'));
+    await user.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Assign Role' })).not.toBeInTheDocument());
+    expect(mockAssignMutateAsync).toHaveBeenCalledWith({
+      data: { users: ['alice'], role: 'library_author', scopes: [libraryScope.externalKey] },
+    });
+    expect(screen.getByText('Role assigned successfully.')).toBeInTheDocument();
+  });
+
+  it('hides the item for roles of a team the user cannot manage', async () => {
+    const user = userEvent.setup();
+    (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging(SCOPE_TYPES.LIBRARY));
+    renderTable();
+
+    await openRowMenu(user, 'Course Admin');
+    expect(queryAssignItem()).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Duplicate' })).toBeInTheDocument();
+
+    await openRowMenu(user, 'Library Admin');
+    expect(queryAssignItem()).toBeInTheDocument();
+  });
+
+  it('hides the item for course roles while course authoring is disabled', async () => {
+    const user = userEvent.setup();
+    (useCourseAuthoringFlag as jest.Mock).mockReturnValue({
+      isCourseAuthoringEnabled: false,
+      isCourseEnabled: () => false,
+      isOrgAuthoringEnabled: () => false,
+      isLoading: false,
+    });
+    renderTable();
+
+    await openRowMenu(user, 'Course Admin');
+
+    expect(queryAssignItem()).not.toBeInTheDocument();
+  });
+
+  it('hides the item when the user cannot assign any role', async () => {
+    const user = userEvent.setup();
+    (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging());
+    renderTable();
+
+    await openRowMenu(user, 'Library Admin');
+
+    expect(queryAssignItem()).not.toBeInTheDocument();
   });
 });
