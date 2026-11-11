@@ -1,5 +1,5 @@
 import {
-  Dropdown, Form, Icon, Stack,
+  Alert, Dropdown, Form, Icon, Stack,
 } from '@openedx/paragon';
 import { useIntl } from '@openedx/frontend-base';
 import { FilterList, Info, Search } from '@openedx/paragon/icons';
@@ -18,6 +18,7 @@ const MultipleChoiceFilter = ({
   onSearchChange,
   iconSrc,
   disabled = false,
+  errorMessage,
   size = 'sm',
 }: MultipleChoiceFilterProps) => {
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
@@ -87,15 +88,21 @@ const MultipleChoiceFilter = ({
           aria-label={filterButtonText}
           value={checkedBoxes}
         >
-          <span className="small text-info-700 mt-2">
-            {formatMessage(messages['authz.table.controlbar.filters.items.showing'], { current: filterChoices.length, total: filterChoices.length })}
-          </span>
+          {errorMessage ? (
+            <Alert variant="danger" className="m-2">
+              {errorMessage}
+            </Alert>
+          ) : (
+            <span className="small text-info-700 mt-2">
+              {formatMessage(messages['authz.table.controlbar.filters.items.showing'], { current: filterChoices.length, total: filterChoices.length })}
+            </span>
+          )}
           {!isGrouped ? filterChoices.map(({
             displayName, value, description,
           }) => (
             <Form.Checkbox
               className="m-2 w-100"
-              key={displayName}
+              key={value}
               checked={checkedBoxes.includes(value)}
               value={value}
               onChange={() => handleClickCheckbox(value, displayName)}
@@ -117,7 +124,7 @@ const MultipleChoiceFilter = ({
                   {options.map(({ displayName, value, description }) => (
                     <Form.Checkbox
                       className="m-2 w-100"
-                      key={displayName}
+                      key={value}
                       value={value}
                       onChange={() => handleClickCheckbox(value, displayName)}
                       disabled={checkedBoxes.includes(value) ? false : disabled}

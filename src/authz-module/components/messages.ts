@@ -31,6 +31,11 @@ const messages = defineMessages({
     defaultMessage: 'Search',
     description: 'Search placeholder for two specific fields',
   },
+  'authz.table.controlbar.roles.error': {
+    id: 'authz.table.controlbar.roles.error',
+    defaultMessage: 'Roles could not be loaded. Please try again later.',
+    description: 'Error displayed in the roles filter when the authorization catalog cannot be loaded',
+  },
   'authz.table.controlbar.search.by.fields': {
     id: 'authz.table.controlbar.search.by.fields',
     defaultMessage: 'Search by {firstField} or {secondField}',
@@ -91,11 +96,6 @@ const messages = defineMessages({
     id: 'authz.team.members.table.group.libraries',
     defaultMessage: 'Libraries',
     description: 'Label for the "Libraries" group in the team members table filters',
-  },
-  'authz.team.members.table.group.global': {
-    id: 'authz.team.members.table.group.global',
-    defaultMessage: 'Global',
-    description: 'Label for the "Global" group in the team members table filters',
   },
   'authz.table.controlbar.filters.more.results': {
     id: 'authz.table.controlbar.filters.more.results',
