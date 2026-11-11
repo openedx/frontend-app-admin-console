@@ -1,9 +1,7 @@
 import type { IntlShape } from '@openedx/frontend-base';
 import { actionKeys } from '@src/authz-module/components/RoleCard/constants';
-import {
-  EnrichedPermission, PermissionMetadata, PermissionsResourceGrouped,
-  ResourceMetadata, Role,
-} from '@src/types';
+import type { Category, Permission, ScopeCatalog } from '@src/authz-module/catalog';
+import { EnrichedPermission, PermissionMetadata } from '@src/types';
 import actionMessages from '@src/authz-module/components/RoleCard/messages';
 
 /**
@@ -39,61 +37,47 @@ const getPermissionMetadata = (permission: PermissionMetadata, intl: IntlShape):
   return { ...permission, label, actionKey };
 };
 
-interface BuildPermissionsMatrixProps {
-  roles: Role[];
-  permissions: PermissionMetadata[];
-  resources: ResourceMetadata[];
-  intl: IntlShape;
+export interface MatrixPermission {
+  permission: Permission;
+  // Whether each role, by role id, grants the permission.
+  grantedTo: Record<string, boolean>;
+}
+
+export interface MatrixCategory {
+  category: Category;
+  permissions: MatrixPermission[];
 }
 
 /**
- * Builds a permission matrix from the given roles, permissions, and resources.
+ * Builds the roles and permissions matrix of a scope type: its permissions grouped by category,
+ * each one with the roles that grant it.
  *
- * The matrix groups permissions under their respective resources and maps
- * each permission to which roles have access to it.
+ * Categories keep the catalog order. Permissions without a category go in a final
+ * `otherCategory`, which is left out when there are none.
  *
- * @param roles - List of roles, each containing a list of granted permission keys.
- * @param permissions - Metadata describing each permission, including its associated resource.
- * @param resources - List of resource metadata used to group permissions.
- * @param intl - The internationalization object used to localize permission labels.
+ * @param scopeCatalog - The catalog of the scope type.
+ * @param otherCategory - The category that groups the permissions without one.
  *
- * @returns A permission matrix grouped by resource, with role mappings per permission.
+ * @returns The matrix, one entry per category.
  */
-const buildPermissionMatrixByResource = ({
-  roles, permissions, resources, intl,
-}: BuildPermissionsMatrixProps): PermissionsResourceGrouped[] => {
-  const enrichedPermissions = permissions.reduce((acc, perm) => {
-    acc[perm.key] = getPermissionMetadata(perm, intl);
-    return acc;
-  }, {} as Record<string, EnrichedPermission>);
-
-  const permissionsByResource = permissions.reduce<Record<string, PermissionMetadata[]>>((acc, perm) => {
-    if (!acc[perm.resource]) acc[perm.resource] = [];
-    acc[perm.resource].push(perm);
-    return acc;
-  }, {});
-
-  return resources.map(resource => {
-    const perms = permissionsByResource[resource.key] || [];
-
-    const permissionRows = perms.map(permission => {
-      const enriched = enrichedPermissions[permission.key];
-      const rolesMap = roles.reduce((acc, role) => {
-        acc[role.name] = role.permissions.includes(permission.key);
-        return acc;
-      }, {} as Record<string, boolean>);
-
-      return {
-        ...enriched,
-        roles: rolesMap,
-      };
-    });
-
-    return {
-      ...resource,
-      permissions: permissionRows,
-    };
+const buildPermissionMatrix = (
+  { categories, permissions, roles }: ScopeCatalog,
+  otherCategory: Category,
+): MatrixCategory[] => {
+  const toMatrixPermission = (permission: Permission): MatrixPermission => ({
+    permission,
+    grantedTo: Object.fromEntries(roles.map(({ role, permissions: granted }) => [role, granted.includes(permission.id)])),
   });
+
+  const matrix = categories.map((category) => ({
+    category,
+    permissions: permissions.filter(({ categoryId }) => categoryId === category.id).map(toMatrixPermission),
+  }));
+
+  const uncategorized = permissions.filter(({ categoryId }) => categoryId === null);
+  if (!uncategorized.length) return matrix;
+
+  return [...matrix, { category: otherCategory, permissions: uncategorized.map(toMatrixPermission) }];
 };
 
-export { buildPermissionMatrixByResource, getPermissionMetadata };
+export { buildPermissionMatrix, getPermissionMetadata };
