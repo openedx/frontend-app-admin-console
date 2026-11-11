@@ -10,6 +10,7 @@ module.exports = createConfig('test', {
     'src/setupTest.tsx',
     'src/i18n',
     'src/__mocks__',
+    'testUtils',
   ],
   moduleNameMapper: {
     '\\.svg$': '<rootDir>/src/__mocks__/svg.js',
