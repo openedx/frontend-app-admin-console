@@ -6,11 +6,11 @@ import {
   Stepper, Button, StatefulButton, Icon, FullscreenModal, Alert,
 } from '@openedx/paragon';
 import { SpinnerSimple } from '@openedx/paragon/icons';
-import { RoleMetadata } from '@src/types';
 import baseMessages from '@src/authz-module/messages';
 import { ERROR_TOAST_MAP, useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { getHttpErrorStatus } from '@src/data/utils';
 import SelectUsersAndRoleStep from './components/SelectUsersAndRoleStep';
+import type { RoleGroup, SelectedRole } from './components/SelectUsersAndRoleStep';
 import DefineApplicationScopeStep from './components/DefineApplicationScopeStep';
 import { useValidateUsers, useAssignTeamMembersRole } from '@src/authz-module/data/hooks';
 import messages from './messages';
@@ -29,7 +29,10 @@ interface AssignRoleWizardProps {
   /** Called on Cancel, header close and Esc, and after a successful save. */
   onClose: () => void;
   initialUsers?: string;
-  roles?: RoleMetadata[];
+  // The roles the user can assign, grouped by scope type.
+  roleGroups?: RoleGroup[];
+  isLoadingRoles?: boolean;
+  isRolesError?: boolean;
 }
 
 const parseUsers = (input: string): string[] => input
@@ -40,7 +43,7 @@ const parseUsers = (input: string): string[] => input
 const getInitialState = (initialUsers: string) => ({
   activeStep: STEPS.SELECT_USERS_AND_ROLE as StepKey,
   users: initialUsers,
-  selectedRole: null as string | null,
+  selectedRole: null as SelectedRole | null,
   selectedScopes: new Set<string>(),
   invalidUsers: [] as string[],
   validatedUsers: [] as string[],
@@ -51,13 +54,13 @@ const getInitialState = (initialUsers: string) => ({
  * header, steps and action rows go into three modal slots that share one context.
  */
 const AssignRoleWizard = ({
-  isOpen, onClose, initialUsers = '', roles = [],
+  isOpen, onClose, initialUsers = '', roleGroups = [], isLoadingRoles = false, isRolesError = false,
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, Bold, Br } = useToastManager();
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(null);
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
@@ -156,7 +159,7 @@ const AssignRoleWizard = ({
       const result = await assignRoleMutation.mutateAsync({
         data: {
           users: validatedUsers,
-          role: selectedRole,
+          role: selectedRole.role,
           scopes: Array.from(selectedScopes),
         },
       });
@@ -317,7 +320,9 @@ const AssignRoleWizard = ({
               setUsers={handleUsersChange}
               selectedRole={selectedRole}
               setSelectedRole={setSelectedRole}
-              roles={roles}
+              roleGroups={roleGroups}
+              isLoadingRoles={isLoadingRoles}
+              isRolesError={isRolesError}
               invalidUsers={invalidUsers}
               inputRef={usersInputRef}
             />
@@ -331,7 +336,7 @@ const AssignRoleWizard = ({
         >
           <div ref={stepContentRef} tabIndex={-1} className="assign-role-wizard__step">
             <DefineApplicationScopeStep
-              selectedRole={selectedRole}
+              scopeType={selectedRole?.scopeType ?? null}
               selectedScopes={selectedScopes}
               onScopeToggle={handleScopeToggle}
               assignmentFailure={assignmentFailure}
