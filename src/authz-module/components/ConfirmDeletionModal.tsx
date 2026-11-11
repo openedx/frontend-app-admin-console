@@ -5,7 +5,7 @@ import {
 import { useIntl } from '@openedx/frontend-base';
 
 import { SpinnerSimple } from '@openedx/paragon/icons';
-import { getAggregateScopeType, getScopeContextType } from '@src/authz-module/constants';
+import { getAggregateScopeType, getScopeType } from '@src/authz-module/constants';
 import messages from './messages';
 
 interface ConfirmDeletionModalProps {
@@ -31,7 +31,7 @@ const ConfirmDeletionModal = ({
   const values = {
     userName: context.userName,
     role: context.name ?? context.role,
-    scopeType: getScopeContextType(context.scope),
+    scopeType: getScopeType(context.scope),
     org: context.org,
   };
   // A wildcard scope names no single resource, so the question says what it reaches instead.

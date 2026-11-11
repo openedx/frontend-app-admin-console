@@ -4,10 +4,10 @@ import { LocationOn } from '@openedx/paragon/icons';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useScopes } from '@src/authz-module/data/hooks';
-import { DEFAULT_FILTER_PAGE_SIZE, SCOPE_TYPES } from '@src/authz-module/constants';
+import { DEFAULT_FILTER_PAGE_SIZE, getScopeType, SCOPE_TYPES } from '@src/authz-module/constants';
+import { getScopeResourceIcon } from '@src/authz-module/utils';
 import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
-import { RESOURCE_ICONS } from '@src/authz-module/components/constants';
 import messages from '@src/authz-module/components/messages';
 
 type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
@@ -29,19 +29,17 @@ const ScopesFilter = ({
 
   const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? [])
     // Libraries are always available; courses only when the authoring flag is enabled for them.
-    .filter((scope) => scope.externalKey?.startsWith('lib') || isCourseEnabled(scope.externalKey))
+    .filter((scope) => getScopeType(scope.externalKey) === SCOPE_TYPES.LIBRARY || isCourseEnabled(scope.externalKey))
     .map((scope) => {
-      const scopeIcon = scope.externalKey?.startsWith('lib') ? RESOURCE_ICONS.LIBRARY : RESOURCE_ICONS.COURSE;
-      let groupName = formatMessage(messages['authz.team.members.table.group.courses']);
-      if (scope.externalKey?.startsWith('lib')) {
-        groupName = formatMessage(messages['authz.team.members.table.group.libraries']);
-      }
+      const groupName = getScopeType(scope.externalKey) === SCOPE_TYPES.LIBRARY
+        ? formatMessage(messages['authz.team.members.table.group.libraries'])
+        : formatMessage(messages['authz.team.members.table.group.courses']);
       return {
         displayName: scope.displayName,
         value: scope.externalKey,
         description: scope.org?.shortName,
         groupName,
-        groupIcon: scopeIcon,
+        groupIcon: getScopeResourceIcon(scope.externalKey),
       };
     }), [scopesData?.pages, formatMessage, isCourseEnabled]);
 

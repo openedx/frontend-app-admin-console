@@ -7,18 +7,10 @@ import baseMessages from '@src/authz-module/messages';
 import AssignRoleWizard from '@src/authz-module/role-assignation-wizard/AssignRoleWizard';
 import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import {
-  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS,
-  MANAGE_TEAM_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
-import { SCOPE_TYPES } from '@src/authz-module/constants';
+  MANAGE_TEAM_ACTIONS, MANAGE_TEAM_PERMISSIONS, SCOPE_TYPES,
+} from '@src/authz-module/constants';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
-
-// Permission that lets the user assign the roles of each scope type.
-const MANAGE_TEAM_ACTIONS: Partial<Record<string, string>> = {
-  [SCOPE_TYPES.COURSE]: CONTENT_COURSE_PERMISSIONS.MANAGE_COURSE_TEAM,
-  [SCOPE_TYPES.LIBRARY]: CONTENT_LIBRARY_PERMISSIONS.MANAGE_LIBRARY_TEAM,
-};
 
 interface AddRoleButtonProps {
   presetUsername?: string;

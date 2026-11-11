@@ -1,18 +1,13 @@
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import {
-  CONTENT_COURSE_PERMISSIONS, CONTENT_LIBRARY_PERMISSIONS, VIEW_TEAM_PERMISSIONS,
-} from '@src/authz-module/roles-permissions';
+import { usePermissions } from '@openedx/frontend-base';
+import { SCOPE_TYPES, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/constants';
 
 export const useViewTeamPermissions = () => {
-  const { data: permissions, isLoading } = useValidateUserPermissionsNonSuspense(VIEW_TEAM_PERMISSIONS);
+  // Authz checks are always enabled in the admin console.
+  const permissions = usePermissions(VIEW_TEAM_PERMISSIONS, true);
 
-  const isCourseViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_COURSE_PERMISSIONS.VIEW_COURSE_TEAM && p.allowed)
-    : false;
-
-  const isLibraryViewAllowed = permissions
-    ? permissions.some((p) => p.action === CONTENT_LIBRARY_PERMISSIONS.VIEW_LIBRARY_TEAM && p.allowed)
-    : false;
-
-  return { isCourseViewAllowed, isLibraryViewAllowed, isLoading };
+  return {
+    isCourseViewAllowed: permissions[SCOPE_TYPES.COURSE] === true,
+    isLibraryViewAllowed: permissions[SCOPE_TYPES.LIBRARY] === true,
+    isLoading: permissions.isLoading,
+  };
 };
