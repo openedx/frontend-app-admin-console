@@ -13,6 +13,7 @@ import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import AnchorButton from '@src/authz-module/components/AnchorButton';
 import PermissionTable from '@src/authz-module/components/PermissionTable';
+import componentMessages from '@src/authz-module/components/messages';
 
 import { buildPermissionMatrix } from './utils';
 
@@ -45,7 +46,7 @@ const RolesPermissions = () => {
 
   const matrix = useMemo(() => (scopeCatalog ? buildPermissionMatrix(scopeCatalog, {
     id: OTHER_CATEGORY_ID,
-    displayName: intl.formatMessage(messages['authz.tabs.permissionsRoles.category.other']),
+    displayName: intl.formatMessage(componentMessages['authz.tabs.permissionsRoles.category.other']),
     description: '',
     icon: null,
   }) : []), [scopeCatalog, intl]);
