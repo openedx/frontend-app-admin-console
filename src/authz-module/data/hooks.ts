@@ -91,13 +91,15 @@ export const useRevokeUserRoles = () => {
  *
  * @param querySettings - Parameters for filtering by roles, scopes,
  * organizations, search term, sorting, and pagination.
+ * @param enabled - Whether to fetch; false while the query settings aren't complete yet.
  *
  * @example
  * const { data: teamMembers } = useTeamMembersAssignments({ roles: 'editor', pageSize: 20 });
  */
-export const useTeamMembersAssignments = (querySettings: QuerySettings) => (
+export const useTeamMembersAssignments = (querySettings: QuerySettings, enabled = true) => (
   useQuery<GetTeamMembersAssignmentsResponse, Error>({
     queryKey: authzQueryKeys.teamMembersAssignments(querySettings),
+    enabled,
     queryFn: () => getTeamMembersAssignments(querySettings),
     staleTime: 1000 * 60 * 30, // refetch after 30 minutes
   })
@@ -131,15 +133,19 @@ export const useOrgs = (search?: string, page?: number, pageSize?: number) => us
  *
  * @param params - Filter parameters (all optional):
  *   - `search` — text filter applied to scope names
- *   - `scopeType` — filter by scope type (e.g. course, library)
- *   - `org` — filter by organization
+ *   - `scopeType` — filter by `course-v1` (`SCOPE_TYPES.COURSE`) or `lib` (`SCOPE_TYPES.LIBRARY`)
+ *   - `orgs` — filter by organization short names
  *   - `pageSize` — number of items per page
  *   - `managementPermissionOnly` — when true, returns only scopes the requester can manage
  * @returns An `InfiniteQueryResult` whose `data.pages` contains the accumulated `GetScopesResponse` pages.
  *
  * @example
  * ```tsx
- * const { data, fetchNextPage, hasNextPage } = useScopes({ search: 'intro', orgs: ['edX'] });
+ * import { SCOPE_TYPES } from '@src/authz-module/constants';
+ *
+ * const { data, fetchNextPage, hasNextPage } = useScopes({
+ *   search: 'intro', scopeType: SCOPE_TYPES.COURSE, orgs: ['edX'],
+ * });
  * const scopes = data?.pages.flatMap((p) => p.results) ?? [];
  * ```
  */
@@ -166,6 +172,7 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
   * It retrieves the full list of roles with the corresponding permissions.
   * @param username - The username of the user
   * @param querySettings - Optional query parameters for filtering, sorting, and pagination
+  * @param enabled - Whether to fetch; false while the query settings aren't complete yet
   *
   * @example
   * ```tsx
@@ -175,11 +182,12 @@ export const useScopes = (params: Omit<GetScopesParams, 'page'> = {}) => useInfi
 export const useUserAssignedRoles = (
   username?: string,
   querySettings?: QuerySettings,
+  enabled = true,
 ) => useQuery<GetUserAssignmentsResponse, Error>({
   queryKey: authzQueryKeys.userRoles(username, querySettings),
   queryFn: () => getUserAssignedRoles(username, querySettings),
   staleTime: 1000 * 60 * 30, // refetch after 30 minutes
-  enabled: !!username,
+  enabled: !!username && enabled,
   refetchOnWindowFocus: false,
 });
 
