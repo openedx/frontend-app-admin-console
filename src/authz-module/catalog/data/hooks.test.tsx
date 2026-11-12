@@ -4,7 +4,8 @@ import { usePermissions } from '@openedx/frontend-base';
 import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { CATALOG_PAGE_SIZE } from '../constants';
-import { invalidateAuthzCatalog, useAuthzCatalog } from './hooks';
+import { invalidateAuthzCatalog, useAuthzCatalog, useCatalogRoles } from './hooks';
+import type { RolesQueryParams } from './api';
 
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
@@ -282,5 +283,95 @@ describe('useAuthzCatalog', () => {
     await waitFor(() => expect(
       result.current.data?.roles.map(({ role }) => role),
     ).toEqual(['role_page_1', 'role_page_2', 'role_page_3']));
+  });
+});
+
+describe('useCatalogRoles', () => {
+  const params: RolesQueryParams = {
+    scopeTypes: [SCOPE_TYPES.LIBRARY],
+    search: 'admin',
+    sortBy: 'display_name',
+    order: 'asc',
+    pageIndex: 1,
+    pageSize: 10,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('fetches the requested page of roles', async () => {
+    const { get } = mockCatalogApi();
+
+    const { result } = renderHook(() => useCatalogRoles(params), { wrapper: createQueryClientWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const url = get.mock.calls[0][0] as URL;
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      scope_types: 'lib', search: 'admin', sort_by: 'display_name', order: 'asc', page: '2', page_size: '10',
+    });
+    expect(result.current.data?.results.map(({ role }) => role)).toEqual(['course_admin', 'library_admin']);
+  });
+
+  it('does not fetch while disabled', () => {
+    const { get } = mockCatalogApi();
+
+    const { result } = renderHook(() => useCatalogRoles(params, false), { wrapper: createQueryClientWrapper() });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('fetches again when the parameters change', async () => {
+    const { get } = mockCatalogApi();
+    const { result, rerender } = renderHook((props: RolesQueryParams) => useCatalogRoles(props), {
+      wrapper: createQueryClientWrapper(),
+      initialProps: params,
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    rerender({ ...params, pageIndex: 2 });
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    expect((get.mock.calls[1][0] as URL).searchParams.get('page')).toBe('3');
+  });
+
+  it('keeps the previous page while the next one loads', async () => {
+    const { get } = mockCatalogApi();
+    const { result, rerender } = renderHook((props: RolesQueryParams) => useCatalogRoles(props), {
+      wrapper: createQueryClientWrapper(),
+      initialProps: params,
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const firstPage = result.current.data;
+    let resolveNextPage: (value: unknown) => void = () => {};
+    get.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveNextPage = resolve;
+    }));
+
+    rerender({ ...params, pageIndex: 2 });
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    expect(result.current.data).toBe(firstPage);
+    expect(result.current.isPlaceholderData).toBe(true);
+    expect(result.current.isLoading).toBe(false);
+
+    await act(async () => resolveNextPage({ data: { ...firstPage, count: 30 } }));
+
+    await waitFor(() => expect(result.current.isPlaceholderData).toBe(false));
+    expect(result.current.data?.count).toBe(30);
+  });
+
+  it('is refreshed when the catalog is invalidated', async () => {
+    const { get } = mockCatalogApi();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(() => useCatalogRoles(params), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    await act(async () => invalidateAuthzCatalog(queryClient));
+
+    expect(get).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import { useTeamMembersAssignments, useOrgs, useScopes } from '@src/authz-module/data/hooks';
 import { renderWithAllProviders } from '@src/testUtils';
-import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
+import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
+import { useCatalogRoles } from '@src/authz-module/catalog/data/hooks';
 import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
@@ -11,6 +12,7 @@ import messages from './messages';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
+  useCatalogRoles: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
@@ -75,6 +77,20 @@ describe('AuthzHome', () => {
     (useTeamMembersAssignments as jest.Mock).mockReturnValue(emptyResponse);
     (useOrgs as jest.Mock).mockReturnValue(emptyResponse);
     (useScopes as jest.Mock).mockReturnValue(emptyScopesResponse);
+    (useCatalogRoles as jest.Mock).mockReturnValue({
+      data: {
+        count: authzCatalog.roles.length,
+        next: null,
+        previous: null,
+        scopeTypes: authzCatalog.scopeTypes,
+        categories: authzCatalog.categories,
+        permissions: authzCatalog.permissions,
+        results: authzCatalog.roles,
+      },
+      error: null,
+      isLoading: false,
+      refetch: jest.fn(),
+    });
   });
 
   it('renders without crashing', () => {

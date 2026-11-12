@@ -1,12 +1,13 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import debounce from 'lodash.debounce';
 import { useIntl } from '@openedx/frontend-base';
-import {
-  Alert, Container, DataTable, Spinner, TextFilter,
-} from '@openedx/paragon';
+import { DataTable, TextFilter } from '@openedx/paragon';
 
-import { TABLE_DEFAULT_PAGE_SIZE } from '../constants';
-import { useAuthzCatalog } from '../catalog';
-import type { ScopeCatalog } from '../catalog';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
+import { SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '../constants';
+import { useCatalogRoles } from '../catalog';
+import type { GetAuthzCatalogResponse, Role } from '../catalog';
+import { useViewTeamPermissions } from '../hooks/useViewTeamPermissions';
 import MultipleChoiceFilter from '../components/TableControlBar/MultipleChoiceFilter';
 import TableFooter from '../components/TableFooter/TableFooter';
 import LastUpdatedCell from './components/LastUpdatedCell';
@@ -16,61 +17,82 @@ import ResourceTypeCell from './components/ResourceTypeCell';
 import RoleActionsCell from './components/RoleActionsCell';
 import RoleNameCell from './components/RoleNameCell';
 import RolesTableControlBar from './components/RolesTableControlBar';
+import { ROLES_TABLE_COLUMNS } from './constants';
+import useRolesQuerySettings from './hooks/useRolesQuerySettings';
 import messages from './messages';
 import type { RoleRow } from './types';
 
-/** Flattens the catalog into one row per role and scope type, keeping the catalog's order. */
-const buildRoleRows = (scopeCatalogs: ScopeCatalog[]): RoleRow[] => scopeCatalogs.flatMap(
-  ({ scopeType, roles }) => roles.map((role) => ({
-    id: `${scopeType}:${role.role}`,
-    name: role.displayName,
-    resourceType: scopeType,
-    // TODO: read the member count and update time from the catalog once the backend API returns them.
-    members: null,
-    permissionCount: role.permissions.length,
-    lastUpdated: null,
-    isCustom: role.definitionKind === 'user_defined',
-  })),
-);
+const toastedErrors = new WeakSet<Error>();
 
 /**
- * Lists the roles of every scope type the user can view, read from the authz catalog
- * (`GET /api/authz/v1/roles/`, ADR 0028), so no role copy lives in the client. The
- * catalog is fetched whole, so search, filtering, sorting and pagination run client side.
- *
- * TODO: update the search and resource type filter handling once the backend API supports
- * them; filtering is done client side over the fetched catalog until then.
+ * Stable stand-in for a page that has not resolved. A fresh object literal here would hand
+ * `DataTable` a new `data` array on every render, and react-table resets its state whenever
+ * `data` changes identity.
+ */
+const EMPTY_ROLES: GetAuthzCatalogResponse = {
+  count: 0, next: null, previous: null, scopeTypes: [], categories: [], permissions: [], results: [],
+};
+
+const toRoleRow = (role: Role): RoleRow => ({
+  id: role.role,
+  name: role.displayName,
+  resourceTypes: role.scopeTypes,
+  members: role.userCount,
+  permissionCount: role.permissions.length,
+  lastUpdated: role.updatedAt,
+  isCustom: role.definitionKind === 'user_defined',
+});
+
+/**
+ * Lists the roles of the scope types the user can view, one page at a time from
+ * `GET /api/authz/v1/roles/` (ADR 0028), so no role copy lives in the client. Search, the
+ * resource type filter, sorting and pagination all run on the server, following the team
+ * members table: the table runs in manual mode, and `useRolesQuerySettings` turns its state into
+ * the request. The complete catalog that other screens rely on stays in `useAuthzCatalog`.
  */
 const RolesPermissionsTable = () => {
   const { formatMessage } = useIntl();
+  const { showErrorToast } = useToastManager();
+
   const {
-    scopeTypes, getScopeCatalog, isLoading, isError,
-  } = useAuthzCatalog();
+    isCourseViewAllowed, isLibraryViewAllowed, isLoading: isLoadingPermissions,
+  } = useViewTeamPermissions();
+  const viewableScopeTypes = useMemo(() => [
+    ...(isCourseViewAllowed ? [SCOPE_TYPES.COURSE] : []),
+    ...(isLibraryViewAllowed ? [SCOPE_TYPES.LIBRARY] : []),
+  ], [isCourseViewAllowed, isLibraryViewAllowed]);
 
-  const roleRows = useMemo(() => buildRoleRows(
-    scopeTypes.map(getScopeCatalog).filter((scopeCatalog) => scopeCatalog !== undefined),
-  ), [scopeTypes, getScopeCatalog]);
+  const { querySettings, handleTableFetch } = useRolesQuerySettings(viewableScopeTypes);
+  // `scope_types` is required, so nothing is fetched until the viewable scope types are known.
+  const isQueryReady = !isLoadingPermissions && viewableScopeTypes.length > 0;
 
-  if (isLoading) {
-    return (
-      <Container className="d-flex py-5">
-        <Spinner
-          animation="border"
-          variant="primary"
-          className="m-auto"
-          screenReaderText={formatMessage(messages['authz.tabs.permissionsRoles.loading'])}
-        />
-      </Container>
-    );
-  }
+  const {
+    data,
+    isLoading: isLoadingFirstPage,
+    isPlaceholderData,
+    error,
+    refetch,
+  } = useCatalogRoles(querySettings, isQueryReady);
+  const isLoadingRoles = isLoadingFirstPage || isPlaceholderData;
+  const { results, count } = data ?? EMPTY_ROLES;
+  // With no page to show, the empty table says the roles failed to load, not that none matched.
+  const hasFailedToLoad = !!error && !data;
 
-  if (isError) {
-    return (
-      <Alert variant="danger">
-        {formatMessage(messages['authz.tabs.permissionsRoles.error'])}
-      </Alert>
-    );
-  }
+  const roleRows = useMemo(() => results.map(toRoleRow), [results]);
+
+  // Only transient failures reach here; each one is reported once, with a retry.
+  useEffect(() => {
+    if (error && !toastedErrors.has(error)) {
+      toastedErrors.add(error);
+      showErrorToast(error, refetch);
+    }
+  }, [error, showErrorToast, refetch]);
+
+  const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
+
+  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
+
+  useEffect(() => () => fetchData.cancel(), [fetchData]);
 
   return (
     <DataTable
@@ -78,9 +100,15 @@ const RolesPermissionsTable = () => {
       isFilterable
       isPaginated
       isSortable
+      manualFilters
+      manualPagination
+      manualSortBy
+      fetchData={fetchData}
       data={roleRows}
-      itemCount={roleRows.length}
+      itemCount={count}
+      pageCount={pageCount}
       initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
+      isLoading={isLoadingPermissions || isLoadingRoles}
       additionalColumns={[
         {
           id: 'actions',
@@ -91,27 +119,24 @@ const RolesPermissionsTable = () => {
       ]}
       columns={[
         {
-          id: 'name',
+          id: ROLES_TABLE_COLUMNS.NAME,
           Header: formatMessage(messages['authz.roles.table.column.role.title']),
           accessor: 'name',
           Cell: RoleNameCell,
-          filter: 'text',
           Filter: TextFilter,
         },
         {
-          id: 'resourceType',
+          id: ROLES_TABLE_COLUMNS.RESOURCE_TYPE,
           Header: formatMessage(messages['authz.roles.table.column.resource.type.title']),
-          accessor: 'resourceType',
+          accessor: 'resourceTypes',
           Cell: ResourceTypeCell,
-          filter: 'includesValue',
           Filter: MultipleChoiceFilter,
         },
         {
-          id: 'members',
+          id: ROLES_TABLE_COLUMNS.MEMBERS,
           Header: formatMessage(messages['authz.roles.table.column.members.title']),
           accessor: 'members',
           Cell: MembersCell,
-          sortType: 'basic',
           disableFilters: true,
         },
         {
@@ -123,18 +148,19 @@ const RolesPermissionsTable = () => {
           disableSortBy: true,
         },
         {
-          id: 'lastUpdated',
+          id: ROLES_TABLE_COLUMNS.LAST_UPDATED,
           Header: formatMessage(messages['authz.roles.table.column.last.updated.title']),
           accessor: 'lastUpdated',
           Cell: LastUpdatedCell,
-          sortType: 'basic',
           disableFilters: true,
         },
       ]}
     >
-      <RolesTableControlBar scopeTypes={scopeTypes} />
+      <RolesTableControlBar scopeTypes={viewableScopeTypes} />
       <DataTable.Table />
-      <DataTable.EmptyTable content={formatMessage(messages['authz.roles.table.empty'])} />
+      <DataTable.EmptyTable
+        content={formatMessage(messages[hasFailedToLoad ? 'authz.tabs.permissionsRoles.error' : 'authz.roles.table.empty'])}
+      />
       <TableFooter showingMessage={messages['authz.roles.table.showing.roles.text']} />
     </DataTable>
   );

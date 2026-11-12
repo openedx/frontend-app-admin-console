@@ -8,7 +8,7 @@ import { Close } from '@openedx/paragon/icons';
 import MultipleChoiceFilter from '../../components/TableControlBar/MultipleChoiceFilter';
 import SearchFilter from '../../components/TableControlBar/SearchFilter';
 import componentMessages from '../../components/messages';
-import { RESOURCE_TYPE_DISPLAY } from '../constants';
+import { RESOURCE_TYPE_DISPLAY, ROLES_TABLE_COLUMNS } from '../constants';
 import messages from '../messages';
 
 interface RolesTableControlBarProps {
@@ -21,8 +21,8 @@ interface RolesTableControlBarProps {
  * TableControlBar builds a "Search by X or Y" placeholder from two text columns, while this
  * table searches a single column with a plain "Search", so it has its own bar.
  *
- * TODO: the filters set react-table column filters applied client side; update them once the
- * backend API supports search and resource type filtering.
+ * The filters set react-table column filters; with the table in manual mode they reach the
+ * server through `fetchData` and `useRolesQuerySettings`, so the count is the server's.
  */
 const RolesTableControlBar = ({ scopeTypes }: RolesTableControlBarProps) => {
   const { formatMessage } = useIntl();
@@ -30,8 +30,8 @@ const RolesTableControlBar = ({ scopeTypes }: RolesTableControlBarProps) => {
     columns, page, itemCount,
   // @ts-expect-error - Paragon's DataTableContext is not typed
   } = useContext<DataTableContext>(DataTableContext);
-  const nameColumn = columns.find((column) => column.id === 'name');
-  const resourceTypeColumn = columns.find((column) => column.id === 'resourceType');
+  const nameColumn = columns.find((column) => column.id === ROLES_TABLE_COLUMNS.NAME);
+  const resourceTypeColumn = columns.find((column) => column.id === ROLES_TABLE_COLUMNS.RESOURCE_TYPE);
 
   const getResourceTypeName = (scopeType: string) => {
     const label = RESOURCE_TYPE_DISPLAY[scopeType]?.label;
