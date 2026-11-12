@@ -1,12 +1,10 @@
-/** One row of the roles table: a catalog role within one of its scope types. */
+/** One row of the roles table: one role of the page the server returned. */
 export interface RoleRow {
-  // A role spanning several scope types gets one row per scope type, so the id includes it.
+  // The catalog role key, e.g. `library_admin`.
   id: string;
   name: string;
-  resourceType: string;
-  // TODO: the catalog API (ADR 0028) has no member count or update time yet, so both are always
-  // null and render "-". Fill them in once the backend API provides them.
-  members: number | null;
+  resourceTypes: string[];
+  members: number;
   permissionCount: number;
   lastUpdated: string | null;
   isCustom: boolean;

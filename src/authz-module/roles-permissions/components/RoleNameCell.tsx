@@ -1,7 +1,7 @@
 import { useIntl } from '@openedx/frontend-base';
 
-import messages from '../messages';
-import type { RoleCellProps } from '../types';
+import messages from '@src/authz-module/roles-permissions/messages';
+import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
 
 /** Role name, with a "Custom Role" sub-label for user-defined roles. */
 const RoleNameCell = ({ row }: RoleCellProps) => {

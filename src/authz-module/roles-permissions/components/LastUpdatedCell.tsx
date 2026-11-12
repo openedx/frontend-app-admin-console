@@ -1,6 +1,6 @@
 import { useIntl } from '@openedx/frontend-base';
 
-import type { RoleCellProps } from '../types';
+import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
 
 /** Localized update time, or "-" when the role has none. */
 const LastUpdatedCell = ({ row }: RoleCellProps) => {

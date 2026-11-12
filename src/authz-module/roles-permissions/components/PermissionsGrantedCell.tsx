@@ -1,7 +1,7 @@
 import { useIntl } from '@openedx/frontend-base';
 
-import messages from '../messages';
-import type { RoleCellProps } from '../types';
+import messages from '@src/authz-module/roles-permissions/messages';
+import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
 
 /** Number of permissions the role grants in its resource type, e.g. "14 Granted". */
 const PermissionsGrantedCell = ({ row }: RoleCellProps) => {

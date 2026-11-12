@@ -4,8 +4,8 @@ import {
 } from '@openedx/paragon';
 import { Edit, MoreVert, Visibility } from '@openedx/paragon/icons';
 
-import messages from '../messages';
-import type { RoleCellProps } from '../types';
+import messages from '@src/authz-module/roles-permissions/messages';
+import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
 
 /**
  * Built-in roles can only be viewed; custom roles can be edited. Every role has the overflow menu.
