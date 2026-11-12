@@ -23,7 +23,16 @@ export const buildCatalogPermission = (id: string, fields: Partial<Permission> =
 });
 
 export const buildCatalogRole = (role: string, fields: Partial<Role> = {}): Role => ({
-  role, displayName: role, description: '', icon: null, definitionKind: 'static', permissions: [], scopeTypes: [], ...fields,
+  role,
+  displayName: role,
+  description: '',
+  icon: null,
+  definitionKind: 'static',
+  permissions: [],
+  scopeTypes: [],
+  userCount: 0,
+  updatedAt: null,
+  ...fields,
 });
 
 /** A catalog with the course and library roles. */

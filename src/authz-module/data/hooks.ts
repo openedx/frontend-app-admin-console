@@ -2,6 +2,7 @@ import {
   useInfiniteQuery, useMutation, useQuery, useQueryClient,
 } from '@tanstack/react-query';
 import { appId } from '@src/constants';
+import { invalidateCatalogRoles } from '@src/authz-module/catalog';
 import {
   assignTeamMembersRole, AssignTeamMembersRoleRequest, getTeamMembersAssignments,
   GetTeamMembersAssignmentsResponse, getOrgs, GetOrgsResponse,
@@ -40,6 +41,8 @@ export const useAssignTeamMembersRole = () => {
         queryClient.invalidateQueries({
           predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
         });
+        // The roles table counts each role's members.
+        invalidateCatalogRoles(queryClient);
       }
     },
   });
@@ -79,6 +82,8 @@ export const useRevokeUserRoles = () => {
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
       });
+      // The roles table counts each role's members.
+      invalidateCatalogRoles(queryClient);
     },
   });
 };

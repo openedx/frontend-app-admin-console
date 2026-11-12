@@ -120,6 +120,10 @@ const mockFilteredUserAssignments = {
 
 const createWrapper = createQueryClientWrapper;
 
+// Keys of the catalog queries, under the `appId` mocked above: a roles table page and the full catalog.
+const catalogRolesPageKey = ['test-app', 'authz', 'catalog', 'roles', { pageIndex: 0 }];
+const fullCatalogKey = ['test-app', 'authz', 'catalog', ['lib']];
+
 describe('useAssignTeamMembersRole', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -150,6 +154,44 @@ describe('useAssignTeamMembersRole', () => {
 
     expect(getAuthenticatedHttpClient).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('refreshes the roles table member counts, but not the full catalog, after assigning', async () => {
+    mockHttpClient().mockReturnValue({
+      put: jest.fn().mockResolvedValue({ data: { completed: [], errors: [] } }),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(catalogRolesPageKey, 'roles page');
+    queryClient.setQueryData(fullCatalogKey, 'full catalog');
+    const { result } = renderHook(() => useAssignTeamMembersRole(), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { scopes: ['lib:123'], users: ['jdoe'], role: 'author' } });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(queryClient.getQueryState(catalogRolesPageKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(fullCatalogKey)?.isInvalidated).toBe(false);
+  });
+
+  it('keeps the roles table member counts when assigning fails', async () => {
+    mockHttpClient().mockReturnValue({
+      put: jest.fn().mockRejectedValue(new Error('Failed to add members')),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(catalogRolesPageKey, 'roles page');
+    const { result } = renderHook(() => useAssignTeamMembersRole(), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { scopes: ['lib:123'], users: ['jdoe'], role: 'author' } });
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(queryClient.getQueryState(catalogRolesPageKey)?.isInvalidated).toBe(false);
   });
 
   it('handles error when adding team members fails', async () => {
@@ -531,6 +573,26 @@ describe('useRevokeUserRoles', () => {
   }
 
   invalidateQueriesSpy.mockRestore();
+  });
+
+  it('refreshes the roles table member counts, but not the full catalog, after revoking', async () => {
+    mockHttpClient().mockReturnValue({
+      delete: jest.fn().mockResolvedValue({ data: { completed: [], errors: [] } }),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(catalogRolesPageKey, 'roles page');
+    queryClient.setQueryData(fullCatalogKey, 'full catalog');
+    const { result } = renderHook(() => useRevokeUserRoles(), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ data: { scope: 'lib:123', users: 'jdoe', role: 'author' } });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(queryClient.getQueryState(catalogRolesPageKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(fullCatalogKey)?.isInvalidated).toBe(false);
   });
 });
 
