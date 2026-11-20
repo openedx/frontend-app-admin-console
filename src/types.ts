@@ -1,3 +1,5 @@
+import type { GetTeamMembersAssignmentsResponse } from './authz-module/data/api';
+
 export interface PermissionValidationRequest {
   action: string;
   scope?: string;
@@ -74,3 +76,12 @@ export interface TeamMember {
   assignmentCount: number;
   assignments: TeamMemberAssignment[];
 }
+
+/**
+ * Stable stand-in for a query that has not resolved. A fresh object literal here would
+ * hand `DataTable` a new `data` array on every render, and react-table resets its
+ * expanded-row state whenever `data` changes identity.
+ */
+export const EMPTY_ASSIGNMENTS: GetTeamMembersAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};

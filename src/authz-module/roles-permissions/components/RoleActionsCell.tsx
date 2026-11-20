@@ -1,4 +1,5 @@
 import { useIntl } from '@openedx/frontend-base';
+import { useNavigate } from 'react-router-dom';
 import {
   Dropdown, Icon, IconButton, Stack,
 } from '@openedx/paragon';
@@ -6,23 +7,28 @@ import { Edit, MoreVert, Visibility } from '@openedx/paragon/icons';
 
 import messages from '../messages';
 import { useRoleAssignment } from '../RoleAssignmentContext';
+import { buildRoleDetailPath } from '@src/authz-module/constants';
 import type { RoleCellProps } from '../types';
 
 /**
  * Built-in roles can only be viewed; custom roles can be edited. Every role has the overflow menu.
  * "Assign role" opens the wizard with the row's role preselected, and is hidden when the user
  * cannot assign that role.
- *
- * TODO: the view (eye), edit (pencil) and "Duplicate" actions render without handlers; they
- * will be wired in a follow-up ticket.
  */
 const RoleActionsCell = ({ row }: RoleCellProps) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
   const { canAssignRole, assignRole } = useRoleAssignment();
   const { id, isCustom } = row.original;
+
+  const handleViewEditRole = () => {
+    navigate(buildRoleDetailPath(id));
+  };
+
   return (
     <Stack direction="horizontal" gap={2} className="justify-content-center">
       <IconButton
+        onClick={handleViewEditRole}
         src={isCustom ? Edit : Visibility}
         iconAs={Icon}
         variant="primary"
