@@ -24,6 +24,7 @@ export interface AuthZTitleProps {
   activeLabel?: string;
   pageTitle: string;
   pageSubtitle?: string | ReactNode;
+  titleAction?: ReactNode;
   navLinks?: BreadcrumbLink[];
   actions?: (Action | ReactNode)[];
   showDivider?: boolean;
@@ -40,7 +41,7 @@ export const ActionButton = ({ label, icon, onClick }: Action) => (
 );
 
 const AuthZTitle = ({
-  activeLabel, navLinks = [], pageTitle, pageSubtitle, actions = [], showDivider = false,
+  activeLabel, navLinks = [], pageTitle, pageSubtitle, titleAction, actions = [], showDivider = false,
 }: AuthZTitleProps) => {
   const shouldRenderBreadcrumb = activeLabel || navLinks?.length > 0;
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
@@ -58,7 +59,10 @@ const AuthZTitle = ({
       <Row>
         <Col xs={12} md={7}>
           <div className="d-flex align-items-center flex-column-sm mb-3 mb-md-0">
-            <h2 className="text-break text-primary mb-0">{pageTitle}</h2>
+            <div className="d-flex align-items-center">
+              <h2 className="text-break text-primary mb-0">{pageTitle}</h2>
+              {titleAction && <div className="ml-2">{titleAction}</div>}
+            </div>
             {pageSubtitle && (
               <>
                 <hr className="authz-action-divider mx-lg-3 my-md-0 mx-md-3" />
