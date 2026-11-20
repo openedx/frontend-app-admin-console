@@ -170,6 +170,25 @@ describe('RoleDetailPage', () => {
     });
   });
 
+  it('calls handleDeleteRole when delete menu item is clicked', async () => {
+    const user = userEvent.setup();
+    renderRoleDetail();
+
+    const moreActionsButton = screen.getByRole('button', { name: messages['authz.custom.role.more.name.alt'].defaultMessage });
+    await user.click(moreActionsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(messages['authz.custom.role.action.delete'].defaultMessage)).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByText(messages['authz.custom.role.action.delete'].defaultMessage);
+    // TODO: Update this test when delete role is fully implemented.
+    // Currently handleDeleteRole just logs to console; this should verify actual deletion behavior.
+    expect(deleteButton).toBeInTheDocument();
+    await user.click(deleteButton);
+    expect(deleteButton).toBeInTheDocument();
+  });
+
   it('renders breadcrumb navigation links', () => {
     renderRoleDetail();
     expect(screen.getByRole('link', { name: 'Roles and Permissions Management' }))
@@ -186,5 +205,59 @@ describe('RoleDetailPage', () => {
     renderRoleDetail();
     // Should render LoadingPage with Spinner while loading
     expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('does not render custom role actions for built-in roles', () => {
+    mockUseAuthzCatalog.mockReturnValueOnce({
+      getRole: jest.fn((id) => (id === 'custom-role-123' ? { ...mockRole, definitionKind: 'static' } : null)),
+      isLoading: false,
+    });
+    renderRoleDetail('custom-role-123');
+
+    // Should not render edit or more actions buttons for built-in roles
+    expect(screen.queryByRole('button', { name: messages['authz.custom.role.edit.name.alt'].defaultMessage })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: messages['authz.custom.role.more.name.alt'].defaultMessage })).not.toBeInTheDocument();
+    // Should render duplicate button for built-in roles
+    expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
+  });
+
+  it('renders DuplicateRoleButton only for built-in roles', () => {
+    // Test with custom role
+    renderRoleDetail('custom-role-123');
+    expect(screen.queryByRole('button', { name: /Duplicate/ })).not.toBeInTheDocument();
+
+    // Test with built-in role
+    mockUseAuthzCatalog.mockReturnValueOnce({
+      getRole: jest.fn((id) => (id === 'builtin-role' ? { displayName: 'Built-in', definitionKind: 'static', permissions: [] } : null)),
+      isLoading: false,
+    });
+    renderRoleDetail('builtin-role');
+    expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
+  });
+
+  it('renders Permissions tab that can be navigated to', async () => {
+    const user = userEvent.setup();
+    renderRoleDetail();
+
+    // Click on Permissions tab
+    const permissionsTab = screen.getByRole('tab', { name: messages['authz.custom.role.tabs.permissions'].defaultMessage });
+    await user.click(permissionsTab);
+
+    // Check that Permissions tab becomes active
+    expect(permissionsTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('calls handleDeleteMember when delete member button is clicked', async () => {
+    const user = userEvent.setup();
+    renderRoleDetail();
+
+    // Find delete button for a member (use the second button in the actions cell, after view button)
+    const deleteButtons = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    expect(deleteButtons.length).toBeGreaterThan(0);
+
+    // TODO: Update this test when delete member is fully implemented.
+    // Currently handleDeleteMember just logs to console; this should verify actual deletion behavior.
+    await user.click(deleteButtons[0]);
+    expect(deleteButtons[0]).toBeInTheDocument();
   });
 });

@@ -17,6 +17,13 @@ import {
 import useScopePermissions from '@src/authz-module/role-assignation-wizard/hooks/useScopePermissions';
 import RolesPermissionsTable from './RolesPermissionsTable';
 
+const mockNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedUser: jest.fn(),
@@ -239,6 +246,18 @@ describe('RolesPermissionsTable', () => {
       // The menu takes its accessible name from the toggle through aria-labelledby.
       const menu = screen.getByRole('button', { name: 'Duplicate' }).closest('.dropdown-menu');
       expect(menu).toHaveAttribute('aria-labelledby', toggle.id);
+    });
+
+    it('navigates to role detail page when edit/view button is clicked', async () => {
+      renderTable();
+
+      const reviewerRow = within(getRow('Library reviewer'));
+      const editButton = reviewerRow.getByRole('button', { name: 'Edit role' });
+
+      await user.click(editButton);
+
+      // Verify navigate was called with the correct path for the library_reviewer role
+      expect(mockNavigate).toHaveBeenCalledWith('/admin-console/authz/role/library_reviewer');
     });
 
     it('shows a pill for each resource type of a role', () => {
