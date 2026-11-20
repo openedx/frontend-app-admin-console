@@ -66,6 +66,11 @@ const messages = defineMessages({
     defaultMessage: 'Delete',
     description: 'Menu item to delete a custom role',
   },
+  'authz.custom.role.members.table.empty': {
+    id: 'authz.custom.role.members.table.empty',
+    defaultMessage: 'No users assigned to this role',
+    description: 'Message displayed when the members table is empty',
+  },
 });
 
 export default messages;

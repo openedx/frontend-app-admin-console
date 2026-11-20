@@ -183,8 +183,8 @@ describe('MembersTable', () => {
     // Component should render, possibly with loading indicator
   });
 
-  it('renders empty state when no members returned', () => {
-    mockUseTeamMembersAssignments.mockReturnValueOnce({
+  it('renders empty state when no members returned', async () => {
+    mockUseTeamMembersAssignments.mockReturnValue({
       data: {
         results: [],
         count: 0,
@@ -198,6 +198,26 @@ describe('MembersTable', () => {
     renderMembersTable();
     // Should still render headers even with no data
     expect(screen.getByRole('columnheader', { name: /Username/i })).toBeInTheDocument();
+    // Should show the empty state message
+    await waitFor(() => {
+      expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
+    });
+  });
+
+  it('uses EMPTY_ASSIGNMENTS when data is undefined', async () => {
+    mockUseTeamMembersAssignments.mockReturnValue({
+      data: undefined,
+      error: null,
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+    renderMembersTable();
+    // Should still render headers with EMPTY_ASSIGNMENTS default
+    expect(screen.getByRole('columnheader', { name: /Username/i })).toBeInTheDocument();
+    // Should show the empty state message
+    await waitFor(() => {
+      expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
+    });
   });
 
   it('filters by roleId from URL params', () => {

@@ -129,6 +129,9 @@ const MembersTable = ({ onDelete }: MembersTableProps) => {
     >
       <TableControlBar onFilterChange={setColumnsWithFiltersApplied} countLabel={showingLabel} />
       <DataTable.Table />
+      <DataTable.EmptyTable
+        content={intl.formatMessage(messages['authz.custom.role.members.table.empty'])}
+      />
       <TableFooter showingMessage={messages['authz.custom.role.members.table.showing.message']} />
     </DataTable>
   );
