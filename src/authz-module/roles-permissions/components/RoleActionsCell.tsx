@@ -1,4 +1,5 @@
 import { useIntl } from '@openedx/frontend-base';
+import { useNavigate } from 'react-router-dom';
 import {
   Dropdown, Icon, IconButton, Stack,
 } from '@openedx/paragon';
@@ -8,6 +9,7 @@ import { isCustomRole } from '@src/authz-module/catalog';
 import messages from '@src/authz-module/roles-permissions/messages';
 import { useRoleAssignment } from '@src/authz-module/roles-permissions/RoleAssignmentContext';
 import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
+import { buildRoleDetailPath } from '@src/authz-module/constants';
 
 /**
  * Built-in roles can only be viewed; custom roles can be edited. Every role has the overflow menu.
@@ -21,12 +23,19 @@ import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
  */
 const RoleActionsCell = ({ row }: RoleCellProps) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
   const { canAssignRole, assignRole } = useRoleAssignment();
   const isCustom = isCustomRole(row.original);
   const labelValues = { role: row.original.displayName };
+
+  const handleViewEditRole = () => {
+    navigate(buildRoleDetailPath(row.original.role));
+  };
+
   return (
     <Stack direction="horizontal" gap={2} className="justify-content-center">
       <IconButton
+        onClick={handleViewEditRole}
         src={isCustom ? Edit : Visibility}
         iconAs={Icon}
         variant="primary"

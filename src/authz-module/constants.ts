@@ -86,12 +86,18 @@ export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
 /** Absolute base path of the module; src/routes.tsx derives its route prefix from this. */
 export const AUTHZ_HOME_PATH = '/admin-console/authz';
 
+/** Home with the Roles and Permissions tab preselected; authz-home opens that tab when any hash is present. */
+export const AUTHZ_ROLES_PERMISSIONS_PATH = `${AUTHZ_HOME_PATH}#roles-permissions`;
+
 /** Segments nested under the authz splat route, relative to AUTHZ_HOME_PATH. */
 export const ROUTES = {
   AUDIT_USER_PATH: 'user/:username',
+  ROLE_DETAIL_PATH: 'role/:roleId',
 };
 
 export const buildAuditUserPath = (username: string) => `${AUTHZ_HOME_PATH}/user/${encodeURIComponent(username)}`;
+
+export const buildRoleDetailPath = (roleId: string) => `${AUTHZ_HOME_PATH}/role/${encodeURIComponent(roleId)}`;
 
 export enum RoleOperationErrorStatus {
   USER_NOT_FOUND = 'user_not_found',

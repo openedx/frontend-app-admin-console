@@ -1,0 +1,71 @@
+import { defineMessages } from '@openedx/frontend-base';
+
+const messages = defineMessages({
+  'authz.custom.role.edit.name.alt': {
+    id: 'authz.custom.role.edit.name.alt',
+    defaultMessage: 'Edit role name',
+    description: 'Accessible label for the pencil button that edits the role name',
+  },
+  'authz.custom.role.more.name.alt': {
+    id: 'authz.custom.role.more.name.alt',
+    defaultMessage: 'More actions',
+    description: 'Accessible label for the more button that opens a menu with more actions for the custom role',
+  },
+  'authz.custom.role.tabs.members': {
+    id: 'authz.custom.role.tabs.members',
+    defaultMessage: 'Members',
+    description: 'Label for the "Members" tab on the role detail page',
+  },
+  'authz.custom.role.tabs.permissions': {
+    id: 'authz.custom.role.tabs.permissions',
+    defaultMessage: 'Permissions',
+    description: 'Label for the "Permissions" tab on the role detail page',
+  },
+  'authz.custom.role.members.table.column.header.username': {
+    id: 'authz.custom.role.members.table.column.header.username',
+    defaultMessage: 'Username',
+    description: 'Header for the "Username" column in the members table',
+  },
+  'authz.custom.role.members.table.column.header.email': {
+    id: 'authz.custom.role.members.table.column.header.email',
+    defaultMessage: 'Email',
+    description: 'Header for the "Email" column in the members table',
+  },
+  'authz.custom.role.members.table.column.header.scope': {
+    id: 'authz.custom.role.members.table.column.header.scope',
+    defaultMessage: 'Scope',
+    description: 'Header for the "Scope" column in the members table',
+  },
+  'authz.custom.role.members.table.column.header.actions': {
+    id: 'authz.custom.role.members.table.column.header.actions',
+    defaultMessage: 'Actions',
+    description: 'Header for the "Actions" column in the members table',
+  },
+  'authz.custom.role.members.table.showing.message': {
+    id: 'authz.custom.role.members.table.showing.message',
+    defaultMessage: 'Showing {pageSize} users of {itemCount}',
+    description: 'Message displayed in the footer an in the control barof the members table indicating the range of users being shown',
+  },
+  'authz.role.members.table.action.view.alt': {
+    id: 'authz.role.members.table.action.view.alt',
+    defaultMessage: 'View member details',
+    description: 'Accessible label for the view button in the members table',
+  },
+  'authz.role.members.table.action.delete.alt': {
+    id: 'authz.role.members.table.action.delete.alt',
+    defaultMessage: 'Remove member from role',
+    description: 'Accessible label for the delete button in the members table',
+  },
+  'authz.custom.role.action.duplicate': {
+    id: 'authz.custom.role.action.duplicate',
+    defaultMessage: 'Duplicate',
+    description: 'Menu item to duplicate a custom role',
+  },
+  'authz.custom.role.action.delete': {
+    id: 'authz.custom.role.action.delete',
+    defaultMessage: 'Delete',
+    description: 'Menu item to delete a custom role',
+  },
+});
+
+export default messages;

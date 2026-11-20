@@ -1,5 +1,5 @@
 import {
-  AUTHZ_HOME_PATH, buildAuditUserPath, getAggregateScopeType,
+  AUTHZ_HOME_PATH, buildAuditUserPath, buildRoleDetailPath, getAggregateScopeType,
   getOrgAggregateScopeKey, getPlatformAggregateScopeKey, SCOPE_TYPES,
 } from './constants';
 
@@ -11,6 +11,16 @@ describe('buildAuditUserPath', () => {
   it('URL-encodes the username', () => {
     expect(buildAuditUserPath('user+with@special.chars'))
       .toBe(`${AUTHZ_HOME_PATH}/user/user%2Bwith%40special.chars`);
+  });
+});
+
+describe('buildRoleDetailPath', () => {
+  it('builds the absolute custom role path for a role name', () => {
+    expect(buildRoleDetailPath('editor')).toBe(`${AUTHZ_HOME_PATH}/role/editor`);
+  });
+
+  it('URL-encodes the role name', () => {
+    expect(buildRoleDetailPath('my role/v2')).toBe(`${AUTHZ_HOME_PATH}/role/my%20role%2Fv2`);
   });
 });
 
