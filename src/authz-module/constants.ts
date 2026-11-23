@@ -1,3 +1,5 @@
+import { GetTeamMembersAssignmentsResponse } from './data/api';
+
 // Scope types the console supports, as the authz API names them (the namespace of the scope keys).
 export const SCOPE_TYPES = {
   COURSE: 'course-v1',
@@ -115,3 +117,12 @@ export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
+
+/**
+ * Stable stand-in for a query that has not resolved. A fresh object literal here would
+ * hand `DataTable` a new `data` array on every render, and react-table resets its
+ * expanded-row state whenever `data` changes identity.
+ */
+export const EMPTY_ASSIGNMENTS: GetTeamMembersAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};

@@ -25,7 +25,7 @@ import { EmailCell, NameCell } from './components/TeamMemberCells';
 import MoreRolesToggle from './components/MoreRolesToggle';
 import UserAssignmentsSubTable from './components/UserAssignmentsSubTable';
 import TeamMemberViewActionCell from './components/TeamMemberViewActionCell';
-import { EMPTY_ASSIGNMENTS } from '@src/types';
+import { EMPTY_ASSIGNMENTS } from '@src/authz-module/constants';
 
 interface TeamMembersTableProps {
   presetScope?: string;

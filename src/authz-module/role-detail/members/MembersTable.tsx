@@ -9,7 +9,7 @@ import messages from '@src/authz-module/role-detail/messages';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
-import { EMPTY_ASSIGNMENTS } from '@src/types';
+import { EMPTY_ASSIGNMENTS } from '@src/authz-module/constants';
 import { EmailCell, NameCell } from '@src/authz-module/team-members/components/TeamMemberCells';
 import { ScopeNameCell } from '@src/authz-module/components/TableCells';
 import { getCellHeader } from '@src/authz-module/utils';
