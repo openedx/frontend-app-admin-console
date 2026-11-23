@@ -140,6 +140,37 @@ describe('MembersTable', () => {
     });
   });
 
+  it('shows each scope with its organization, as the Team Members table does', () => {
+    renderMembersTable();
+
+    // Demo Course and Content Library belong to OpenedX, Math 101 to WGU.
+    expect(screen.getAllByText('OpenedX')).toHaveLength(2);
+    expect(screen.getByText('WGU')).toBeInTheDocument();
+  });
+
+  it('summarises an organization-wide scope as just the organization', () => {
+    mockUseTeamMembersAssignments.mockReturnValue({
+      ...mockMembersData,
+      data: {
+        ...mockMembersData.data,
+        results: [{
+          ...mockMembersData.data.results[1],
+          assignments: [{
+            ...mockMembersData.data.results[1].assignments[0],
+            org: 'MathDept',
+            scope: 'lib:MathDept:*',
+            scopeDisplayName: '',
+          }],
+        }],
+        count: 1,
+      },
+    });
+    renderMembersTable();
+
+    // Named once, on the scope line, rather than repeated on an organization line below.
+    expect(screen.getAllByText('MathDept')).toHaveLength(1);
+  });
+
   it('renders action buttons for each member row', async () => {
     renderMembersTable();
 
