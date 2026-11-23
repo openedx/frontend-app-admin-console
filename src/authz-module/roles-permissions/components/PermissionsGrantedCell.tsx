@@ -8,7 +8,7 @@ const PermissionsGrantedCell = ({ row }: RoleCellProps) => {
   const { formatMessage } = useIntl();
   return (
     <span>
-      {formatMessage(messages['authz.roles.table.permissions.granted'], { count: row.original.permissionCount })}
+      {formatMessage(messages['authz.roles.table.permissions.granted'], { count: row.original.permissions.length })}
     </span>
   );
 };

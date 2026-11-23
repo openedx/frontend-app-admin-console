@@ -4,18 +4,22 @@ import {
 } from '@openedx/paragon';
 import { Edit, MoreVert, Visibility } from '@openedx/paragon/icons';
 
+import { isCustomRole } from '@src/authz-module/catalog';
 import messages from '@src/authz-module/roles-permissions/messages';
 import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
 
 /**
  * Built-in roles can only be viewed; custom roles can be edited. Every role has the overflow menu.
+ * Each label names the role, since react-bootstrap names the menu after its toggle and a screen
+ * reader user moving through the table must tell the rows apart.
  *
  * TODO: the view (eye), edit (pencil), "Duplicate" and "Assign role" actions render without
  * handlers; they will be wired in a follow-up ticket.
  */
 const RoleActionsCell = ({ row }: RoleCellProps) => {
   const { formatMessage } = useIntl();
-  const { id, isCustom } = row.original;
+  const isCustom = isCustomRole(row.original);
+  const labelValues = { role: row.original.displayName };
   return (
     <Stack direction="horizontal" gap={2} className="justify-content-center">
       <IconButton
@@ -24,17 +28,17 @@ const RoleActionsCell = ({ row }: RoleCellProps) => {
         variant="primary"
         className="roles-table-action-button"
         size="sm"
-        alt={formatMessage(messages[isCustom ? 'authz.roles.table.action.edit.alt' : 'authz.roles.table.action.view.alt'])}
+        alt={formatMessage(messages[isCustom ? 'authz.roles.table.action.edit.alt' : 'authz.roles.table.action.view.alt'], labelValues)}
       />
       <Dropdown drop="right">
         <Dropdown.Toggle
-          id={`role-actions-${id}`}
+          id={`role-actions-${row.original.role}`}
           as={IconButton}
           src={MoreVert}
           iconAs={Icon}
           variant="dark"
           size="sm"
-          alt={formatMessage(messages['authz.roles.table.action.more.alt'])}
+          alt={formatMessage(messages['authz.roles.table.action.more.alt'], labelValues)}
         />
         {/* Fixed positioning lets the menu escape the table container's overflow clipping. */}
         <Dropdown.Menu className="border-0 rounded shadow py-3" popperConfig={{ strategy: 'fixed' }}>

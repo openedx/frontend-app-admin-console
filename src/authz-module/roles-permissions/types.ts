@@ -1,15 +1,9 @@
-/** One row of the roles table: one role of the page the server returned. */
-export interface RoleRow {
-  // The catalog role key, e.g. `library_admin`.
-  id: string;
-  name: string;
-  resourceTypes: string[];
-  members: number;
-  permissionCount: number;
-  lastUpdated: string | null;
-  isCustom: boolean;
-}
+import type { DataTableCellProps } from '@openedx/paragon';
 
-export interface RoleCellProps {
-  row: { original: RoleRow };
-}
+import type { Role } from '@src/authz-module/catalog';
+
+/**
+ * Props Paragon's DataTable passes to a roles table cell. Rows are the catalog roles as the
+ * endpoint returns them, so the table and the catalog share one vocabulary (ADR 0004).
+ */
+export type RoleCellProps = DataTableCellProps<Role>;

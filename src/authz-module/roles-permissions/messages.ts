@@ -123,18 +123,18 @@ const messages = defineMessages({
   },
   'authz.roles.table.action.view.alt': {
     id: 'authz.roles.table.action.view.alt',
-    defaultMessage: 'View role',
-    description: 'Accessible label of the button that opens a built-in role',
+    defaultMessage: 'View {role}',
+    description: 'Accessible label of the button that opens a built-in role. {role} is the role name, so screen reader users know which row the button acts on.',
   },
   'authz.roles.table.action.edit.alt': {
     id: 'authz.roles.table.action.edit.alt',
-    defaultMessage: 'Edit role',
-    description: 'Accessible label of the button that edits a custom role',
+    defaultMessage: 'Edit {role}',
+    description: 'Accessible label of the button that edits a custom role. {role} is the role name, so screen reader users know which row the button acts on.',
   },
   'authz.roles.table.action.more.alt': {
     id: 'authz.roles.table.action.more.alt',
-    defaultMessage: 'More actions',
-    description: 'Accessible label of the menu with more actions for a role',
+    defaultMessage: 'More actions for {role}',
+    description: 'Accessible label of the toggle, and so of the menu, with more actions for a role. {role} is the role name, so screen reader users know which row the menu acts on.',
   },
   'authz.roles.table.action.duplicate': {
     id: 'authz.roles.table.action.duplicate',

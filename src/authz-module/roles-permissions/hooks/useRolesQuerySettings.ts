@@ -43,7 +43,7 @@ const toTableSettings = (state: RolesTableState): TableSettings => {
 
   return {
     search: typeof search === 'string' ? search.trim() || null : null,
-    resourceTypes: Array.isArray(resourceTypes) ? [...resourceTypes].sort().join(',') : '',
+    resourceTypes: Array.isArray(resourceTypes) ? resourceTypes.toSorted().join(',') : '',
     sortBy,
     order: sortBy ? (sort.desc ? 'desc' : 'asc') : null,
     pageIndex: state.pageIndex ?? 0,

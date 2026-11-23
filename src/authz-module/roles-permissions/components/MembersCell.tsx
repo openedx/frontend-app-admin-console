@@ -8,7 +8,7 @@ import type { RoleCellProps } from '@src/authz-module/roles-permissions/types';
  */
 const MembersCell = ({ row }: RoleCellProps) => {
   const { formatNumber } = useIntl();
-  return <span>{formatNumber(row.original.members)}</span>;
+  return <span>{formatNumber(row.original.userCount)}</span>;
 };
 
 export default MembersCell;

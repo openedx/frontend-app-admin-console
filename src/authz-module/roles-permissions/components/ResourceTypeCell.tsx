@@ -12,7 +12,7 @@ const ResourceTypeCell = ({ row }: RoleCellProps) => {
   const { formatMessage } = useIntl();
   return (
     <Stack direction="horizontal" gap={1} className="flex-wrap">
-      {row.original.resourceTypes.map((resourceType) => {
+      {row.original.scopeTypes.map((resourceType) => {
         const display = RESOURCE_TYPE_DISPLAY[resourceType];
         return (
           <span

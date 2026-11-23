@@ -120,7 +120,7 @@ describe('RolesPermissionsTable', () => {
     });
 
     it('lists the rows in the order the server returned them', () => {
-      mockRolesPage({ data: buildPage({ results: [...roles].reverse() }) });
+      mockRolesPage({ data: buildPage({ results: roles.toReversed() }) });
       renderTable();
 
       const names = screen.getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell')[0].textContent);
@@ -132,11 +132,25 @@ describe('RolesPermissionsTable', () => {
 
       const reviewer = within(getRow('Library reviewer'));
       expect(reviewer.getByText('Custom Role')).toBeInTheDocument();
-      expect(reviewer.getByRole('button', { name: 'Edit role' })).toBeInTheDocument();
+      expect(reviewer.getByRole('button', { name: 'Edit Library reviewer' })).toBeInTheDocument();
 
       const courseAdmin = within(getRow('Course Admin'));
       expect(courseAdmin.queryByText('Custom Role')).not.toBeInTheDocument();
-      expect(courseAdmin.getByRole('button', { name: 'View role' })).toBeInTheDocument();
+      expect(courseAdmin.getByRole('button', { name: 'View Course Admin' })).toBeInTheDocument();
+    });
+
+    it('names the role in each row\'s more-actions toggle and in the menu it opens', async () => {
+      renderTable();
+      expect(within(getRow('Library reviewer')).getByRole('button', { name: 'More actions for Library reviewer' }))
+        .toBeInTheDocument();
+      const toggle = within(getRow('Course Admin')).getByRole('button', { name: 'More actions for Course Admin' });
+      await user.click(toggle);
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+      // The menu takes its accessible name from the toggle through aria-labelledby.
+      const menu = screen.getByRole('button', { name: 'Duplicate' }).closest('.dropdown-menu');
+      expect(menu).toHaveAttribute('aria-labelledby', toggle.id);
     });
 
     it('shows a pill for each resource type of a role', () => {

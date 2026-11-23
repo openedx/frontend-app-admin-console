@@ -1,19 +1,11 @@
 import { screen } from '@testing-library/react';
 import { renderWrapper } from '@src/testUtils';
-import type { RoleRow } from '@src/authz-module/roles-permissions/types';
+import { buildCatalogRole } from '@src/authz-module/catalog/testUtils';
 import MembersCell from './MembersCell';
 
 const renderCell = (members: number) => {
-  const row: RoleRow = {
-    id: 'library_admin',
-    name: 'Library Admin',
-    resourceTypes: ['lib'],
-    members,
-    permissionCount: 0,
-    lastUpdated: null,
-    isCustom: false,
-  };
-  return renderWrapper(<MembersCell row={{ original: row }} />);
+  const role = buildCatalogRole('library_admin', { userCount: members });
+  return renderWrapper(<MembersCell row={{ id: role.role, original: role }} />);
 };
 
 describe('MembersCell', () => {

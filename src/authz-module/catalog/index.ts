@@ -2,6 +2,7 @@ export {
   useAuthzCatalog, useCatalogRoles, invalidateAuthzCatalog, invalidateCatalogRoles,
 } from './data/hooks';
 export { default as CatalogIcon } from './CatalogIcon';
+export { isCustomRole } from './utils';
 export type {
   GetAuthzCatalogResponse, RolesQueryParams, RolesSortBy, RolesSortOrder,
 } from './data/api';

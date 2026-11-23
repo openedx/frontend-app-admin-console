@@ -1,14 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import debounce from 'lodash.debounce';
 import { useIntl } from '@openedx/frontend-base';
-import { DataTable, TextFilter } from '@openedx/paragon';
+import { DataTable } from '@openedx/paragon';
 
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { useCatalogRoles } from '@src/authz-module/catalog';
-import type { GetAuthzCatalogResponse, Role } from '@src/authz-module/catalog';
+import type { GetAuthzCatalogResponse } from '@src/authz-module/catalog';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
-import MultipleChoiceFilter from '@src/authz-module/components/TableControlBar/MultipleChoiceFilter';
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import LastUpdatedCell from './components/LastUpdatedCell';
 import MembersCell from './components/MembersCell';
@@ -20,7 +19,6 @@ import RolesTableControlBar from './components/RolesTableControlBar';
 import { ROLES_TABLE_COLUMNS } from './constants';
 import useRolesQuerySettings from './hooks/useRolesQuerySettings';
 import messages from './messages';
-import type { RoleRow } from './types';
 
 const toastedErrors = new WeakSet<Error>();
 
@@ -32,16 +30,6 @@ const toastedErrors = new WeakSet<Error>();
 const EMPTY_ROLES: GetAuthzCatalogResponse = {
   count: 0, next: null, previous: null, scopeTypes: [], categories: [], permissions: [], results: [],
 };
-
-const toRoleRow = (role: Role): RoleRow => ({
-  id: role.role,
-  name: role.displayName,
-  resourceTypes: role.scopeTypes,
-  members: role.userCount,
-  permissionCount: role.permissions.length,
-  lastUpdated: role.updatedAt,
-  isCustom: role.definitionKind === 'user_defined',
-});
 
 /**
  * Lists the roles of the scope types the user can view, one page at a time from
@@ -78,8 +66,6 @@ const RolesPermissionsTable = () => {
   // With no page to show, the empty table says the roles failed to load, not that none matched.
   const hasFailedToLoad = !!error && !data;
 
-  const roleRows = useMemo(() => results.map(toRoleRow), [results]);
-
   // Only transient failures reach here; each one is reported once, with a retry.
   useEffect(() => {
     if (error && !toastedErrors.has(error)) {
@@ -104,7 +90,7 @@ const RolesPermissionsTable = () => {
       manualPagination
       manualSortBy
       fetchData={fetchData}
-      data={roleRows}
+      data={results}
       itemCount={count}
       pageCount={pageCount}
       initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
@@ -121,28 +107,26 @@ const RolesPermissionsTable = () => {
         {
           id: ROLES_TABLE_COLUMNS.NAME,
           Header: formatMessage(messages['authz.roles.table.column.role.title']),
-          accessor: 'name',
+          accessor: 'displayName',
           Cell: RoleNameCell,
-          Filter: TextFilter,
         },
         {
           id: ROLES_TABLE_COLUMNS.RESOURCE_TYPE,
           Header: formatMessage(messages['authz.roles.table.column.resource.type.title']),
-          accessor: 'resourceTypes',
+          accessor: 'scopeTypes',
           Cell: ResourceTypeCell,
-          Filter: MultipleChoiceFilter,
         },
         {
           id: ROLES_TABLE_COLUMNS.MEMBERS,
           Header: formatMessage(messages['authz.roles.table.column.members.title']),
-          accessor: 'members',
+          accessor: 'userCount',
           Cell: MembersCell,
           disableFilters: true,
         },
         {
           id: 'permissions',
           Header: formatMessage(messages['authz.roles.table.column.permissions.title']),
-          accessor: 'permissionCount',
+          accessor: 'permissions',
           Cell: PermissionsGrantedCell,
           disableFilters: true,
           disableSortBy: true,
@@ -150,7 +134,7 @@ const RolesPermissionsTable = () => {
         {
           id: ROLES_TABLE_COLUMNS.LAST_UPDATED,
           Header: formatMessage(messages['authz.roles.table.column.last.updated.title']),
-          accessor: 'lastUpdated',
+          accessor: 'updatedAt',
           Cell: LastUpdatedCell,
           disableFilters: true,
         },

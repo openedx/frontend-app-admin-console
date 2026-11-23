@@ -1,7 +1,7 @@
 import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { buildCatalogCategory, buildCatalogPermission, buildCatalogRole } from './testUtils';
 import type { AuthzCatalog, Role } from './types';
-import { getScopeCatalog, sortRolesByPermissionCount } from './utils';
+import { getScopeCatalog, isCustomRole, sortRolesByPermissionCount } from './utils';
 
 const catalog: AuthzCatalog = {
   scopeTypes: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY],
@@ -30,6 +30,16 @@ const catalog: AuthzCatalog = {
 };
 
 const roleIds = (roles: Role[]) => roles.map(({ role }) => role);
+
+describe('isCustomRole', () => {
+  it('is true for a user-defined role', () => {
+    expect(isCustomRole(buildCatalogRole('reviewer', { definitionKind: 'user_defined' }))).toBe(true);
+  });
+
+  it('is false for a static role', () => {
+    expect(isCustomRole(buildCatalogRole('library_admin', { definitionKind: 'static' }))).toBe(false);
+  });
+});
 
 describe('getScopeCatalog', () => {
   it('keeps only the permissions granted in the scope type', () => {
