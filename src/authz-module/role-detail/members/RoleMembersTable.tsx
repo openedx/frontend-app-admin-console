@@ -1,4 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
+import {
+  useCallback, useEffect, useMemo, useState,
+} from 'react';
+import debounce from 'lodash.debounce';
 import { useParams } from 'react-router-dom';
 import { useIntl } from '@openedx/frontend-base';
 import { DataTable, TextFilter } from '@openedx/paragon';
@@ -58,6 +61,10 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
 
   const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
 
+  const fetchData = useMemo(() => debounce(handleTableFetch, 500), [handleTableFetch]);
+
+  useEffect(() => () => fetchData.cancel(), [fetchData]);
+
   // Flatten members array: each assignment becomes a row
   const flattenedMembers = useMemo(() => flattenMembers(members), [members]);
 
@@ -116,7 +123,7 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
       additionalColumns={additionalColumns}
       columns={columns}
       data={flattenedMembers}
-      fetchData={handleTableFetch}
+      fetchData={fetchData}
       initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
       isFilterable
       isLoading={isLoading}

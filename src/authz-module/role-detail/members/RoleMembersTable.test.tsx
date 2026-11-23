@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/testUtils';
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
@@ -272,6 +272,34 @@ describe('RoleMembersTable', () => {
     // Username and email share one search box, so both appear in its placeholder.
     expect(screen.getByPlaceholderText('Search by Username or Email')).toBeInTheDocument();
     expect(screen.getAllByRole('textbox')).toHaveLength(1);
+  });
+
+  it('debounces the search so typing sends a single request', async () => {
+    jest.useFakeTimers();
+    try {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderMembersTable();
+      const searchedTerms = () => mockUseTeamMembersAssignments.mock.calls
+        .map(([settings]) => settings.search)
+        .filter(Boolean);
+
+      await user.type(screen.getByPlaceholderText('Search by Username or Email'), 'inst');
+      // Nothing is requested while the user is still typing.
+      expect(searchedTerms()).toEqual([]);
+
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+
+      // Only the full term reaches the request, never the partial keystrokes.
+      expect(new Set(searchedTerms())).toEqual(new Set(['inst']));
+      expect(mockUseTeamMembersAssignments).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'inst', roles: 'custom-role-123' }),
+        true,
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('renders scope filter control', async () => {
