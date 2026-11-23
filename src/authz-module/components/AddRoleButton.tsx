@@ -4,8 +4,7 @@ import { Button } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
 
 import baseMessages from '@src/authz-module/messages';
-import AssignRoleWizard from '@src/authz-module/role-assignation-wizard/AssignRoleWizard';
-import useAssignableRoleGroups from '@src/authz-module/role-assignation-wizard/hooks/useAssignableRoleGroups';
+import { AssignRoleWizard, useAssignableRoleGroups } from '@src/authz-module/role-assignation-wizard';
 
 interface AddRoleButtonProps {
   presetUsername?: string;
