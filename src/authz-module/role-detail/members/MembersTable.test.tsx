@@ -74,6 +74,13 @@ const mockMembersData = {
   refetch: jest.fn(),
 };
 
+// The action buttons' accessible names include the member's username.
+const actionButtonName = (messageKey: keyof typeof messages) => new RegExp(
+  messages[messageKey].defaultMessage.replace('{username}', '.+'),
+);
+const viewButtonName = actionButtonName('authz.role.members.table.action.view.alt');
+const deleteButtonName = actionButtonName('authz.role.members.table.action.delete.alt');
+
 const renderMembersTable = (props = {}) => renderWithAllProviders(
   <ToastManagerProvider><MembersTable onDelete={jest.fn()} {...props} /></ToastManagerProvider>,
 );
@@ -137,14 +144,14 @@ describe('MembersTable', () => {
     renderMembersTable();
 
     await waitFor(() => {
-      // Should have 3 view buttons (one per flattened row)
-      const viewButtons = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage });
-      expect(viewButtons).toHaveLength(3);
-
-      // Should have 3 delete buttons (one per flattened row)
-      const deleteButtons = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
-      expect(deleteButtons).toHaveLength(3);
+      // One view and one delete button per flattened row (3 rows)
+      expect(screen.getAllByRole('button', { name: viewButtonName })).toHaveLength(3);
+      expect(screen.getAllByRole('button', { name: deleteButtonName })).toHaveLength(3);
     });
+
+    // Each row's buttons are labeled with that row's username
+    expect(screen.getAllByRole('button', { name: 'Remove instructor1 from role' })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Remove instructor2 from role' })).toBeInTheDocument();
   });
 
   it('displays showing message with correct member count', async () => {
@@ -163,27 +170,27 @@ describe('MembersTable', () => {
 
     renderMembersTable({ onDelete: mockOnDelete });
 
-    await waitFor(() => {
-      const deleteButtons = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
-      expect(deleteButtons.length).toBeGreaterThan(0);
-    });
+    const deleteButton = await screen.findByRole('button', { name: 'Remove instructor2 from role' });
+    await user.click(deleteButton);
 
-    const firstDeleteButton = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage })[0];
-    await user.click(firstDeleteButton);
-
-    expect(mockOnDelete).toHaveBeenCalled();
+    expect(mockOnDelete).toHaveBeenCalledWith(expect.objectContaining({
+      username: 'instructor2',
+      scope: 'lib:OpenedX:CONTENT',
+    }));
   });
 
   it('renders with loading state initially', () => {
-    mockUseTeamMembersAssignments.mockReturnValueOnce({
+    // Not `mockReturnValueOnce`: the table re-renders after fetching, and must stay loading.
+    mockUseTeamMembersAssignments.mockReturnValue({
       ...mockMembersData,
       isLoading: true,
     });
     renderMembersTable();
-    // Component should render, possibly with loading indicator
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search/i)).toBeInTheDocument();
   });
 
-  it('renders empty state when no members returned', async () => {
+  it('renders empty state when no members returned', () => {
     mockUseTeamMembersAssignments.mockReturnValue({
       data: {
         results: [],
@@ -199,12 +206,10 @@ describe('MembersTable', () => {
     // Should still render headers even with no data
     expect(screen.getByRole('columnheader', { name: /Username/i })).toBeInTheDocument();
     // Should show the empty state message
-    await waitFor(() => {
-      expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
-    });
+    expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
   });
 
-  it('uses EMPTY_ASSIGNMENTS when data is undefined', async () => {
+  it('uses EMPTY_ASSIGNMENTS when data is undefined', () => {
     mockUseTeamMembersAssignments.mockReturnValue({
       data: undefined,
       error: null,
@@ -215,9 +220,7 @@ describe('MembersTable', () => {
     // Should still render headers with EMPTY_ASSIGNMENTS default
     expect(screen.getByRole('columnheader', { name: /Username/i })).toBeInTheDocument();
     // Should show the empty state message
-    await waitFor(() => {
-      expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
-    });
+    expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
   });
 
   it('filters by roleId from URL params', () => {
