@@ -8,7 +8,7 @@ import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import { renderWithAllProviders } from '@src/testUtils';
 import messages from './messages';
-import RoleDetailPage from './index';
+import RoleDetailPage from './RoleDetailPage';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),

@@ -7,7 +7,7 @@ import ErrorFallback from '@src/authz-module/components/ErrorPage';
 import { CustomErrors } from '@src/constants';
 import AuthzHome from './authz-home';
 import AuditUserPage from './audit-user';
-import RoleDetailPage from './role-detail';
+import { RoleDetailPage } from './role-detail';
 import { ROUTES } from './constants';
 
 import './index.scss';
