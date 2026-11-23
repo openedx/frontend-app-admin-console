@@ -84,6 +84,8 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
       accessor: 'email',
       Cell: EmailCell,
       disableFilters: true,
+      filter: 'text',
+      Filter: TextFilter,
     },
     {
       id: 'scope',

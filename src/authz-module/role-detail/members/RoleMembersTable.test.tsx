@@ -266,14 +266,12 @@ describe('RoleMembersTable', () => {
     );
   });
 
-  it('renders search filter for username column', async () => {
+  it('renders a single search box that names both searchable fields', () => {
     renderMembersTable();
 
-    await waitFor(() => {
-      // Look for search input - should be present for filtering
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-      expect(searchInput).toBeInTheDocument();
-    });
+    // Username and email share one search box, so both appear in its placeholder.
+    expect(screen.getByPlaceholderText('Search by Username or Email')).toBeInTheDocument();
+    expect(screen.getAllByRole('textbox')).toHaveLength(1);
   });
 
   it('renders scope filter control', async () => {
