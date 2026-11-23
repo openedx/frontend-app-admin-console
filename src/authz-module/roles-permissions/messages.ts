@@ -156,6 +156,151 @@ const messages = defineMessages({
     defaultMessage: 'Remove {filter} filter',
     description: 'Accessible label of the button that removes an applied filter chip in the roles table',
   },
+  'authz.roles.create.button': {
+    id: 'authz.roles.create.button',
+    defaultMessage: 'Create Custom Role',
+    description: 'Header button that opens the create custom role wizard',
+  },
+  'authz.roles.create.wizard.title': {
+    id: 'authz.roles.create.wizard.title',
+    defaultMessage: 'Create a new role',
+    description: 'Title of the create custom role wizard',
+  },
+  'authz.roles.create.wizard.step.nameAndResource': {
+    id: 'authz.roles.create.wizard.step.nameAndResource',
+    defaultMessage: 'Name & Resource',
+    description: 'Title of the first step of the create custom role wizard',
+  },
+  'authz.roles.create.wizard.step.permissions': {
+    id: 'authz.roles.create.wizard.step.permissions',
+    defaultMessage: 'Permissions',
+    description: 'Title of the second step of the create custom role wizard',
+  },
+  'authz.roles.create.wizard.step.status': {
+    id: 'authz.roles.create.wizard.step.status',
+    defaultMessage: 'Step {current} of {total}: {title}',
+    description: 'Accessible name of the content of the active step of the create custom role wizard, which a screen reader reads when focus moves to the step',
+  },
+  'authz.roles.create.wizard.button.cancel': {
+    id: 'authz.roles.create.wizard.button.cancel',
+    defaultMessage: 'Cancel',
+    description: 'Button that closes the create custom role wizard',
+  },
+  'authz.roles.create.wizard.button.next': {
+    id: 'authz.roles.create.wizard.button.next',
+    defaultMessage: 'Next',
+    description: 'Button that moves the create custom role wizard to the permissions step',
+  },
+  'authz.roles.create.wizard.button.back': {
+    id: 'authz.roles.create.wizard.button.back',
+    defaultMessage: 'Back',
+    description: 'Button that moves the create custom role wizard back to the name and resource step',
+  },
+  'authz.roles.create.wizard.button.next.hint.name': {
+    id: 'authz.roles.create.wizard.button.next.hint.name',
+    defaultMessage: 'Enter a role name to continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the role name is missing',
+  },
+  'authz.roles.create.wizard.button.next.hint.sourceRole': {
+    id: 'authz.roles.create.wizard.button.next.hint.sourceRole',
+    defaultMessage: 'Select a role to clone to continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: no role to clone is selected',
+  },
+  'authz.roles.create.wizard.name.error': {
+    id: 'authz.roles.create.wizard.name.error',
+    defaultMessage: 'Enter a role name.',
+    description: 'Error shown under the custom role name field when it is empty',
+  },
+  'authz.roles.create.wizard.sourceRole.error': {
+    id: 'authz.roles.create.wizard.sourceRole.error',
+    defaultMessage: 'Select a role to clone.',
+    description: 'Error shown under the picker of the role a custom role is cloned from when none is selected',
+  },
+  'authz.roles.create.wizard.name.label': {
+    id: 'authz.roles.create.wizard.name.label',
+    defaultMessage: 'Role name',
+    description: 'Label of the custom role name field',
+  },
+  'authz.roles.create.wizard.name.placeholder': {
+    id: 'authz.roles.create.wizard.name.placeholder',
+    defaultMessage: 'e.g. Course designer',
+    description: 'Placeholder of the custom role name field',
+  },
+  'authz.roles.create.wizard.name.helper': {
+    id: 'authz.roles.create.wizard.name.helper',
+    defaultMessage: 'Shown when administrators assign access.',
+    description: 'Helper text of the custom role name field',
+  },
+  'authz.roles.create.wizard.startFrom.label': {
+    id: 'authz.roles.create.wizard.startFrom.label',
+    defaultMessage: 'Start from',
+    description: 'Label of the choice between building a custom role from scratch or cloning a role',
+  },
+  'authz.roles.create.wizard.startFrom.scratch.title': {
+    id: 'authz.roles.create.wizard.startFrom.scratch.title',
+    defaultMessage: 'Start from scratch',
+    description: 'Title of the option that builds the custom role without permissions',
+  },
+  'authz.roles.create.wizard.startFrom.scratch.description': {
+    id: 'authz.roles.create.wizard.startFrom.scratch.description',
+    defaultMessage: 'Build the role from zero permissions.',
+    description: 'Description of the option that builds the custom role without permissions',
+  },
+  'authz.roles.create.wizard.startFrom.clone.title': {
+    id: 'authz.roles.create.wizard.startFrom.clone.title',
+    defaultMessage: 'Clone from role',
+    description: 'Title of the option that starts the custom role from an existing role',
+  },
+  'authz.roles.create.wizard.startFrom.clone.description': {
+    id: 'authz.roles.create.wizard.startFrom.clone.description',
+    defaultMessage: 'Start with pre-configured permissions from an existing role.',
+    description: 'Description of the option that starts the custom role from an existing role',
+  },
+  'authz.roles.create.wizard.resourceType.label': {
+    id: 'authz.roles.create.wizard.resourceType.label',
+    defaultMessage: 'Resource type',
+    description: 'Label of the custom role resource type field',
+  },
+  'authz.roles.create.wizard.resourceType.helper': {
+    id: 'authz.roles.create.wizard.resourceType.helper',
+    defaultMessage: 'Select the target resource. Custom roles currently apply to a single resource type.',
+    description: 'Helper text of the custom role resource type field',
+  },
+  'authz.roles.create.wizard.sourceRole.label': {
+    id: 'authz.roles.create.wizard.sourceRole.label',
+    defaultMessage: 'Role',
+    description: 'Label of the picker of the role a custom role is cloned from',
+  },
+  'authz.roles.create.wizard.sourceRole.placeholder': {
+    id: 'authz.roles.create.wizard.sourceRole.placeholder',
+    defaultMessage: 'Select a role',
+    description: 'Placeholder of the picker of the role a custom role is cloned from',
+  },
+  'authz.roles.create.wizard.sourceRole.group.standard': {
+    id: 'authz.roles.create.wizard.sourceRole.group.standard',
+    defaultMessage: 'Standard Roles',
+    description: 'Header of the built-in roles in the clone source role picker',
+  },
+  'authz.roles.create.wizard.sourceRole.group.custom': {
+    id: 'authz.roles.create.wizard.sourceRole.group.custom',
+    defaultMessage: 'Custom Roles',
+    description: 'Header of the custom roles in the clone source role picker',
+  },
+  'authz.roles.create.wizard.sourceRole.custom': {
+    id: 'authz.roles.create.wizard.sourceRole.custom',
+    defaultMessage: '{role} (Custom Role)',
+    description: 'A selected custom role in the clone source role picker',
+  },
+  'authz.roles.create.wizard.loading': {
+    id: 'authz.roles.create.wizard.loading',
+    defaultMessage: 'Loading roles',
+    description: 'Screen reader text while the create custom role wizard loads the roles',
+  },
+  'authz.roles.create.wizard.error': {
+    id: 'authz.roles.create.wizard.error',
+    defaultMessage: 'The roles could not be loaded. Please try again later.',
+    description: 'Message shown when the create custom role wizard fails to load the roles',
+  },
   'authz.team.remove.user.toast.success.description': {
     id: 'authz.team.remove.user.toast.success.description',
     defaultMessage: 'The {role} role has been successfully removed.{rolesCount, plural, =0 { The user no longer has access to this library and has been removed from the member list.} other {}}',

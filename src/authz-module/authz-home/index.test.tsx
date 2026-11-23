@@ -7,6 +7,9 @@ import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { CustomErrors } from '@src/constants';
+import { usePermissions } from '@openedx/frontend-base';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
+import baseMessages from '@src/authz-module/messages';
 import AuthzHome from './index';
 import messages from './messages';
 
@@ -25,6 +28,12 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: jest.fn(),
+}));
+
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  // The manage-team answer: by default the user can manage no team.
+  usePermissions: jest.fn(() => ({ 'course-v1': false, lib: false, isLoading: false })),
 }));
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -160,5 +169,38 @@ describe('AuthzHome', () => {
     expect(teamTab.getAllByText('Scope').length).toBe(1);
     expect(teamTab.getAllByText('Role').length).toBe(1);
     expect(teamTab.getByText('Actions')).toBeInTheDocument();
+  });
+
+  it('outlines the assign role button only while the roles and permissions tab is active', async () => {
+    (usePermissions as jest.Mock).mockReturnValue({
+      [SCOPE_TYPES.COURSE]: false, [SCOPE_TYPES.LIBRARY]: true, isLoading: false,
+    });
+    const user = userEvent.setup();
+    renderAuthzHome();
+    const assignRoleButton = () => screen.getByRole('button', {
+      name: baseMessages['authz.management.assign.role.title'].defaultMessage,
+    });
+
+    expect(assignRoleButton()).toHaveClass('btn-primary');
+
+    await user.click(screen.getByRole('tab', { name: messages['authz.tabs.permissionsRoles'].defaultMessage }));
+    expect(assignRoleButton()).toHaveClass('btn-outline-primary');
+
+    await user.click(screen.getByRole('tab', { name: messages['authz.tabs.team'].defaultMessage }));
+    expect(assignRoleButton()).toHaveClass('btn-primary');
+  });
+
+  it('shows the create custom role button only on the roles and permissions tab', async () => {
+    const user = userEvent.setup();
+    renderAuthzHome();
+    const createCustomRoleButton = () => screen.queryByRole('button', { name: 'Create Custom Role' });
+
+    expect(createCustomRoleButton()).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: messages['authz.tabs.permissionsRoles'].defaultMessage }));
+    expect(createCustomRoleButton()).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: messages['authz.tabs.team'].defaultMessage }));
+    expect(createCustomRoleButton()).not.toBeInTheDocument();
   });
 });

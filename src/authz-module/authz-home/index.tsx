@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -8,13 +9,18 @@ import { CustomErrors } from '@src/constants';
 import LoadingPage from '@src/components/LoadingPage';
 import { RolesPermissionsTable } from '@src/authz-module/roles-permissions';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
+import CreateCustomRole from '@src/authz-module/roles-permissions/components/CreateCustomRole';
 
 import messages from './messages';
+
+type AuthzHomeTab = 'team' | 'permissionsRoles';
 
 const AuthzHome = () => {
   const { hash } = useLocation();
   const intl = useIntl();
   const [searchParams] = useSearchParams();
+  // Controlled so the header actions can follow the active tab.
+  const [activeTab, setActiveTab] = useState<AuthzHomeTab>(hash ? 'permissionsRoles' : 'team');
 
   /* In the authoring repository the scope is encoded but this is to Replace spaces with '+'
      to match URL encoding format in case the 'scope' parameter is provided with spaces instead of '+'
@@ -47,15 +53,15 @@ const AuthzHome = () => {
   return (
     <AuthZLayout
       pageTitle={pageTitle}
-      // TODO: add the "Create Custom Role" header button, tracked in
-      // https://github.com/openedx/openedx-authz/issues/571
-      actions={
-        [<AddRoleButton key="add-role-button" />]
-      }
+      actions={[
+        <AddRoleButton key="add-role-button" variant={activeTab === 'permissionsRoles' ? 'outline-primary' : 'primary'} />,
+        ...(activeTab === 'permissionsRoles' ? [<CreateCustomRole key="create-custom-role" />] : []),
+      ]}
     >
       <Tabs
         variant="tabs"
-        defaultActiveKey={hash ? 'permissionsRoles' : 'team'}
+        activeKey={activeTab}
+        onSelect={(key: string | null) => key && setActiveTab(key as AuthzHomeTab)}
         className="page-band bg-light-100"
       >
         <Tab eventKey="team" title={intl.formatMessage(messages['authz.tabs.team'])} className="page-band py-3">
