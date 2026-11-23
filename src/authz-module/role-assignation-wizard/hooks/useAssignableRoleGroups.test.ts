@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
+import { usePermissions } from '@openedx/frontend-base';
 import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
-import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import useAssignableRoleGroups from './useAssignableRoleGroups';
 
@@ -9,22 +9,23 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
 }));
 
-jest.mock('@src/data/hooks', () => ({
-  useValidateUserPermissionsNonSuspense: jest.fn(),
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  usePermissions: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: jest.fn(),
 }));
 
-const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUsePermissions = usePermissions as jest.Mock;
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 
+// The answer `usePermissions` gives for the manage-team query: a boolean under each scope type.
 const allow = (...scopeTypes: string[]) => ({
-  data: [SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY].map((scopeType) => ({
-    action: MANAGE_TEAM_ACTIONS[scopeType],
-    allowed: scopeTypes.includes(scopeType),
-  })),
+  [SCOPE_TYPES.COURSE]: scopeTypes.includes(SCOPE_TYPES.COURSE),
+  [SCOPE_TYPES.LIBRARY]: scopeTypes.includes(SCOPE_TYPES.LIBRARY),
+  isLoading: false,
 });
 
 const groupScopeTypes = (roleGroups: { scopeType: string }[]) => roleGroups.map(({ scopeType }) => scopeType);
@@ -33,7 +34,7 @@ describe('useAssignableRoleGroups', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthzCatalog();
-    mockUseValidatePermissions.mockReturnValue(allow(SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY));
+    mockUsePermissions.mockReturnValue(allow(SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY));
     mockUseCourseAuthoringFlag.mockReturnValue({ isCourseAuthoringEnabled: true });
   });
 
@@ -46,7 +47,7 @@ describe('useAssignableRoleGroups', () => {
   });
 
   it('leaves out the scope types whose team the user cannot manage', () => {
-    mockUseValidatePermissions.mockReturnValue(allow(SCOPE_TYPES.LIBRARY));
+    mockUsePermissions.mockReturnValue(allow(SCOPE_TYPES.LIBRARY));
 
     const { result } = renderHook(() => useAssignableRoleGroups());
 
@@ -63,7 +64,7 @@ describe('useAssignableRoleGroups', () => {
   });
 
   it('cannot assign when the user manages no team', () => {
-    mockUseValidatePermissions.mockReturnValue(allow());
+    mockUsePermissions.mockReturnValue(allow());
 
     const { result } = renderHook(() => useAssignableRoleGroups());
 
@@ -72,7 +73,9 @@ describe('useAssignableRoleGroups', () => {
   });
 
   it('cannot assign while the permissions are loading', () => {
-    mockUseValidatePermissions.mockReturnValue({ data: undefined });
+    mockUsePermissions.mockReturnValue({
+      [SCOPE_TYPES.COURSE]: undefined, [SCOPE_TYPES.LIBRARY]: undefined, isLoading: true,
+    });
 
     const { result } = renderHook(() => useAssignableRoleGroups());
 

@@ -2,15 +2,14 @@ import {
   act, screen, waitFor, within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getAuthenticatedUser } from '@openedx/frontend-base';
+import { getAuthenticatedUser, usePermissions } from '@openedx/frontend-base';
 import { renderWithAllProviders } from '@src/testUtils';
-import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { SCOPE_TYPES, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { authzCatalog, buildCatalogRole, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { useCatalogRoles } from '@src/authz-module/catalog/data/hooks';
 import type { GetAuthzCatalogResponse, RolesQueryParams } from '@src/authz-module/catalog';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import {
   useAssignTeamMembersRole, useOrgs, useScopes, useValidateUsers,
@@ -21,6 +20,7 @@ import RolesPermissionsTable from './RolesPermissionsTable';
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedUser: jest.fn(),
+  usePermissions: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
@@ -30,11 +30,6 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
 
 jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
   useViewTeamPermissions: jest.fn(),
-}));
-
-jest.mock('@src/data/hooks', () => ({
-  ...jest.requireActual('@src/data/hooks'),
-  useValidateUserPermissionsNonSuspense: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
@@ -106,11 +101,10 @@ const mockViewPermissions = (overrides: Partial<ReturnType<typeof useViewTeamPer
 const mockValidateMutateAsync = jest.fn();
 const mockAssignMutateAsync = jest.fn();
 
+// The answer `usePermissions` gives for the manage-team query: a boolean under each scope type.
 const allowManaging = (...scopeTypes: string[]) => ({
-  data: ALL_SCOPE_TYPES.map((scopeType) => ({
-    action: MANAGE_TEAM_ACTIONS[scopeType],
-    allowed: scopeTypes.includes(scopeType),
-  })),
+  ...Object.fromEntries(ALL_SCOPE_TYPES.map((scopeType) => [scopeType, scopeTypes.includes(scopeType)])),
+  isLoading: false,
 });
 
 const libraryScope = {
@@ -122,7 +116,7 @@ const libraryScope = {
 // The assign role wizard: a user who can manage every team, with course authoring on.
 const mockRoleAssignment = () => {
   mockAuthzCatalog();
-  (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging(...ALL_SCOPE_TYPES));
+  (usePermissions as jest.Mock).mockReturnValue(allowManaging(...ALL_SCOPE_TYPES));
   (useCourseAuthoringFlag as jest.Mock).mockReturnValue({
     isCourseAuthoringEnabled: true,
     isCourseEnabled: () => true,
@@ -492,7 +486,7 @@ describe('RolesPermissionsTable — assign role', () => {
 
   it('hides the item for roles of a team the user cannot manage', async () => {
     const user = userEvent.setup();
-    (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging(SCOPE_TYPES.LIBRARY));
+    (usePermissions as jest.Mock).mockReturnValue(allowManaging(SCOPE_TYPES.LIBRARY));
     renderTable();
 
     await openRowMenu(user, 'Course Admin');
@@ -520,7 +514,7 @@ describe('RolesPermissionsTable — assign role', () => {
 
   it('hides the item when the user cannot assign any role', async () => {
     const user = userEvent.setup();
-    (useValidateUserPermissionsNonSuspense as jest.Mock).mockReturnValue(allowManaging());
+    (usePermissions as jest.Mock).mockReturnValue(allowManaging());
     renderTable();
 
     await openRowMenu(user, 'Library Admin');

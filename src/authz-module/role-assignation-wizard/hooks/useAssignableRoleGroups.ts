@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
+import { usePermissions } from '@openedx/frontend-base';
 
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
-import {
-  MANAGE_TEAM_ACTIONS, MANAGE_TEAM_PERMISSIONS, SCOPE_TYPES,
-} from '@src/authz-module/constants';
+import { MANAGE_TEAM_PERMISSIONS, SCOPE_TYPES } from '@src/authz-module/constants';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import type { RoleGroup } from '../components/SelectUsersAndRoleStep';
@@ -14,24 +12,28 @@ import type { RoleGroup } from '../components/SelectUsersAndRoleStep';
  * wizard may offer, so the rules live here and not in each host.
  */
 const useAssignableRoleGroups = () => {
-  const { data: managePermissions } = useValidateUserPermissionsNonSuspense(MANAGE_TEAM_PERMISSIONS);
+  // Authz checks are always enabled in the admin console.
+  const managePermissions = usePermissions(MANAGE_TEAM_PERMISSIONS, true);
   const { isCourseAuthoringEnabled } = useCourseAuthoringFlag();
   const {
     scopeTypes, getScopeCatalog, isLoading, isError,
   } = useAuthzCatalog();
 
-  const canAssignRole = !!managePermissions?.some((permission) => permission.allowed);
+  // Joined because `usePermissions` returns a new object on every render, and a string keeps the
+  // memo below, and so the roles the wizard is given, stable while the answer does not change.
+  const manageableKey = Object.keys(MANAGE_TEAM_PERMISSIONS)
+    .filter((scopeType) => managePermissions[scopeType] === true)
+    .join(',');
+  const canAssignRole = manageableKey !== '';
 
   // The catalog roles of the scope types where the user can manage the team, in catalog order.
   const roleGroups: RoleGroup[] = useMemo(() => scopeTypes
-    .filter((scopeType) => managePermissions?.some(
-      ({ action, allowed }) => allowed && action === MANAGE_TEAM_ACTIONS[scopeType],
-    ))
+    .filter((scopeType) => manageableKey.split(',').includes(scopeType))
     // Course (authoring) roles are only assignable when the course-authoring flag is enabled.
     .filter((scopeType) => scopeType !== SCOPE_TYPES.COURSE || isCourseAuthoringEnabled)
     .map(getScopeCatalog)
     .filter((scopeCatalog) => scopeCatalog !== undefined), [
-    scopeTypes, managePermissions, isCourseAuthoringEnabled, getScopeCatalog,
+    scopeTypes, manageableKey, isCourseAuthoringEnabled, getScopeCatalog,
   ]);
 
   return {
