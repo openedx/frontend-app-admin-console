@@ -252,7 +252,7 @@ describe('RolesPermissionsTable', () => {
       renderTable();
 
       const reviewerRow = within(getRow('Library reviewer'));
-      const editButton = reviewerRow.getByRole('button', { name: 'Edit role' });
+      const editButton = reviewerRow.getByRole('button', { name: 'Edit Library reviewer' });
 
       await user.click(editButton);
 

@@ -7,7 +7,7 @@ import { Icon, IconButton } from '@openedx/paragon';
 import type { DataTableCellProps } from '@openedx/paragon';
 import { buildAuditUserPath } from '@src/authz-module/constants';
 import messages from '../messages';
-import { FlattenedMember } from './MembersTable';
+import { FlattenedMember } from './RoleMembersTable';
 
 type MemberActionCellProps = DataTableCellProps<FlattenedMember> & {
   onClickDeleteButton: (member: FlattenedMember) => void;
