@@ -1,7 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
-import { IntlProvider } from '@openedx/frontend-base';
+import { renderWrapper } from '@src/testUtils';
 import messages from '../messages';
 import MemberActionCell from './MemberActionCell';
 
@@ -27,16 +26,12 @@ const mockRow = {
   original: mockMember,
 };
 
-const renderActionCell = (props = {}) => render(
-  <IntlProvider locale="en">
-    <BrowserRouter>
-      <MemberActionCell
-        row={mockRow}
-        onClickDeleteButton={jest.fn()}
-        {...props}
-      />
-    </BrowserRouter>
-  </IntlProvider>,
+const renderActionCell = (props = {}) => renderWrapper(
+  <MemberActionCell
+    row={mockRow}
+    onClickDeleteButton={jest.fn()}
+    {...props}
+  />,
 );
 
 describe('MemberActionCell', () => {
@@ -46,17 +41,20 @@ describe('MemberActionCell', () => {
 
   it('renders view button', () => {
     renderActionCell();
-    expect(screen.getByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage })).toBeInTheDocument();
+    const expectedName = messages['authz.role.members.table.action.view.alt'].defaultMessage.replace('{username}', mockMember.username);
+    expect(screen.getByRole('button', { name: expectedName })).toBeInTheDocument();
   });
 
   it('renders delete button', () => {
     renderActionCell();
-    expect(screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage })).toBeInTheDocument();
+    const expectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', mockMember.username);
+    expect(screen.getByRole('button', { name: expectedName })).toBeInTheDocument();
   });
 
   it('view button has primary variant', () => {
     renderActionCell();
-    const viewButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage });
+    const expectedName = messages['authz.role.members.table.action.view.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const viewButton = screen.getByRole('button', { name: expectedName });
 
     // Check that the button has the primary styling applied
     expect(viewButton).toHaveClass('btn-icon-primary');
@@ -64,7 +62,8 @@ describe('MemberActionCell', () => {
 
   it('delete button has danger variant', () => {
     renderActionCell();
-    const deleteButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    const expectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const deleteButton = screen.getByRole('button', { name: expectedName });
 
     // Check that the button has the danger styling applied
     expect(deleteButton).toHaveClass('btn-icon-danger');
@@ -74,7 +73,8 @@ describe('MemberActionCell', () => {
     const user = userEvent.setup();
     renderActionCell();
 
-    const viewButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage });
+    const expectedName = messages['authz.role.members.table.action.view.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const viewButton = screen.getByRole('button', { name: expectedName });
     await user.click(viewButton);
 
     // Should navigate to audit-user page for the member
@@ -89,7 +89,8 @@ describe('MemberActionCell', () => {
 
     renderActionCell({ onClickDeleteButton: mockOnDelete });
 
-    const deleteButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    const expectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const deleteButton = screen.getByRole('button', { name: expectedName });
     await user.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith(mockMember);
@@ -112,8 +113,10 @@ describe('MemberActionCell', () => {
 
   it('renders small-sized buttons', () => {
     renderActionCell();
-    const viewButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage });
-    const deleteButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    const viewExpectedName = messages['authz.role.members.table.action.view.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const deleteExpectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const viewButton = screen.getByRole('button', { name: viewExpectedName });
+    const deleteButton = screen.getByRole('button', { name: deleteExpectedName });
 
     // Both buttons should have size="sm" applied (shows as btn-icon-sm for IconButton)
     expect(viewButton).toHaveClass('btn-icon-sm');
@@ -126,7 +129,8 @@ describe('MemberActionCell', () => {
 
     renderActionCell({ onClickDeleteButton: mockOnDelete });
 
-    const deleteButton = screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    const expectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', mockMember.username);
+    const deleteButton = screen.getByRole('button', { name: expectedName });
 
     await user.click(deleteButton);
     await user.click(deleteButton);
@@ -147,18 +151,16 @@ describe('MemberActionCell', () => {
       permissionCount: 3,
     };
 
-    render(
-      <IntlProvider locale="en">
-        <BrowserRouter>
-          <MemberActionCell
-            row={{ id: '2', original: differentMember }}
-            onClickDeleteButton={jest.fn()}
-          />
-        </BrowserRouter>
-      </IntlProvider>,
+    renderWrapper(
+      <MemberActionCell
+        row={{ id: '2', original: differentMember }}
+        onClickDeleteButton={jest.fn()}
+      />,
     );
 
-    expect(screen.getByRole('button', { name: messages['authz.role.members.table.action.view.alt'].defaultMessage })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage })).toBeInTheDocument();
+    const viewExpectedName = messages['authz.role.members.table.action.view.alt'].defaultMessage.replace('{username}', differentMember.username);
+    const deleteExpectedName = messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', differentMember.username);
+    expect(screen.getByRole('button', { name: viewExpectedName })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: deleteExpectedName })).toBeInTheDocument();
   });
 });

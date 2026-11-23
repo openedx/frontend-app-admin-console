@@ -48,12 +48,12 @@ const messages = defineMessages({
   },
   'authz.role.members.table.action.view.alt': {
     id: 'authz.role.members.table.action.view.alt',
-    defaultMessage: 'View member details',
+    defaultMessage: 'View member details for {username}',
     description: 'Accessible label for the view button in the members table',
   },
   'authz.role.members.table.action.delete.alt': {
     id: 'authz.role.members.table.action.delete.alt',
-    defaultMessage: 'Remove member from role',
+    defaultMessage: 'Remove {username} from role',
     description: 'Accessible label for the delete button in the members table',
   },
   'authz.custom.role.action.duplicate': {

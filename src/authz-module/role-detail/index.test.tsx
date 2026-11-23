@@ -1,14 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import type { Role } from '@src/authz-module/catalog/types';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { SiteContext, IntlProvider } from '@openedx/frontend-base';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Route, Routes } from 'react-router-dom';
 import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module/constants';
-import { useAuthzCatalog } from '@src/authz-module/catalog/data/hooks';
-import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
+import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import baseMessages from '@src/authz-module/messages';
-import { mockAppContext } from '@src/testUtils';
+import { renderWithAllProviders } from '@src/testUtils';
 import messages from './messages';
 import RoleDetailPage from './index';
 
@@ -45,14 +43,18 @@ jest.mock('@src/authz-module/components/TableControlBar/ScopesFilter', () => ({
   default: () => <div>Scopes Filter</div>,
 }));
 
-const mockUseAuthzCatalog = useAuthzCatalog as jest.Mock;
 const mockUseTeamMembersAssignments = useTeamMembersAssignments as jest.Mock;
 
-const mockRole = {
-  id: 'custom-role-123',
+const mockRole: Role = {
+  role: 'custom-role-123',
   displayName: 'Custom Instructor',
+  description: 'Custom Instructor role',
   definitionKind: 'user_defined',
   permissions: [],
+  scopeTypes: [],
+  userCount: 0,
+  updatedAt: null,
+  icon: null,
 };
 
 const mockMembers = {
@@ -83,33 +85,23 @@ const mockMembers = {
   refetch: jest.fn(),
 };
 
+const mockCatalogWithRoles = (...roles: Role[]) => mockAuthzCatalog({
+  catalog: { ...authzCatalog, roles: [...authzCatalog.roles, ...roles] },
+});
+
 const renderRoleDetail = (roleId = 'custom-role-123') => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[`/roles/${roleId}`]}>
-        <SiteContext.Provider value={mockAppContext}>
-          <IntlProvider locale="en">
-            <Routes>
-              <Route path="/roles/:roleId" element={children} />
-            </Routes>
-          </IntlProvider>
-        </SiteContext.Provider>
-      </MemoryRouter>
-    </QueryClientProvider>
+  // renderWithAllProviders uses a BrowserRouter, so set the URL the route reads `roleId` from.
+  window.history.pushState({}, '', `/roles/${roleId}`);
+  return renderWithAllProviders(
+    <Routes>
+      <Route path="/roles/:roleId" element={<RoleDetailPage />} />
+    </Routes>,
   );
-  return render(<RoleDetailPage />, { wrapper: Wrapper });
 };
 
 describe('RoleDetailPage', () => {
   beforeEach(() => {
-    mockAuthzCatalog();
-    mockUseAuthzCatalog.mockReturnValue({
-      getRole: jest.fn((id) => (id === 'custom-role-123' ? mockRole : null)),
-      isLoading: false,
-    });
+    mockCatalogWithRoles(mockRole);
     mockUseTeamMembersAssignments.mockReturnValue(mockMembers);
   });
 
@@ -198,20 +190,14 @@ describe('RoleDetailPage', () => {
   });
 
   it('renders loading state when fetching role data', () => {
-    mockUseAuthzCatalog.mockReturnValueOnce({
-      getRole: jest.fn(),
-      isLoading: true,
-    });
+    mockAuthzCatalog({ isLoading: true });
     renderRoleDetail();
     // Should render LoadingPage with Spinner while loading
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('does not render custom role actions for built-in roles', () => {
-    mockUseAuthzCatalog.mockReturnValueOnce({
-      getRole: jest.fn((id) => (id === 'custom-role-123' ? { ...mockRole, definitionKind: 'static' } : null)),
-      isLoading: false,
-    });
+    mockCatalogWithRoles({ ...mockRole, definitionKind: 'static' });
     renderRoleDetail('custom-role-123');
 
     // Should not render edit or more actions buttons for built-in roles
@@ -221,17 +207,17 @@ describe('RoleDetailPage', () => {
     expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
   });
 
-  it('renders DuplicateRoleButton only for built-in roles', () => {
-    // Test with custom role
+  it('does not render DuplicateRoleButton for custom roles', () => {
     renderRoleDetail('custom-role-123');
     expect(screen.queryByRole('button', { name: /Duplicate/ })).not.toBeInTheDocument();
+  });
 
-    // Test with built-in role
-    mockUseAuthzCatalog.mockReturnValueOnce({
-      getRole: jest.fn((id) => (id === 'builtin-role' ? { displayName: 'Built-in', definitionKind: 'static', permissions: [] } : null)),
-      isLoading: false,
+  it('renders DuplicateRoleButton for built-in roles', () => {
+    mockCatalogWithRoles({
+      ...mockRole, role: 'builtin-role', displayName: 'Built-in', definitionKind: 'static',
     });
     renderRoleDetail('builtin-role');
+    expect(screen.getByRole('heading', { name: 'Built-in' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
   });
 
@@ -252,7 +238,8 @@ describe('RoleDetailPage', () => {
     renderRoleDetail();
 
     // Find delete button for a member (use the second button in the actions cell, after view button)
-    const deleteButtons = screen.getAllByRole('button', { name: messages['authz.role.members.table.action.delete.alt'].defaultMessage });
+    const pattern = new RegExp(messages['authz.role.members.table.action.delete.alt'].defaultMessage.replace('{username}', '.*'));
+    const deleteButtons = screen.getAllByRole('button', { name: pattern });
     expect(deleteButtons.length).toBeGreaterThan(0);
 
     // TODO: Update this test when delete member is fully implemented.

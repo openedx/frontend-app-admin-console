@@ -1,13 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { IntlProvider } from '@openedx/frontend-base';
+import { screen } from '@testing-library/react';
+import { renderWrapper } from '@src/testUtils';
 import DuplicateRoleButton from './DuplicateRoleButton';
 import messages from '../messages';
 
-const renderButton = () => render(
-  <IntlProvider locale="en">
-    <DuplicateRoleButton />
-  </IntlProvider>,
-);
+const renderButton = () => renderWrapper(<DuplicateRoleButton />);
 
 describe('DuplicateRoleButton', () => {
   it('renders button with correct text', () => {

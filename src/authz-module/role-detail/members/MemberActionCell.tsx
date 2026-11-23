@@ -35,7 +35,7 @@ const MemberActionCell = ({
         variant="primary"
         size="sm"
         onClick={handleViewUser}
-        alt={formatMessage(messages['authz.role.members.table.action.view.alt'])}
+        alt={formatMessage(messages['authz.role.members.table.action.view.alt'], { username: member.username })}
       />
       <IconButton
         src={Delete}
@@ -43,7 +43,7 @@ const MemberActionCell = ({
         variant="danger"
         onClick={handleDelete}
         size="sm"
-        alt={formatMessage(messages['authz.role.members.table.action.delete.alt'])}
+        alt={formatMessage(messages['authz.role.members.table.action.delete.alt'], { username: member.username })}
       />
     </div>
   );
