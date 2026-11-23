@@ -16,7 +16,7 @@ import { getCellHeader } from '@src/authz-module/utils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import MemberActionCell from './MemberActionCell';
 
-interface MembersTableProps {
+interface RoleMembersTableProps {
   onDelete: (member: FlattenedMember) => void;
 }
 
@@ -38,7 +38,7 @@ const flattenMembers = (teamMembers: TeamMember[]): FlattenedMember[] => {
   );
 };
 
-const MembersTable = ({ onDelete }: MembersTableProps) => {
+const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
   const intl = useIntl();
   const { roleId = '' } = useParams();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
@@ -137,4 +137,4 @@ const MembersTable = ({ onDelete }: MembersTableProps) => {
   );
 };
 
-export default MembersTable;
+export default RoleMembersTable;

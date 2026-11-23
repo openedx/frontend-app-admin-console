@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { FlattenedMember } from './members/MembersTable';
+import type { FlattenedMember } from './members/RoleMembersTable';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIntl } from '@openedx/frontend-base';
 import { Icon, IconButton, Stack, Tab, Tabs, Dropdown } from '@openedx/paragon';
@@ -13,7 +13,7 @@ import { useAuthzCatalog } from '@src/authz-module/catalog';
 import messages from './messages';
 import AddRoleButton from '../components/AddRoleButton';
 import DuplicateRoleButton from '../components/DuplicateRoleButton';
-import MembersTable from './members/MembersTable';
+import MembersTable from './members/RoleMembersTable';
 
 const RoleDetailPage = () => {
   const intl = useIntl();

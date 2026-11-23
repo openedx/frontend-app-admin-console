@@ -5,7 +5,7 @@ import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import messages from '../messages';
-import MembersTable from './MembersTable';
+import RoleMembersTable from './RoleMembersTable';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
@@ -82,10 +82,10 @@ const viewButtonName = actionButtonName('authz.role.members.table.action.view.al
 const deleteButtonName = actionButtonName('authz.role.members.table.action.delete.alt');
 
 const renderMembersTable = (props = {}) => renderWithAllProviders(
-  <ToastManagerProvider><MembersTable onDelete={jest.fn()} {...props} /></ToastManagerProvider>,
+  <ToastManagerProvider><RoleMembersTable onDelete={jest.fn()} {...props} /></ToastManagerProvider>,
 );
 
-describe('MembersTable', () => {
+describe('RoleMembersTable', () => {
   beforeEach(() => {
     mockAuthzCatalog();
     mockUseTeamMembersAssignments.mockReturnValue(mockMembersData);
