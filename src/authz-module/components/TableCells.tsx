@@ -21,6 +21,7 @@ import { useAuthzCatalog } from '@src/authz-module/catalog';
 import { RESOURCE_ICONS } from './constants';
 import messages from './messages';
 import ExpandableButton from './ExpandableButton';
+import ScopeSummary from './ScopeSummary';
 
 type CellProps = DataTableCellProps<UserRoleWithPermissions>;
 interface AssignmentCellProps {
@@ -79,6 +80,13 @@ const ScopeNameCell = ({ row }: AssignmentCellProps) => {
       <span className="text-truncate" title={scopeText}>{scopeText}</span>
     </span>
   );
+};
+
+// The scope with its organization on a subline.
+// For tables that have no separate organization column.
+const ScopeSummaryCell = ({ row }: AssignmentCellProps) => {
+  const { scope, scopeDisplayName, org } = row.original;
+  return <ScopeSummary scope={scope} scopeDisplayName={scopeDisplayName} org={org} />;
 };
 
 // Mirrors ScopeNameCell's icon treatment. A wildcard org reaches past any one
@@ -222,6 +230,7 @@ export {
   RoleCell,
   OrgIconCell,
   ScopeNameCell,
+  ScopeSummaryCell,
   PermissionsCell,
   createActionsCell,
 };

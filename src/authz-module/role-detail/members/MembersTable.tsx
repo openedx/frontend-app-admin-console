@@ -11,7 +11,7 @@ import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { EMPTY_ASSIGNMENTS } from '@src/authz-module/constants';
 import { EmailCell, NameCell } from '@src/authz-module/team-members/components/TeamMemberCells';
-import { ScopeNameCell } from '@src/authz-module/components/TableCells';
+import { ScopeSummaryCell } from '@src/authz-module/components/TableCells';
 import { getCellHeader } from '@src/authz-module/utils';
 import type { TeamMember, TeamMemberAssignment } from '@src/types';
 import MemberActionCell from './MemberActionCell';
@@ -89,7 +89,7 @@ const MembersTable = ({ onDelete }: MembersTableProps) => {
       id: 'scope',
       Header: getCellHeader('scope', intl.formatMessage(messages['authz.custom.role.members.table.column.header.scope']), columnsWithFiltersApplied),
       accessor: 'scope',
-      Cell: ScopeNameCell,
+      Cell: ScopeSummaryCell,
       filter: 'includesValue',
       disableSortBy: true,
       defaultCanFilter: true,
