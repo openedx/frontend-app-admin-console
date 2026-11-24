@@ -34,6 +34,12 @@ const SCOPE_TYPE_LABELS: Partial<Record<string, { tab: MessageDescriptor; title:
   },
 };
 
+/**
+ * Roles and permissions matrix of one scope type at a time.
+ *
+ * Not rendered at the moment: the Roles and Permissions tab shows RolesPermissionsTable instead.
+ * It is kept on purpose because it will be reused later.
+ */
 const RolesPermissions = () => {
   const intl = useIntl();
   // The catalog only holds the scope types the user can view.

@@ -22,6 +22,8 @@ export interface Role {
   definitionKind: 'static' | 'user_defined';
   permissions: string[];
   scopeTypes: string[];
+  userCount: number;
+  updatedAt: string | null;
 }
 
 export interface AuthzCatalog {

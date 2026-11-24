@@ -1,6 +1,13 @@
 import type { AuthzCatalog, Role, ScopeCatalog } from './types';
 
 /**
+ * Tells whether a role was defined at runtime by an admin (openedx-authz ADR 0016) rather than
+ * shipped with the platform. Only these roles can be edited, so screens label and act on them
+ * differently.
+ */
+export const isCustomRole = (role: Role): boolean => role.definitionKind === 'user_defined';
+
+/**
  * Orders roles from the one with most permissions to the one with fewest. Roles with the same
  * number of permissions keep their catalog order, so the order does not depend on the language.
  */

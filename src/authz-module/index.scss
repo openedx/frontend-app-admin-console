@@ -103,6 +103,12 @@
   .authz-cell-username { max-width: 15rem; }  // ~24 characters
   .authz-cell-email { max-width: 17rem; }     // ~28 characters
 
+  // Paragon has no info IconButton variant. Only the resting color is overridden, so hover
+  // and focus keep the primary variant's colors (white icon on the primary background).
+  .roles-table-action-button {
+    --btn-icon-color: var(--pgn-color-info-500);
+  }
+
   .team-members-table {
     // Every row is two lines tall: the assigned-roles cell stacks scope over org.
     td {
