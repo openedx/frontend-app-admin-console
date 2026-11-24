@@ -24,6 +24,11 @@ describe('SearchFilter', () => {
     expect(screen.getByPlaceholderText('Search users...')).toBeInTheDocument();
   });
 
+  it('sizes the input to fit its placeholder', () => {
+    renderWrapper(<SearchFilter {...defaultProps} placeholder="Search by Name or Email" />);
+    expect(screen.getByRole('textbox')).toHaveAttribute('size', '23');
+  });
+
   it('displays current filter value', () => {
     renderWrapper(<SearchFilter {...defaultProps} filterValue="test query" />);
     expect(screen.getByDisplayValue('test query')).toBeInTheDocument();
