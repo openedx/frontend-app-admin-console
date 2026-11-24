@@ -73,6 +73,10 @@ const renderTable = () => renderWithAllProviders(
 
 const requestedParams = (): RolesQueryParams => mockUseCatalogRoles.mock.lastCall[0];
 const isRequestEnabled = (): boolean => mockUseCatalogRoles.mock.lastCall[1];
+// Paragon's loading spinner is a status whose only text is "loading". The count of shown roles is a
+// status too, so the spinner is found by that text and not by its role.
+const getLoadingSpinner = () => screen.queryByText('loading');
+
 const getRow = (roleName: string) => screen.getByText(roleName).closest('tr') as HTMLElement;
 const getHeader = (title: string) => screen.getAllByRole('columnheader')
   .find(({ textContent }) => textContent?.trim() === title) as HTMLElement;
@@ -209,7 +213,7 @@ describe('RolesPermissionsTable', () => {
       renderTable();
 
       expect(isRequestEnabled()).toBe(false);
-      expect(screen.getByRole('status')).toBeInTheDocument();
+      expect(getLoadingSpinner()).toBeInTheDocument();
     });
 
     it('searches once the user stops typing', async () => {
@@ -299,7 +303,7 @@ describe('RolesPermissionsTable', () => {
       mockRolesPage({ data: undefined, isLoading: true });
       renderTable();
 
-      expect(screen.getByRole('status')).toBeInTheDocument();
+      expect(getLoadingSpinner()).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
 
@@ -307,14 +311,14 @@ describe('RolesPermissionsTable', () => {
       mockRolesPage({ isPlaceholderData: true });
       renderTable();
 
-      expect(screen.getByRole('status')).toBeInTheDocument();
+      expect(getLoadingSpinner()).toBeInTheDocument();
       expect(screen.getByText('Course Admin')).toBeInTheDocument();
     });
 
     it('shows no loading state once the page has loaded', () => {
       renderTable();
 
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(getLoadingSpinner()).not.toBeInTheDocument();
     });
 
     it('reports a failed page once, with a toast', () => {

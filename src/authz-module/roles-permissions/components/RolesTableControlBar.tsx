@@ -60,7 +60,10 @@ const RolesTableControlBar = ({ scopeTypes }: RolesTableControlBarProps) => {
           filterValue={appliedResourceTypes}
           setFilter={setResourceTypes}
         />
-        <span className="ml-auto small">
+        {/* The results load from the server after a search, filter, sort or page change, so the
+            count is a status: screen readers announce it when the new results arrive. Only this
+            copy is a status; the footer repeats the text and would announce it twice. */}
+        <span role="status" className="ml-auto small">
           {formatMessage(messages['authz.roles.table.showing.roles.text'], { pageSize: page.length, itemCount })}
         </span>
       </Stack>
