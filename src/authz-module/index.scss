@@ -231,8 +231,8 @@
       line-height: 1.2;
     }
   }
-  
-  @media(--pgn-size-breakpoint-max-width-sm){
+
+  @media(--pgn-size-breakpoint-max-width-md){
     .flex-column-sm {
       flex-direction: column;
     }
@@ -291,6 +291,10 @@
       background: transparent;
     }
   }
+}
+
+.scope-filters {
+  gap: 0.625rem;
 }
 
 // Wizard modal chrome. `.pgn__modal` only to outrank Paragon's `-dark` header rule.

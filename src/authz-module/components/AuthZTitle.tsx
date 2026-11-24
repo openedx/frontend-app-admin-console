@@ -44,6 +44,7 @@ const AuthZTitle = ({
 }: AuthZTitleProps) => {
   const shouldRenderBreadcrumb = activeLabel || navLinks?.length > 0;
   const isDesktop = useMediaQuery({ minWidth: breakpoints.large.minWidth });
+  const isMobile = useMediaQuery({ maxWidth: breakpoints.small.maxWidth });
   return (
     <div className={`page-band py-4 bg-light-100${showDivider ? ' title-border-bottom' : ''}`}>
       { shouldRenderBreadcrumb
@@ -53,11 +54,12 @@ const AuthZTitle = ({
           linkAs={Link}
           links={navLinks}
           activeLabel={activeLabel}
+          isMobile={isMobile && navLinks.length > 0}
         />
       )}
       <Row>
         <Col xs={12} md={7}>
-          <div className="d-flex align-items-center flex-column-sm mb-3 mb-md-0">
+          <div className="d-flex align-items-center flex-column-sm mb-3 mb-md-0 flex-wrap">
             <h2 className="text-break text-primary mb-0">{pageTitle}</h2>
             {pageSubtitle && (
               <>
