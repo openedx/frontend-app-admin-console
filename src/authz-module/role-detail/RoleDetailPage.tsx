@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import type { FlattenedMember } from './members/RoleMembersTable';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIntl } from '@openedx/frontend-base';
-import { Icon, IconButton, Stack, Tab, Tabs, Dropdown } from '@openedx/paragon';
+import {
+  Alert, Icon, IconButton, Stack, Tab, Tabs, Dropdown,
+} from '@openedx/paragon';
 import { Edit, MoreVert, PersonAdd } from '@openedx/paragon/icons';
 import LoadingPage from '@src/components/LoadingPage';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
@@ -10,6 +12,7 @@ import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module
 import baseMessages from '@src/authz-module/messages';
 import homeMessages from '@src/authz-module/authz-home/messages';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
+import { CustomErrors } from '@src/constants';
 import messages from './messages';
 import AddRoleButton from '../components/AddRoleButton';
 import DuplicateRoleButton from '../components/DuplicateRoleButton';
@@ -19,11 +22,9 @@ const RoleDetailPage = () => {
   const intl = useIntl();
   const { roleId = '' } = useParams();
   const { hash } = useLocation();
-  const { getRole, isLoading } = useAuthzCatalog();
+  const { getRole, isLoading, isError } = useAuthzCatalog();
 
   const role = getRole(roleId);
-  const { displayName = '', definitionKind } = role || {};
-  const isCustomRole = definitionKind === 'user_defined';
 
   const navLinks = useMemo(() => [
     {
@@ -48,6 +49,31 @@ const RoleDetailPage = () => {
   if (isLoading) {
     return <LoadingPage />;
   }
+
+  // Checked before the role, so a failed catalog request isn't reported as a missing role.
+  // Shown inline, as RolesPermissions does for the same catalog.
+  if (isError) {
+    return (
+      <div className="authz-module page-band py-4">
+        <Alert variant="danger">
+          {intl.formatMessage(messages['authz.custom.role.load.error'])}
+        </Alert>
+      </div>
+    );
+  }
+
+  /*
+   * The module's ErrorBoundary renders the Not Found page.
+   * Not Found covers ids that never existed, deleted custom roles (old bookmarks or shared
+   * links), and roles of a scope type the user can't view — the catalog only loads the
+   * viewable ones, and Not Found avoids revealing that such a role exists.
+   */
+  if (!role) {
+    throw new Error(CustomErrors.NOT_FOUND);
+  }
+
+  const { displayName, definitionKind } = role;
+  const isCustomRole = definitionKind === 'user_defined';
 
   return (
     <AuthZLayout

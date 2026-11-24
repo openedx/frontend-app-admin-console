@@ -1,6 +1,11 @@
 import { defineMessages } from '@openedx/frontend-base';
 
 const messages = defineMessages({
+  'authz.custom.role.load.error': {
+    id: 'authz.custom.role.load.error',
+    defaultMessage: 'The role could not be loaded. Please try again later.',
+    description: 'Message shown on the role detail page when the roles catalog fails to load',
+  },
   'authz.custom.role.edit.name.alt': {
     id: 'authz.custom.role.edit.name.alt',
     defaultMessage: 'Edit role name',

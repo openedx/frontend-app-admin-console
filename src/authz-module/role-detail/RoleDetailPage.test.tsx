@@ -1,14 +1,14 @@
 import { screen, waitFor } from '@testing-library/react';
 import type { Role } from '@src/authz-module/catalog/types';
 import userEvent from '@testing-library/user-event';
-import { Route, Routes } from 'react-router-dom';
-import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module/constants';
+import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH, ROUTES } from '@src/authz-module/constants';
 import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import { renderWithAllProviders } from '@src/testUtils';
+import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import AuthZModule from '@src/authz-module';
 import messages from './messages';
-import RoleDetailPage from './RoleDetailPage';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
@@ -89,13 +89,16 @@ const mockCatalogWithRoles = (...roles: Role[]) => mockAuthzCatalog({
   catalog: { ...authzCatalog, roles: [...authzCatalog.roles, ...roles] },
 });
 
+/**
+ * Renders the page through the module's routes, so missing roles reach its real ErrorBoundary.
+ * renderWithAllProviders uses a BrowserRouter, so the URL is set for the route to read `roleId`.
+ */
 const renderRoleDetail = (roleId = 'custom-role-123') => {
-  // renderWithAllProviders uses a BrowserRouter, so set the URL the route reads `roleId` from.
-  window.history.pushState({}, '', `/roles/${roleId}`);
+  window.history.pushState({}, '', `/${ROUTES.ROLE_DETAIL_PATH.replace(':roleId', encodeURIComponent(roleId))}`);
   return renderWithAllProviders(
-    <Routes>
-      <Route path="/roles/:roleId" element={<RoleDetailPage />} />
-    </Routes>,
+    <ToastManagerProvider>
+      <AuthZModule />
+    </ToastManagerProvider>,
   );
 };
 
@@ -246,5 +249,48 @@ describe('RoleDetailPage', () => {
     // Currently handleDeleteMember just logs to console; this should verify actual deletion behavior.
     await user.click(deleteButtons[0]);
     expect(deleteButtons[0]).toBeInTheDocument();
+  });
+
+  describe('when the role cannot be shown', () => {
+    // The ErrorBoundary logs the caught error; keep the test output clean.
+    let consoleErrorSpy: jest.SpyInstance;
+    beforeEach(() => {
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
+    const expectNoRolePage = () => {
+      expect(screen.queryByRole('tab', { name: messages['authz.custom.role.tabs.members'].defaultMessage })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Duplicate/ })).not.toBeInTheDocument();
+      expect(screen.queryByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).not.toBeInTheDocument();
+    };
+
+    it('shows the Not Found page for an unknown role id', () => {
+      renderRoleDetail('unknown-role');
+
+      expect(screen.getByText('Page Not Found')).toBeInTheDocument();
+      expect(screen.getByText('404')).toBeInTheDocument();
+      expectNoRolePage();
+    });
+
+    it('shows the Not Found page for a role of a scope type the user cannot view', () => {
+      // The catalog only loads viewable scope types, so such a role is absent, as if unknown.
+      mockAuthzCatalog({ catalog: { ...authzCatalog, roles: [] } });
+      renderRoleDetail('custom-role-123');
+
+      expect(screen.getByText('Page Not Found')).toBeInTheDocument();
+      expectNoRolePage();
+    });
+
+    it('shows an inline error, not Not Found, when the catalog fails to load', () => {
+      mockAuthzCatalog({ isError: true });
+      renderRoleDetail();
+
+      expect(screen.getByRole('alert')).toHaveTextContent(messages['authz.custom.role.load.error'].defaultMessage);
+      expect(screen.queryByText('Page Not Found')).not.toBeInTheDocument();
+      expectNoRolePage();
+    });
   });
 });

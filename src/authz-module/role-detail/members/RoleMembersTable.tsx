@@ -11,6 +11,7 @@ import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFil
 import messages from '@src/authz-module/role-detail/messages';
 import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
 import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
+import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
 import { EMPTY_ASSIGNMENTS } from '@src/authz-module/constants';
 import { EmailCell, NameCell } from '@src/authz-module/team-members/components/TeamMemberCells';
@@ -41,8 +42,11 @@ const flattenMembers = (teamMembers: TeamMember[]): FlattenedMember[] => {
   );
 };
 
+const toastedErrors = new WeakSet<Error>();
+
 const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
   const intl = useIntl();
+  const { showErrorToast } = useToastManager();
   const { roleId = '' } = useParams();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
 
@@ -56,8 +60,19 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
 
   const {
     data: { results: members = [], count = 0 } = EMPTY_ASSIGNMENTS,
-    isLoading
+    isLoading,
+    error,
+    refetch,
   } = useTeamMembersAssignments(querySettings, true);
+
+  // Without this a failed request would read as "No users assigned to this role". Each error
+  // is toasted once, as in TeamMembersTable, so re-renders don't stack duplicate toasts.
+  useEffect(() => {
+    if (error && !toastedErrors.has(error)) {
+      toastedErrors.add(error);
+      showErrorToast(error, refetch);
+    }
+  }, [error, showErrorToast, refetch]);
 
   const pageCount = Math.ceil(count / TABLE_DEFAULT_PAGE_SIZE);
 

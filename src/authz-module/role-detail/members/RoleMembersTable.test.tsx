@@ -302,6 +302,34 @@ describe('RoleMembersTable', () => {
     }
   });
 
+  describe('when the members request fails', () => {
+    const serverError = () => Object.assign(new Error('Boom'), {
+      customAttributes: { httpErrorStatus: 500 },
+    });
+
+    it('shows an error toast once, not once per effect pass', () => {
+      mockUseTeamMembersAssignments.mockReturnValue({
+        ...mockMembersData, data: undefined, error: serverError(),
+      });
+      renderMembersTable();
+
+      expect(screen.getAllByText(/We're experiencing technical difficulties./)).toHaveLength(1);
+    });
+
+    it('retries the request from the toast', async () => {
+      const user = userEvent.setup();
+      const refetch = jest.fn();
+      mockUseTeamMembersAssignments.mockReturnValue({
+        ...mockMembersData, data: undefined, error: serverError(), refetch,
+      });
+      renderMembersTable();
+
+      await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('renders scope filter control', async () => {
     renderMembersTable();
 
