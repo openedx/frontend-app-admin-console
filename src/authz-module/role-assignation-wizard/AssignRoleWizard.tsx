@@ -29,6 +29,11 @@ interface AssignRoleWizardProps {
   /** Called on Cancel, header close and Esc, and after a successful save. */
   onClose: () => void;
   initialUsers?: string;
+  /**
+   * Role selected when the wizard opens, e.g. from a roles table row. It stays changeable,
+   * and is ignored unless it is one of `roleGroups`.
+   */
+  initialRole?: SelectedRole;
   // The roles the user can assign, grouped by scope type.
   roleGroups?: RoleGroup[];
   isLoadingRoles?: boolean;
@@ -40,10 +45,22 @@ const parseUsers = (input: string): string[] => input
   .map((u) => u.trim())
   .filter(Boolean);
 
-const getInitialState = (initialUsers: string) => ({
+/**
+ * Keeps a preset role only if it is offered: an unoffered one would check no radio yet still
+ * enable Next, letting the user save a role they cannot see or may not assign.
+ */
+const getOfferedRole = (role: SelectedRole | undefined, roleGroups: RoleGroup[]): SelectedRole | null => {
+  if (!role) return null;
+  const isOffered = roleGroups.some(({ scopeType, roles }) => (
+    scopeType === role.scopeType && roles.some((r) => r.role === role.role)
+  ));
+  return isOffered ? role : null;
+};
+
+const getInitialState = (initialUsers: string, initialRole: SelectedRole | null) => ({
   activeStep: STEPS.SELECT_USERS_AND_ROLE as StepKey,
   users: initialUsers,
-  selectedRole: null as SelectedRole | null,
+  selectedRole: initialRole,
   selectedScopes: new Set<string>(),
   invalidUsers: [] as string[],
   validatedUsers: [] as string[],
@@ -54,13 +71,14 @@ const getInitialState = (initialUsers: string) => ({
  * header, steps and action rows go into three modal slots that share one context.
  */
 const AssignRoleWizard = ({
-  isOpen, onClose, initialUsers = '', roleGroups = [], isLoadingRoles = false, isRolesError = false,
+  isOpen, onClose, initialUsers = '', initialRole, roleGroups = [], isLoadingRoles = false, isRolesError = false,
 }: AssignRoleWizardProps) => {
   const intl = useIntl();
   const { showToast, Bold, Br } = useToastManager();
+  const offeredInitialRole = getOfferedRole(initialRole, roleGroups);
   const [activeStep, setActiveStep] = useState<StepKey>(STEPS.SELECT_USERS_AND_ROLE);
   const [users, setUsers] = useState(initialUsers);
-  const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<SelectedRole | null>(offeredInitialRole);
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
 
   const [invalidUsers, setInvalidUsers] = useState<string[]>([]);
@@ -85,7 +103,7 @@ const AssignRoleWizard = ({
   }, []);
 
   const resetState = () => {
-    const initialState = getInitialState(initialUsers);
+    const initialState = getInitialState(initialUsers, offeredInitialRole);
     setActiveStep(initialState.activeStep);
     setUsers(initialState.users);
     setSelectedRole(initialState.selectedRole);
@@ -184,6 +202,20 @@ const AssignRoleWizard = ({
       handleRequestError(error);
     }
   };
+
+  /**
+   * The roles may still be loading when the wizard opens, so the preset applies once they
+   * offer it. A radio group can't be cleared, so a null selection means the user hasn't
+   * picked a role yet and nothing they chose is overwritten.
+   */
+  const offeredInitialRoleKey = offeredInitialRole && `${offeredInitialRole.scopeType}:${offeredInitialRole.role}`;
+  useEffect(() => {
+    if (offeredInitialRole) {
+      setSelectedRole((current) => current ?? offeredInitialRole);
+    }
+  // `offeredInitialRole` is rebuilt every render; its key says when it actually changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offeredInitialRoleKey]);
 
   useEffect(() => {
     if (invalidUsers.length && usersInputRef.current) {

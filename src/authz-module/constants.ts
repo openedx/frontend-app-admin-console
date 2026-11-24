@@ -23,11 +23,11 @@ export const VIEW_TEAM_PERMISSIONS = Object.fromEntries(
   Object.entries(VIEW_TEAM_ACTIONS).map(([scopeType, action]) => [scopeType, { action }]),
 );
 
-// Keep manage-team requests in the same order (libraries first) to share one query.
-export const MANAGE_TEAM_PERMISSIONS: { action: string }[] = [
-  { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY] },
-  { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE] },
-];
+// Manage-team validation query, keyed by scope type like VIEW_TEAM_PERMISSIONS so `usePermissions`
+// answers each scope type under its own key.
+export const MANAGE_TEAM_PERMISSIONS = Object.fromEntries(
+  Object.entries(MANAGE_TEAM_ACTIONS).map(([scopeType, action]) => [scopeType, { action }]),
+);
 
 const ORG_AGGREGATE_SCOPE_BUILDERS: Record<string, (orgSlug: string) => string> = {
   [SCOPE_TYPES.COURSE]: (orgSlug: string) => `course-v1:${orgSlug}+*`,

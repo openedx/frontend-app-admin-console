@@ -16,6 +16,10 @@ jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
   getAuthenticatedHttpClient: jest.fn(),
   configure: jest.fn(),
+  // The user can manage every team, so the "Assign role" button shows.
+  usePermissions: jest.fn().mockReturnValue({
+    'course-v1': true, lib: true, isLoading: false,
+  }),
 }));
 
 // Mock data hooks

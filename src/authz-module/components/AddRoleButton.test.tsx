@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { initializeMocks, renderWithAllProviders } from '@src/testUtils';
 import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { getScopeCatalog } from '@src/authz-module/catalog/utils';
-import { MANAGE_TEAM_ACTIONS, SCOPE_TYPES } from '@src/authz-module/constants';
+import { SCOPE_TYPES } from '@src/authz-module/constants';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
-import { useValidateUserPermissionsNonSuspense } from '@src/data/hooks';
+import { usePermissions } from '@openedx/frontend-base';
 import { useCourseAuthoringFlag } from '@src/authz-module/hooks/useCourseAuthoringFlag';
 import { useValidateUsers } from '@src/authz-module/data/hooks';
 import AddRoleButton from './AddRoleButton';
@@ -15,9 +15,9 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
 }));
 
-jest.mock('@src/data/hooks', () => ({
-  ...jest.requireActual('@src/data/hooks'),
-  useValidateUserPermissionsNonSuspense: jest.fn(),
+jest.mock('@openedx/frontend-base', () => ({
+  ...jest.requireActual('@openedx/frontend-base'),
+  usePermissions: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/data/hooks', () => ({
@@ -29,16 +29,16 @@ jest.mock('@src/authz-module/hooks/useCourseAuthoringFlag', () => ({
   useCourseAuthoringFlag: jest.fn(),
 }));
 
-const mockUseValidatePermissions = useValidateUserPermissionsNonSuspense as jest.Mock;
+const mockUsePermissions = usePermissions as jest.Mock;
 const mockUseCourseAuthoringFlag = useCourseAuthoringFlag as jest.Mock;
 const mockUseValidateUsers = useValidateUsers as jest.Mock;
-const allowAllPermissions = {
-  data: [
-    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: true },
-    { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
-  ],
+// The answer `usePermissions` gives for the manage-team query: a boolean under each scope type.
+const allow = (...scopeTypes: string[]) => ({
+  [SCOPE_TYPES.COURSE]: scopeTypes.includes(SCOPE_TYPES.COURSE),
+  [SCOPE_TYPES.LIBRARY]: scopeTypes.includes(SCOPE_TYPES.LIBRARY),
   isLoading: false,
-};
+});
+const allowAllPermissions = allow(SCOPE_TYPES.COURSE, SCOPE_TYPES.LIBRARY);
 
 const renderButton = (props = {}) => renderWithAllProviders(
   <ToastManagerProvider>
@@ -58,7 +58,7 @@ describe('AddRoleButton', () => {
     mockAuthzCatalog();
     // Restated here because `mockImplementation` outlives `clearAllMocks`.
     mockUseValidateUsers.mockImplementation(() => ({ mutateAsync: jest.fn(), isPending: false }));
-    mockUseValidatePermissions.mockReturnValue(allowAllPermissions);
+    mockUsePermissions.mockReturnValue(allowAllPermissions);
     mockUseCourseAuthoringFlag.mockReturnValue({
       isCourseAuthoringEnabled: true,
       isCourseEnabled: () => true,
@@ -213,8 +213,8 @@ describe('AddRoleButton', () => {
     const libraryRoles = ['Library Admin', 'Library Author', 'Library Contributor', 'Library User'];
     const courseRoles = ['Course Admin', 'Course Staff'];
     const scopeRoles = [
-      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], roles: libraryRoles },
-      { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], roles: courseRoles },
+      { scopeType: SCOPE_TYPES.LIBRARY, roles: libraryRoles },
+      { scopeType: SCOPE_TYPES.COURSE, roles: courseRoles },
     ];
     const allRoles = scopeRoles.flatMap(({ roles }) => roles);
 
@@ -237,11 +237,8 @@ describe('AddRoleButton', () => {
       expect(roleNames.filter((name) => name?.startsWith('Library'))).toEqual(catalogOrder);
     });
 
-    it.each(scopeRoles)('shows only the roles for the allowed scope type %#', async ({ action, roles }) => {
-      mockUseValidatePermissions.mockReturnValue({
-        data: scopeRoles.map((scope) => ({ action: scope.action, allowed: scope.action === action })),
-        isLoading: false,
-      });
+    it.each(scopeRoles)('shows only the roles for the allowed scope type %#', async ({ scopeType, roles }) => {
+      mockUsePermissions.mockReturnValue(allow(scopeType));
       await openWizard();
 
       roles.forEach((role) => {
@@ -268,15 +265,6 @@ describe('AddRoleButton', () => {
       expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
     });
 
-    it('ignores allowed permissions whose action is not a known role scope', async () => {
-      mockUseValidatePermissions.mockReturnValue({
-        data: [{ action: 'some.unrelated.permission', allowed: true }],
-        isLoading: false,
-      });
-      await openWizard();
-      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
-    });
-
     it('hides course roles when the course-authoring flag is disabled even if MANAGE_COURSE_TEAM is allowed', async () => {
       mockUseCourseAuthoringFlag.mockReturnValue({
         isCourseAuthoringEnabled: false,
@@ -295,33 +283,30 @@ describe('AddRoleButton', () => {
 
   describe('permission gating', () => {
     it('does not render the button when the user cannot manage any team', () => {
-      mockUseValidatePermissions.mockReturnValue({
-        data: [
-          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
-          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: false },
-        ],
-        isLoading: false,
-      });
+      mockUsePermissions.mockReturnValue(allow());
       renderButton();
 
       expect(screen.queryByRole('button', { name: /assign role/i })).not.toBeInTheDocument();
     });
 
     it('renders the button when at least one team-management permission is allowed', () => {
-      mockUseValidatePermissions.mockReturnValue({
-        data: [
-          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.LIBRARY], allowed: false },
-          { action: MANAGE_TEAM_ACTIONS[SCOPE_TYPES.COURSE], allowed: true },
-        ],
-        isLoading: false,
-      });
+      mockUsePermissions.mockReturnValue(allow(SCOPE_TYPES.COURSE));
       renderButton();
 
       expect(screen.getByRole('button', { name: /assign role/i })).toBeInTheDocument();
     });
 
+    it('does not render the button for an allowed key that is not a known scope type', () => {
+      mockUsePermissions.mockReturnValue({ ...allow(), 'some.unrelated.key': true });
+      renderButton();
+
+      expect(screen.queryByRole('button', { name: /assign role/i })).not.toBeInTheDocument();
+    });
+
     it('does not render the button while permissions are loading', () => {
-      mockUseValidatePermissions.mockReturnValue({ data: undefined, isLoading: true });
+      mockUsePermissions.mockReturnValue({
+        [SCOPE_TYPES.COURSE]: undefined, [SCOPE_TYPES.LIBRARY]: undefined, isLoading: true,
+      });
       renderButton();
 
       expect(screen.queryByRole('button', { name: /assign role/i })).not.toBeInTheDocument();
