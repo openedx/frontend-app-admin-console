@@ -146,6 +146,9 @@ describe('RoleMembersTable', () => {
     // Demo Course and Content Library belong to OpenedX, Math 101 to WGU.
     expect(screen.getAllByText('OpenedX')).toHaveLength(2);
     expect(screen.getByText('WGU')).toBeInTheDocument();
+    // Screen readers get the resource type and organization the icons show.
+    expect(screen.getByRole('group', { name: 'Course Demo Course in the organization OpenedX' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Library Content Library in the organization OpenedX' })).toBeInTheDocument();
   });
 
   it('summarises an organization-wide scope as just the organization', () => {
