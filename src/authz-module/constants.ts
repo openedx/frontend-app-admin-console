@@ -1,4 +1,4 @@
-import { GetTeamMembersAssignmentsResponse } from './data/api';
+import { GetRoleAssignmentsResponse, GetTeamMembersAssignmentsResponse } from './data/api';
 
 // Scope types the console supports, as the authz API names them (the namespace of the scope keys).
 export const SCOPE_TYPES = {
@@ -124,5 +124,10 @@ export const ADMIN_ROLES = ['course_admin', 'library_admin'];
  * expanded-row state whenever `data` changes identity.
  */
 export const EMPTY_ASSIGNMENTS: GetTeamMembersAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};
+
+/** Same as `EMPTY_ASSIGNMENTS`, for the per-assignment listing of one role. */
+export const EMPTY_ROLE_ASSIGNMENTS: GetRoleAssignmentsResponse = {
   results: [], count: 0, next: null, previous: null,
 };

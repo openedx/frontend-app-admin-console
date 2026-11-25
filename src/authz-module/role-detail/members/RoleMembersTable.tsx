@@ -9,61 +9,43 @@ import TableControlBar from '@src/authz-module/components/TableControlBar/TableC
 import TableFooter from '@src/authz-module/components/TableFooter/TableFooter';
 import ScopesFilter from '@src/authz-module/components/TableControlBar/ScopesFilter';
 import messages from '@src/authz-module/role-detail/messages';
-import { TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
-import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
+import { EMPTY_ROLE_ASSIGNMENTS, TABLE_DEFAULT_PAGE_SIZE } from '@src/authz-module/constants';
+import { useRoleAssignments } from '@src/authz-module/data/hooks';
 import { useToastManager } from '@src/components/ToastManager/ToastManagerContext';
 import { useQuerySettings } from '@src/authz-module/hooks/useQuerySettings';
-import { EMPTY_ASSIGNMENTS } from '@src/authz-module/constants';
 import { EmailCell, NameCell } from '@src/authz-module/team-members/components/TeamMemberCells';
 import { ScopeSummaryCell } from '@src/authz-module/components/TableCells';
 import { getCellHeader } from '@src/authz-module/utils';
-import type { TeamMember, TeamMemberAssignment } from '@src/types';
+import type { RoleAssignment } from '@src/types';
 import MemberActionCell from './MemberActionCell';
 
 interface RoleMembersTableProps {
-  onDelete: (member: FlattenedMember) => void;
+  onDelete: (assignment: RoleAssignment) => void;
 }
-
-export interface FlattenedMember extends TeamMemberAssignment {
-  username: string;
-  fullName: string;
-  email: string;
-}
-
-// Transform TeamMember[] with nested assignments into flat array of FlattenedMember
-const flattenMembers = (teamMembers: TeamMember[]): FlattenedMember[] => {
-  return teamMembers.flatMap(member =>
-    member.assignments.map(assignment => ({
-      ...assignment,
-      username: member.username,
-      fullName: member.fullName,
-      email: member.email,
-    }))
-  );
-};
 
 const toastedErrors = new WeakSet<Error>();
 
+/**
+ * The members of the role in the URL, one row per assignment: a user holding the role in
+ * several scopes gets a row per scope. Rows, pages and the count are all assignments, as
+ * the endpoint returns them, so none are cut and the count matches what is listed.
+ */
 const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
   const intl = useIntl();
   const { showErrorToast } = useToastManager();
   const { roleId = '' } = useParams();
   const [columnsWithFiltersApplied, setColumnsWithFiltersApplied] = useState<string[]>([]);
 
-  const { querySettings: baseQuerySettings, handleTableFetch } = useQuerySettings();
+  const { querySettings, handleTableFetch } = useQuerySettings();
 
-  // Merge roleId into querySettings
-  const querySettings = useMemo(() => ({
-    ...baseQuerySettings,
-    roles: roleId,
-  }), [baseQuerySettings, roleId]);
-
+  // The role is passed apart from the table's settings, so no table state can widen the
+  // listing to other roles; the hook stays idle until there is one.
   const {
-    data: { results: members = [], count = 0 } = EMPTY_ASSIGNMENTS,
+    data: { results: assignments, count } = EMPTY_ROLE_ASSIGNMENTS,
     isLoading,
     error,
     refetch,
-  } = useTeamMembersAssignments(querySettings, true);
+  } = useRoleAssignments(roleId, querySettings);
 
   // Without this a failed request would read as "No users assigned to this role". Each error
   // is toasted once, as in TeamMembersTable, so re-renders don't stack duplicate toasts.
@@ -80,16 +62,13 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
 
   useEffect(() => () => fetchData.cancel(), [fetchData]);
 
-  // Flatten members array: each assignment becomes a row
-  const flattenedMembers = useMemo(() => flattenMembers(members), [members]);
-
   const showingLabel = intl.formatMessage(
     messages['authz.custom.role.members.table.showing.message'],
-    { pageSize: flattenedMembers.length, itemCount: count },
+    { pageSize: assignments.length, itemCount: count },
   );
 
-  const handleShowConfirmDeletionModal = useCallback((member: FlattenedMember) => {
-    onDelete(member);
+  const handleShowConfirmDeletionModal = useCallback((assignment: RoleAssignment) => {
+    onDelete(assignment);
   }, [onDelete]);
 
   const columns = useMemo(() => [
@@ -137,7 +116,7 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
     <DataTable
       additionalColumns={additionalColumns}
       columns={columns}
-      data={flattenedMembers}
+      data={assignments}
       fetchData={fetchData}
       initialState={{ pageSize: TABLE_DEFAULT_PAGE_SIZE }}
       isFilterable

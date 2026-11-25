@@ -7,10 +7,10 @@ import { Icon, IconButton } from '@openedx/paragon';
 import type { DataTableCellProps } from '@openedx/paragon';
 import { buildAuditUserPath } from '@src/authz-module/constants';
 import messages from '../messages';
-import { FlattenedMember } from './RoleMembersTable';
+import type { RoleAssignment } from '@src/types';
 
-type MemberActionCellProps = DataTableCellProps<FlattenedMember> & {
-  onClickDeleteButton: (member: FlattenedMember) => void;
+type MemberActionCellProps = DataTableCellProps<RoleAssignment> & {
+  onClickDeleteButton: (member: RoleAssignment) => void;
 };
 
 const MemberActionCell = ({

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { FlattenedMember } from './members/RoleMembersTable';
+import type { RoleAssignment } from '@src/types';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIntl } from '@openedx/frontend-base';
 import {
@@ -38,7 +38,7 @@ const RoleDetailPage = () => {
   ], [intl]);
 
   // TODO: add delete actions on actions epic
-  const handleDeleteMember = (member: FlattenedMember) => {
+  const handleDeleteMember = (member: RoleAssignment) => {
     console.log('Deleting member:', member);
   };
 

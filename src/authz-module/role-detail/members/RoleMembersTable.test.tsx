@@ -1,9 +1,10 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/testUtils';
-import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
+import { useRoleAssignments } from '@src/authz-module/data/hooks';
 import { mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
+import type { RoleAssignment } from '@src/types';
 import messages from '../messages';
 import RoleMembersTable from './RoleMembersTable';
 
@@ -13,7 +14,7 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
 
 jest.mock('@src/authz-module/data/hooks', () => ({
   ...jest.requireActual('@src/authz-module/data/hooks'),
-  useTeamMembersAssignments: jest.fn(),
+  useRoleAssignments: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -22,50 +23,40 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(() => jest.fn()),
 }));
 
-const mockUseTeamMembersAssignments = useTeamMembersAssignments as jest.Mock;
+const mockUseRoleAssignments = useRoleAssignments as jest.Mock;
 
-const mockMembersData = {
+const instructor1 = {
+  username: 'instructor1', fullName: 'Instructor One', email: 'instructor1@example.com',
+};
+const instructor2 = {
+  username: 'instructor2', fullName: 'Instructor Two', email: 'instructor2@example.com',
+};
+
+const buildAssignment = (user: typeof instructor1, fields: Partial<RoleAssignment>): RoleAssignment => ({
+  ...user,
+  role: 'custom-role-123',
+  org: 'OpenedX',
+  orgDisplayName: 'OpenedX',
+  scope: 'course-v1:OpenedX+DemoX+Demo',
+  scopeDisplayName: 'Demo Course',
+  permissionCount: 5,
+  ...fields,
+});
+
+// As `/api/authz/v1/assignments/` returns them: one entry per assignment, so instructor1,
+// who holds the role in two scopes, comes twice. `count` totals assignments across pages.
+const mockAssignmentsData = {
   data: {
     results: [
-      {
-        username: 'instructor1',
-        fullName: 'Instructor One',
-        email: 'instructor1@example.com',
-        assignmentCount: 2,
-        assignments: [
-          {
-            role: 'custom-role-123',
-            org: 'OpenedX',
-            scope: 'course-v1:OpenedX+DemoX+Demo',
-            scopeDisplayName: 'Demo Course',
-            permissionCount: 5,
-          },
-          {
-            role: 'custom-role-123',
-            org: 'WGU',
-            scope: 'course-v1:WGU+Math+101',
-            scopeDisplayName: 'Math 101',
-            permissionCount: 3,
-          },
-        ],
-      },
-      {
-        username: 'instructor2',
-        fullName: 'Instructor Two',
-        email: 'instructor2@example.com',
-        assignmentCount: 1,
-        assignments: [
-          {
-            role: 'custom-role-123',
-            org: 'OpenedX',
-            scope: 'lib:OpenedX:CONTENT',
-            scopeDisplayName: 'Content Library',
-            permissionCount: 7,
-          },
-        ],
-      },
+      buildAssignment(instructor1, {}),
+      buildAssignment(instructor1, {
+        org: 'WGU', scope: 'course-v1:WGU+Math+101', scopeDisplayName: 'Math 101', permissionCount: 3,
+      }),
+      buildAssignment(instructor2, {
+        scope: 'lib:OpenedX:CONTENT', scopeDisplayName: 'Content Library', permissionCount: 7,
+      }),
     ],
-    count: 3,
+    count: 12,
     next: null,
     previous: null,
   },
@@ -88,7 +79,7 @@ const renderMembersTable = (props = {}) => renderWithAllProviders(
 describe('RoleMembersTable', () => {
   beforeEach(() => {
     mockAuthzCatalog();
-    mockUseTeamMembersAssignments.mockReturnValue(mockMembersData);
+    mockUseRoleAssignments.mockReturnValue(mockAssignmentsData);
   });
 
   it('renders table with column headers', () => {
@@ -99,14 +90,28 @@ describe('RoleMembersTable', () => {
     expect(screen.getByRole('columnheader', { name: messages['authz.custom.role.members.table.column.header.scope'].defaultMessage })).toBeInTheDocument();
   });
 
-  it('renders flattened members (one row per assignment)', async () => {
+  it('renders one row per assignment, so a user with the role in two scopes appears twice', async () => {
     renderMembersTable();
 
     await waitFor(() => {
-      // instructor1 has 2 assignments, instructor2 has 1 = 3 total rows
       expect(screen.getAllByText('instructor1')).toHaveLength(2);
       expect(screen.getByText('instructor2')).toBeInTheDocument();
     });
+  });
+
+  it('lists every scope of a user, not only a preview of them', () => {
+    // The user-grouped endpoint sent at most three assignments per user; this one sends them all.
+    const scopes = ['A', 'B', 'C', 'D', 'E'].map((run) => buildAssignment(instructor1, {
+      scope: `course-v1:OpenedX+DemoX+${run}`, scopeDisplayName: `Demo Course ${run}`,
+    }));
+    mockUseRoleAssignments.mockReturnValue({
+      ...mockAssignmentsData,
+      data: { ...mockAssignmentsData.data, results: scopes, count: scopes.length },
+    });
+    renderMembersTable();
+
+    expect(screen.getAllByText('instructor1')).toHaveLength(5);
+    scopes.forEach(({ scopeDisplayName }) => expect(screen.getByText(scopeDisplayName)).toBeInTheDocument());
   });
 
   it('renders member usernames correctly', async () => {
@@ -152,19 +157,11 @@ describe('RoleMembersTable', () => {
   });
 
   it('summarises an organization-wide scope as just the organization', () => {
-    mockUseTeamMembersAssignments.mockReturnValue({
-      ...mockMembersData,
+    mockUseRoleAssignments.mockReturnValue({
+      ...mockAssignmentsData,
       data: {
-        ...mockMembersData.data,
-        results: [{
-          ...mockMembersData.data.results[1],
-          assignments: [{
-            ...mockMembersData.data.results[1].assignments[0],
-            org: 'MathDept',
-            scope: 'lib:MathDept:*',
-            scopeDisplayName: '',
-          }],
-        }],
+        ...mockAssignmentsData.data,
+        results: [buildAssignment(instructor2, { org: 'MathDept', scope: 'lib:MathDept:*', scopeDisplayName: '' })],
         count: 1,
       },
     });
@@ -178,7 +175,7 @@ describe('RoleMembersTable', () => {
     renderMembersTable();
 
     await waitFor(() => {
-      // One view and one delete button per flattened row (3 rows)
+      // One view and one delete button per assignment row (3 rows)
       expect(screen.getAllByRole('button', { name: viewButtonName })).toHaveLength(3);
       expect(screen.getAllByRole('button', { name: deleteButtonName })).toHaveLength(3);
     });
@@ -188,14 +185,19 @@ describe('RoleMembersTable', () => {
     expect(screen.getByRole('button', { name: 'Remove instructor2 from role' })).toBeInTheDocument();
   });
 
-  it('displays showing message with correct member count', async () => {
+  it('counts assignments: the rows shown out of the API total', () => {
     renderMembersTable();
 
-    await waitFor(() => {
-      // Should show "Showing 3 users of 3" (3 flattened assignments)
-      const footers = screen.queryAllByText(/Showing 3 users of 3/);
-      expect(footers.length).toBeGreaterThan(0);
-    });
+    // Both the rows and the total are assignments, so the two numbers share a unit.
+    // Once in the control bar and once in the footer.
+    expect(screen.getAllByText('Showing 3 assignments of 12')).toHaveLength(2);
+  });
+
+  it('paginates by assignment', () => {
+    renderMembersTable();
+
+    // 12 assignments at 10 per page.
+    expect(screen.getByRole('button', { name: /Next, Page 2/ })).toBeEnabled();
   });
 
   it('calls onDelete when delete button is clicked', async () => {
@@ -215,8 +217,8 @@ describe('RoleMembersTable', () => {
 
   it('renders with loading state initially', () => {
     // Not `mockReturnValueOnce`: the table re-renders after fetching, and must stay loading.
-    mockUseTeamMembersAssignments.mockReturnValue({
-      ...mockMembersData,
+    mockUseRoleAssignments.mockReturnValue({
+      ...mockAssignmentsData,
       isLoading: true,
     });
     renderMembersTable();
@@ -225,7 +227,7 @@ describe('RoleMembersTable', () => {
   });
 
   it('renders empty state when no members returned', () => {
-    mockUseTeamMembersAssignments.mockReturnValue({
+    mockUseRoleAssignments.mockReturnValue({
       data: {
         results: [],
         count: 0,
@@ -243,30 +245,25 @@ describe('RoleMembersTable', () => {
     expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
   });
 
-  it('uses EMPTY_ASSIGNMENTS when data is undefined', () => {
-    mockUseTeamMembersAssignments.mockReturnValue({
+  it('uses EMPTY_ROLE_ASSIGNMENTS when data is undefined', () => {
+    mockUseRoleAssignments.mockReturnValue({
       data: undefined,
       error: null,
       isLoading: false,
       refetch: jest.fn(),
     });
     renderMembersTable();
-    // Should still render headers with EMPTY_ASSIGNMENTS default
+    // Should still render headers with the EMPTY_ROLE_ASSIGNMENTS default
     expect(screen.getByRole('columnheader', { name: /Username/i })).toBeInTheDocument();
     // Should show the empty state message
     expect(screen.getByText(messages['authz.custom.role.members.table.empty'].defaultMessage)).toBeInTheDocument();
   });
 
-  it('filters by roleId from URL params', () => {
+  it('requests the assignments of the role in the URL only', () => {
     renderMembersTable();
 
-    // Verify the hook was called with the correct roleId
-    expect(mockUseTeamMembersAssignments).toHaveBeenCalledWith(
-      expect.objectContaining({
-        roles: 'custom-role-123',
-      }),
-      true,
-    );
+    expect(mockUseRoleAssignments).toHaveBeenCalled();
+    mockUseRoleAssignments.mock.calls.forEach(([role]) => expect(role).toBe('custom-role-123'));
   });
 
   it('renders a single search box that names both searchable fields', () => {
@@ -282,8 +279,8 @@ describe('RoleMembersTable', () => {
     try {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderMembersTable();
-      const searchedTerms = () => mockUseTeamMembersAssignments.mock.calls
-        .map(([settings]) => settings.search)
+      const searchedTerms = () => mockUseRoleAssignments.mock.calls
+        .map(([, settings]) => settings.search)
         .filter(Boolean);
 
       await user.type(screen.getByPlaceholderText('Search by Username or Email'), 'inst');
@@ -296,9 +293,9 @@ describe('RoleMembersTable', () => {
 
       // Only the full term reaches the request, never the partial keystrokes.
       expect(new Set(searchedTerms())).toEqual(new Set(['inst']));
-      expect(mockUseTeamMembersAssignments).toHaveBeenLastCalledWith(
-        expect.objectContaining({ search: 'inst', roles: 'custom-role-123' }),
-        true,
+      expect(mockUseRoleAssignments).toHaveBeenLastCalledWith(
+        'custom-role-123',
+        expect.objectContaining({ search: 'inst' }),
       );
     } finally {
       jest.useRealTimers();
@@ -311,8 +308,8 @@ describe('RoleMembersTable', () => {
     });
 
     it('shows an error toast once, not once per effect pass', () => {
-      mockUseTeamMembersAssignments.mockReturnValue({
-        ...mockMembersData, data: undefined, error: serverError(),
+      mockUseRoleAssignments.mockReturnValue({
+        ...mockAssignmentsData, data: undefined, error: serverError(),
       });
       renderMembersTable();
 
@@ -322,8 +319,8 @@ describe('RoleMembersTable', () => {
     it('retries the request from the toast', async () => {
       const user = userEvent.setup();
       const refetch = jest.fn();
-      mockUseTeamMembersAssignments.mockReturnValue({
-        ...mockMembersData, data: undefined, error: serverError(), refetch,
+      mockUseRoleAssignments.mockReturnValue({
+        ...mockAssignmentsData, data: undefined, error: serverError(), refetch,
       });
       renderMembersTable();
 

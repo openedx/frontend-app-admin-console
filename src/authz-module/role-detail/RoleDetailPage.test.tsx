@@ -3,7 +3,7 @@ import type { Role } from '@src/authz-module/catalog/types';
 import userEvent from '@testing-library/user-event';
 import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH, ROUTES } from '@src/authz-module/constants';
 import { authzCatalog, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
-import { useTeamMembersAssignments } from '@src/authz-module/data/hooks';
+import { useRoleAssignments } from '@src/authz-module/data/hooks';
 import baseMessages from '@src/authz-module/messages';
 import { renderWithAllProviders } from '@src/testUtils';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
@@ -15,7 +15,7 @@ jest.mock('@src/authz-module/catalog/data/hooks', () => ({
 }));
 
 jest.mock('@src/authz-module/data/hooks', () => ({
-  useTeamMembersAssignments: jest.fn(),
+  useRoleAssignments: jest.fn(),
 }));
 
 jest.mock('@src/authz-module/role-assignation-wizard/hooks/useAssignableRoleGroups', () => ({
@@ -43,7 +43,7 @@ jest.mock('@src/authz-module/components/TableControlBar/ScopesFilter', () => ({
   default: () => <div>Scopes Filter</div>,
 }));
 
-const mockUseTeamMembersAssignments = useTeamMembersAssignments as jest.Mock;
+const mockUseRoleAssignments = useRoleAssignments as jest.Mock;
 
 const mockRole: Role = {
   role: 'custom-role-123',
@@ -57,23 +57,19 @@ const mockRole: Role = {
   icon: null,
 };
 
-const mockMembers = {
+const mockAssignments = {
   data: {
     results: [
       {
         username: 'instructor1',
         fullName: 'Instructor One',
         email: 'instructor1@example.com',
-        assignmentCount: 1,
-        assignments: [
-          {
-            role: 'custom-role-123',
-            org: 'OpenedX',
-            scope: 'course-v1:OpenedX+DemoX+Demo',
-            scopeDisplayName: 'Demo Course',
-            permissionCount: 5,
-          },
-        ],
+        role: 'custom-role-123',
+        org: 'OpenedX',
+        orgDisplayName: 'OpenedX',
+        scope: 'course-v1:OpenedX+DemoX+Demo',
+        scopeDisplayName: 'Demo Course',
+        permissionCount: 5,
       },
     ],
     count: 1,
@@ -105,7 +101,7 @@ const renderRoleDetail = (roleId = 'custom-role-123') => {
 describe('RoleDetailPage', () => {
   beforeEach(() => {
     mockCatalogWithRoles(mockRole);
-    mockUseTeamMembersAssignments.mockReturnValue(mockMembers);
+    mockUseRoleAssignments.mockReturnValue(mockAssignments);
   });
 
   it('renders the role display name as the page title', () => {
