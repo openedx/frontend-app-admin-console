@@ -299,6 +299,11 @@
     outline: none;
   }
 
+  // The design pulls the two steps apart; Paragon's connector is only 80px.
+  .pgn__stepper-header-line {
+    flex-basis: 15rem;
+  }
+
   .create-custom-role-wizard__start-from .pgn__selectable_box {
     padding: var(--pgn-spacing-spacer-2-5) var(--pgn-spacing-spacer-3);
     cursor: pointer;

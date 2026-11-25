@@ -12,6 +12,8 @@ export interface Permission {
   icon: string | null;
   categoryId: string | null;
   scopeTypes: string[];
+  // Ids of the permissions this one needs. Absent until the backend stores dependencies (openedx-authz#560).
+  implies?: string[];
 }
 
 export interface Role {
