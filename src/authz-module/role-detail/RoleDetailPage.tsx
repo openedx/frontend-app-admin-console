@@ -11,12 +11,12 @@ import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module/constants';
 import baseMessages from '@src/authz-module/messages';
 import homeMessages from '@src/authz-module/authz-home/messages';
-import { useAuthzCatalog } from '@src/authz-module/catalog';
+import { isCustomRole, useAuthzCatalog } from '@src/authz-module/catalog';
 import { CustomErrors } from '@src/constants';
 import messages from './messages';
 import AddRoleButton from '../components/AddRoleButton';
 import DuplicateRoleButton from '../components/DuplicateRoleButton';
-import MembersTable from './members/RoleMembersTable';
+import RoleMembersTable from './members/RoleMembersTable';
 
 const RoleDetailPage = () => {
   const intl = useIntl();
@@ -72,15 +72,16 @@ const RoleDetailPage = () => {
     throw new Error(CustomErrors.NOT_FOUND);
   }
 
-  const { displayName, definitionKind } = role;
-  const isCustomRole = definitionKind === 'user_defined';
+  const { displayName } = role;
+
+  const isCustom = isCustomRole(role);
 
   return (
     <AuthZLayout
       navLinks={navLinks}
       activeLabel={displayName}
       pageTitle={displayName}
-      titleAction={isCustomRole && (
+      titleAction={isCustom && (
         <Stack direction="horizontal">
           <IconButton
             className="role-detail-action-button"
@@ -112,7 +113,7 @@ const RoleDetailPage = () => {
       actions={[
         // Adding 2 actions as a stack since we don't want to have a divider between them
         <Stack direction="horizontal" gap={2} key="role-actions">
-          {!isCustomRole && <DuplicateRoleButton />}
+          {!isCustom && <DuplicateRoleButton />}
           <AddRoleButton key="add-role-button" iconBefore={PersonAdd} />
         </Stack>
       ]}
@@ -123,7 +124,7 @@ const RoleDetailPage = () => {
         className="page-band bg-light-100"
       >
         <Tab eventKey="members" title={intl.formatMessage(messages['authz.custom.role.tabs.members'])} className="page-band py-3">
-          <MembersTable onDelete={handleDeleteMember} />
+          <RoleMembersTable onDelete={handleDeleteMember} />
         </Tab>
         <Tab id="role-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
 

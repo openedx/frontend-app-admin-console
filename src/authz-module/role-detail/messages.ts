@@ -48,8 +48,8 @@ const messages = defineMessages({
   },
   'authz.custom.role.members.table.showing.message': {
     id: 'authz.custom.role.members.table.showing.message',
-    defaultMessage: 'Showing {pageSize} users of {itemCount}',
-    description: 'Message displayed in the footer an in the control barof the members table indicating the range of users being shown',
+    defaultMessage: 'Showing {pageSize} assignments of {itemCount}',
+    description: 'Message displayed in the footer and in the control bar of the role members table. Each row is one assignment of the role (a user in one scope), so it counts assignments, not users.',
   },
   'authz.role.members.table.action.view.alt': {
     id: 'authz.role.members.table.action.view.alt',
