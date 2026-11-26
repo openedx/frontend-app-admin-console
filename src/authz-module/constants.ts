@@ -1,4 +1,4 @@
-import { GetRoleAssignmentsResponse, GetTeamMembersAssignmentsResponse } from './data/api';
+import { type GetRoleAssignmentsResponse, type GetTeamMembersAssignmentsResponse } from './data/api';
 
 // Scope types the console supports, as the authz API names them (the namespace of the scope keys).
 export const SCOPE_TYPES = {

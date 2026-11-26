@@ -109,11 +109,6 @@ describe('RoleDetailPage', () => {
     expect(screen.getByRole('heading', { name: 'Custom Instructor' })).toBeInTheDocument();
   });
 
-  it('renders the edit role button', () => {
-    renderRoleDetail();
-    expect(screen.getByRole('button', { name: messages['authz.custom.role.edit.name.alt'].defaultMessage })).toBeInTheDocument();
-  });
-
   it('renders the more actions dropdown button', () => {
     renderRoleDetail();
     expect(screen.getByRole('button', { name: messages['authz.custom.role.more.name.alt'].defaultMessage })).toBeInTheDocument();
@@ -199,8 +194,7 @@ describe('RoleDetailPage', () => {
     mockCatalogWithRoles({ ...mockRole, definitionKind: 'static' });
     renderRoleDetail('custom-role-123');
 
-    // Should not render edit or more actions buttons for built-in roles
-    expect(screen.queryByRole('button', { name: messages['authz.custom.role.edit.name.alt'].defaultMessage })).not.toBeInTheDocument();
+    // Should not render more actions buttons for built-in roles
     expect(screen.queryByRole('button', { name: messages['authz.custom.role.more.name.alt'].defaultMessage })).not.toBeInTheDocument();
     // Should render duplicate button for built-in roles
     expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();

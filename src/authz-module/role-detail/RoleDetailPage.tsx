@@ -5,7 +5,7 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Alert, Icon, IconButton, Stack, Tab, Tabs, Dropdown,
 } from '@openedx/paragon';
-import { Edit, MoreVert, PersonAdd } from '@openedx/paragon/icons';
+import { MoreVert, PersonAdd } from '@openedx/paragon/icons';
 import LoadingPage from '@src/components/LoadingPage';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module/constants';
@@ -83,13 +83,6 @@ const RoleDetailPage = () => {
       pageTitle={displayName}
       titleAction={isCustom && (
         <Stack direction="horizontal">
-          <IconButton
-            className="role-detail-action-button"
-            src={Edit}
-            iconAs={Icon}
-            size="sm"
-            alt={intl.formatMessage(messages['authz.custom.role.edit.name.alt'])}
-          />
           <Dropdown>
             <Dropdown.Toggle
               id={`role-actions-${roleId}`}
@@ -129,6 +122,11 @@ const RoleDetailPage = () => {
         <Tab id="role-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
 
         </Tab>
+        {isCustom && (
+          <Tab id="role-comparison-tab" eventKey="comparison" title={intl.formatMessage(messages['authz.custom.role.tabs.comparison'])} className="page-band py-3">
+
+          </Tab>
+        )}
       </Tabs>
     </AuthZLayout>
   );

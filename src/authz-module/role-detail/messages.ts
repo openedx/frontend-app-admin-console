@@ -6,11 +6,6 @@ const messages = defineMessages({
     defaultMessage: 'The role could not be loaded. Please try again later.',
     description: 'Message shown on the role detail page when the roles catalog fails to load',
   },
-  'authz.custom.role.edit.name.alt': {
-    id: 'authz.custom.role.edit.name.alt',
-    defaultMessage: 'Edit role name',
-    description: 'Accessible label for the pencil button that edits the role name',
-  },
   'authz.custom.role.more.name.alt': {
     id: 'authz.custom.role.more.name.alt',
     defaultMessage: 'More actions',
@@ -25,6 +20,11 @@ const messages = defineMessages({
     id: 'authz.custom.role.tabs.permissions',
     defaultMessage: 'Permissions',
     description: 'Label for the "Permissions" tab on the role detail page',
+  },
+  'authz.custom.role.tabs.comparison': {
+    id: 'authz.custom.role.tabs.comparison',
+    defaultMessage: 'Role comparison',
+    description: 'Label for the "Role comparison" tab on the role detail page',
   },
   'authz.custom.role.members.table.column.header.username': {
     id: 'authz.custom.role.members.table.column.header.username',
