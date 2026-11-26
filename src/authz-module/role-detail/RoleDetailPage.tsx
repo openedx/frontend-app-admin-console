@@ -20,6 +20,24 @@ import AddRoleButton from '../components/AddRoleButton';
 import DuplicateRoleButton from '../components/DuplicateRoleButton';
 import RoleMembersTable from './members/RoleMembersTable';
 
+// Tab keys, also used as the URL hash that opens each tab (e.g. `#comparison`).
+const ROLE_DETAIL_TABS = {
+  MEMBERS: 'members',
+  PERMISSIONS: 'permissions',
+  COMPARISON: 'comparison',
+} as const;
+
+/**
+ * The tab the URL hash asks for. Comparison only exists for built-in roles, so a custom role
+ * falls back to Members, as does any other hash.
+ */
+const getTabFromHash = (hash: string, isCustom: boolean) => {
+  const tab = hash.replace('#', '');
+  if (tab === ROLE_DETAIL_TABS.PERMISSIONS) return ROLE_DETAIL_TABS.PERMISSIONS;
+  if (tab === ROLE_DETAIL_TABS.COMPARISON && !isCustom) return ROLE_DETAIL_TABS.COMPARISON;
+  return ROLE_DETAIL_TABS.MEMBERS;
+};
+
 const RoleDetailPage = () => {
   const intl = useIntl();
   const { roleId = '' } = useParams();
@@ -125,17 +143,17 @@ const RoleDetailPage = () => {
       )}
       <Tabs
         variant="tabs"
-        defaultActiveKey={hash ? 'permissions' : 'members'}
+        defaultActiveKey={getTabFromHash(hash, isCustom)}
         className="page-band bg-light-100"
       >
-        <Tab eventKey="members" title={intl.formatMessage(messages['authz.custom.role.tabs.members'])} className="page-band py-3">
+        <Tab eventKey={ROLE_DETAIL_TABS.MEMBERS} title={intl.formatMessage(messages['authz.custom.role.tabs.members'])} className="page-band py-3">
           <RoleMembersTable scopeTypes={scopeTypes} onDelete={handleDeleteMember} />
         </Tab>
-        <Tab id="role-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
+        <Tab id="role-permissions-tab" eventKey={ROLE_DETAIL_TABS.PERMISSIONS} title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
 
         </Tab>
         {!isCustom && (
-          <Tab id="role-comparison-tab" eventKey="comparison" title={intl.formatMessage(messages['authz.custom.role.tabs.comparison'])} className="page-band py-3">
+          <Tab id="role-comparison-tab" eventKey={ROLE_DETAIL_TABS.COMPARISON} title={intl.formatMessage(messages['authz.custom.role.tabs.comparison'])} className="page-band py-3">
 
           </Tab>
         )}

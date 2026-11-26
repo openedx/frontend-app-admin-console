@@ -89,8 +89,8 @@ const mockCatalogWithRoles = (...roles: Role[]) => mockAuthzCatalog({
  * Renders the page through the module's routes, so missing roles reach its real ErrorBoundary.
  * renderWithAllProviders uses a BrowserRouter, so the URL is set for the route to read `roleId`.
  */
-const renderRoleDetail = (roleId = 'custom-role-123') => {
-  window.history.pushState({}, '', `/${ROUTES.ROLE_DETAIL_PATH.replace(':roleId', encodeURIComponent(roleId))}`);
+const renderRoleDetail = (roleId = 'custom-role-123', hash = '') => {
+  window.history.pushState({}, '', `/${ROUTES.ROLE_DETAIL_PATH.replace(':roleId', encodeURIComponent(roleId))}${hash}`);
   return renderWithAllProviders(
     <ToastManagerProvider>
       <AuthZModule />
@@ -235,6 +235,32 @@ describe('RoleDetailPage', () => {
     renderRoleDetail('builtin-role');
     expect(screen.getByRole('heading', { name: 'Built-in' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
+  });
+
+  describe('opens the tab the URL hash names', () => {
+    const builtInRole = { ...mockRole, definitionKind: 'static' as const };
+
+    it('opens Permissions for #permissions', () => {
+      renderRoleDetail('custom-role-123', '#permissions');
+      expect(screen.getByRole('tab', { name: messages['authz.custom.role.tabs.permissions'].defaultMessage, selected: true })).toBeInTheDocument();
+    });
+
+    it('opens Comparison for #comparison on a built-in role', () => {
+      mockCatalogWithRoles(builtInRole);
+      renderRoleDetail('custom-role-123', '#comparison');
+      expect(screen.getByRole('tab', { name: messages['authz.custom.role.tabs.comparison'].defaultMessage, selected: true })).toBeInTheDocument();
+    });
+
+    it('opens Members for #comparison on a custom role, which has no Comparison tab', () => {
+      renderRoleDetail('custom-role-123', '#comparison');
+      expect(screen.queryByRole('tab', { name: messages['authz.custom.role.tabs.comparison'].defaultMessage })).not.toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: messages['authz.custom.role.tabs.members'].defaultMessage, selected: true })).toBeInTheDocument();
+    });
+
+    it('opens Members for an unknown hash', () => {
+      renderRoleDetail('custom-role-123', '#unknown');
+      expect(screen.getByRole('tab', { name: messages['authz.custom.role.tabs.members'].defaultMessage, selected: true })).toBeInTheDocument();
+    });
   });
 
   it('renders Permissions tab that can be navigated to', async () => {
