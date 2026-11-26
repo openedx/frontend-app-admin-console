@@ -129,7 +129,7 @@ const RoleDetailPage = () => {
         className="page-band bg-light-100"
       >
         <Tab eventKey="members" title={intl.formatMessage(messages['authz.custom.role.tabs.members'])} className="page-band py-3">
-          <RoleMembersTable onDelete={handleDeleteMember} />
+          <RoleMembersTable scopeTypes={scopeTypes} onDelete={handleDeleteMember} />
         </Tab>
         <Tab id="role-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
 

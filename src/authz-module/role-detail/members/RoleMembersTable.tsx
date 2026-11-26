@@ -20,6 +20,7 @@ import type { RoleAssignment } from '@src/types';
 import MemberActionCell from './MemberActionCell';
 
 interface RoleMembersTableProps {
+  scopeTypes: string[];
   onDelete: (assignment: RoleAssignment) => void;
 }
 
@@ -30,7 +31,7 @@ const toastedErrors = new WeakSet<Error>();
  * several scopes gets a row per scope. Rows, pages and the count are all assignments, as
  * the endpoint returns them, so none are cut and the count matches what is listed.
  */
-const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
+const RoleMembersTable = ({ scopeTypes, onDelete }: RoleMembersTableProps) => {
   const intl = useIntl();
   const { showErrorToast } = useToastManager();
   const { roleId = '' } = useParams();
@@ -97,10 +98,11 @@ const RoleMembersTable = ({ onDelete }: RoleMembersTableProps) => {
       disableSortBy: true,
       defaultCanFilter: true,
       Filter: ScopesFilter,
+      scopeTypes,
       filterButtonText: intl.formatMessage(messages['authz.custom.role.members.table.column.header.scope']),
       filterOrder: 2,
     },
-  ], [intl, columnsWithFiltersApplied]);
+  ], [intl, columnsWithFiltersApplied, scopeTypes]);
 
   const additionalColumns = useMemo(() => [
     {

@@ -73,7 +73,7 @@ const viewButtonName = actionButtonName('authz.role.members.table.action.view.al
 const deleteButtonName = actionButtonName('authz.role.members.table.action.delete.alt');
 
 const renderMembersTable = (props = {}) => renderWithAllProviders(
-  <ToastManagerProvider><RoleMembersTable onDelete={jest.fn()} {...props} /></ToastManagerProvider>,
+  <ToastManagerProvider><RoleMembersTable scopeTypes={[]} onDelete={jest.fn()} {...props} /></ToastManagerProvider>,
 );
 
 describe('RoleMembersTable', () => {
