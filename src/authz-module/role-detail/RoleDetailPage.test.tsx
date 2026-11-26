@@ -200,6 +200,29 @@ describe('RoleDetailPage', () => {
     expect(screen.getByRole('button', { name: /Duplicate/ })).toBeInTheDocument();
   });
 
+  it('shows the resource type and last update of a custom role', () => {
+    const updatedAt = '2024-03-15T10:30:00Z';
+    mockCatalogWithRoles({ ...mockRole, scopeTypes: ['lib'], updatedAt });
+    renderRoleDetail();
+    expect(screen.getByText('Libraries')).toBeInTheDocument();
+    expect(screen.getByText(/Last updated:/)).toBeInTheDocument();
+    expect(document.querySelector(`time[datetime="${updatedAt}"]`)).toBeInTheDocument();
+  });
+
+  it('shows "-" as the last update of a custom role never updated', () => {
+    renderRoleDetail();
+    expect(screen.getByText(/Last updated:/)).toHaveTextContent('Last updated: -');
+  });
+
+  it('does not show the resource type or last update of a built-in role', () => {
+    mockCatalogWithRoles({
+      ...mockRole, definitionKind: 'static', scopeTypes: ['lib'], updatedAt: '2024-03-15T10:30:00Z',
+    });
+    renderRoleDetail();
+    expect(screen.queryByText(/Last updated:/)).not.toBeInTheDocument();
+    expect(document.querySelector('time')).not.toBeInTheDocument();
+  });
+
   it('does not render DuplicateRoleButton for custom roles', () => {
     renderRoleDetail('custom-role-123');
     expect(screen.queryByRole('button', { name: /Duplicate/ })).not.toBeInTheDocument();

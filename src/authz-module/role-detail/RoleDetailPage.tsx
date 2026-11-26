@@ -8,6 +8,8 @@ import {
 import { MoreVert, PersonAdd } from '@openedx/paragon/icons';
 import LoadingPage from '@src/components/LoadingPage';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
+import ResourceTypeTags from '@src/authz-module/components/ResourceTypeTags';
+import LastUpdatedTime from '@src/authz-module/components/LastUpdatedTime';
 import { AUTHZ_HOME_PATH, AUTHZ_ROLES_PERMISSIONS_PATH } from '@src/authz-module/constants';
 import baseMessages from '@src/authz-module/messages';
 import homeMessages from '@src/authz-module/authz-home/messages';
@@ -72,7 +74,7 @@ const RoleDetailPage = () => {
     throw new Error(CustomErrors.NOT_FOUND);
   }
 
-  const { displayName } = role;
+  const { displayName, scopeTypes, updatedAt } = role;
 
   const isCustom = isCustomRole(role);
 
@@ -111,6 +113,16 @@ const RoleDetailPage = () => {
         </Stack>
       ]}
     >
+      {isCustom && (
+        <Stack direction="horizontal" gap={3} className="page-band pb-3 bg-light-100 flex-wrap">
+          <ResourceTypeTags scopeTypes={scopeTypes} />
+          <span className="small text-gray-700">
+            {intl.formatMessage(messages['authz.custom.role.last.updated'], {
+              date: <LastUpdatedTime updatedAt={updatedAt} />,
+            })}
+          </span>
+        </Stack>
+      )}
       <Tabs
         variant="tabs"
         defaultActiveKey={hash ? 'permissions' : 'members'}
@@ -122,7 +134,7 @@ const RoleDetailPage = () => {
         <Tab id="role-permissions-tab" eventKey="permissions" title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
 
         </Tab>
-        {isCustom && (
+        {!isCustom && (
           <Tab id="role-comparison-tab" eventKey="comparison" title={intl.formatMessage(messages['authz.custom.role.tabs.comparison'])} className="page-band py-3">
 
           </Tab>

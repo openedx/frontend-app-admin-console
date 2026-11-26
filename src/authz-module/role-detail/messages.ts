@@ -71,6 +71,11 @@ const messages = defineMessages({
     defaultMessage: 'Delete',
     description: 'Menu item to delete a custom role',
   },
+  'authz.custom.role.last.updated': {
+    id: 'authz.custom.role.last.updated',
+    defaultMessage: 'Last updated: {date}',
+    description: 'Date and time a custom role was last updated, shown next to its resource type',
+  },
   'authz.custom.role.members.table.empty': {
     id: 'authz.custom.role.members.table.empty',
     defaultMessage: 'No users assigned to this role',
