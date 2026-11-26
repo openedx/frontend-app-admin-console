@@ -187,6 +187,11 @@ const messages = defineMessages({
     defaultMessage: 'Table pagination',
     description: 'Label for the table pagination controls',
   },
+  'authz.action.duplicate.role': {
+    id: 'authz.action.duplicate.role',
+    defaultMessage: 'Duplicate Role',
+    description: 'Label for the action to duplicate a role.',
+  },
 });
 
 export default messages;

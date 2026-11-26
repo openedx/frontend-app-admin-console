@@ -72,11 +72,6 @@ const messages = defineMessages(
       defaultMessage: 'Retry',
       description: 'Label for retry button.',
     },
-    'authz.custom.role.duplicate.role': {
-      id: 'authz.custom.role.duplicate.role',
-      defaultMessage: 'Duplicate Role',
-      description: 'Label for the action to duplicate a role.',
-    }
   },
 );
 
