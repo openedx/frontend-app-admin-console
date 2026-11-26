@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import { useIntl } from '@openedx/frontend-base';
 import { Button } from '@openedx/paragon';
 import { Plus } from '@openedx/paragon/icons';
@@ -8,6 +8,7 @@ import { AssignRoleWizard, useAssignableRoleGroups } from '@src/authz-module/rol
 
 interface AddRoleButtonProps {
   presetUsername?: string;
+  iconBefore?: ComponentType;
 }
 
 /**
@@ -18,7 +19,7 @@ interface AddRoleButtonProps {
  * The wizard is mounted only while open, never hidden: each opening gets its own state
  * and its own request state
  */
-const AddRoleButton = ({ presetUsername }: AddRoleButtonProps) => {
+const AddRoleButton = ({ presetUsername, iconBefore = Plus }: AddRoleButtonProps) => {
   const intl = useIntl();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
@@ -34,7 +35,7 @@ const AddRoleButton = ({ presetUsername }: AddRoleButtonProps) => {
     <>
       <Button
         size="sm"
-        iconBefore={Plus}
+        iconBefore={iconBefore}
         onClick={() => setIsWizardOpen(true)}
       >
         {intl.formatMessage(baseMessages['authz.management.assign.role.title'])}

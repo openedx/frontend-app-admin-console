@@ -20,6 +20,11 @@ describe('AuthZTitle', () => {
     expect(screen.getByText(defaultProps.pageTitle)).toBeInTheDocument();
   });
 
+  it('renders the title action next to the title', () => {
+    render(<AuthZTitle {...defaultProps} titleAction={<button type="button">Edit</button>} />);
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+  });
+
   it('renders breadcrumb with links and active label', () => {
     const navLinks = [
       { label: 'Root', to: '/' },

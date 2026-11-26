@@ -1,3 +1,5 @@
+import { type GetRoleAssignmentsResponse, type GetTeamMembersAssignmentsResponse } from './data/api';
+
 // Scope types the console supports, as the authz API names them (the namespace of the scope keys).
 export const SCOPE_TYPES = {
   COURSE: 'course-v1',
@@ -86,12 +88,18 @@ export const RETRY_TOAST_DELAY = 120_000; // 2 minutes
 /** Absolute base path of the module; src/routes.tsx derives its route prefix from this. */
 export const AUTHZ_HOME_PATH = '/admin-console/authz';
 
+/** Home with the Roles and Permissions tab preselected; authz-home opens that tab when any hash is present. */
+export const AUTHZ_ROLES_PERMISSIONS_PATH = `${AUTHZ_HOME_PATH}#roles-permissions`;
+
 /** Segments nested under the authz splat route, relative to AUTHZ_HOME_PATH. */
 export const ROUTES = {
   AUDIT_USER_PATH: 'user/:username',
+  ROLE_DETAIL_PATH: 'role/:roleId',
 };
 
 export const buildAuditUserPath = (username: string) => `${AUTHZ_HOME_PATH}/user/${encodeURIComponent(username)}`;
+
+export const buildRoleDetailPath = (roleId: string) => `${AUTHZ_HOME_PATH}/role/${encodeURIComponent(roleId)}`;
 
 export enum RoleOperationErrorStatus {
   USER_NOT_FOUND = 'user_not_found',
@@ -109,3 +117,17 @@ export const TABLE_DEFAULT_PAGE_SIZE = 10;
 
 export const DEFAULT_FILTER_PAGE_SIZE = 5;
 export const ADMIN_ROLES = ['course_admin', 'library_admin'];
+
+/**
+ * Stable stand-in for a query that has not resolved. A fresh object literal here would
+ * hand `DataTable` a new `data` array on every render, and react-table resets its
+ * expanded-row state whenever `data` changes identity.
+ */
+export const EMPTY_ASSIGNMENTS: GetTeamMembersAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};
+
+/** Same as `EMPTY_ASSIGNMENTS`, for the per-assignment listing of one role. */
+export const EMPTY_ROLE_ASSIGNMENTS: GetRoleAssignmentsResponse = {
+  results: [], count: 0, next: null, previous: null,
+};

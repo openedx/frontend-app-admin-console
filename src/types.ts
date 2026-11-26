@@ -62,6 +62,17 @@ export interface TeamMemberAssignment {
 }
 
 /**
+ * One role assignment with the user who holds it.
+ * Mirrors `results[]` of `GET /api/authz/v1/assignments/`.
+ */
+export interface RoleAssignment extends TeamMemberAssignment {
+  username: string;
+  fullName: string;
+  email: string;
+  orgDisplayName: string;
+}
+
+/**
  * A team member as returned by the user-grouped assignments endpoint: one entry per
  * user, carrying the first few of their assignments. `assignmentCount` counts every
  * assignment behind that slice, so it can exceed `assignments.length`. Both are scoped

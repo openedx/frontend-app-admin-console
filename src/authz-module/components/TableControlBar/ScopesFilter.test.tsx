@@ -137,6 +137,29 @@ describe('ScopesFilter', () => {
     );
   });
 
+  it('fetches only the scope type it is limited to', () => {
+    renderWrapper(<ScopesFilter {...defaultProps} scopeTypes={[SCOPE_TYPES.COURSE]} />);
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeType: SCOPE_TYPES.COURSE }),
+    );
+  });
+
+  it('lists only scopes of the scope types it is limited to', async () => {
+    const user = userEvent.setup();
+    renderWrapper(<ScopesFilter {...defaultProps} scopeTypes={[SCOPE_TYPES.COURSE]} />);
+    await user.click(screen.getByRole('button', { name: /Scopes/i }));
+    expect(await screen.findByText('Test Course')).toBeInTheDocument();
+    expect(screen.queryByText('Test Library')).not.toBeInTheDocument();
+  });
+
+  it('still fetches only libraries for a user who cannot view courses, whatever it is limited to', () => {
+    mockUsePermissions.mockReturnValue(permissionsData({ library: true, course: false }));
+    renderWrapper(<ScopesFilter {...defaultProps} scopeTypes={[SCOPE_TYPES.COURSE]} />);
+    expect(mockUseScopes).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeType: SCOPE_TYPES.LIBRARY }),
+    );
+  });
+
   it('lists course scopes whose course-authoring flag is enabled', async () => {
     const user = userEvent.setup();
     renderWrapper(<ScopesFilter {...defaultProps} />);

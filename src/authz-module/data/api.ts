@@ -1,5 +1,5 @@
 import {
-  Org, Scope, TeamMember, UserRole,
+  Org, RoleAssignment, Scope, TeamMember, UserRole,
 } from '@src/types';
 import { camelCaseObject, getAuthenticatedHttpClient } from '@openedx/frontend-base';
 import { getApiUrl } from '@src/data/utils';
@@ -53,6 +53,13 @@ export interface AssignTeamMembersRoleRequest {
 
 export interface GetTeamMembersAssignmentsResponse {
   results: TeamMember[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+}
+
+export interface GetRoleAssignmentsResponse {
+  results: RoleAssignment[];
   count: number;
   next: string | null;
   previous: string | null;
@@ -168,6 +175,40 @@ export const getTeamMembersAssignments = async (querySettings: QuerySettings): P
     url.searchParams.set('order', querySettings.order);
   }
   // The endpoint defaults `assignments_limit` to 3; set it only to change that default.
+  url.searchParams.set('page_size', querySettings.pageSize.toString());
+  url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
+
+  const { data } = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(data);
+};
+
+/**
+ * Fetches the assignments of one role: one entry per assignment, paginated, counted and
+ * sorted by assignment, so a user holding the role in several scopes appears once per scope.
+ *
+ * `role` is required and always sent as the `roles` filter, overriding any `roles` in
+ * `querySettings`: without it the endpoint lists the assignments of every role.
+ */
+export const getRoleAssignments = async (
+  role: string,
+  querySettings: QuerySettings,
+): Promise<GetRoleAssignmentsResponse> => {
+  const url = new URL(getApiUrl('/api/authz/v1/assignments/'));
+
+  url.searchParams.set('roles', role);
+  if (querySettings.scopes) {
+    url.searchParams.set('scopes', querySettings.scopes);
+  }
+  if (querySettings.organizations) {
+    url.searchParams.set('orgs', querySettings.organizations);
+  }
+  if (querySettings.search) {
+    url.searchParams.set('search', querySettings.search);
+  }
+  if (querySettings.sortBy && querySettings.order) {
+    url.searchParams.set('sort_by', querySettings.sortBy);
+    url.searchParams.set('order', querySettings.order);
+  }
   url.searchParams.set('page_size', querySettings.pageSize.toString());
   url.searchParams.set('page', (querySettings.pageIndex + 1).toString());
 

@@ -10,11 +10,13 @@ import {
   RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
   validateUsers, ValidateUsersRequest, GetScopesParams,
   getCourseAuthoringFlagStates, CourseAuthoringFlagStates,
+  getRoleAssignments, GetRoleAssignmentsResponse,
 } from './api';
 
 const authzQueryKeys = {
   all: [appId, 'authz'] as const,
   teamMembersAssignments: (querySettings?: QuerySettings) => [...authzQueryKeys.all, 'teamMembersAssignments', querySettings] as const,
+  roleAssignments: (role: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'roleAssignments', role, querySettings] as const,
   orgs: (search?: string, page?: number, pageSize?: number) => [...authzQueryKeys.all, 'organizations', search, page, pageSize] as const,
   scopes: (params?: Omit<GetScopesParams, 'page'>) => [...authzQueryKeys.all, 'scopes', params] as const,
   userRoles: (username?: string, querySettings?: QuerySettings) => [...authzQueryKeys.all, 'userRoles', username, querySettings] as const,
@@ -41,6 +43,7 @@ export const useAssignTeamMembersRole = () => {
         queryClient.invalidateQueries({
           predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
         });
+        queryClient.invalidateQueries({ queryKey: [...authzQueryKeys.all, 'roleAssignments'] });
         // The roles table counts each role's members.
         invalidateCatalogRoles(queryClient);
       }
@@ -82,6 +85,7 @@ export const useRevokeUserRoles = () => {
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('teamMembersAssignments'),
       });
+      queryClient.invalidateQueries({ queryKey: [...authzQueryKeys.all, 'roleAssignments'] });
       // The roles table counts each role's members.
       invalidateCatalogRoles(queryClient);
     },
@@ -106,6 +110,24 @@ export const useTeamMembersAssignments = (querySettings: QuerySettings, enabled 
     queryKey: authzQueryKeys.teamMembersAssignments(querySettings),
     enabled,
     queryFn: () => getTeamMembersAssignments(querySettings),
+    staleTime: 1000 * 60 * 30, // refetch after 30 minutes
+  })
+);
+
+/**
+ * React Query hook to fetch the assignments of one role, one entry per assignment, with
+ * support for filtering, sorting, and pagination; see `getRoleAssignments`.
+ *
+ * Stays idle without a `role`: the endpoint would otherwise list every role's assignments.
+ *
+ * @example
+ * const { data } = useRoleAssignments('course_staff', querySettings);
+ */
+export const useRoleAssignments = (role: string, querySettings: QuerySettings) => (
+  useQuery<GetRoleAssignmentsResponse, Error>({
+    queryKey: authzQueryKeys.roleAssignments(role, querySettings),
+    enabled: !!role,
+    queryFn: () => getRoleAssignments(role, querySettings),
     staleTime: 1000 * 60 * 30, // refetch after 30 minutes
   })
 );

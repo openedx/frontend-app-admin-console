@@ -7,6 +7,7 @@ import {
   getOrgs,
   getScopes,
   getCourseAuthoringFlagStates,
+  getRoleAssignments,
 } from './api';
 import { SCOPE_TYPES } from '../constants';
 
@@ -80,6 +81,66 @@ describe('API functions', () => {
       expect(calledUrl.toString()).toContain('search=library');
       expect(calledUrl.toString()).toContain('sort_by=role');
       expect(calledUrl.toString()).toContain('order=asc');
+    });
+  });
+
+  describe('getRoleAssignments', () => {
+    const requestedUrl = (mockGet: jest.Mock) => new URL(mockGet.mock.calls[0][0].toString());
+
+    it('lists the assignments of one role from the assignments endpoint', async () => {
+      const results = [{
+        username: 'jdoe', full_name: 'John Doe', email: 'jdoe@example.com', role: 'course_staff',
+        org: 'OpenedX', org_display_name: 'Open edX', scope: 'course-v1:OpenedX+DemoX+Demo', scope_display_name: 'Demo Course', permission_count: 5,
+      }];
+      const mockGet = jest.fn().mockResolvedValue({ data: { results, count: 1, next: null, previous: null } });
+      mockHttpClient().mockReturnValue({ get: mockGet });
+
+      const result = await getRoleAssignments('course_staff', mockQuerySettings);
+
+      const url = requestedUrl(mockGet);
+      expect(url.pathname).toBe('/api/authz/v1/assignments/');
+      expect(url.searchParams.get('roles')).toBe('course_staff');
+      expect(result.count).toBe(1);
+      expect(result.results[0]).toMatchObject({
+        fullName: 'John Doe', orgDisplayName: 'Open edX', scopeDisplayName: 'Demo Course', permissionCount: 5,
+      });
+    });
+
+    it('always filters by the given role, even if the settings name other roles', async () => {
+      const mockGet = jest.fn().mockResolvedValue({ data: { results: [], count: 0 } });
+      mockHttpClient().mockReturnValue({ get: mockGet });
+
+      await getRoleAssignments('course_staff', { ...mockQuerySettings, roles: 'course_admin,library_admin' });
+
+      expect(requestedUrl(mockGet).searchParams.getAll('roles')).toEqual(['course_staff']);
+    });
+
+    it('sends the table filters, sorting and pagination', async () => {
+      const mockGet = jest.fn().mockResolvedValue({ data: { results: [], count: 0 } });
+      mockHttpClient().mockReturnValue({ get: mockGet });
+
+      await getRoleAssignments('course_staff', {
+        ...mockQuerySettings,
+        scopes: 'lib:OpenedX:CONTENT',
+        organizations: 'OpenedX',
+        search: 'jdoe',
+        sortBy: 'username',
+        order: 'desc',
+        pageSize: 10,
+        pageIndex: 2,
+      });
+
+      const params = requestedUrl(mockGet).searchParams;
+      expect(Object.fromEntries(params)).toEqual({
+        roles: 'course_staff',
+        scopes: 'lib:OpenedX:CONTENT',
+        orgs: 'OpenedX',
+        search: 'jdoe',
+        sort_by: 'username',
+        order: 'desc',
+        page_size: '10',
+        page: '3',
+      });
     });
   });
 
