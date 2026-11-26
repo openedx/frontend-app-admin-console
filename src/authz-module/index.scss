@@ -321,6 +321,20 @@
     max-height: 480px;
     overflow-y: auto;
   }
+
+  // Takes no height, so the request alert floats over the bottom of the body above the footer.
+  .after-body-stepper__alert-anchor {
+    position: relative;
+    height: 0;
+  }
+
+  .stepper__alert {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+  }
 }
 
 // Wizard modal chrome. `.pgn__modal` only to outrank Paragon's `-dark` header rule.

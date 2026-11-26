@@ -4,7 +4,9 @@ import { usePermissions } from '@openedx/frontend-base';
 import { createQueryClientWrapper, mockHttpClient } from '@src/testUtils';
 import { SCOPE_TYPES, VIEW_TEAM_ACTIONS } from '@src/authz-module/constants';
 import { CATALOG_PAGE_SIZE } from '../constants';
-import { invalidateAuthzCatalog, useAuthzCatalog, useCatalogRoles } from './hooks';
+import {
+  invalidateAuthzCatalog, useAuthzCatalog, useCatalogRoles, useCreateCustomRole,
+} from './hooks';
 import type { RolesQueryParams } from './api';
 
 jest.mock('@openedx/frontend-base', () => ({
@@ -373,5 +375,70 @@ describe('useCatalogRoles', () => {
     await act(async () => invalidateAuthzCatalog(queryClient));
 
     expect(get).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useCreateCustomRole', () => {
+  const request = {
+    displayName: 'Course designer',
+    scopeType: SCOPE_TYPES.COURSE,
+    permissions: ['courses.view_course', 'courses.edit_course_content'],
+  };
+  const createdRole = {
+    ...buildRole('custom_course_designer', request.permissions, SCOPE_TYPES.COURSE),
+    display_name: 'Course designer',
+    definition_kind: 'user_defined',
+    user_count: 0,
+    updated_at: '2025-01-01T00:00:00Z',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('posts the role with its resource type as a one-item list, and returns it camel-cased', async () => {
+    const post = jest.fn().mockResolvedValue({ data: createdRole });
+    mockHttpClient().mockReturnValue({ post });
+    const { result } = renderHook(() => useCreateCustomRole(), { wrapper: createQueryClientWrapper() });
+
+    let role;
+    await act(async () => {
+      role = await result.current.mutateAsync(request);
+    });
+
+    expect(post).toHaveBeenCalledWith(expect.stringMatching(/\/api\/authz\/v1\/roles\/$/), {
+      display_name: 'Course designer',
+      scope_types: [SCOPE_TYPES.COURSE],
+      permissions: ['courses.view_course', 'courses.edit_course_content'],
+    });
+    expect(role).toMatchObject({
+      role: 'custom_course_designer', displayName: 'Course designer', definitionKind: 'user_defined', userCount: 0,
+    });
+  });
+
+  it('refreshes the catalog once the role is created', async () => {
+    mockHttpClient().mockReturnValue({ post: jest.fn().mockResolvedValue({ data: createdRole }) });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useCreateCustomRole(), { wrapper: createQueryClientWrapper(queryClient) });
+
+    await act(async () => {
+      await result.current.mutateAsync(request);
+    });
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: [expect.any(String), 'authz', 'catalog'] });
+  });
+
+  it('leaves the catalog alone when the role is rejected', async () => {
+    mockHttpClient().mockReturnValue({ post: jest.fn().mockRejectedValue(new Error('Conflict')) });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useCreateCustomRole(), { wrapper: createQueryClientWrapper(queryClient) });
+
+    await act(async () => {
+      await expect(result.current.mutateAsync(request)).rejects.toThrow('Conflict');
+    });
+
+    expect(invalidate).not.toHaveBeenCalled();
   });
 });

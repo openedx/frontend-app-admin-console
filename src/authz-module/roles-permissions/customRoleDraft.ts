@@ -1,4 +1,4 @@
-import type { Role } from '@src/authz-module/catalog';
+import type { CreateCustomRoleRequest, Permission, Role } from '@src/authz-module/catalog';
 
 /** Backend `display_name` is `max_length=255`; a longer name would be rejected on save. */
 export const MAX_ROLE_NAME_LENGTH = 255;
@@ -57,3 +57,31 @@ export const getCustomRoleSeed = (
   if (!sourceRole || !scopeType) return null;
   return { scopeType, permissions: [...sourceRole.permissions] };
 };
+
+/**
+ * Turns the wizard's answers into the request that creates the role.
+ *
+ * The permissions are those of the resource type that end up granted, the chosen ones and what
+ * they need, in catalog order, so the request matches the count the permissions step shows.
+ *
+ * @param draft - The first step's answers.
+ * @param seed - What the permissions step started from, which holds the resource type.
+ * @param effective - Ids granted in the permissions step.
+ * @param permissions - The permissions of the seed's resource type.
+ */
+export const buildCreateCustomRoleRequest = (
+  draft: CustomRoleDraft,
+  seed: CustomRoleSeed,
+  effective: ReadonlySet<string>,
+  permissions: Permission[],
+): CreateCustomRoleRequest => ({
+  displayName: draft.name.trim(),
+  scopeType: seed.scopeType,
+  permissions: permissions.filter(({ id }) => effective.has(id)).map(({ id }) => id),
+});
+
+/**
+ * Whether two role names are the same to the server, which compares them trimmed and without case.
+ * The wizard uses it to tell whether the name a create was rejected for has been changed.
+ */
+export const isSameRoleName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();

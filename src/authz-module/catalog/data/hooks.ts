@@ -1,10 +1,12 @@
 import { useCallback, useMemo } from 'react';
-import { keepPreviousData, QueryClient, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData, QueryClient, useMutation, useQuery, useQueryClient,
+} from '@tanstack/react-query';
 import { usePermissions } from '@openedx/frontend-base';
 import { appId } from '@src/constants';
 import { SCOPE_TYPES, VIEW_TEAM_PERMISSIONS } from '@src/authz-module/constants';
-import { getAuthzCatalog, getAuthzCatalogPage } from './api';
-import type { GetAuthzCatalogResponse, RolesQueryParams } from './api';
+import { createCustomRole, getAuthzCatalog, getAuthzCatalogPage } from './api';
+import type { CreateCustomRoleRequest, GetAuthzCatalogResponse, RolesQueryParams } from './api';
 import type { AuthzCatalog, Role, ScopeCatalog } from '../types';
 import { getScopeCatalog } from '../utils';
 
@@ -146,3 +148,23 @@ export const useCatalogRoles = (params: RolesQueryParams, enabled = true) => use
   staleTime: 30 * 60 * 1000,
   placeholderData: keepPreviousData,
 });
+
+/**
+ * Creates a custom role and, once it exists, refreshes the complete catalog and the roles table,
+ * so the new role is listed, offered to clone and offered to assign without a reload.
+ *
+ * @example
+ * ```tsx
+ * const createRole = useCreateCustomRole();
+ * await createRole.mutateAsync({
+ *   displayName: 'Course designer', scopeType: SCOPE_TYPES.COURSE, permissions: ['courses.view_course'],
+ * });
+ * ```
+ */
+export const useCreateCustomRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation<Role, Error, CreateCustomRoleRequest>({
+    mutationFn: createCustomRole,
+    onSuccess: () => invalidateAuthzCatalog(queryClient),
+  });
+};
