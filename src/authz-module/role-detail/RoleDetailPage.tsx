@@ -19,6 +19,8 @@ import messages from './messages';
 import AddRoleButton from '../components/AddRoleButton';
 import DuplicateRoleButton from '../components/DuplicateRoleButton';
 import RoleMembersTable from './members/RoleMembersTable';
+import RolesPermissionsContent from './permissions/RolePermissionsContent';
+import RolesPermissions from '../roles-permissions/RolesPermissions';
 
 // Tab keys, also used as the URL hash that opens each tab (e.g. `#comparison`).
 const ROLE_DETAIL_TABS = {
@@ -160,11 +162,11 @@ const RoleDetailPage = () => {
           <RoleMembersTable scopeTypes={scopeTypes} onDelete={handleDeleteMember} />
         </Tab>
         <Tab id="role-permissions-tab" eventKey={ROLE_DETAIL_TABS.PERMISSIONS} title={intl.formatMessage(messages['authz.custom.role.tabs.permissions'])} className="page-band py-3">
-
+          <RolesPermissionsContent />
         </Tab>
         {!isCustom && (
           <Tab id="role-comparison-tab" eventKey={ROLE_DETAIL_TABS.COMPARISON} title={intl.formatMessage(messages['authz.custom.role.tabs.comparison'])} className="page-band py-3">
-
+            <RolesPermissions scopeType={scopeTypes[0]} />
           </Tab>
         )}
       </Tabs>
