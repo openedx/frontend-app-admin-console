@@ -76,6 +76,11 @@ const messages = defineMessages({
     defaultMessage: 'Last updated: {date}',
     description: 'Date and time a custom role was last updated, shown next to its resource type',
   },
+  'authz.custom.role.members.changes.warning': {
+    id: 'authz.custom.role.members.changes.warning',
+    defaultMessage: 'This role is assigned to {count, plural, one {{formattedCount} team member} other {{formattedCount} team members}}. Any permission changes will apply to them immediately.',
+    description: 'Warning on a custom role that permission changes reach its members right away. formattedCount is count padded to two digits, e.g. 05.',
+  },
   'authz.custom.role.members.table.empty': {
     id: 'authz.custom.role.members.table.empty',
     defaultMessage: 'No users assigned to this role',

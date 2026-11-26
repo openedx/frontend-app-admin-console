@@ -5,7 +5,7 @@ import { useIntl } from '@openedx/frontend-base';
 import {
   Alert, Icon, IconButton, Stack, Tab, Tabs, Dropdown,
 } from '@openedx/paragon';
-import { MoreVert, PersonAdd } from '@openedx/paragon/icons';
+import { MoreVert, PersonAdd, Warning } from '@openedx/paragon/icons';
 import LoadingPage from '@src/components/LoadingPage';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
 import ResourceTypeTags from '@src/authz-module/components/ResourceTypeTags';
@@ -92,7 +92,9 @@ const RoleDetailPage = () => {
     throw new Error(CustomErrors.NOT_FOUND);
   }
 
-  const { displayName, scopeTypes, updatedAt } = role;
+  const {
+    displayName, scopeTypes, updatedAt, userCount,
+  } = role;
 
   const isCustom = isCustomRole(role);
 
@@ -132,14 +134,22 @@ const RoleDetailPage = () => {
       ]}
     >
       {isCustom && (
-        <Stack direction="horizontal" gap={3} className="page-band pb-3 bg-light-100 flex-wrap">
-          <ResourceTypeTags scopeTypes={scopeTypes} />
-          <span className="small text-gray-700">
-            {intl.formatMessage(messages['authz.custom.role.last.updated'], {
-              date: <LastUpdatedTime updatedAt={updatedAt} />,
+        <div className="page-band pb-3 bg-light-100">
+          <Stack direction="horizontal" gap={3} className="flex-wrap">
+            <ResourceTypeTags scopeTypes={scopeTypes} />
+            <span className="small text-gray-700">
+              {intl.formatMessage(messages['authz.custom.role.last.updated'], {
+                date: <LastUpdatedTime updatedAt={updatedAt} />,
+              })}
+            </span>
+          </Stack>
+          <Alert variant="warning" icon={Warning} className="mt-3 mb-0">
+            {intl.formatMessage(messages['authz.custom.role.members.changes.warning'], {
+              count: userCount,
+              formattedCount: intl.formatNumber(userCount, { minimumIntegerDigits: 2 }),
             })}
-          </span>
-        </Stack>
+          </Alert>
+        </div>
       )}
       <Tabs
         variant="tabs"

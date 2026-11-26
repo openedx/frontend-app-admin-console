@@ -223,6 +223,26 @@ describe('RoleDetailPage', () => {
     expect(document.querySelector('time')).not.toBeInTheDocument();
   });
 
+  it('warns that permission changes apply to the members of a custom role', () => {
+    mockCatalogWithRoles({ ...mockRole, userCount: 5 });
+    renderRoleDetail();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'This role is assigned to 05 team members. Any permission changes will apply to them immediately.',
+    );
+  });
+
+  it('uses the singular for a custom role with one member', () => {
+    mockCatalogWithRoles({ ...mockRole, userCount: 1 });
+    renderRoleDetail();
+    expect(screen.getByRole('alert')).toHaveTextContent('This role is assigned to 01 team member.');
+  });
+
+  it('does not show the members warning on a built-in role', () => {
+    mockCatalogWithRoles({ ...mockRole, definitionKind: 'static' });
+    renderRoleDetail();
+    expect(screen.queryByText(/Any permission changes will apply/)).not.toBeInTheDocument();
+  });
+
   it('does not render DuplicateRoleButton for custom roles', () => {
     renderRoleDetail('custom-role-123');
     expect(screen.queryByRole('button', { name: /Duplicate/ })).not.toBeInTheDocument();
