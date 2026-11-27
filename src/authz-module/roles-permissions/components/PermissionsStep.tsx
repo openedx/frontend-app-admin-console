@@ -84,6 +84,7 @@ const PermissionsStep = ({ categories, permissions, selection }: PermissionsStep
             onSearchChange={setSearch}
             areAllExpanded={areAllExpanded}
             onToggleExpandAll={handleToggleExpandAll}
+            isExpandAllDisabled={isNarrowed}
           />
           <div role="status" className="sr-only">
             {formatMessage(messages['authz.roles.create.wizard.permissions.results.status'], { count: visibleCount })}
@@ -103,11 +104,12 @@ const PermissionsStep = ({ categories, permissions, selection }: PermissionsStep
                 totalCount={tally.total}
                 isOpen={isOpen(group.id)}
                 onToggleOpen={() => handleToggleOpen(group.id)}
+                isToggleDisabled={isNarrowed}
                 isPermissionOn={(permissionId) => selection.effective.has(permissionId)}
                 getRequiredByNames={(permissionId) => selection.requiredBy[permissionId]
                   ?.map((id) => permissionNames.get(id) ?? id)}
                 onTogglePermission={selection.toggle}
-                onSetAll={(isOn) => selection.setCategory(group.permissions.map(({ id }) => id), isOn)}
+                onSetAll={(isOn) => selection.setCategory(group.visiblePermissions.map(({ id }) => id), isOn)}
               />
             );
           })}

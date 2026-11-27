@@ -15,6 +15,8 @@ interface PermissionCategorySectionProps {
   totalCount: number;
   isOpen: boolean;
   onToggleOpen: () => void;
+  /** The category is held open (by a search), so its header cannot close it. */
+  isToggleDisabled?: boolean;
   isPermissionOn: (permissionId: string) => boolean;
   getRequiredByNames: (permissionId: string) => string[] | undefined;
   onTogglePermission: (permissionId: string) => void;
@@ -27,11 +29,12 @@ interface PermissionCategorySectionProps {
  */
 const PermissionCategorySection = ({
   title, icon, visiblePermissions, selectedCount, totalCount, isOpen, onToggleOpen,
-  isPermissionOn, getRequiredByNames, onTogglePermission, onSetAll,
+  isToggleDisabled = false, isPermissionOn, getRequiredByNames, onTogglePermission, onSetAll,
 }: PermissionCategorySectionProps) => {
   const { formatMessage } = useIntl();
   const bodyId = useId();
-  const isAllOn = selectedCount === totalCount;
+  // Select all acts on the rows shown, so a search never changes permissions it hides.
+  const isAllOn = visiblePermissions.length > 0 && visiblePermissions.every(({ id }) => isPermissionOn(id));
 
   return (
     <Collapsible.Advanced
@@ -39,15 +42,16 @@ const PermissionCategorySection = ({
       className="permission-category bg-white border border-primary-300 rounded overflow-hidden mb-3"
       aria-label={title}
       open={isOpen}
-      onToggle={onToggleOpen}
+      onToggle={isToggleDisabled ? undefined : onToggleOpen}
     >
       <div className="d-flex align-items-center bg-primary-100 px-3 py-2">
         <Collapsible.Trigger
           className="permission-category__toggle d-flex align-items-center flex-grow-1 text-primary-400"
           aria-controls={bodyId}
+          aria-disabled={isToggleDisabled}
           // The trigger only handles Enter; a button also toggles on Space.
           onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === ' ') {
+            if (e.key === ' ' && !isToggleDisabled) {
               e.preventDefault();
               onToggleOpen();
             }
