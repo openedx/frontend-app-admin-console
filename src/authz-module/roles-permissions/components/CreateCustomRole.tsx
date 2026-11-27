@@ -43,7 +43,8 @@ interface CreateError {
   canRetry: boolean;
   // A taken name is fixed in the name field, which takes focus in place of the alert.
   isNameTaken?: boolean;
-}// Why Next does nothing, so a screen reader can be told; `null` when there is nothing to fix.
+}
+
 const NEXT_BLOCKERS = {
   NAME: 'name',
   CATALOG_LOADING: 'catalogLoading',

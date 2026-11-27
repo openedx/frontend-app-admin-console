@@ -324,7 +324,7 @@ describe('CreateCustomRole', () => {
     });
 
     it.each([
-      [400, 'This role can not be created as it is. Check its name and permissions, then try again.'],
+      [400, 'This role cannot be created as it is. Check its name and permissions, then try again.'],
       [403, 'You do not have permission to create roles.'],
     ])('explains a %i on the permissions step, in our own words, and keeps the choices', async (status, message) => {
       mockPost(jest.fn().mockRejectedValue(buildHttpError(status)));
@@ -393,7 +393,7 @@ describe('CreateCustomRole', () => {
         expect(getNameField()).toHaveFocus();
         expect(screen.getByText('A role with this name already exists.')).toBeInTheDocument();
         expect(screen.getByRole('alert')).toHaveTextContent(
-          'A role named "Course designer" already exists. Please choose different name.',
+          'A role named "Course designer" already exists. Please choose a different name.',
         );
         expect(screen.getByTestId('step-error')).toBeInTheDocument();
       });
