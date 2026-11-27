@@ -206,6 +206,16 @@ const messages = defineMessages({
     defaultMessage: 'Select a role to clone to continue.',
     description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: no role to clone is selected',
   },
+  'authz.roles.create.wizard.button.next.hint.catalogLoading': {
+    id: 'authz.roles.create.wizard.button.next.hint.catalogLoading',
+    defaultMessage: 'Roles are still loading. Wait to continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the roles are still loading',
+  },
+  'authz.roles.create.wizard.button.next.hint.catalogError': {
+    id: 'authz.roles.create.wizard.button.next.hint.catalogError',
+    defaultMessage: 'Roles could not be loaded, so you cannot continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the roles failed to load or none are available',
+  },
   'authz.roles.create.wizard.name.error': {
     id: 'authz.roles.create.wizard.name.error',
     defaultMessage: 'Enter a role name.',

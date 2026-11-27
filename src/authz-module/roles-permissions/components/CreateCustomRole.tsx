@@ -19,6 +19,8 @@ type StepKey = typeof STEPS[keyof typeof STEPS];
 // Why Next does nothing, so a screen reader can be told; `null` when there is nothing to fix.
 const NEXT_BLOCKERS = {
   NAME: 'name',
+  CATALOG_LOADING: 'catalogLoading',
+  CATALOG_ERROR: 'catalogError',
   SOURCE_ROLE: 'sourceRole',
 } as const;
 
@@ -66,6 +68,11 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
   let nextBlocker: typeof NEXT_BLOCKERS[keyof typeof NEXT_BLOCKERS] | null = null;
   if (!draft.name.trim()) {
     nextBlocker = NEXT_BLOCKERS.NAME;
+  } else if (isLoading) {
+    nextBlocker = NEXT_BLOCKERS.CATALOG_LOADING;
+  } else if (isError || !scopeTypes.length) {
+    // A catalog that loaded with no resource types leaves nothing to pick, so it reads as a failure too.
+    nextBlocker = NEXT_BLOCKERS.CATALOG_ERROR;
   } else if (!canProceed && draft.startFrom === START_FROM.CLONE) {
     nextBlocker = NEXT_BLOCKERS.SOURCE_ROLE;
   }
