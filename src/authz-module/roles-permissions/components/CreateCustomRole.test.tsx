@@ -3,11 +3,18 @@ import userEvent from '@testing-library/user-event';
 import { renderWithAllProviders } from '@src/testUtils';
 import { authzCatalog, buildCatalogRole, mockAuthzCatalog } from '@src/authz-module/catalog/testUtils';
 import { SCOPE_TYPES } from '@src/authz-module/constants';
+import { useValidateRoleName } from '../../data/hooks';
 import CreateCustomRole from './CreateCustomRole';
 
 jest.mock('@src/authz-module/catalog/data/hooks', () => ({
   useAuthzCatalog: jest.fn(),
 }));
+
+jest.mock('../../data/hooks', () => ({
+  useValidateRoleName: jest.fn(),
+}));
+
+const mockValidateRoleName = jest.fn();
 
 const catalogWithCustomRole = {
   ...authzCatalog,
@@ -38,6 +45,8 @@ describe('CreateCustomRole', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthzCatalog({ catalog: catalogWithCustomRole });
+    mockValidateRoleName.mockResolvedValue({ available: true, reason: null });
+    (useValidateRoleName as jest.Mock).mockReturnValue({ mutateAsync: mockValidateRoleName, isPending: false });
   });
 
   it('opens the wizard on the name and resource step', async () => {
@@ -188,6 +197,62 @@ describe('CreateCustomRole', () => {
     expect(screen.getByText('The roles could not be loaded. Please try again later.')).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'Resource type' })).not.toBeInTheDocument();
     expectNextBlocked();
+  });
+
+  describe('role name check', () => {
+    const typeNameAndNext = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Course designer');
+      await user.click(getNextButton());
+    };
+
+    it('checks the name and moves on when it is available', async () => {
+      const user = await openWizard();
+      await typeNameAndNext(user);
+      expect(mockValidateRoleName).toHaveBeenCalledWith('Course designer');
+      expect(await screen.findByRole('group', { name: 'Step 2 of 2: Permissions' })).toBeInTheDocument();
+    });
+
+    it.each([
+      ['taken', 'A role with this name already exists. Enter a different role name.'],
+      ['invalid', 'This role name is not valid. Enter a different role name.'],
+    ])('stays on the first step with an alert when the name is %s', async (reason, text) => {
+      mockValidateRoleName.mockResolvedValue({ available: false, reason });
+      const user = await openWizard();
+      await typeNameAndNext(user);
+      expect(await screen.findByRole('alert')).toHaveTextContent(text);
+      expect(screen.getByRole('textbox', { name: 'Role name' })).toHaveClass('is-invalid');
+      expectNextBlocked();
+      expect(getNextButton()).toHaveAccessibleDescription('Change the role name to continue.');
+      await user.click(getNextButton());
+      expect(mockValidateRoleName).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('group', { name: 'Step 2 of 2: Permissions' })).not.toBeInTheDocument();
+    });
+
+    it('stays on the first step with an alert when the check fails', async () => {
+      mockValidateRoleName.mockRejectedValue(new Error('network'));
+      const user = await openWizard();
+      await typeNameAndNext(user);
+      expect(await screen.findByRole('alert')).toHaveTextContent('The role name could not be checked. Please try again.');
+      expect(screen.getByRole('textbox', { name: 'Role name' })).toBeInTheDocument();
+      // A failed check says nothing about the name, so Next stays available to retry.
+      expectNextAllowed();
+    });
+
+    it('clears the alert when the name changes', async () => {
+      mockValidateRoleName.mockResolvedValue({ available: false, reason: 'taken' });
+      const user = await openWizard();
+      await typeNameAndNext(user);
+      expect(await screen.findByRole('alert')).toBeInTheDocument();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), '2');
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expectNextAllowed();
+    });
+
+    it('does not check an empty name', async () => {
+      const user = await openWizard();
+      await user.click(getNextButton());
+      expect(mockValidateRoleName).not.toHaveBeenCalled();
+    });
   });
 
   describe('accessibility', () => {

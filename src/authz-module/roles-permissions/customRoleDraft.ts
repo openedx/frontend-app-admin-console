@@ -57,3 +57,6 @@ export const getCustomRoleSeed = (
   if (!sourceRole || !scopeType) return null;
   return { scopeType, permissions: [...sourceRole.permissions] };
 };
+
+/** Why the role name check kept the wizard on its first step. */
+export type NameCheckError = 'taken' | 'invalid' | 'failed';

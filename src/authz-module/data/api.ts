@@ -85,6 +85,14 @@ export interface ValidateUsersResponse {
   };
 }
 
+export interface ValidateRoleNameResponse {
+  displayName: string;
+  available: boolean;
+  // `taken` when another role already uses the name, `invalid` when it breaks the name rules.
+  reason: 'taken' | 'invalid' | null;
+  message: string | null;
+}
+
 export interface GetScopesParams {
   scopeType?: string;
   search?: string;
@@ -123,6 +131,18 @@ export const validateUsers = async (
   const res = await getAuthenticatedHttpClient().post(
     getApiUrl('/api/authz/v1/users/validate/'),
     data,
+  );
+  return camelCaseObject(res.data);
+};
+
+/**
+ * Checks whether a custom role name is free. It is not a reservation: creating the role can
+ * still conflict if someone else takes the name first.
+ */
+export const validateRoleName = async (displayName: string): Promise<ValidateRoleNameResponse> => {
+  const res = await getAuthenticatedHttpClient().post(
+    getApiUrl('/api/authz/v1/roles/validate-name/'),
+    { display_name: displayName },
   );
   return camelCaseObject(res.data);
 };

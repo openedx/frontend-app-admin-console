@@ -5,7 +5,8 @@ import { Add } from '@openedx/paragon/icons';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import type { ScopeCatalog } from '@src/authz-module/catalog';
 import { EMPTY_CUSTOM_ROLE_DRAFT, START_FROM, getCustomRoleSeed } from '../customRoleDraft';
-import type { CustomRoleDraft } from '../customRoleDraft';
+import type { CustomRoleDraft, NameCheckError } from '../customRoleDraft';
+import { useValidateRoleName } from '../../data/hooks';
 import messages from '../messages';
 import NameAndResourceStep from './NameAndResourceStep';
 
@@ -19,6 +20,7 @@ type StepKey = typeof STEPS[keyof typeof STEPS];
 // Why Next does nothing, so a screen reader can be told; `null` when there is nothing to fix.
 const NEXT_BLOCKERS = {
   NAME: 'name',
+  NAME_REJECTED: 'nameRejected',
   CATALOG_LOADING: 'catalogLoading',
   CATALOG_ERROR: 'catalogError',
   SOURCE_ROLE: 'sourceRole',
@@ -48,6 +50,8 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
   const [hasTriedNext, setHasTriedNext] = useState(false);
   // Counts the presses of a blocked Next, so the step can move focus to the first missing answer.
   const [focusRequest, setFocusRequest] = useState(0);
+  const [nameCheckError, setNameCheckError] = useState<NameCheckError | null>(null);
+  const { mutateAsync: validateRoleName, isPending: isCheckingName } = useValidateRoleName();
   const nextHintId = `${useId()}-next-hint`;
   /** Focus target of the active step, so focus doesn't stay on the footer of the step that left. */
   const stepContentRef = useRef<HTMLDivElement>(null);
@@ -65,9 +69,13 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
   // The resource type field shows the first resource type until another is picked, so it counts as picked.
   const effectiveDraft = draft.scopeType ? draft : { ...draft, scopeType: scopeTypes[0] ?? '' };
   const canProceed = getCustomRoleSeed(effectiveDraft, getRole) !== null;
+  // A rejected name stays rejected until it changes; a failed check can be retried as is.
+  const isNameRejected = nameCheckError === 'taken' || nameCheckError === 'invalid';
   let nextBlocker: typeof NEXT_BLOCKERS[keyof typeof NEXT_BLOCKERS] | null = null;
   if (!draft.name.trim()) {
     nextBlocker = NEXT_BLOCKERS.NAME;
+  } else if (isNameRejected) {
+    nextBlocker = NEXT_BLOCKERS.NAME_REJECTED;
   } else if (isLoading) {
     nextBlocker = NEXT_BLOCKERS.CATALOG_LOADING;
   } else if (isError || !scopeTypes.length) {
@@ -76,6 +84,8 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
   } else if (!canProceed && draft.startFrom === START_FROM.CLONE) {
     nextBlocker = NEXT_BLOCKERS.SOURCE_ROLE;
   }
+
+  const isNextDisabled = !canProceed || isCheckingName || isNameRejected;
 
   const stepTitles = {
     [STEPS.NAME_AND_RESOURCE]: formatMessage(messages['authz.roles.create.wizard.step.nameAndResource']),
@@ -88,14 +98,34 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
     title: stepTitles[step],
   });
 
-  const handleDraftChange = (changes: Partial<CustomRoleDraft>) => setDraft((prev) => ({ ...prev, ...changes }));
+  const handleDraftChange = (changes: Partial<CustomRoleDraft>) => {
+    // A new name makes the previous check result stale.
+    if (changes.name !== undefined) setNameCheckError(null);
+    setDraft((prev) => ({ ...prev, ...changes }));
+  };
 
-  const handleNext = () => {
+  /**
+   * The name is checked on Next, not while typing, because the check is not a reservation:
+   * the final create can still conflict, and a check per keystroke would only add requests.
+   */
+  const handleNext = async () => {
+    if (isCheckingName || isNameRejected) return;
     if (!canProceed) {
       setHasTriedNext(true);
       setFocusRequest((count) => count + 1);
       return;
     }
+    try {
+      const result = await validateRoleName(effectiveDraft.name);
+      if (!result.available) {
+        setNameCheckError(result.reason === 'invalid' ? 'invalid' : 'taken');
+        return;
+      }
+    } catch {
+      setNameCheckError('failed');
+      return;
+    }
+    setNameCheckError(null);
     setDraft(effectiveDraft);
     setActiveStep(STEPS.PERMISSIONS);
   };
@@ -120,8 +150,8 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
               {/* aria-disabled, not disabled, so Next stays focusable and can say what is missing. */}
               <Button
                 onClick={handleNext}
-                className={canProceed ? undefined : 'disabled'}
-                aria-disabled={!canProceed}
+                className={isNextDisabled ? 'disabled' : undefined}
+                aria-disabled={isNextDisabled}
                 aria-describedby={nextBlocker ? nextHintId : undefined}
               >
                 {formatMessage(messages['authz.roles.create.wizard.button.next'])}
@@ -161,6 +191,7 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
               isError={isError}
               showErrors={hasTriedNext}
               focusRequest={focusRequest}
+              nameCheckError={nameCheckError}
             />
           </div>
         </Stepper.Step>

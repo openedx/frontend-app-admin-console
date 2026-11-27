@@ -9,6 +9,7 @@ import { RESOURCE_TYPE_DISPLAY } from '../constants';
 import { MAX_ROLE_NAME_LENGTH, START_FROM } from '../customRoleDraft';
 import type { CustomRoleDraft, StartFrom } from '../customRoleDraft';
 import messages from '../messages';
+import type { NameCheckError } from '../customRoleDraft';
 
 interface NameAndResourceStepProps {
   draft: CustomRoleDraft;
@@ -21,6 +22,8 @@ interface NameAndResourceStepProps {
   showErrors?: boolean;
   // Grows each time a blocked Next is pressed, to move focus to the first missing answer.
   focusRequest?: number;
+  // Why the name check kept the wizard on this step, shown as an alert; `null` when there is nothing to fix.
+  nameCheckError?: NameCheckError | null;
 }
 
 const START_FROM_OPTIONS = [START_FROM.SCRATCH, START_FROM.CLONE];
@@ -35,6 +38,7 @@ const ARROW_KEY_OFFSETS: Record<string, number> = {
  */
 const NameAndResourceStep = ({
   draft, onChange, scopeCatalogs, isLoading = false, isError = false, showErrors = false, focusRequest = 0,
+  nameCheckError = null,
 }: NameAndResourceStepProps) => {
   const { formatMessage } = useIntl();
   const idPrefix = useId();
@@ -97,13 +101,18 @@ const NameAndResourceStep = ({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange({ name: e.target.value })}
           onBlur={() => setIsNameTouched(true)}
           placeholder={formatMessage(messages['authz.roles.create.wizard.name.placeholder'])}
-          isInvalid={showNameError}
+          isInvalid={showNameError || nameCheckError !== null}
           maxLength={MAX_ROLE_NAME_LENGTH}
           required
         />
         {showNameError && (
           <Form.Control.Feedback type="invalid" hasIcon={false}>
             {formatMessage(messages['authz.roles.create.wizard.name.error'])}
+          </Form.Control.Feedback>
+        )}
+        {!showNameError && nameCheckError && (
+          <Form.Control.Feedback type="invalid" hasIcon={false} role="alert">
+            {formatMessage(messages[`authz.roles.create.wizard.name.alert.${nameCheckError}`])}
           </Form.Control.Feedback>
         )}
         <Form.Control.Feedback type="default">

@@ -8,7 +8,7 @@ import {
   GetTeamMembersAssignmentsResponse, getOrgs, GetOrgsResponse,
   getScopes, GetScopesResponse, QuerySettings, revokeUserRoles,
   RevokeUserRolesRequest, getUserAssignedRoles, GetUserAssignmentsResponse,
-  validateUsers, ValidateUsersRequest, GetScopesParams,
+  validateUsers, ValidateUsersRequest, GetScopesParams, validateRoleName,
   getCourseAuthoringFlagStates, CourseAuthoringFlagStates,
 } from './api';
 
@@ -60,6 +60,17 @@ export const useValidateUsers = () => useMutation({
   mutationFn: async ({ data }: {
     data: ValidateUsersRequest;
   }) => validateUsers(data),
+});
+
+/**
+ * React Query hook to check whether a custom role name is available.
+ *
+ * @example
+ * const { mutateAsync: validateRoleName } = useValidateRoleName();
+ * const { available, reason } = await validateRoleName('Library Designer');
+ */
+export const useValidateRoleName = () => useMutation({
+  mutationFn: (displayName: string) => validateRoleName(displayName),
 });
 
 /**

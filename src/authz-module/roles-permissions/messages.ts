@@ -201,6 +201,11 @@ const messages = defineMessages({
     defaultMessage: 'Enter a role name to continue.',
     description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the role name is missing',
   },
+  'authz.roles.create.wizard.button.next.hint.nameRejected': {
+    id: 'authz.roles.create.wizard.button.next.hint.nameRejected',
+    defaultMessage: 'Change the role name to continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the role name was rejected',
+  },
   'authz.roles.create.wizard.button.next.hint.sourceRole': {
     id: 'authz.roles.create.wizard.button.next.hint.sourceRole',
     defaultMessage: 'Select a role to clone to continue.',
@@ -220,6 +225,21 @@ const messages = defineMessages({
     id: 'authz.roles.create.wizard.name.error',
     defaultMessage: 'Enter a role name.',
     description: 'Error shown under the custom role name field when it is empty',
+  },
+  'authz.roles.create.wizard.name.alert.taken': {
+    id: 'authz.roles.create.wizard.name.alert.taken',
+    defaultMessage: 'A role with this name already exists. Enter a different role name.',
+    description: 'Alert shown on the first step of the create custom role wizard when the role name is already used',
+  },
+  'authz.roles.create.wizard.name.alert.invalid': {
+    id: 'authz.roles.create.wizard.name.alert.invalid',
+    defaultMessage: 'This role name is not valid. Enter a different role name.',
+    description: 'Alert shown on the first step of the create custom role wizard when the role name breaks the naming rules',
+  },
+  'authz.roles.create.wizard.name.alert.failed': {
+    id: 'authz.roles.create.wizard.name.alert.failed',
+    defaultMessage: 'The role name could not be checked. Please try again.',
+    description: 'Alert shown on the first step of the create custom role wizard when the role name check request fails',
   },
   'authz.roles.create.wizard.sourceRole.error': {
     id: 'authz.roles.create.wizard.sourceRole.error',
