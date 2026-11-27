@@ -50,6 +50,14 @@ describe('CreateCustomRole', () => {
     expect(screen.getByText('Shown when administrators assign access.')).toBeInTheDocument();
   });
 
+  it('limits the role name to the 255 characters the backend accepts', async () => {
+    const user = await openWizard();
+    const name = screen.getByRole('textbox', { name: 'Role name' });
+    expect(name).toHaveAttribute('maxLength', '255');
+    await user.click(name);
+    await user.paste('a'.repeat(300));
+    expect(name).toHaveValue('a'.repeat(255));
+  });
   it('starts from scratch on the first resource type', async () => {
     await openWizard();
 
@@ -242,6 +250,18 @@ describe('CreateCustomRole', () => {
       expect(picker).toHaveAccessibleDescription('Select a role to clone.');
     });
 
+    it.each([
+      ['loading', { isLoading: true }, 'Roles are still loading. Wait to continue.'],
+      ['failed to load', { isError: true }, 'Roles could not be loaded, so you cannot continue.'],
+    ])('tells a screen reader why Next does nothing while the roles %s', async (_state, catalogState, hint) => {
+      const user = userEvent.setup();
+      mockAuthzCatalog(catalogState);
+      renderWithAllProviders(<CreateCustomRole />);
+      await user.click(screen.getByRole('button', { name: 'Create Custom Role' }));
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Course designer');
+      expectNextBlocked();
+      expect(getNextButton()).toHaveAccessibleDescription(hint);
+    });
     it('moves between the start from cards with the arrow keys, as a radio group', async () => {
       const user = await openWizard();
       const scratch = screen.getByRole('radio', { name: /start from scratch/i });

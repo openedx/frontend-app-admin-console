@@ -1,5 +1,8 @@
 import type { Role } from '@src/authz-module/catalog';
 
+/** Backend `display_name` is `max_length=255`; a longer name would be rejected on save. */
+export const MAX_ROLE_NAME_LENGTH = 255;
+
 export const START_FROM = {
   SCRATCH: 'scratch',
   CLONE: 'clone',

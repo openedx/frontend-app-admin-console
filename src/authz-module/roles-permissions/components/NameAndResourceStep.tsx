@@ -6,7 +6,7 @@ import {
 import { isCustomRole } from '@src/authz-module/catalog';
 import type { Role, ScopeCatalog } from '@src/authz-module/catalog';
 import { RESOURCE_TYPE_DISPLAY } from '../constants';
-import { START_FROM } from '../customRoleDraft';
+import { MAX_ROLE_NAME_LENGTH, START_FROM } from '../customRoleDraft';
 import type { CustomRoleDraft, StartFrom } from '../customRoleDraft';
 import messages from '../messages';
 
@@ -98,6 +98,7 @@ const NameAndResourceStep = ({
           onBlur={() => setIsNameTouched(true)}
           placeholder={formatMessage(messages['authz.roles.create.wizard.name.placeholder'])}
           isInvalid={showNameError}
+          maxLength={MAX_ROLE_NAME_LENGTH}
           required
         />
         {showNameError && (
