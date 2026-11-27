@@ -23,7 +23,7 @@ interface NameAndResourceStepProps {
   // Grows each time a blocked Next is pressed, to move focus to the first missing answer.
   focusRequest?: number;
   // Why the name check kept the wizard on this step, shown as an alert; `null` when there is nothing to fix.
-  nameCheckError?: NameCheckError | null;
+  nameCheckError: NameCheckError | null;
 }
 
 const START_FROM_OPTIONS = [START_FROM.SCRATCH, START_FROM.CLONE];
@@ -37,8 +37,7 @@ const ARROW_KEY_OFFSETS: Record<string, number> = {
  * so the resource type field is swapped for the role picker instead of shown beside it.
  */
 const NameAndResourceStep = ({
-  draft, onChange, scopeCatalogs, isLoading = false, isError = false, showErrors = false, focusRequest = 0,
-  nameCheckError = null,
+  draft, onChange, scopeCatalogs, isLoading = false, isError = false, showErrors = false, focusRequest = 0, nameCheckError,
 }: NameAndResourceStepProps) => {
   const { formatMessage } = useIntl();
   const idPrefix = useId();
