@@ -118,6 +118,34 @@ describe('PermissionsStep', () => {
       expect(screen.getByRole('status')).toHaveTextContent('1 permission shown');
     });
 
+    it('disables Collapse all and keeps the categories open while searching', async () => {
+      const user = renderStep();
+      await user.type(screen.getByPlaceholderText('Search'), 'outline');
+      expect(screen.getByRole('button', { name: 'Collapse all' })).toBeDisabled();
+      const header = screen.getByRole('button', { name: /Course/, expanded: true });
+      expect(header).toHaveAttribute('aria-disabled', 'true');
+      await user.click(header);
+      expect(getSwitch('Edit course')).toBeInTheDocument();
+      await user.clear(screen.getByPlaceholderText('Search'));
+      expect(screen.getByRole('button', { name: 'Expand all' })).toBeEnabled();
+      await waitFor(() => expect(screen.queryByRole('switch')).not.toBeInTheDocument());
+    });
+    it('selects and deselects only the permissions the search shows', async () => {
+      const user = renderStep();
+      await user.type(screen.getByPlaceholderText('Search'), 'add a');
+      await user.click(screen.getByRole('button', { name: 'Select all Course permissions' }));
+      expect(getSwitch('Create course')).toBeChecked();
+      expect(screen.getByText('1 of 3 permissions selected')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Deselect all Course permissions' }));
+      expect(getSwitch('Create course')).not.toBeChecked();
+      await user.click(screen.getByRole('button', { name: 'Select all Course permissions' }));
+      await user.clear(screen.getByPlaceholderText('Search'));
+      await user.click(screen.getByRole('button', { name: 'Course' }));
+      expect(getSwitch('Create course')).toBeChecked();
+      expect(getSwitch('View course')).not.toBeChecked();
+      expect(getSwitch('Edit course')).not.toBeChecked();
+      expect(screen.getByRole('button', { name: 'Select all Course permissions' })).toBeInTheDocument();
+    });
     it('keeps the summary on every category whatever is searched', async () => {
       const user = renderStep();
       await user.type(screen.getByPlaceholderText('Search'), 'outline');
