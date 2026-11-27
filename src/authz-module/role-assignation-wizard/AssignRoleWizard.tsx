@@ -268,12 +268,12 @@ const AssignRoleWizard = ({
         beforeBodyNode={<Stepper.Header className="border-bottom" />}
         // Between body and footer: beside the button that failed, never scrolled away.
         afterBodyNode={requestError && (
-          <div className="mb-5 bg-light-200">
+          <div className="after-body-stepper__alert-anchor">
             <Alert
               variant="danger"
               ref={requestErrorRef}
               tabIndex={-1}
-              className="mx-4 mb-0"
+              className="stepper__alert mx-4 mb-4 shadow"
               dismissible
               onClose={() => setRequestError(null)}
               actions={[

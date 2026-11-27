@@ -1,6 +1,8 @@
 import { authzCatalog, buildCatalogRole } from '@src/authz-module/catalog/testUtils';
 import { SCOPE_TYPES } from '@src/authz-module/constants';
-import { EMPTY_CUSTOM_ROLE_DRAFT, START_FROM, getCustomRoleSeed } from './customRoleDraft';
+import {
+  EMPTY_CUSTOM_ROLE_DRAFT, START_FROM, buildCreateCustomRoleRequest, getCustomRoleSeed, isSameRoleName,
+} from './customRoleDraft';
 
 const roles = [
   ...authzCatalog.roles,
@@ -45,5 +47,41 @@ describe('getCustomRoleSeed', () => {
       name: 'Designer', startFrom: START_FROM.CLONE, scopeType: '', sourceRole: 'course_admin',
     }, getRole);
     expect(seed?.permissions).not.toBe(getRole('course_admin')?.permissions);
+  });
+});
+
+describe('buildCreateCustomRoleRequest', () => {
+  const coursePermissions = authzCatalog.permissions.filter(({ scopeTypes }) => scopeTypes.includes(SCOPE_TYPES.COURSE));
+  const seed = { scopeType: SCOPE_TYPES.COURSE, permissions: [] };
+
+  it('sends the trimmed name and the resource type of the seed', () => {
+    const draft = { ...EMPTY_CUSTOM_ROLE_DRAFT, name: '  Course designer  ', scopeType: SCOPE_TYPES.LIBRARY };
+    expect(buildCreateCustomRoleRequest(draft, seed, new Set(['courses.view_course']), coursePermissions)).toEqual({
+      displayName: 'Course designer',
+      scopeType: SCOPE_TYPES.COURSE,
+      permissions: ['courses.view_course'],
+    });
+  });
+
+  it('sends the granted permissions of the resource type in catalog order, and nothing else', () => {
+    const effective = new Set(['courses.view_course', 'content_libraries.view_library', 'courses.edit_course_content']);
+    const request = buildCreateCustomRoleRequest(
+      { ...EMPTY_CUSTOM_ROLE_DRAFT, name: 'Designer' },
+      seed,
+      effective,
+      coursePermissions,
+    );
+    expect(request.permissions).toEqual(['courses.edit_course_content', 'courses.view_course']);
+  });
+});
+
+describe('isSameRoleName', () => {
+  it('ignores case and surrounding spaces, as the server does', () => {
+    expect(isSameRoleName('  Course Designer ', 'course designer')).toBe(true);
+  });
+
+  it('tells apart names that differ in their characters, inner spaces included', () => {
+    expect(isSameRoleName('Course designer', 'Course designers')).toBe(false);
+    expect(isSameRoleName('Course designer', 'Course  designer')).toBe(false);
   });
 });

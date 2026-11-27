@@ -15,12 +15,14 @@ interface NameAndResourceStepProps {
   onChange: (changes: Partial<CustomRoleDraft>) => void;
   // The catalog of each resource type the user can view, in catalog order.
   scopeCatalogs: ScopeCatalog[];
-  isLoading?: boolean;
-  isError?: boolean;
+  isLoading: boolean;
+  isError: boolean;
   // Shows the missing answers' errors, after Next was pressed without them.
-  showErrors?: boolean;
+  showErrors: boolean;
+  // The server rejected the name as taken, and it hasn't been changed since.
+  isNameTaken: boolean;
   // Grows each time a blocked Next is pressed, to move focus to the first missing answer.
-  focusRequest?: number;
+  focusRequest: number;
 }
 
 const START_FROM_OPTIONS = [START_FROM.SCRATCH, START_FROM.CLONE];
@@ -34,7 +36,7 @@ const ARROW_KEY_OFFSETS: Record<string, number> = {
  * so the resource type field is swapped for the role picker instead of shown beside it.
  */
 const NameAndResourceStep = ({
-  draft, onChange, scopeCatalogs, isLoading = false, isError = false, showErrors = false, focusRequest = 0,
+  draft, onChange, scopeCatalogs, isLoading, isError, showErrors, isNameTaken, focusRequest,
 }: NameAndResourceStepProps) => {
   const { formatMessage } = useIntl();
   const idPrefix = useId();
@@ -60,13 +62,14 @@ const NameAndResourceStep = ({
     .find(({ role }) => role === draft.sourceRole);
 
   const isNameMissing = !draft.name.trim();
-  const showNameError = isNameMissing && (isNameTouched || showErrors);
+  const showMissingNameError = isNameMissing && (isNameTouched || showErrors);
+  const showNameError = showMissingNameError || isNameTaken;
   const showSourceRoleError = showErrors && draft.startFrom === START_FROM.CLONE && !selectedSourceRole;
 
   // A blocked Next moves focus to the first answer it needs, where the error is read out.
   useEffect(() => {
     if (focusRequest === 0) return;
-    document.getElementById(isNameMissing ? nameInputId : sourceRoleToggleId)?.focus();
+    document.getElementById(isNameMissing || isNameTaken ? nameInputId : sourceRoleToggleId)?.focus();
     // Only a new press should move focus, not later edits of the answers.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusRequest]);
@@ -99,11 +102,15 @@ const NameAndResourceStep = ({
           placeholder={formatMessage(messages['authz.roles.create.wizard.name.placeholder'])}
           isInvalid={showNameError}
           maxLength={MAX_ROLE_NAME_LENGTH}
+          // `isInvalid` only styles the field; a taken name is valid to the browser, so it is said here.
+          aria-invalid={showNameError}
           required
         />
         {showNameError && (
           <Form.Control.Feedback type="invalid" hasIcon={false}>
-            {formatMessage(messages['authz.roles.create.wizard.name.error'])}
+            {formatMessage(messages[showMissingNameError
+              ? 'authz.roles.create.wizard.name.error'
+              : 'authz.roles.create.wizard.name.error.taken'])}
           </Form.Control.Feedback>
         )}
         <Form.Control.Feedback type="default">

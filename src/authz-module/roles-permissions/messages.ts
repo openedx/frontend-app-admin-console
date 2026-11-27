@@ -196,6 +196,31 @@ const messages = defineMessages({
     defaultMessage: 'Create',
     description: 'Button of the permissions step that creates the custom role',
   },
+  'authz.roles.create.wizard.button.submit.pending': {
+    id: 'authz.roles.create.wizard.button.submit.pending',
+    defaultMessage: 'Creating',
+    description: 'Label of the create button of the create custom role wizard while the role is being created',
+  },
+  'authz.roles.create.wizard.success': {
+    id: 'authz.roles.create.wizard.success',
+    defaultMessage: 'The {name} role was created.',
+    description: 'Toast shown once the create custom role wizard has created the role',
+  },
+  'authz.roles.create.wizard.error.nameTaken': {
+    id: 'authz.roles.create.wizard.error.nameTaken',
+    defaultMessage: 'A role named "{name}" already exists. Please choose a different name.',
+    description: 'Alert of the create custom role wizard when another role already uses the name',
+  },
+  'authz.roles.create.wizard.error.invalid': {
+    id: 'authz.roles.create.wizard.error.invalid',
+    defaultMessage: 'This role cannot be created as it is. Check its name and permissions, then try again.',
+    description: 'Alert of the create custom role wizard when the server rejects the role as invalid',
+  },
+  'authz.roles.create.wizard.error.forbidden': {
+    id: 'authz.roles.create.wizard.error.forbidden',
+    defaultMessage: 'You do not have permission to create roles.',
+    description: 'Alert of the create custom role wizard when the user is not allowed to create roles',
+  },
   'authz.roles.create.wizard.button.back': {
     id: 'authz.roles.create.wizard.button.back',
     defaultMessage: 'Back',
@@ -205,6 +230,11 @@ const messages = defineMessages({
     id: 'authz.roles.create.wizard.button.next.hint.name',
     defaultMessage: 'Enter a role name to continue.',
     description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the role name is missing',
+  },
+  'authz.roles.create.wizard.button.next.hint.nameTaken': {
+    id: 'authz.roles.create.wizard.button.next.hint.nameTaken',
+    defaultMessage: 'Another role already uses this name. Choose a different name to continue.',
+    description: 'Screen reader text that explains why the Next button of the create custom role wizard does nothing: the server rejected the name as taken',
   },
   'authz.roles.create.wizard.button.next.hint.sourceRole': {
     id: 'authz.roles.create.wizard.button.next.hint.sourceRole',
@@ -225,6 +255,11 @@ const messages = defineMessages({
     id: 'authz.roles.create.wizard.name.error',
     defaultMessage: 'Enter a role name.',
     description: 'Error shown under the custom role name field when it is empty',
+  },
+  'authz.roles.create.wizard.name.error.taken': {
+    id: 'authz.roles.create.wizard.name.error.taken',
+    defaultMessage: 'A role with this name already exists.',
+    description: 'Error shown under the custom role name field when another role already uses the name',
   },
   'authz.roles.create.wizard.sourceRole.error': {
     id: 'authz.roles.create.wizard.sourceRole.error',

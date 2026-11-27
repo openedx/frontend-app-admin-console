@@ -7,9 +7,8 @@ import AddRoleButton from '@src/authz-module/components/AddRoleButton';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { CustomErrors } from '@src/constants';
 import LoadingPage from '@src/components/LoadingPage';
-import { RolesPermissionsTable } from '@src/authz-module/roles-permissions';
+import { CreateCustomRole, RolesPermissionsTable } from '@src/authz-module/roles-permissions';
 import AuthZLayout from '@src/authz-module/components/AuthZLayout';
-import CreateCustomRole from '@src/authz-module/roles-permissions/components/CreateCustomRole';
 
 import messages from './messages';
 

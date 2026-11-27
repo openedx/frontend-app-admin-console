@@ -32,6 +32,30 @@ export interface RolesQueryParams {
   pageSize: number;
 }
 
+/** A custom role to create: its name, its one resource type and the permissions it grants. */
+export interface CreateCustomRoleRequest {
+  displayName: string;
+  scopeType: string;
+  permissions: string[];
+}
+
+/**
+ * Creates a custom role through the roles endpoint (openedx-authz ADR 0036) and returns it in the
+ * format of a roles list item, so it can join the catalog as is.
+ *
+ * The endpoint takes the resource type as a one-item list, which leaves room for roles that span
+ * several. A taken name rejects with status 409 and any other invalid role with 400; the caller
+ * reads the status with `getHttpErrorStatus`.
+ */
+export const createCustomRole = async (request: CreateCustomRoleRequest): Promise<Role> => {
+  const { data } = await getAuthenticatedHttpClient().post(getApiUrl('/api/authz/v1/roles/'), {
+    display_name: request.displayName,
+    scope_types: [request.scopeType],
+    permissions: request.permissions,
+  });
+  return camelCaseObject(data);
+};
+
 /**
  * Fetches one page of roles from the roles endpoint, the one request behind both the roles table
  * and the complete catalog. Search, sort and pagination run on the server, so `count`, `next`
