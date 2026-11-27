@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useIntl } from '@openedx/frontend-base';
+import { useMemo, useState } from 'react';
+import { getAuthenticatedUser, useIntl } from '@openedx/frontend-base';
 import { Tab, Tabs } from '@openedx/paragon';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { TeamMembersTable } from '@src/authz-module/team-members';
@@ -26,6 +26,10 @@ const AuthzHome = () => {
      to match URL encoding format in case the 'scope' parameter is provided with spaces instead of '+'
   */
   const presetScope = searchParams.get('scope')?.replace(/\s/g, '+') || undefined;
+
+  const showCreateCustomRole = useMemo(() => {
+    return getAuthenticatedUser()?.administrator ? activeTab === 'permissionsRoles' : false;
+  }, [activeTab]);
 
   const pageTitle = intl.formatMessage(messages['authz.manage.page.title']);
 
@@ -54,8 +58,8 @@ const AuthzHome = () => {
     <AuthZLayout
       pageTitle={pageTitle}
       actions={[
-        <AddRoleButton key="add-role-button" variant={activeTab === 'permissionsRoles' ? 'outline-primary' : 'primary'} />,
-        ...(activeTab === 'permissionsRoles' ? [<CreateCustomRole key="create-custom-role" />] : []),
+        <AddRoleButton key="add-role-button" variant={showCreateCustomRole ? 'outline-primary' : 'primary'} />,
+        ...(showCreateCustomRole ? [<CreateCustomRole key="create-custom-role" />] : []),
       ]}
     >
       <Tabs

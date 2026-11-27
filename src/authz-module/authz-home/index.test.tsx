@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { ToastManagerProvider } from '@src/components/ToastManager/ToastManagerContext';
 import { useViewTeamPermissions } from '@src/authz-module/hooks/useViewTeamPermissions';
 import { CustomErrors } from '@src/constants';
-import { usePermissions } from '@openedx/frontend-base';
+import { getAuthenticatedUser, usePermissions } from '@openedx/frontend-base';
 import { SCOPE_TYPES } from '@src/authz-module/constants';
 import baseMessages from '@src/authz-module/messages';
 import AuthzHome from './index';
@@ -33,6 +33,7 @@ jest.mock('@src/authz-module/hooks/useViewTeamPermissions', () => ({
 jest.mock('@openedx/frontend-base', () => ({
   ...jest.requireActual('@openedx/frontend-base'),
   // The manage-team answer: by default the user can manage no team.
+  getAuthenticatedUser: jest.fn(() => ({ administrator: true })),
   usePermissions: jest.fn(() => ({ 'course-v1': false, lib: false, isLoading: false })),
 }));
 
@@ -81,6 +82,7 @@ describe('AuthzHome', () => {
   beforeEach(() => {
     // Call history is asserted on below, so it must not carry over between cases.
     jest.clearAllMocks();
+    (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: true });
     mockAuthzCatalog();
     mockViewTeamPermissions({ isCourseViewAllowed: true, isLibraryViewAllowed: true, isLoading: false });
     (useTeamMembersAssignments as jest.Mock).mockReturnValue(emptyResponse);
@@ -202,5 +204,12 @@ describe('AuthzHome', () => {
 
     await user.click(screen.getByRole('tab', { name: messages['authz.tabs.team'].defaultMessage }));
     expect(createCustomRoleButton()).not.toBeInTheDocument();
+  });
+  it('hides the create custom role button from non-staff users', async () => {
+    const user = userEvent.setup();
+    (getAuthenticatedUser as jest.Mock).mockReturnValue({ administrator: false });
+    renderAuthzHome();
+    await user.click(screen.getByRole('tab', { name: messages['authz.tabs.permissionsRoles'].defaultMessage }));
+    expect(screen.queryByRole('button', { name: 'Create Custom Role' })).not.toBeInTheDocument();
   });
 });
