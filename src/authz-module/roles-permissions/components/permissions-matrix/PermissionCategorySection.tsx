@@ -16,7 +16,7 @@ interface PermissionCategorySectionProps {
   isOpen: boolean;
   onToggleOpen: () => void;
   /** The category is held open (by a search), so its header cannot close it. */
-  isToggleDisabled?: boolean;
+  isToggleDisabled: boolean;
   isPermissionOn: (permissionId: string) => boolean;
   getRequiredByNames: (permissionId: string) => string[] | undefined;
   onTogglePermission: (permissionId: string) => void;
@@ -29,7 +29,7 @@ interface PermissionCategorySectionProps {
  */
 const PermissionCategorySection = ({
   title, icon, visiblePermissions, selectedCount, totalCount, isOpen, onToggleOpen,
-  isToggleDisabled = false, isPermissionOn, getRequiredByNames, onTogglePermission, onSetAll,
+  isToggleDisabled, isPermissionOn, getRequiredByNames, onTogglePermission, onSetAll,
 }: PermissionCategorySectionProps) => {
   const { formatMessage } = useIntl();
   const bodyId = useId();

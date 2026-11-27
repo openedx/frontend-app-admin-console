@@ -10,12 +10,12 @@ interface PermissionsMatrixToolbarProps {
   areAllExpanded: boolean;
   onToggleExpandAll: () => void;
   /** Expand all / Collapse all does nothing while a search keeps the categories open. */
-  isExpandAllDisabled?: boolean;
+  isExpandAllDisabled: boolean;
 }
 
 /** Search and Expand all / Collapse all of the permissions matrix. */
 const PermissionsMatrixToolbar = ({
-  search, onSearchChange, areAllExpanded, onToggleExpandAll, isExpandAllDisabled = false,
+  search, onSearchChange, areAllExpanded, onToggleExpandAll, isExpandAllDisabled,
 }: PermissionsMatrixToolbarProps) => {
   const { formatMessage } = useIntl();
   const prefix = 'authz.roles.create.wizard.permissions';
