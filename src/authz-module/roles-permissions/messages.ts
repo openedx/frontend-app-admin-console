@@ -191,6 +191,11 @@ const messages = defineMessages({
     defaultMessage: 'Next',
     description: 'Button that moves the create custom role wizard to the permissions step',
   },
+  'authz.roles.create.wizard.button.submit': {
+    id: 'authz.roles.create.wizard.button.submit',
+    defaultMessage: 'Create',
+    description: 'Button of the permissions step that creates the custom role',
+  },
   'authz.roles.create.wizard.button.back': {
     id: 'authz.roles.create.wizard.button.back',
     defaultMessage: 'Back',
@@ -310,6 +315,96 @@ const messages = defineMessages({
     id: 'authz.roles.create.wizard.error',
     defaultMessage: 'The roles could not be loaded. Please try again later.',
     description: 'Message shown when the create custom role wizard fails to load the roles',
+  },
+  'authz.roles.create.wizard.permissions.title': {
+    id: 'authz.roles.create.wizard.permissions.title',
+    defaultMessage: 'Permissions matrix',
+    description: 'Heading of the permissions step of the create custom role wizard',
+  },
+  'authz.roles.create.wizard.permissions.search.label': {
+    id: 'authz.roles.create.wizard.permissions.search.label',
+    defaultMessage: 'Search permissions',
+    description: 'Accessible label of the search field of the permissions matrix',
+  },
+  'authz.roles.create.wizard.permissions.search.placeholder': {
+    id: 'authz.roles.create.wizard.permissions.search.placeholder',
+    defaultMessage: 'Search',
+    description: 'Placeholder of the search field of the permissions matrix',
+  },
+  'authz.roles.create.wizard.permissions.expandAll': {
+    id: 'authz.roles.create.wizard.permissions.expandAll',
+    defaultMessage: 'Expand all',
+    description: 'Button that opens every category of the permissions matrix',
+  },
+  'authz.roles.create.wizard.permissions.collapseAll': {
+    id: 'authz.roles.create.wizard.permissions.collapseAll',
+    defaultMessage: 'Collapse all',
+    description: 'Button that closes every category of the permissions matrix',
+  },
+  'authz.roles.create.wizard.permissions.category.other': {
+    id: 'authz.roles.create.wizard.permissions.category.other',
+    defaultMessage: 'Other',
+    description: 'Name of the group of permissions that have no category',
+  },
+  'authz.roles.create.wizard.permissions.category.count': {
+    id: 'authz.roles.create.wizard.permissions.category.count',
+    defaultMessage: '{selected} of {total} permissions selected',
+    description: 'Count shown in the header of a permissions matrix category',
+  },
+  'authz.roles.create.wizard.permissions.category.selectAll': {
+    id: 'authz.roles.create.wizard.permissions.category.selectAll',
+    defaultMessage: 'Select all',
+    description: 'Button that turns on every permission of a category',
+  },
+  'authz.roles.create.wizard.permissions.category.deselectAll': {
+    id: 'authz.roles.create.wizard.permissions.category.deselectAll',
+    defaultMessage: 'Deselect all',
+    description: 'Button that turns off every permission of a category',
+  },
+  'authz.roles.create.wizard.permissions.category.selectAll.label': {
+    id: 'authz.roles.create.wizard.permissions.category.selectAll.label',
+    defaultMessage: 'Select all {category} permissions',
+    description: 'Accessible name of the select all button of a category',
+  },
+  'authz.roles.create.wizard.permissions.category.deselectAll.label': {
+    id: 'authz.roles.create.wizard.permissions.category.deselectAll.label',
+    defaultMessage: 'Deselect all {category} permissions',
+    description: 'Accessible name of the deselect all button of a category',
+  },
+  'authz.roles.create.wizard.permissions.row.autoEnabled': {
+    id: 'authz.roles.create.wizard.permissions.row.autoEnabled',
+    defaultMessage: 'Auto-enabled · Required by {requiredBy}',
+    description: 'Label of a locked permission, naming the chosen permissions that need it',
+  },
+  'authz.roles.create.wizard.permissions.summary.title': {
+    id: 'authz.roles.create.wizard.permissions.summary.title',
+    defaultMessage: 'Permissions summary',
+    description: 'Heading of the side panel that counts the selected permissions',
+  },
+  'authz.roles.create.wizard.permissions.summary.total': {
+    id: 'authz.roles.create.wizard.permissions.summary.total',
+    defaultMessage: '{count, plural, one {permission} other {permissions}} selected across {areas, plural, one {# area} other {# areas}}',
+    description: 'Caption under the total of selected permissions, with how many categories they come from',
+  },
+  'authz.roles.create.wizard.permissions.summary.scope.title': {
+    id: 'authz.roles.create.wizard.permissions.summary.scope.title',
+    defaultMessage: 'Scope is assigned later',
+    description: 'Title of the note of the permissions summary about the role scope',
+  },
+  'authz.roles.create.wizard.permissions.summary.scope.body': {
+    id: 'authz.roles.create.wizard.permissions.summary.scope.body',
+    defaultMessage: 'This role can be assigned to an organization, individual courses, or content libraries.',
+    description: 'Body of the note of the permissions summary about the role scope',
+  },
+  'authz.roles.create.wizard.permissions.results.status': {
+    id: 'authz.roles.create.wizard.permissions.results.status',
+    defaultMessage: '{count, plural, one {# permission} other {# permissions}} shown',
+    description: 'Screen reader announcement of how many permissions match the search and filter',
+  },
+  'authz.roles.create.wizard.permissions.empty': {
+    id: 'authz.roles.create.wizard.permissions.empty',
+    defaultMessage: 'No permissions match your search.',
+    description: 'Message of the permissions matrix when nothing matches',
   },
   'authz.team.remove.user.toast.success.description': {
     id: 'authz.team.remove.user.toast.success.description',

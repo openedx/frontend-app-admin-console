@@ -1,13 +1,19 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import {
+  useEffect, useId, useMemo, useRef, useState,
+} from 'react';
 import { useIntl } from '@openedx/frontend-base';
-import { Button, FullscreenModal, Stepper } from '@openedx/paragon';
+import {
+  Button, Container, FullscreenModal, Stepper,
+} from '@openedx/paragon';
 import { Add } from '@openedx/paragon/icons';
 import { useAuthzCatalog } from '@src/authz-module/catalog';
 import type { ScopeCatalog } from '@src/authz-module/catalog';
 import { EMPTY_CUSTOM_ROLE_DRAFT, START_FROM, getCustomRoleSeed } from '../customRoleDraft';
 import type { CustomRoleDraft } from '../customRoleDraft';
+import { usePermissionSelection } from '../hooks/usePermissionSelection';
 import messages from '../messages';
 import NameAndResourceStep from './NameAndResourceStep';
+import PermissionsStep from './PermissionsStep';
 
 const STEPS = {
   NAME_AND_RESOURCE: 'name-and-resource',
@@ -64,7 +70,19 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
     .filter((scopeCatalog): scopeCatalog is ScopeCatalog => scopeCatalog !== undefined);
   // The resource type field shows the first resource type until another is picked, so it counts as picked.
   const effectiveDraft = draft.scopeType ? draft : { ...draft, scopeType: scopeTypes[0] ?? '' };
-  const canProceed = getCustomRoleSeed(effectiveDraft, getRole) !== null;
+  const seed = getCustomRoleSeed(effectiveDraft, getRole);
+  const canProceed = seed !== null;
+  const seedScopeCatalog = scopeCatalogs.find(({ scopeType }) => scopeType === seed?.scopeType);
+  const scopePermissions = useMemo(
+    () => seedScopeCatalog?.permissions ?? [],
+    [seedScopeCatalog],
+  );
+  // Lives here, not in the step, so the choices survive Back.
+  const permissionSelection = usePermissionSelection(
+    seed,
+    draft.startFrom === START_FROM.CLONE ? draft.sourceRole : null,
+    scopePermissions,
+  );
   let nextBlocker: typeof NEXT_BLOCKERS[keyof typeof NEXT_BLOCKERS] | null = null;
   if (!draft.name.trim()) {
     nextBlocker = NEXT_BLOCKERS.NAME;
@@ -137,6 +155,10 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
                 {formatMessage(messages['authz.roles.create.wizard.button.back'])}
               </Button>
               <Stepper.ActionRow.Spacer />
+              {/* TODO(#573): create the role. Until then it only reflects the minimum of one permission. */}
+              <Button disabled={permissionSelection.selectedCount === 0}>
+                {formatMessage(messages['authz.roles.create.wizard.button.submit'])}
+              </Button>
             </Stepper.ActionRow>
           </>
         )}
@@ -153,15 +175,17 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
             aria-label={getStepLabel(STEPS.NAME_AND_RESOURCE)}
             className="create-custom-role-wizard__step"
           >
-            <NameAndResourceStep
-              draft={effectiveDraft}
-              onChange={handleDraftChange}
-              scopeCatalogs={scopeCatalogs}
-              isLoading={isLoading}
-              isError={isError}
-              showErrors={hasTriedNext}
-              focusRequest={focusRequest}
-            />
+            <Container fluid size="xl" className="px-0">
+              <NameAndResourceStep
+                draft={effectiveDraft}
+                onChange={handleDraftChange}
+                scopeCatalogs={scopeCatalogs}
+                isLoading={isLoading}
+                isError={isError}
+                showErrors={hasTriedNext}
+                focusRequest={focusRequest}
+              />
+            </Container>
           </div>
         </Stepper.Step>
         <Stepper.Step
@@ -175,7 +199,15 @@ export const CreateCustomRoleWizard = ({ onClose }: CreateCustomRoleWizardProps)
             role="group"
             aria-label={getStepLabel(STEPS.PERMISSIONS)}
             className="create-custom-role-wizard__step"
-          />
+          >
+            <Container fluid size="xl" className="px-0">
+              <PermissionsStep
+                categories={seedScopeCatalog?.categories ?? []}
+                permissions={scopePermissions}
+                selection={permissionSelection}
+              />
+            </Container>
+          </div>
         </Stepper.Step>
       </FullscreenModal>
     </Stepper>
