@@ -102,6 +102,70 @@ describe('CreateCustomRole', () => {
     expect(screen.getByRole('combobox', { name: 'Resource type' })).toHaveValue(SCOPE_TYPES.LIBRARY);
   });
 
+  describe('permissions step', () => {
+    const getSubmitButton = () => screen.getByRole('button', { name: 'Create' });
+    const getTotal = () => within(screen.getByRole('complementary')).getByText(/^\d+$/);
+
+    it('starts empty when built from scratch, with the create button off until a permission is chosen', async () => {
+      const user = await openWizard();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Course designer');
+      await user.click(getNextButton());
+      expect(screen.getByRole('heading', { name: 'Permissions matrix' })).toBeInTheDocument();
+      expect(getTotal()).toHaveTextContent('0');
+      expect(getSubmitButton()).toBeDisabled();
+
+      await user.click(screen.getByRole('button', { name: 'Select all Course permissions' }));
+      expect(getTotal()).toHaveTextContent('3');
+      expect(getSubmitButton()).toBeEnabled();
+    });
+
+    it('starts with the permissions of the role being cloned', async () => {
+      const user = await openWizard();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Course designer');
+      await user.click(screen.getByRole('radio', { name: /clone from role/i }));
+      await user.click(screen.getByRole('button', { name: 'Role Select a role' }));
+      await user.click(screen.getByText('Course Staff'));
+      await user.click(getNextButton());
+      expect(getTotal()).toHaveTextContent('2');
+      expect(within(screen.getByRole('complementary')).getByText('2/3')).toBeInTheDocument();
+      expect(getSubmitButton()).toBeEnabled();
+    });
+
+    it('lists only the permissions of the chosen resource type', async () => {
+      const user = await openWizard();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Library designer');
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Resource type' }), 'Libraries');
+      await user.click(getNextButton());
+      const summary = within(screen.getByRole('complementary'));
+      expect(summary.getByText('Library')).toBeInTheDocument();
+      expect(summary.queryByText('Course')).not.toBeInTheDocument();
+    });
+
+    it('keeps the choices when going back and forward, and when the name changes', async () => {
+      const user = await openWizard();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Course designer');
+      await user.click(getNextButton());
+      await user.click(screen.getByRole('button', { name: 'Select all Course permissions' }));
+
+      await user.click(screen.getByRole('button', { name: 'Back' }));
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), ' v2');
+      await user.click(getNextButton());
+      expect(getTotal()).toHaveTextContent('3');
+    });
+
+    it('starts over when the resource type changes', async () => {
+      const user = await openWizard();
+      await user.type(screen.getByRole('textbox', { name: 'Role name' }), 'Designer');
+      await user.click(getNextButton());
+      await user.click(screen.getByRole('button', { name: 'Select all Course permissions' }));
+
+      await user.click(screen.getByRole('button', { name: 'Back' }));
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Resource type' }), 'Libraries');
+      await user.click(getNextButton());
+      expect(getTotal()).toHaveTextContent('0');
+    });
+  });
+
   it('swaps the resource type for a grouped role picker when cloning', async () => {
     const user = await openWizard();
 
