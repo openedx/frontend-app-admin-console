@@ -34,20 +34,28 @@ const SCOPE_TYPE_LABELS: Partial<Record<string, { tab: MessageDescriptor; title:
   },
 };
 
+interface RolesPermissionsProps {
+  // Fixes the matrix to this scope type and hides the buttons that switch between scope types.
+  scopeType?: string;
+}
+
 /**
  * Roles and permissions matrix of one scope type at a time.
  *
- * Not rendered at the moment: the Roles and Permissions tab shows RolesPermissionsTable instead.
- * It is kept on purpose because it will be reused later.
+ * Without `scopeType`, buttons switch between the scope types the user can view. The role detail
+ * page passes the role's scope type, so it only shows that one.
  */
-const RolesPermissions = () => {
+const RolesPermissions = ({ scopeType: fixedScopeType }: RolesPermissionsProps) => {
   const intl = useIntl();
   // The catalog only holds the scope types the user can view.
   const {
     scopeTypes, getScopeCatalog, isLoading, isError,
   } = useAuthzCatalog();
   const [selectedScopeType, setSelectedScopeType] = useState<string>();
-  const activeScopeType = selectedScopeType ?? scopeTypes[0];
+
+  const canSwitchScopeType = !fixedScopeType;
+  const userScopeType = selectedScopeType ?? scopeTypes[0];
+  const activeScopeType = canSwitchScopeType ? userScopeType : fixedScopeType;
   const scopeCatalog = activeScopeType ? getScopeCatalog(activeScopeType) : undefined;
 
   const matrix = useMemo(() => (scopeCatalog ? buildPermissionMatrix(scopeCatalog, {
@@ -88,19 +96,21 @@ const RolesPermissions = () => {
   return (
     <>
       <Card className="bg-light-200">
-        <div className="px-3 py-4">
-          <ButtonGroup size="md">
-            {scopeTypes.map((scopeType) => (
-              <Button
-                key={scopeType}
-                onClick={() => setSelectedScopeType(scopeType)}
-                variant={scopeType === activeScopeType ? 'primary' : 'outline-primary'}
-              >
-                {formatScopeTypeLabel(scopeType, 'tab')}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </div>
+        {canSwitchScopeType && (
+          <div className="px-3 py-4">
+            <ButtonGroup size="md">
+              {scopeTypes.map((scopeType) => (
+                <Button
+                  key={scopeType}
+                  onClick={() => setSelectedScopeType(scopeType)}
+                  variant={scopeType === activeScopeType ? 'primary' : 'outline-primary'}
+                >
+                  {formatScopeTypeLabel(scopeType, 'tab')}
+                </Button>
+              ))}
+            </ButtonGroup>
+          </div>
+        )}
         <div className="position-relative">
           <PermissionTable
             matrix={matrix}

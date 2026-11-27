@@ -7,6 +7,7 @@ import ErrorFallback from '@src/authz-module/components/ErrorPage';
 import { CustomErrors } from '@src/constants';
 import AuthzHome from './authz-home';
 import AuditUserPage from './audit-user';
+import { RoleDetailPage } from './role-detail';
 import { ROUTES } from './constants';
 
 import './index.scss';
@@ -24,6 +25,7 @@ const AuthZModule = () => (
           <Routes>
             <Route index element={<AuthzHome />} />
             <Route path={ROUTES.AUDIT_USER_PATH} element={<AuditUserPage />} />
+            <Route path={ROUTES.ROLE_DETAIL_PATH} element={<RoleDetailPage />} />
             <Route path="*" element={<NotFoundError />} />
           </Routes>
         </Suspense>

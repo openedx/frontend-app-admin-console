@@ -71,6 +71,21 @@ const messages = defineMessages({
     defaultMessage: 'All platform',
     description: 'Shown in place of an organization for a role that is not limited to one organization: a wildcard org, or a Django-managed role.',
   },
+  'authz.scope.summary.label.specific': {
+    id: 'authz.scope.summary.label.specific',
+    defaultMessage: '{scopeType, select, lib {Library} other {Course}} {scopeName} in the organization {organization}',
+    description: 'Accessible name of a single course or library scope, e.g. "Course Science Fundamentals in the organization Demo". {scopeType} is lib for a library and anything else for a course.',
+  },
+  'authz.scope.summary.label.org': {
+    id: 'authz.scope.summary.label.org',
+    defaultMessage: '{scopeLabel} in the organization {organization}',
+    description: 'Accessible name of a scope covering every course or library of one organization, e.g. "All courses in the organization Demo". {scopeLabel} is "All courses" or "All libraries".',
+  },
+  'authz.scope.summary.label.platform': {
+    id: 'authz.scope.summary.label.platform',
+    defaultMessage: '{scopeLabel} on the platform',
+    description: 'Accessible name of a scope covering every course or library on the platform, e.g. "All courses on the platform". {scopeLabel} is "All courses" or "All libraries".',
+  },
   'authz.user.table.permissions.access.label': {
     id: 'authz.user.table.permissions.access.label',
     defaultMessage: '{accessType, select, total {Total Access} partial {Partial Access} other {No Access}}',
@@ -171,6 +186,11 @@ const messages = defineMessages({
     id: 'authz.table.footer.pagination.label',
     defaultMessage: 'Table pagination',
     description: 'Label for the table pagination controls',
+  },
+  'authz.action.duplicate.role': {
+    id: 'authz.action.duplicate.role',
+    defaultMessage: 'Duplicate Role',
+    description: 'Label for the action to duplicate a role.',
   },
 });
 

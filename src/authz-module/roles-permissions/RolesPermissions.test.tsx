@@ -71,6 +71,14 @@ describe('RolesPermissions', () => {
     expect(screen.queryByText('See full documentation')).not.toBeInTheDocument();
   });
 
+  it('shows only the given scope type, without the buttons to switch', async () => {
+    renderWithAllProviders(<RolesPermissions scopeType={SCOPE_TYPES.LIBRARY} />);
+    expect(await screen.findByRole('columnheader', { name: 'Library Roles' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Courses' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Libraries' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'Course Roles' })).not.toBeInTheDocument();
+  });
+
   it('shows a loading indicator while the catalog loads', () => {
     mockAuthzCatalog({ isLoading: true });
     renderWithAllProviders(<RolesPermissions />);

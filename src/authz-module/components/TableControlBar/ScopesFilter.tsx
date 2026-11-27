@@ -10,10 +10,22 @@ import { MultipleChoiceFilterProps } from './types';
 import MultipleChoiceFilter from './MultipleChoiceFilter';
 import messages from '@src/authz-module/components/messages';
 
-type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'>;
+type ScopesFilterProps = Omit<MultipleChoiceFilterProps, 'filterChoices' | 'isSearchable' | 'onSearchChange'> & {
+  scopeTypes?: string[];
+};
+
+/**
+ * Picks the scope type to request: users who can't view courses only get libraries. Otherwise a
+ * single allowed scope type is requested, so pages aren't filled with options that get dropped.
+ */
+const getRequestedScopeType = (isCourseViewAllowed: boolean, scopeTypes?: string[]) => {
+  if (!isCourseViewAllowed) return SCOPE_TYPES.LIBRARY;
+  if (scopeTypes?.length === 1) return scopeTypes[0];
+  return undefined;
+};
 
 const ScopesFilter = ({
-  filterButtonText, filterValue, setFilter, disabled,
+  filterButtonText, filterValue, setFilter, disabled, scopeTypes,
 }: ScopesFilterProps) => {
   const { formatMessage } = useIntl();
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
@@ -21,15 +33,17 @@ const ScopesFilter = ({
   const { isCourseViewAllowed } = useViewTeamPermissions();
   const { isCourseEnabled } = useCourseAuthoringFlag();
 
+  const requestedScopeType = getRequestedScopeType(isCourseViewAllowed, scopeTypes);
   const { data: scopesData } = useScopes({
     search: searchValue,
     pageSize: DEFAULT_FILTER_PAGE_SIZE,
-    ...(isCourseViewAllowed ? {} : { scopeType: SCOPE_TYPES.LIBRARY }),
+    ...(requestedScopeType ? { scopeType: requestedScopeType } : {}),
   });
 
   const filterChoices = useMemo(() => (scopesData?.pages?.flatMap((p) => p.results) ?? [])
     // Libraries are always available; courses only when the authoring flag is enabled for them.
     .filter((scope) => getScopeType(scope.externalKey) === SCOPE_TYPES.LIBRARY || isCourseEnabled(scope.externalKey))
+    .filter((scope) => !scopeTypes || scopeTypes.includes(getScopeType(scope.externalKey)))
     .map((scope) => {
       const groupName = getScopeType(scope.externalKey) === SCOPE_TYPES.LIBRARY
         ? formatMessage(messages['authz.team.members.table.group.libraries'])
@@ -41,7 +55,7 @@ const ScopesFilter = ({
         groupName,
         groupIcon: getScopeResourceIcon(scope.externalKey),
       };
-    }), [scopesData?.pages, formatMessage, isCourseEnabled]);
+    }), [scopesData?.pages, formatMessage, isCourseEnabled, scopeTypes]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);

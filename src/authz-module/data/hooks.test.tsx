@@ -7,6 +7,7 @@ import {
   useAssignTeamMembersRole,
   useRevokeUserRoles,
   useTeamMembersAssignments,
+  useRoleAssignments,
   useOrgs,
   useScopes,
   useUserAssignedRoles,
@@ -644,6 +645,94 @@ describe('useTeamMembersAssignments', () => {
     );
     expect(result.current.fetchStatus).toBe('idle');
     expect(get).not.toHaveBeenCalled();
+  });
+});
+
+describe('useRoleAssignments', () => {
+  const roleAssignments = {
+    results: [{
+      username: 'johndoe',
+      fullName: 'John Doe',
+      email: 'johndoe@example.com',
+      role: 'course_staff',
+      org: 'OpenedX',
+      orgDisplayName: 'Open edX',
+      scope: 'course-v1:OpenedX+DemoX+DemoCourse',
+      scopeDisplayName: 'Open edX Demo Course',
+      permissionCount: 27,
+    }],
+    count: 1,
+    next: null,
+    previous: null,
+  };
+
+  it('fetches the assignments of the given role', async () => {
+    const get = jest.fn(() => Promise.resolve({ data: roleAssignments }));
+    mockHttpClient().mockReturnValue({ get });
+    const { result } = renderHook(
+      () => useRoleAssignments('course_staff', mockQuerySettings),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => expect(result.current.data).toEqual(roleAssignments));
+    const url = new URL((get.mock.calls[0] as unknown[])[0] as string);
+    expect(url.pathname).toBe('/api/authz/v1/assignments/');
+    expect(url.searchParams.get('roles')).toBe('course_staff');
+  });
+
+  it('does not fetch without a role, which would list the assignments of every role', () => {
+    const get = jest.fn();
+    mockHttpClient().mockReturnValue({ get });
+    const { result } = renderHook(
+      () => useRoleAssignments('', mockQuerySettings),
+      { wrapper: createWrapper() },
+    );
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  describe('after a role change', () => {
+    const roleAssignmentsKey = ['test-app', 'authz', 'roleAssignments', 'course_staff', mockQuerySettings];
+    const createClientWithRoleAssignments = () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      queryClient.setQueryData(roleAssignmentsKey, roleAssignments);
+      return queryClient;
+    };
+
+    it('refreshes the role members after assigning', async () => {
+      mockHttpClient().mockReturnValue({
+        put: jest.fn().mockResolvedValue({ data: { completed: [], errors: [] } }),
+      });
+      const queryClient = createClientWithRoleAssignments();
+      const { result } = renderHook(() => useAssignTeamMembersRole(), {
+        wrapper: createQueryClientWrapper(queryClient),
+      });
+
+      await act(async () => {
+        result.current.mutate({ data: { scopes: ['lib:123'], users: ['jdoe'], role: 'course_staff' } });
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(queryClient.getQueryState(roleAssignmentsKey)?.isInvalidated).toBe(true);
+    });
+
+    it('refreshes the role members after revoking', async () => {
+      mockHttpClient().mockReturnValue({
+        delete: jest.fn().mockResolvedValue({ data: { completed: [], errors: [] } }),
+      });
+      const queryClient = createClientWithRoleAssignments();
+      const { result } = renderHook(() => useRevokeUserRoles(), {
+        wrapper: createQueryClientWrapper(queryClient),
+      });
+
+      await act(async () => {
+        result.current.mutate({ data: { scope: 'lib:123', users: 'jdoe', role: 'course_staff' } });
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(queryClient.getQueryState(roleAssignmentsKey)?.isInvalidated).toBe(true);
+    });
   });
 });
 
