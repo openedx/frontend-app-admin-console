@@ -293,8 +293,34 @@
   }
 }
 
+// Create custom role wizard chrome, on top of the shared wizard chrome below.
+.pgn__modal.create-custom-role-wizard {
+  .create-custom-role-wizard__step:focus {
+    outline: none;
+  }
+
+  .create-custom-role-wizard__start-from .pgn__selectable_box {
+    padding: var(--pgn-spacing-spacer-2-5) var(--pgn-spacing-spacer-3);
+    cursor: pointer;
+
+    &.pgn__selectable_box-active {
+      background-color: var(--pgn-color-info-100);
+
+      .create-custom-role-wizard__option-title {
+        color: var(--pgn-color-info-500);
+      }
+    }
+  }
+
+  .create-custom-role-wizard__source-role-menu {
+    max-height: 480px;
+    overflow-y: auto;
+  }
+}
+
 // Wizard modal chrome. `.pgn__modal` only to outrank Paragon's `-dark` header rule.
-.pgn__modal.assign-role-wizard {
+.pgn__modal.assign-role-wizard,
+.pgn__modal.create-custom-role-wizard {
   // Matches the Next button, via the button's own token so a theme keeps them in step.
   .pgn__modal-header {
     background-color: var(--pgn-color-btn-bg-primary);

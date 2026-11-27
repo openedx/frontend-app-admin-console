@@ -11,6 +11,7 @@ import {
   useScopes,
   useUserAssignedRoles,
   useValidateUsers,
+  useValidateRoleName,
   useCourseAuthoringFlagStates,
 } from './hooks';
 
@@ -259,6 +260,38 @@ describe('useValidateUsers', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error).toEqual(new Error('Validation failed'));
+  });
+});
+
+describe('useValidateRoleName', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns whether the role name is available', async () => {
+    const mockResponse = { displayName: 'Designer', available: true, reason: null };
+    const post = jest.fn().mockResolvedValue({ data: mockResponse });
+    mockHttpClient().mockReturnValue({ post });
+
+    const { result } = renderHook(() => useValidateRoleName(), { wrapper: createWrapper() });
+    await act(async () => {
+      result.current.mutate('Designer');
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(post).toHaveBeenCalledWith(expect.any(String), { display_name: 'Designer' });
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('exposes the error when the request fails', async () => {
+    mockHttpClient().mockReturnValue({ post: jest.fn().mockRejectedValue(new Error('boom')) });
+
+    const { result } = renderHook(() => useValidateRoleName(), { wrapper: createWrapper() });
+    await act(async () => {
+      result.current.mutate('Designer');
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });
 

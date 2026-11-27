@@ -7,6 +7,7 @@ import {
   getOrgs,
   getScopes,
   getCourseAuthoringFlagStates,
+  validateRoleName,
 } from './api';
 import { SCOPE_TYPES } from '../constants';
 
@@ -256,6 +257,26 @@ describe('API functions', () => {
         orgOverrides: { on: ['Demo'], off: [] },
         courseOverrides: { on: [], off: ['course-v1:testing+CT01+CT01-2024'] },
       });
+    });
+  });
+
+  describe('validateRoleName', () => {
+    it('posts the name as display_name and returns the result', async () => {
+      const post = jest.fn().mockResolvedValue({
+        data: {
+          displayName: 'Library Designer', available: false, reason: 'taken', message: 'taken',
+        },
+      });
+      mockHttpClient().mockReturnValue({ post });
+
+      const result = await validateRoleName('Library Designer');
+
+      expect(post).toHaveBeenCalledWith(
+        expect.stringContaining('/api/authz/v1/roles/validate-name/'),
+        { display_name: 'Library Designer' },
+      );
+      expect(result.available).toBe(false);
+      expect(result.reason).toBe('taken');
     });
   });
 });
