@@ -71,9 +71,9 @@ const AuthZTitle = ({
           </div>
         </Col>
         <Col xs={12} md={5}>
-          <Stack className="justify-content-end" direction={isDesktop ? 'horizontal' : 'vertical'}>
+          <Stack className="justify-content-end" direction={isDesktop ? 'horizontal' : 'vertical'} gap={2}>
             {
-              actions.map((action, index) => {
+              actions.map((action) => {
                 const content = isValidElement(action)
                   ? action
                   : <ActionButton {...action as Action} />;
@@ -83,8 +83,6 @@ const AuthZTitle = ({
                 return (
                   <Fragment key={`authz-header-action-${key}`}>
                     {content}
-                    {(index === actions.length - 1) ? null
-                      : (<hr className="authz-action-divider mx-lg-5" />)}
                   </Fragment>
                 );
               })
